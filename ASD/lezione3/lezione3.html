@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appunti Lezione 3: Divide et Impera e Merge Sort</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+    <style>
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+
+        .sort-example {
+            font-family: var(--font-code); line-height: 1.7; background-color: var(--bg-deep-space);
+            padding: 1.2rem; border-radius: var(--border-radius-small); margin-top: 1.2rem;
+            border: 1px solid var(--border-soft);
+        }
+        .array-step {
+            margin-bottom: 0.8rem; padding-left: 15px; border-left: 1px dotted var(--border-soft);
+            color: var(--text-secondary); font-size: 0.9em;
+        }
+        .array-item, .array-pointer {
+            padding: 3px 6px; border-radius: var(--border-radius-small); margin: 0 2px;
+            display: inline-block; text-align: center; min-width: 2em;
+        }
+        .array-item {
+            border: 1px solid var(--text-secondary);
+            background-color: rgba(156, 163, 175, 0.1);
+        }
+        .array-item.sorted { background-color: rgba(96, 165, 250, 0.15); color: var(--accent-primary); border-color: var(--accent-primary); }
+        .array-item.comparing { background-color: rgba(129, 140, 248, 0.2); color: var(--accent-secondary); border-color: var(--accent-secondary); }
+        .array-pointer { color: #f472b6; font-weight: bold; border: none; padding-bottom: 0; } 
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Appunti Lezione 3: Divide et Impera e Merge Sort</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <h2>Indice Argomenti (Lezione 1C)</h2>
+        <ul>
+            <li><a href="#divide-et-impera" class="sidebar-link">1. Tecnica Divide et Impera</a></li>
+            <li><a href="#merge-sort-intro" class="sidebar-link">2. Merge Sort: Introduzione</a></li>
+            <li><a href="#merge-procedura" class="sidebar-link">3. Procedura Merge</a></li>
+            <li><a href="#correttezza-merge-sort" class="sidebar-link">4. Correttezza Merge Sort</a></li>
+            <li><a href="#complessita-merge-sort" class="sidebar-link">5. Complessità Merge Sort</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="divide-et-impera" class="content-section">
+            <h2 class="section-title">1. Tecnica Algoritmica: Divide et Impera</h2>
+            <div class="section-content">
+                <p>La tecnica "Divide et Impera" (Dividi e Conquista) è un paradigma di progettazione algoritmica che consiste nei seguenti tre passi, applicati ricorsivamente:</p>
+                <ol>
+                    <li><strong>Divide (Dividi):</strong> Il problema originale di dimensione <em>n</em> viene scomposto in <em>a</em> sottoproblemi più piccoli, ciascuno di dimensione circa <em>n/b</em> (dove \(a \ge 1\) e \(b > 1\)).</li>
+                    <li><strong>Impera (Conquista/Risolvi):</strong> I sottoproblemi vengono risolti. Se i sottoproblemi sono sufficientemente piccoli, vengono risolti direttamente (caso base della ricorsione). Altrimenti, vengono risolti ricorsivamente applicando la stessa tecnica "Divide et Impera".</li>
+                    <li><strong>Combina (Combina):</strong> Le soluzioni dei sottoproblemi vengono combinate per ottenere la soluzione del problema originale.</li>
+                </ol>
+                <p><strong>Come si risolve il passo 2 (Risolvere i sottoproblemi)?</strong> Si riapplica la tecnica "Divide et Impera" ai sottoproblemi, fino a quando si ottengono sottoproblemi la cui soluzione è immediata (caso base della ricorsione).</p>
+                <p>Questa natura ricorsiva è fondamentale per la tecnica.</p>
+                
+                <h3 class="subsection-title">Esempi di Algoritmi Ricorsivi</h3>
+                <ul>
+                    <li><strong>Fattoriale:</strong>
+                        <ul>
+                            <li>Versione Ricorsiva: \( \text{fact}(n) = n \cdot \text{fact}(n-1) \) con caso base \( \text{fact}(0) = 1 \).</li>
+                            <li>Versione Iterativa: Utilizza un ciclo per moltiplicare i numeri da 1 a n.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Numeri di Fibonacci:</strong>
+                        <ul>
+                            <li>Versione Ricorsiva: \( \text{fib}(n) = \text{fib}(n-1) + \text{fib}(n-2) \) con casi base \( \text{fib}(0)=0, \text{fib}(1)=1 \).</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="merge-sort-intro" class="content-section">
+            <h2 class="section-title">2. Merge Sort: Introduzione e Idea Generale</h2>
+            <div class="section-content">
+                <p>Merge Sort è un classico algoritmo di ordinamento che utilizza la tecnica "Divide et Impera".</p>
+                <p><strong>Idea Generale del Merge Sort su un array A[p..q]:</strong></p>
+                <ol>
+                    <li><strong>Divide:</strong> Se \(p < q\) (cioè se l'array ha più di un elemento):
+                        <ul>
+                            <li>Trova l'indice mediano \(r = \lfloor (p+q)/2 \rfloor\).</li>
+                            <li>Dividi l'array \(A[p..q]\) in due sotto-array \(A[p..r]\) e \(A[r+1..q]\).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Impera:</strong> Ordina ricorsivamente i due sotto-array:
+                        <ul>
+                            <li>Chiama `MERGE-SORT(A, p, r)`.</li>
+                            <li>Chiama `MERGE-SORT(A, r + 1, q)`.</li>
+                        </ul>
+                        Il caso base della ricorsione è quando il sotto-array ha un solo elemento (\(p \ge q\)), che è intrinsecamente ordinato.
+                    </li>
+                    <li><strong>Combina:</strong> Fonde (Merge) i due sotto-array ora ordinati \(A[p..r]\) e \(A[r+1..q]\) per ottenere un unico sotto-array ordinato \(A[p..q]\). Questo passo è svolto da una procedura ausiliaria chiamata `MERGE(A, p, r, q)`.</li>
+                </ol>
+
+                <h3 class="subsection-title">Pseudo-codice Merge Sort</h3>
+                <pre><code class="language-pseudocode">
+MERGE-SORT(A, p, q)
+1  if p < q then
+2      r ← floor((p + q) / 2)
+3      MERGE-SORT(A, p, r)
+4      MERGE-SORT(A, r + 1, q)
+5      MERGE(A, p, r, q)
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="merge-procedura" class="content-section">
+            <h2 class="section-title">3. La Procedura MERGE</h2>
+            <div class="section-content">
+                <p>La procedura `MERGE(A, p, r, q)` è il cuore del Merge Sort.</p>
+                <p><strong>Precondizione:</strong> I sotto-array `A[p..r]` e `A[r+1..q]` sono già ordinati.</p>
+                <p><strong>Postcondizione:</strong> Il sotto-array `A[p..q]` (risultante dalla fusione) è ordinato.</p>
+
+                <h3 class="subsection-title">Idea della Procedura MERGE</h3>
+                <p>L'idea è simile a fondere due mazzi di carte già ordinati in un unico mazzo ordinato.</p>
+                <ol>
+                    <li>Si creano due array temporanei (ausiliari), chiamiamoli `L` (Left) e `R` (Right).</li>
+                    <li>L'array `L` conterrà una copia degli elementi di `A[p..r]`. La sua dimensione è \(n_1 = r - p + 1\).</li>
+                    <li>L'array `R` conterrà una copia degli elementi di `A[r+1..q]`. La sua dimensione è \(n_2 = q - r\).</li>
+                    <li>Si aggiunge un elemento "sentinella" (un valore molto grande, come \(+\infty\)) alla fine di entrambi gli array `L` e `R`.</li>
+                    <li>Si utilizzano tre indici: `i` per `L`, `j` per `R`, `k` per `A` (da `p` a `q`).</li>
+                    <li>Per ogni posizione `k` da `p` a `q` in `A`:
+                        <ul>
+                            <li>Se \(L[i] \le R[j]\), si copia `L[i]` in `A[k]` e si incrementa `i`.</li>
+                            <li>Altrimenti, si copia `R[j]` in `A[k]` e si incrementa `j`.</li>
+                        </ul>
+                    </li>
+                </ol>
+                
+                <h3 class="subsection-title">Pseudo-codice MERGE(A, p, r, q)</h3>
+                <pre><code class="language-pseudocode">
+MERGE(A, p, r, q)
+1  n₁ ← r - p + 1
+2  n₂ ← q - r
+3  Siano L[1..n₁+1] e R[1..n₂+1] nuovi array
+4  // Copia la prima metà di A in L
+5  for i ← 1 to n₁ do
+6      L[i] ← A[p + i - 1]
+7  // Copia la seconda metà di A in R
+8  for j ← 1 to n₂ do
+9      R[j] ← A[r + j]
+10 L[n₁ + 1] ← ∞  // Sentinella per L
+11 R[n₂ + 1] ← ∞  // Sentinella per R
+12 i ← 1           // Indice per L
+13 j ← 1           // Indice per R
+14 for k ← p to q do // Indice per A
+15     if L[i] ≤ R[j] then
+16         A[k] ← L[i]
+17         i ← i + 1
+18     else 
+19         A[k] ← R[j]
+20         j ← j + 1
+                </code></pre>
+
+                <p class="sort-example">
+                    <strong>Esempio Visivo della Procedura Merge:</strong><br>
+                    A[p..q] inizialmente: <span class="array-item">3</span><span class="array-item">10</span><span class="array-item">15</span><span class="array-item">20</span><span class="array-item">1</span><span class="array-item">8</span><span class="array-item">18</span><span class="array-item">22</span> (con p=1, r=4, q=8)<br>
+                    A[p..r] = `[3, 10, 15, 20]` (ordinato)<br>
+                    A[r+1..q] = `[1, 8, 18, 22]` (ordinato)<br><br>
+
+                    Dopo la copia in L e R (con sentinelle):<br>
+                    <div class="array-container">L = <span class="array-item">3</span><span class="array-item">10</span><span class="array-item">15</span><span class="array-item">20</span><span class="array-item">∞</span></div>
+                    <div class="pointers-container"><span class="array-pointer" style="margin-left: 0.5em;">↑i</span></div>
+                    <div class="array-container">R = <span class="array-item">1</span><span class="array-item">8</span><span class="array-item">18</span><span class="array-item">22</span><span class="array-item">∞</span></div>
+                    <div class="pointers-container"><span class="array-pointer" style="margin-left: 0.5em;">↑j</span></div>
+                    <div class="array-container">A = <span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span></div>
+                    <div class="pointers-container"><span class="array-pointer" style="margin-left: 0.5em;">↑k (parte da p)</span></div><br>
+
+                    <strong>Passaggi:</strong>
+                    <div class="array-step">
+                    k=1: L[1]=3, R[1]=1. (1 ≤ 3) ⇒ A[1] ← 1. j++.  A: <span class="array-item comparing">1</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><br>
+                    </div>
+                    <div class="array-step">
+                    k=2: L[1]=3, R[2]=8. (3 ≤ 8) ⇒ A[2] ← 3. i++.  A: <span class="array-item sorted">1</span> <span class="array-item comparing">3</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><br>
+                    </div>
+                     <div class="array-step">
+                    k=3: L[2]=10, R[2]=8. (8 < 10) ⇒ A[3] ← 8. j++. A: <span class="array-item sorted">1</span> <span class="array-item sorted">3</span> <span class="array-item comparing">8</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><span class="array-item">_</span><br>
+                    </div>
+                    <p>...e così via, fino a riempire A[p..q] in modo ordinato.</p>
+                </p>
+                <p><strong>Complessità di Merge:</strong> \(\Theta(n)\), dove n è il numero totale di elementi da fondere (q-p+1). Spazio aggiuntivo: \(\Theta(n)\) per gli array L e R.</p>
+            </div>
+        </article>
+
+        <article id="correttezza-merge-sort" class="content-section">
+            <h2 class="section-title">4. Correttezza del Merge Sort</h2>
+            <div class="section-content">
+                <p><strong>Teorema di Correttezza per Merge Sort:</strong> L'algoritmo `MERGE-SORT(A, p, q)` termina sempre e, al termine, il sotto-array `A[p..q]` è ordinato in modo non decrescente.</p>
+                <p>Si dimostra per induzione sulla lunghezza \(m = q - p + 1\) della porzione di array da ordinare.</p>
+
+                <h3 class="subsection-title">Dimostrazione per Induzione su `m`</h3>
+                <p><strong>Caso Base: \(m = 1\)</strong> (cioè \(p = q\))</p>
+                <ul>
+                    <li>Se \(m=1\), allora \(p=q\). La condizione \(p < q\) nel primo `if` del `MERGE-SORT` è falsa.</li>
+                    <li>L'algoritmo non esegue le chiamate ricorsive né il merge, e termina.</li>
+                    <li>Un array (o sotto-array) di un solo elemento \(A[p..p]\) è per definizione ordinato.</li>
+                    <li>Il caso base è verificato.</li>
+                </ul>
+
+                <p><strong>Passo Induttivo:</strong></p>
+                <ul>
+                    <li><strong>Ipotesi Induttiva (Hp.Ind.):</strong> Assumiamo che `MERGE-SORT` termini correttamente per tutte le lunghezze di input \(k < m\).</li>
+                    <li><strong>Tesi da dimostrare:</strong> `MERGE-SORT(A, p, q)` termina correttamente quando la lunghezza dell'input è \(m > 1\).</li>
+                    <li><strong>Dimostrazione del Passo Induttivo (quando \(m > 1\), quindi \(p < q\)):</strong>
+                        <ol>
+                            <li>L'algoritmo calcola \(r = \lfloor (p+q)/2 \rfloor\).</li>
+                            <li>Le lunghezze dei sotto-array \(A[p..r]\) (lunghezza \(r - p + 1\)) e \(A[r+1..q]\) (lunghezza \(q - (r+1) + 1\)) sono entrambe strettamente minori di \(m\).</li>
+                            <li>Per ipotesi induttiva, le chiamate ricorsive `MERGE-SORT(A, p, r)` e `MERGE-SORT(A, r + 1, q)` terminano e ordinano correttamente i rispettivi sotto-array.</li>
+                            <li>Viene chiamata la procedura `MERGE(A, p, r, q)`. Le sue precondizioni (sotto-array ordinati) sono soddisfatte. Assumendo la correttezza di `MERGE`, essa fonde i due sotto-array in un unico array \(A[p..q]\) ordinato e termina.</li>
+                            <li>Di conseguenza, `MERGE-SORT(A, p, q)` termina e \(A[p..q]\) è ordinato.</li>
+                        </ol>
+                    </li>
+                </ul>
+                <p>La correttezza è provata per induzione.</p>
+            </div>
+        </article>
+
+        <article id="complessita-merge-sort" class="content-section">
+            <h2 class="section-title">5. Analisi di Complessità del Merge Sort</h2>
+            <div class="section-content">
+                <p>Indichiamo con \(T(n)\) il tempo di esecuzione di `MERGE-SORT` su un input di `n` elementi.</p>
+                <p>Dallo pseudo-codice di `MERGE-SORT(A, p, q)` con \(n = q - p + 1\):</p>
+                <ul>
+                    <li>Riga 1 (`if p < q`): \(\Theta(1)\) (costante `c` se \(n=1\)).</li>
+                    <li>Riga 2 (`r ← ...`): \(\Theta(1)\) (parte del costo `dn` se \(n>1\)).</li>
+                    <li>Riga 3 (`MERGE-SORT(A, p, r)`): Chiamata su \( \approx n/2 \) elementi. Costo \(T(n/2)\).</li>
+                    <li>Riga 4 (`MERGE-SORT(A, r+1, q)`): Chiamata su \( \approx n/2 \) elementi. Costo \(T(n/2)\).</li>
+                    <li>Riga 5 (`MERGE(A, p, r, q)`): Costo \(\Theta(n)\) (costante `dn` per una costante `d` se \(n>1\)).</li>
+                </ul>
+
+                <h3 class="subsection-title">Equazione di Ricorrenza per T(n)</h3>
+                <div class="math-block">
+                \(
+                T(n) = 
+                \begin{cases} 
+                c & \text{se } n = 1 \\
+                2T(n/2) + dn & \text{se } n > 1
+                \end{cases}
+                \)
+                </div>
+                <p>(Per semplicità, si assume \(n\) potenza di 2 per l'analisi con albero di ricorsione, ma il risultato asintotico vale in generale).</p>
+
+                <h3 class="subsection-title">Risoluzione con Albero di Ricorsione</h3>
+                <p>L'albero di ricorsione mostra come il costo si distribuisce tra i livelli:</p>
+                <div class="mermaid-container">
+                    <div class="mermaid">
+                    graph TD;
+                        N0("T(n) \n Costo Merge: dn");
+                        
+                        N1_1("T(n/2) \n Costo Merge: d(n/2)");
+                        N1_2("T(n/2) \n Costo Merge: d(n/2)");
+                        
+                        N2_1("T(n/4) \n Costo Merge: d(n/4)");
+                        N2_2("T(n/4) \n Costo Merge: d(n/4)");
+                        N2_3("T(n/4) \n Costo Merge: d(n/4)");
+                        N2_4("T(n/4) \n Costo Merge: d(n/4)");
+
+                        N_dots_up1("...");
+                        N_dots_up2("...");
+                        N_dots_up3("...");
+                        N_dots_up4("...");
+                        
+                        Leaf1("T(1)\nc");
+                        Leaf2("T(1)\nc");
+                        Leaf_placeholder("... (n foglie totali) ...");
+                        LeafN("T(1)\nc");
+
+                        N0 --> N1_1;
+                        N0 --> N1_2;
+                        
+                        N1_1 --> N2_1;
+                        N1_1 --> N2_2;
+                        N1_2 --> N2_3;
+                        N1_2 --> N2_4;
+                        
+                        N2_1 --> N_dots_up1;
+                        N2_2 --> N_dots_up2;
+                        N2_3 --> N_dots_up3;
+                        N2_4 --> N_dots_up4;
+
+                        N_dots_up1 --> Leaf1;
+                        N_dots_up2 --> Leaf2;
+                        N_dots_up3 --> Leaf_placeholder;
+                        N_dots_up4 --> LeafN;
+                        
+                        subgraph Livello_0 ["Livello 0 (Costo totale: dn)"]
+                            N0
+                        end
+                        subgraph Livello_1 ["Livello 1 (Costo totale: 2 * d(n/2) = dn)"]
+                            N1_1
+                            N1_2
+                        end
+                        subgraph Livello_2 ["Livello 2 (Costo totale: 4 * d(n/4) = dn)"]
+                            N2_1
+                            N2_2
+                            N2_3
+                            N2_4
+                        end
+                        subgraph Livello_h ["Livello h = log₂(n) (Foglie - Costo totale: n*c)"]
+                            Leaf1
+                            Leaf2
+                            Leaf_placeholder
+                            LeafN
+                        end
+                    </div>
+                </div>
+                <ul>
+                    <li>Ogni livello interno dell'albero (da 0 a \(h-1\), dove \(h = \log_2 n\) è l'altezza) ha un costo totale di `dn`.</li>
+                    <li>Ci sono \(\log_2 n\) livelli interni.</li>
+                    <li>Il livello delle foglie (livello \(h\)) ha `n` foglie, ognuna con costo `c`. Costo totale delle foglie: `cn`.</li>
+                </ul>
+                <p><strong>Costo Totale Sommando i Livelli:</strong></p>
+                <p class="math-block">\( T(n) = (\text{numero di livelli interni}) \times (\text{costo per livello interno}) + (\text{costo foglie}) \)</p>
+                <p class="math-block">\( T(n) = (\log_2 n) \cdot (dn) + cn = dn \log_2 n + cn \)</p>
+                <p>Asintoticamente, il termine dominante è \(n \log n\).</p>
+                <p class="math-block">Quindi, T(n) = Θ(n log n).</p>
+
+                <h3 class="subsection-title">Conclusione sulla Complessità di Merge Sort</h3>
+                <ul>
+                    <li><strong>Spazio:</strong> Θ(n) (a causa degli array ausiliari `L` e `R` in `MERGE`). Non è in-place.</li>
+                    <li><strong>Tempo:</strong> Θ(n log n) in tutti i casi (ottimo, medio, pessimo).</li>
+                </ul>
+                <p>Merge Sort è un algoritmo di ordinamento efficiente e stabile.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark', 
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                themeVariables: { 
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                }
+            });
+
+            const allContentSections = document.querySelectorAll('.content-section');
+            const headerElement = document.querySelector('header');
+            let headerHeight = headerElement ? headerElement.offsetHeight : 70;
+
+            const sidebar = document.getElementById('sidebar');
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const overlay = document.querySelector('.overlay');
+            const body = document.body;
+            const sidebarLinks = document.querySelectorAll('#sidebar a.sidebar-link');
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; // Salva l'innerHTML originale
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || ""; // Decodifica
+                mermaidOriginalDefinitions.set(id, decodedContent.trim()); 
+                
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden';
+            });
+
+            function adjustLayoutForSidebar() {
+                if (headerElement) { headerHeight = headerElement.offsetHeight; }
+                if (window.innerWidth > 992) {
+                    sidebar.style.top = headerHeight + 'px';
+                    sidebar.style.height = `calc(100% - ${headerHeight}px)`;
+                    if (sidebar.classList.contains('hidden-desktop-explicit')) {
+                        body.classList.add('sidebar-hidden');
+                    } else {
+                        body.classList.remove('sidebar-hidden');
+                        sidebar.classList.remove('hidden');
+                    }
+                    body.classList.remove('sidebar-overlay-active');
+                    if(overlay) overlay.style.display = 'none';
+                } else {
+                    sidebar.style.top = '0';
+                    sidebar.style.height = '100vh';
+                    body.classList.add('sidebar-hidden'); 
+                    if (sidebar.classList.contains('open')) {
+                        body.classList.add('sidebar-overlay-active');
+                        if(overlay) overlay.style.display = 'block';
+                    } else {
+                        sidebar.classList.add('hidden'); 
+                        body.classList.remove('sidebar-overlay-active');
+                        if(overlay) overlay.style.display = 'none';
+                    }
+                }
+            }
+            
+            window.addEventListener('resize', adjustLayoutForSidebar);
+
+            if (hamburgerBtn) {
+                hamburgerBtn.addEventListener('click', () => {
+                    const sidebarIsCurrentlyHiddenOrNotOpen = sidebar.classList.contains('hidden') || !sidebar.classList.contains('open');
+                    
+                    sidebar.classList.toggle('hidden', !sidebarIsCurrentlyHiddenOrNotOpen);
+                    sidebar.classList.toggle('open', sidebarIsCurrentlyHiddenOrNotOpen);
+
+                    if (window.innerWidth > 992) {
+                        body.classList.toggle('sidebar-hidden', !sidebarIsCurrentlyHiddenOrNotOpen);
+                        if (sidebar.classList.contains('hidden')) {
+                            sidebar.classList.add('hidden-desktop-explicit');
+                            localStorage.setItem('sidebarState', 'hidden');
+                        } else {
+                            sidebar.classList.remove('hidden-desktop-explicit');
+                            localStorage.setItem('sidebarState', 'visible');
+                        }
+                    } else {
+                         body.classList.toggle('sidebar-overlay-active', sidebarIsCurrentlyHiddenOrNotOpen);
+                         if(overlay) overlay.style.display = sidebarIsCurrentlyHiddenOrNotOpen ? 'block' : 'none';
+                    }
+                });
+            }
+
+            if (overlay) {
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.add('hidden');
+                    sidebar.classList.remove('open');
+                    body.classList.remove('sidebar-overlay-active');
+                    if(overlay) overlay.style.display = 'none';
+                     if (window.innerWidth > 992) {
+                        body.classList.add('sidebar-hidden');
+                        sidebar.classList.add('hidden-desktop-explicit');
+                        localStorage.setItem('sidebarState', 'hidden');
+                    }
+                });
+            }
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id; 
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    console.warn("Nessuna definizione originale per Mermaid ID:", diagramId);
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+
+                diagElement.innerHTML = ''; 
+                
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    console.error("Errore rendering Mermaid per ID:", diagramId, "\nErrore:", e, "\nDefinizione:", diagramDefinition);
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+
+
+            function showSection(targetId, smoothScroll = true) {
+                allContentSections.forEach(s => {
+                    s.classList.remove('active-section');
+                    s.style.display = 'none';
+                    s.querySelectorAll('.mermaid').forEach(diag => {
+                        diag.style.visibility = 'hidden'; 
+                    });
+                });
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.classList.add('active-section');
+                    targetSection.style.display = 'block';
+                    
+                    setTimeout(() => { 
+                        targetSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                    }, 0); // Ritardo minimo per permettere al display:block di applicarsi
+
+
+                    if (smoothScroll) {
+                        const targetPosition = targetSection.offsetTop - headerHeight - 20;
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: "smooth"
+                        });
+                    }
+                }
+            }
+            
+            sidebarLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    
+                    sidebarLinks.forEach(link => link.classList.remove('active-link'));
+                    this.classList.add('active-link');
+
+                    showSection(targetId);
+                    history.pushState(null, null, `#${targetId}`);
+
+                    if (window.innerWidth <= 992) {
+                        sidebar.classList.add('hidden');
+                        sidebar.classList.remove('open');
+                        body.classList.remove('sidebar-overlay-active');
+                        if(overlay) overlay.style.display = 'none';
+                    }
+                });
+            });
+            
+            function setActiveSidebarLinkOnScroll() {
+                let currentSectionId = "";
+                const visibleSections = Array.from(allContentSections).filter(s => s.style.display === 'block');
+                
+                if (visibleSections.length === 1) {
+                    currentSectionId = visibleSections[0].id;
+                } else { 
+                    for (let i = allContentSections.length - 1; i >= 0; i--) {
+                        const section = allContentSections[i];
+                        const sectionTop = section.offsetTop - headerHeight - (window.innerHeight * 0.3);
+                        if (window.pageYOffset >= sectionTop) {
+                            currentSectionId = section.id;
+                            break; 
+                        }
+                    }
+                }
+                
+                if (!currentSectionId && window.location.hash) {
+                    currentSectionId = window.location.hash.substring(1);
+                } else if (!currentSectionId && allContentSections.length > 0) {
+                     const firstActive = document.querySelector('.content-section.active-section');
+                     if (firstActive) {
+                         currentSectionId = firstActive.id;
+                     } else if (document.querySelector('#sidebar a.sidebar-link')) {
+                        currentSectionId = document.querySelector('#sidebar a.sidebar-link').getAttribute('href').substring(1);
+                     }
+                }
+
+                sidebarLinks.forEach(link => {
+                    link.classList.remove('active-link');
+                    if (link.getAttribute('href') === `#${currentSectionId}`) {
+                        link.classList.add('active-link');
+                    }
+                });
+            }
+            window.addEventListener('scroll', setActiveSidebarLinkOnScroll);
+
+            // Initial setup on load
+            if (window.location.hash) {
+                const targetId = window.location.hash.substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement && Array.from(allContentSections).includes(targetElement)) {
+                     showSection(targetId, false); 
+                     setTimeout(() => {
+                        const targetPosition = targetElement.offsetTop - headerHeight - 20;
+                        window.scrollTo({ top: targetPosition, behavior: "auto" });
+                        document.querySelector(`#sidebar a[href="${window.location.hash}"]`)?.classList.add('active-link');
+                    }, 50); 
+                } else if (allContentSections.length > 0) {
+                    const firstSectionId = allContentSections[0].id;
+                    showSection(firstSectionId, false);
+                    document.querySelector(`#sidebar a[href="#${firstSectionId}"]`)?.classList.add('active-link');
+                }
+            } else if (allContentSections.length > 0) {
+                const firstSectionId = allContentSections[0].id;
+                showSection(firstSectionId, false);
+                document.querySelector(`#sidebar a[href="#${firstSectionId}"]`)?.classList.add('active-link');
+            }
+            
+            adjustLayoutForSidebar();
+            if (window.innerWidth > 992) {
+                 if (localStorage.getItem('sidebarState') === 'hidden') {
+                    sidebar.classList.add('hidden', 'hidden-desktop-explicit');
+                    body.classList.add('sidebar-hidden');
+                } else { 
+                    sidebar.classList.remove('hidden', 'hidden-desktop-explicit');
+                    body.classList.remove('sidebar-hidden');
+                }
+            } else {
+                 sidebar.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Appunti</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-deep-space: #111827;
+        --bg-card: #1f2937;
+        --bg-header: #1a202c;
+        --text-primary: #e5e7eb;
+        --text-secondary: #9ca3af;
+        --accent-primary: #60a5fa;
+        --accent-secondary: #818cf8;
+        --border-soft: rgba(107, 114, 128, 0.2);
+        --shadow-soft: rgba(0, 0, 0, 0.25);
+        --font-main: "Nunito Sans", sans-serif;
+        --border-radius-main: 12px;
+        --border-radius-small: 6px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font-main);
+        line-height: 1.7;
+        color: var(--text-primary);
+        background-color: var(--bg-deep-space);
+        display: flex;
+        flex-direction: column;
+        align-items: center; 
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 900px; 
+        margin-top: 2rem;
+      }
+
+      header.main-header {
+        background-color: transparent; 
+        color: var(--text-primary);
+        padding: 2rem 0;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      header.main-header h1 {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: var(--accent-primary);
+        margin-bottom: 0.5rem;
+      }
+      header.main-header p {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+      }
+
+      main {
+        width: 100%;
+      }
+
+      .materie-lista {
+        list-style: none;
+        padding: 0;
+      }
+
+      .materie-lista li {
+        margin-bottom: 1.5rem;
+      }
+
+      .materie-lista a {
+        display: block;
+        background-color: var(--bg-card);
+        color: var(--text-primary);
+        padding: 1.8rem 2rem;
+        text-decoration: none;
+        border-radius: var(--border-radius-main);
+        border-left: 5px solid var(--accent-secondary);
+        box-shadow: 0 4px 12px var(--shadow-soft);
+        transition: transform 0.2s ease-out, box-shadow 0.2s ease-out,
+          border-color 0.2s ease-out;
+        font-size: 1.3rem;
+        font-weight: 600;
+      }
+
+      .materie-lista a:hover {
+        transform: translateY(-3px) scale(1.01);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+        border-left-color: var(--accent-primary);
+        color: var(--accent-primary);
+      }
+
+      .materie-lista a .arrow {
+        float: right;
+        transition: transform 0.2s ease-out;
+      }
+      .materie-lista a:hover .arrow {
+        transform: translateX(5px);
+      }
+
+      footer {
+        text-align: center;
+        padding: 2rem 0;
+        color: var(--text-secondary);
+        margin-top: 3rem;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 1rem;
+        }
+        header.main-header h1 {
+          font-size: 2.2rem;
+        }
+        header.main-header p {
+          font-size: 1rem;
+        }
+        .materie-lista a {
+          font-size: 1.1rem;
+          padding: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="main-header">
+        <h1>I Miei Appunti Universitari</h1>
+        <p>Una raccolta organizzata del mio percorso di studi.</p>
+      </header>
+
+      <main>
+        <ul class="materie-lista">
+          <li>
+            <a href="ASD/ASD_home.html">
+              Algoritmi e Strutture Dati
+              <span class="arrow">→</span>
+            </a>
+          </li>
+        </ul>
+      </main>
+
+      <footer>
+        <p>Realizzato con passione per lo studio.</p>
+      </footer>
+    </div>
+  </body>
+</html>

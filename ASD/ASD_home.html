@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algoritmi e Strutture Dati - Appunti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C; 
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header.page-header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 1.5rem 2rem; 
+            text-align: left; 
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            display: flex;
+            align-items: center;
+        }
+
+        .back-link {
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-size: 1.8rem; 
+            margin-right: 1.5rem;
+            transition: color 0.2s ease;
+        }
+        .back-link:hover {
+            color: var(--accent-primary);
+        }
+
+        header.page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin: 0;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 2rem auto; 
+            padding: 0 1rem; 
+        }
+
+        main {
+            width: 100%;
+        }
+
+        .content-category {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px var(--shadow-soft);
+        }
+
+        .content-category h2 {
+            font-size: 1.5rem;
+            color: var(--accent-secondary);
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.5rem;
+        }
+
+        .lezioni-lista {
+            list-style: none;
+            padding: 0;
+        }
+
+        .lezioni-lista li {
+            margin-bottom: 1rem;
+            background-color: rgba(255,255,255,0.03); 
+            border-radius: var(--border-radius-small);
+            transition: background-color 0.2s ease;
+        }
+        .lezioni-lista li:hover {
+            background-color: rgba(96, 165, 250, 0.1);
+        }
+
+        .lezioni-lista a {
+            display: flex; 
+            align-items: center;
+            color: var(--text-secondary);
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            border-radius: var(--border-radius-small);
+            font-size: 1.1rem;
+            transition: color 0.2s ease;
+        }
+        .lezioni-lista a:hover {
+            color: var(--accent-primary);
+        }
+
+        .lezioni-lista .lesson-icon {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+        }
+        .lezioni-lista .pdf-link {
+            margin-left: auto; 
+            font-size: 0.9rem;
+            color: var(--accent-secondary);
+            text-decoration: underline;
+            padding: 0.3rem 0.5rem;
+            border-radius: var(--border-radius-small);
+        }
+        .lezioni-lista .pdf-link:hover {
+            background-color: rgba(129, 140, 248, 0.15);
+            color: var(--accent-secondary);
+        }
+
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-secondary);
+            margin-top: 3rem;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            header.page-header h1 { font-size: 1.6rem; }
+            .container { margin-top: 1rem; padding: 0 0.5rem;}
+            .content-category { padding: 1.5rem; }
+            .content-category h2 { font-size: 1.3rem; }
+            .lezioni-lista a { font-size: 1rem; padding: 0.8rem 1rem; }
+        }
+
+    </style>
+</head>
+<body>
+    <header class="page-header">
+        <a href="../index.html" class="back-link" title="Torna alla Home">←</a> 
+        <h1>Algoritmi e Strutture Dati</h1>
+    </header>
+
+    <div class="container">
+        <main>
+            <section class="content-category">
+                <h2>Appunti Lezioni</h2>
+                <ul class="lezioni-lista">
+                    <li>
+                        <a href="lezione1/lezione1.html">
+                            <span class="lesson-icon"></span> 
+                            Lezione 1: Introduzione, Complessità e Correttezza
+                        </a>
+                    </li>
+                    <li>
+                        <a href="lezione2/lezione2.html"> 
+                            <span class="lesson-icon"></span>
+                            Lezione 2: Correttezza e Complessità Insertion Sort
+                        </a>
+                    </li>
+                     <li>
+                        <a href="lezione3/lezione3.html"> 
+                            <span class="lesson-icon"></span>
+                            Lezione 3: Divide et Impera, Merge Sort
+                        </a>
+                    </li>
+                    
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>Appunti di Algoritmi e Strutture Dati.</p>
+    </footer>
+</body>
+</html>
