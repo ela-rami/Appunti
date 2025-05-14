@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appunti Lezione 1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/common.css">
+</head>
+<body data-pdf-path="Nota 28 set 2020 (2).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Appunti Lezione 1: Intro al Corso</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../../ASD_home.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#info-generali" class="sidebar-link">1. Info Generali</a></li>
+            <li><a href="#prerequisiti" class="sidebar-link">2. Prerequisiti</a></li>
+            <li><a href="#materiale-didattico" class="sidebar-link">3. Materiale Didattico</a></li>
+            <li><a href="#esame" class="sidebar-link">4. Struttura Esame</a></li>
+            <li><a href="#intro-algoritmi" class="sidebar-link">5. Intro Algoritmi</a></li>
+            <li><a href="#ordinamento" class="sidebar-link">6. Problema Ordinamento</a></li>
+            <li><a href="#vettore" class="sidebar-link">7. Struttura Dati: Vettore</a></li>
+            <li><a href="#selection-sort" class="sidebar-link">8. Selection Sort</a></li>
+            <li><a href="#insertion-sort" class="sidebar-link">9. Insertion Sort</a></li>
+            <!-- Rimossa la sezione 9B della visualizzazione -->
+            <li><a href="#concetti-chiave" class="sidebar-link">10. Concetti Chiave</a></li>
+            <li><a href="#risorse-computazionali" class="sidebar-link">11. Risorse Computazionali</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="info-generali" class="content-section">
+            <h2 class="section-title">1. Informazioni Generali sul Corso</h2>
+            <div class="section-content">
+                <p><strong>Crediti:</strong> 9 CFU gestiti dalla docente.</p>
+                <p><strong>Orario Lezioni:</strong> Lunedì e Giovedì (come da orario indicato).</p>
+                <p><strong>Modalità Lezioni Iniziali:</strong> Le prime lezioni utilizzeranno un tablet per scrivere, data l'indisponibilità della lavagna interattiva. Questo favorisce una velocità di spiegazione più gestibile.</p>
+                <p><strong>Piattaforma E-learning:</strong> Punto di riferimento per materiali e comunicazioni.</p>
+                <p><strong>Registrazioni:</strong> Le lezioni vengono registrate.</p>
+            </div>
+        </article>
+
+        <article id="prerequisiti" class="content-section">
+            <h2 class="section-title">2. Prerequisiti</h2>
+            <div class="section-content">
+                <p><strong>Formale (bloccante):</strong> Superamento dell'esame di Programmazione del primo anno (blocco ESSE3).</p>
+                <p><strong>Sostanziale (fortemente consigliato):</strong></p>
+                <ul>
+                    <li>Solida comprensione dei concetti di programmazione.</li>
+                    <li>Conoscenze di Analisi Matematica 1.</li>
+                    <li>Conoscenze di Matematica Discreta (per informatici) o Algebra Lineare (per BW).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="materiale-didattico" class="content-section">
+            <h2 class="section-title">3. Testo di Riferimento e Materiale Didattico</h2>
+            <div class="section-content">
+                <p><strong>Testo Principale:</strong> "Introduzione agli Algoritmi" di T. H. Cormen, C. E. Leiserson, R. L. Rivest, C. Stein (CLRS). Qualsiasi edizione, preferibilmente recente. Disponibile in italiano e inglese.</p>
+                <p><strong>Materiale su E-learning:</strong></p>
+                <ul>
+                    <li>Elenco argomenti svolti.</li>
+                    <li>Materiale di laboratorio (Prof. Puppis).</li>
+                    <li>Quiz di autovalutazione.</li>
+                    <li>Link a risorse esterne (es. lezioni MIT OpenCourseWare del Prof. Leiserson).</li>
+                </ul>
+                <p><em>Nota: Non verranno usate slide per le lezioni frontali.</em></p>
+            </div>
+        </article>
+
+        <article id="esame" class="content-section">
+            <h2 class="section-title">4. Struttura e Modalità d'Esame</h2>
+            <div class="section-content">
+                <p>L'esame è composto da tre parti:</p>
+                <ol>
+                    <li><strong>Prova Scritta:</strong> Probabilmente online.</li>
+                    <li><strong>Prova Orale:</strong> Obbligatoria per tutti.</li>
+                    <li><strong>Prova di Laboratorio:</strong> Da superare <em>prima</em> della prova orale. Consegna progetti anticipata.</li>
+                </ol>
+                <p><strong>"Compitini":</strong> Due prove intermedie. Superandoli entrambi si può accedere all'orale di Luglio.</p>
+                <p><strong>Sessioni d'Esame:</strong></p>
+                <ul>
+                    <li>Giugno: 1° appello (scritto + orale).</li>
+                    <li>Luglio: 2° appello (scritto + orale / orale post-compitini).</li>
+                    <li>Settembre: Due appelli (scritto + orale).</li>
+                    <li>Gennaio (anno succ.): Ultimo appello A.A. corrente (scritto + orale).</li>
+                </ul>
+                <p><strong>Importanza del Laboratorio:</strong> Cruciale per la comprensione e l'esito dell'orale.</p>
+            </div>
+        </article>
+
+        <article id="intro-algoritmi" class="content-section">
+            <h2 class="section-title">5. Introduzione agli Algoritmi e Modello di Calcolo</h2>
+            <div class="section-content">
+                <p><strong>Definizione (Informale):</strong> Un algoritmo è una sequenza finita di istruzioni non ambigue che, eseguite, portano alla soluzione di un problema.</p>
+                <p><strong>Modello di Calcolo: Pseudo-codice</strong></p>
+                <ul>
+                    <li>Descrizione ad alto livello, indipendente dal linguaggio di programmazione.</li>
+                    <li>Focus sulla logica dell'algoritmo.</li>
+                    <li>Lo studente deve essere in grado di tradurlo in un linguaggio reale.</li>
+                    <li>Si possono omettere dettagli come la dichiarazione di tutte le variabili.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="ordinamento" class="content-section">
+            <h2 class="section-title">6. Il Problema dell'Ordinamento</h2>
+            <div class="section-content">
+                <p><strong>Input:</strong> Una sequenza (array) di <em>n</em> numeri interi: <code><a₁, a₂, ..., aₙ></code>.</p>
+                <p><strong>Output:</strong> Una permutazione (riarrangiamento) <code><a'₁, a'₂, ..., a'ₙ></code> della sequenza di input tale che <code>a'₁ ≤ a'₂ ≤ ... ≤ a'ₙ</code>.</p>
+                <p>Alternativamente, una permutazione <code>π</code> degli indici <code>1, ..., n</code> tale che <code>A[π(1)] ≤ A[π(2)] ≤ ... ≤ A[π(n)]</code>.</p>
+                <p><strong>Obiettivo:</strong> Ordinare gli elementi in modo non decrescente.</p>
+            </div>
+        </article>
+
+        <article id="vettore" class="content-section">
+            <h2 class="section-title">7. Struttura Dati: Vettore (Array)</h2>
+            <div class="section-content">
+                <p>Struttura dati base per l'ordinamento e molti algoritmi.</p>
+                <p><strong>Caratteristiche:</strong></p>
+                <ul>
+                    <li><strong>Statica:</strong> Dimensione fissata alla creazione, non modificabile dinamicamente.</li>
+                    <li><strong>Omogenea:</strong> Tutti gli elementi dello stesso tipo.</li>
+                    <li><strong>Accesso Diretto (o Casuale):</strong> Accesso a qualsiasi elemento in tempo costante tramite indice (elementi in memoria contigua).</li>
+                    <li><strong>Lineare/Sequenziale:</strong> Elementi organizzati logicamente in sequenza. Indici da 1 (pseudo-codice CLRS/lezione) o 0 (C/Java).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="selection-sort" class="content-section">
+            <h2 class="section-title">8. Algoritmo di Ordinamento: Selection Sort</h2>
+            <div class="section-content">
+                <p><strong>Idea di base:</strong></p>
+                <ol>
+                    <li>Si itera attraverso l'array. Per ogni posizione <code>i</code> (dalla prima fino alla penultima):</li>
+                    <li>Si cerca l'elemento più piccolo (minimo) nella porzione di array non ancora ordinata (da <code>A[i]</code> fino all'ultimo elemento <code>A[n]</code>).</li>
+                    <li>Una volta trovato questo minimo, lo si scambia con l'elemento attualmente in posizione <code>i</code>.</li>
+                    <li>Dopo questo scambio, l'elemento in posizione <code>i</code> è garantito essere al suo posto corretto e definitivo nell'array ordinato.</li>
+                    <li>Si ripete il processo per la posizione successiva <code>i+1</code>, considerando la restante parte dell'array.</li>
+                </ol>
+                <p><strong>Pseudo-codice (<code>SelectionSort(A)</code>):</strong></p>
+                <pre><code class="language-pseudocode">
+// A è l'array da ordinare, A.length è la sua lunghezza (n)
+// Gli indici dell'array A vanno da 1 a A.length
+
+for i ← 1 to A.length - 1 do
+    // Trova l'indice dell'elemento minimo in A[i..A.length]
+    min_idx ← i
+    for j ← i + 1 to A.length do
+        if A[j] < A[min_idx] then
+            min_idx ← j
+    
+    // Scambia A[i] con A[min_idx] se sono diversi
+    if min_idx ≠ i then
+        scambia A[i] con A[min_idx] 
+        // (in pratica: temp ← A[i]; A[i] ← A[min_idx]; A[min_idx] ← temp)
+                </code></pre>
+                <p><strong>Esempio (vettore: <code><5, 8, 2, 1></code>, n=4):</strong></p>
+                <div class="sort-example">
+                    <p><strong>Iterazione i=1:</strong></p>
+                    <div class="array-step">
+                        Array: <code>5 | 8 | 2 | 1</code><br>
+                        Cerca il minimo in <code>A[1..4]</code> (cioè in <code>5, 8, 2, 1</code>).<br>
+                        Minimo è <code>1</code> (in posizione 4). <code>min_idx = 4</code>.<br>
+                        Scambia <code>A[1]</code> (che è 5) con <code>A[4]</code> (che è 1).
+                    </div>
+                    <p>Risultato: <span class="array-sorted">1</span> | 8 | 2 | 5</p>
+
+                    <p><strong>Iterazione i=2:</strong></p>
+                    <div class="array-step">
+                        Array: <span class="array-sorted">1</span> | <code>8 | 2 | 5</code><br>
+                        Cerca il minimo in <code>A[2..4]</code> (cioè in <code>8, 2, 5</code>).<br>
+                        Minimo è <code>2</code> (in posizione 3). <code>min_idx = 3</code>.<br>
+                        Scambia <code>A[2]</code> (che è 8) con <code>A[3]</code> (che è 2).
+                    </div>
+                    <p>Risultato: <span class="array-sorted">1 | 2</span> | 8 | 5</p>
+
+                    <p><strong>Iterazione i=3:</strong> (A.length - 1 = 4 - 1 = 3)</p>
+                    <div class="array-step">
+                        Array: <span class="array-sorted">1 | 2</span> | <code>8 | 5</code><br>
+                        Cerca il minimo in <code>A[3..4]</code> (cioè in <code>8, 5</code>).<br>
+                        Minimo è <code>5</code> (in posizione 4). <code>min_idx = 4</code>.<br>
+                        Scambia <code>A[3]</code> (che è 8) con <code>A[4]</code> (che è 5).
+                    </div>
+                    <p>Risultato: <span class="array-sorted">1 | 2 | 5 | 8</span> (Ordinato)</p>
+                    <p><em>Il ciclo for esterno termina qui (i va fino a n-1).</em></p>
+                </div>
+            </div>
+        </article>
+
+        <article id="insertion-sort" class="content-section">
+            <h2 class="section-title">9. Algoritmo di Ordinamento: Insertion Sort</h2>
+            <div class="section-content">
+                <p><strong>Idea di base (come ordinare carte da gioco):</strong></p>
+                <ol>
+                    <li>Il primo elemento <code>A[1]</code> è una sottosequenza ordinata.</li>
+                    <li>Considera <code>A[2]</code>. Inseriscilo correttamente rispetto ad <code>A[1]</code>. Ora <code>A[1..2]</code> è ordinato.</li>
+                    <li>Considera <code>A[3]</code> (<code>key</code>). Confrontalo con gli elementi di <code>A[1..2]</code> (da destra), spostando a destra gli elementi maggiori della <code>key</code>, fino a trovare la posizione per la <code>key</code>.</li>
+                    <li>Ripeti per tutti gli elementi da <code>j=2</code> a <code>j=n</code>.</li>
+                </ol>
+                <p><strong>Pseudo-codice (<code>InsertionSort(A)</code>):</strong></p>
+                <pre><code class="language-pseudocode">
+for j ← 2 to A.length
+    key ← A[j]
+    // Inserisci A[j] nella sequenza ordinata A[1..j-1]
+    i ← j - 1
+    while (i > 0 and A[i] > key) do
+        A[i+1] ← A[i]
+        i ← i - 1
+    A[i+1] ← key
+                </code></pre>
+                <p><strong>Esempio (vettore: <code><5, 8, 2, 1></code>):</strong></p>
+                <div class="sort-example">
+                    <p><strong>Passo 0 (Iniziale):</strong> <span class="array-sorted">5</span> | 8 | 2 | 1</p>
+                    <p><strong>j=2, key=8:</strong></p>
+                    <div class="array-step">
+                        Array: <span class="array-sorted">5</span> <span class="array-key">8</span> | 2 | 1 <br>
+                        (i=1, A[1]=5. 5 < 8, il while non parte, A[1+1] ← key)
+                    </div>
+                    <p>Risultato: <span class="array-sorted">5 | 8</span> | 2 | 1</p>
+
+                    <p><strong>j=3, key=2:</strong></p>
+                    <div class="array-step">
+                        i=2, A[2]=8. (8 > 2) Sposta 8: <span class="array-sorted">5</span> | _ | <span class="array-current">8</span> | 1. key=<span class="array-key">2</span><br>
+                        i=1, A[1]=5. (5 > 2) Sposta 5: <span class="array-sorted">_</span> | <span class="array-current">5</span> | 8 | 1. key=<span class="array-key">2</span><br>
+                        i=0. Il while termina. Inserisci key=2 in A[0+1] = A[1].
+                    </div>
+                    <p>Risultato: <span class="array-sorted">2 | 5 | 8</span> | 1</p>
+
+                    <p><strong>j=4, key=1:</strong></p>
+                    <div class="array-step">
+                        i=3, A[3]=8. (8 > 1) Sposta 8: <span class="array-sorted">2 | 5</span> | _ | <span class="array-current">8</span>. key=<span class="array-key">1</span><br>
+                        i=2, A[2]=5. (5 > 1) Sposta 5: <span class="array-sorted">2</span> | _ | <span class="array-current">5</span> | 8. key=<span class="array-key">1</span><br>
+                        i=1, A[1]=2. (2 > 1) Sposta 2: <span class="array-sorted">_</span> | <span class="array-current">2</span> | 5 | 8. key=<span class="array-key">1</span><br>
+                        i=0. Il while termina. Inserisci key=1 in A[0+1] = A[1].
+                    </div>
+                    <p>Risultato: <span class="array-sorted">1 | 2 | 5 | 8</span> (Ordinato)</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="concetti-chiave" class="content-section">
+            <h2 class="section-title">10. Concetti Chiave da Sviluppare (Anticipazioni)</h2>
+            <div class="section-content">
+                <p><strong>Studio di Complessità:</strong> Analisi quantitativa delle risorse (tempo, spazio) richieste da un algoritmo in funzione della dimensione dell'input. Si userà la notazione asintotica.</p>
+                <p><strong>Correttezza:</strong> Dimostrazione formale che un algoritmo produce l'output corretto per ogni input valido (es. tramite invarianti di ciclo).</p>
+            </div>
+        </article>
+
+        <article id="risorse-computazionali" class="content-section">
+            <h2 class="section-title">11. Risorse Computazionali</h2>
+            <div class="section-content">
+                <p>Gli algoritmi sono valutati principalmente in base a:</p>
+                <ul>
+                    <li><strong>Tempo:</strong> Tempo di esecuzione, misurato come numero di operazioni elementari (non il tempo per scrivere il codice).</li>
+                    <li><strong>Spazio:</strong> Quantità di memoria (RAM/memoria centrale) utilizzata durante l'esecuzione.</li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+</body>
+</html>

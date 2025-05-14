@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appunti Lezione 2: Correttezza e Complessità Insertion Sort</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/common.css">
+    <style>
+        .subsection-title {
+            font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft);
+        }
+        .math-notation {
+            font-family: var(--font-code);
+            background-color: rgba(42, 48, 60, 0.5);
+            padding: 0.5rem;
+            border-radius: var(--border-radius-small);
+            display: block;
+            white-space: pre-wrap;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        table.complexity-table {
+            width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9em;
+        }
+        .complexity-table th, .complexity-table td {
+            border: 1px solid var(--border-soft); padding: 0.75rem; text-align: left; color: var(--text-secondary);
+        }
+        .complexity-table th {
+            background-color: var(--code-bg); color: var(--text-primary); font-weight: 600;
+        }
+        .complexity-table tr:nth-child(even) {
+            background-color: rgba(42, 48, 60, 0.3);
+        }
+        @media (max-width: 768px) {
+            .complexity-table { font-size: 0.8em; }
+            .complexity-table th, .complexity-table td { padding: 0.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 5 ott 2020 (2).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Appunti Lezione 2: Correttezza e Complessità Insertion Sort</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../../ASD_home.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#correttezza-insertion-sort" class="sidebar-link">1. Correttezza Insertion Sort</a></li>
+            <li><a href="#complessita-insertion-sort" class="sidebar-link">2. Complessità Insertion Sort</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="correttezza-insertion-sort" class="content-section">
+            <h2 class="section-title">1. Correttezza dell'Algoritmo Insertion Sort</h2>
+            <div class="section-content">
+                <p>Per dimostrare che un algoritmo è corretto, dobbiamo provare due aspetti principali:</p>
+                <ol>
+                    <li><strong>Terminazione:</strong> L'algoritmo deve sempre finire dopo un numero finito di passi per qualsiasi input valido.</li>
+                    <li><strong>Correttezza Parziale:</strong> Se l'algoritmo termina, deve produrre l'output corretto specificato dal problema.</li>
+                </ol>
+
+                <h3 class="subsection-title">Teorema di Correttezza per Insertion Sort</h3>
+                <p>L'algoritmo <code>InsertionSort(A)</code> termina sempre e, al termine, l'array di input <code>A</code> è ordinato in modo non decrescente (cioè <code>A[1] ≤ A[2] ≤ ... ≤ A[A.length]</code>).</p>
+                
+                <h3 class="subsection-title">Dimostrazione tramite Invariante di Ciclo</h3>
+                <p>Utilizzeremo un <strong>invariante di ciclo</strong> per il ciclo <code>for</code> esterno (quello indicizzato da `j`). Un invariante di ciclo è una proprietà che è vera:</p>
+                <ul>
+                    <li>Prima della prima iterazione del ciclo (Inizializzazione).</li>
+                    <li>Se è vera prima di un'iterazione, rimane vera prima dell'iterazione successiva (Mantenimento).</li>
+                    <li>Quando il ciclo termina, l'invariante fornisce una proprietà utile per dimostrare la correttezza (Terminazione/Conclusione).</li>
+                </ul>
+
+                <p><strong>Invariante del ciclo `for` esterno (per `j`):</strong></p>
+                <p class="math-notation">"All'inizio della <em>j</em>-esima iterazione del ciclo <code>for</code> (cioè quando l'indice del ciclo <code>for</code> ha valore <code>j</code>), il sotto-array <code>A[1..j-1]</code> contiene gli elementi originariamente presenti in <code>A[1..j-1]</code>, ma in ordine non decrescente."</p>
+
+                <h4 style="color: var(--accent-secondary); margin-top:1.5em; margin-bottom:0.5em;">Dimostrazione per Induzione su `j`:</h4>
+                <p><strong>Caso Base (Inizializzazione): `j = 2`</strong></p>
+                <ul>
+                    <li><strong>Tesi:</strong> All'inizio della seconda iterazione (quando `j=2`), il sotto-array `A[1..2-1]`, cioè `A[1..1]` (che contiene solo `A[1]`), è ordinato.</li>
+                    <li><strong>Dimostrazione:</strong> Un sotto-array contenente un solo elemento è sempre, per definizione, ordinato. Quindi, l'invariante è vero per `j=2`.</li>
+                </ul>
+
+                <p><strong>Passo Induttivo:</strong></p>
+                <ul>
+                    <li><strong>Ipotesi Induttiva (Hp.Ind.):</strong> Supponiamo che l'invariante sia vero all'inizio dell'iterazione <em>j</em>-esima, ovvero il sotto-array `A[1..j-1]` è ordinato.</li>
+                    <li><strong>Tesi da dimostrare:</strong> Dobbiamo dimostrare che l'invariante sarà vero anche all'inizio dell'iterazione successiva, la <em>(j+1)</em>-esima. Questo significa che, dopo aver completato l'iterazione <em>j</em>-esima, il sotto-array `A[1..j]` risulterà ordinato.</li>
+                    <li><strong>Dimostrazione del Passo Induttivo:</strong>
+                        <ol>
+                            <li>All'inizio dell'iterazione <em>j</em>-esima, <code>key ← A[j]</code>.</li>
+                            <li>Il ciclo <code>while</code> interno (con indice `i` che parte da `j-1`) confronta <code>key</code> con gli elementi a sinistra in <code>A[1..j-1]</code>.</li>
+                            <li>Tutti gli elementi in <code>A[1..j-1]</code> che sono maggiori di <code>key</code> vengono spostati di una posizione a destra.</li>
+                            <li>Al termine del ciclo <code>while</code>, `i` indica la posizione a sinistra di dove <code>key</code> deve essere inserita (o è -1 se <code>key</code> è il minimo). L'istruzione <code>A[i+1] ← key</code> inserisce <code>key</code>.</li>
+                            <li>Poiché <code>A[1..i]</code> era ordinato e <code>A[i] ≤ key</code> (o `i=0`), e <code>key</code> è minore o uguale agli elementi spostati (che erano in `A[i+1..j-1]`), il sotto-array <code>A[1..j]</code> è ora ordinato e contiene gli stessi elementi originali di `A[1..j]`.</li>
+                            <li>Questo mantiene l'invariante per l'inizio dell'iterazione <em>(j+1)</em>-esima.</li>
+                        </ol>
+                    </li>
+                </ul>
+
+                <p><strong>Terminazione (Conclusione dell'Invariante):</strong></p>
+                <ul>
+                    <li>Il ciclo <code>for</code> esterno termina quando `j` diventa `A.length + 1`.</li>
+                    <li>Secondo l'invariante, all'inizio di questa "pseudo-iterazione", il sotto-array `A[1..(A.length + 1) - 1]`, cioè `A[1..A.length]`, è ordinato.</li>
+                    <li>Questo è esattamente ciò che il teorema di correttezza richiede.</li>
+                </ul>
+
+                <h3 class="subsection-title">Terminazione dell'Algoritmo Insertion Sort</h3>
+                <ul>
+                    <li>Il ciclo <code>while</code> interno termina perché l'indice `i` viene decrementato ad ogni sua iterazione e la condizione del ciclo include `i > 0`. Quindi `i` raggiungerà al massimo 0.</li>
+                    <li>Il ciclo <code>for</code> esterno termina perché l'indice `j` viene incrementato da 2 fino a `A.length`. Quando `j` diventa `A.length + 1`, il ciclo si ferma.</li>
+                </ul>
+                <p>Poiché entrambi i cicli annidati terminano, l'intero algoritmo Insertion Sort termina.</p>
+            </div>
+        </article>
+
+        <article id="complessita-insertion-sort" class="content-section">
+            <h2 class="section-title">2. Analisi di Complessità dell'Algoritmo Insertion Sort</h2>
+            <div class="section-content">
+                <h3 class="subsection-title">Risorse Computazionali</h3>
+                <p>Valutiamo gli algoritmi principalmente in base a due risorse:</p>
+                <ul>
+                    <li><strong>Spazio:</strong>
+                        <ul>
+                            <li><strong>In-place:</strong> Un algoritmo è in-place se modifica la struttura dati di input direttamente, usando solo una quantità di spazio di memoria aggiuntivo costante (indipendente dalla dimensione dell'input).</li>
+                            <li><strong>Insertion Sort è in-place.</strong></li>
+                        </ul>
+                    </li>
+                    <li><strong>Tempo:</strong> Il tempo di esecuzione.</li>
+                </ul>
+
+                <h3 class="subsection-title">Criterio di Costo Uniforme</h3>
+                <p>Assumiamo che ogni operazione di base (elementare) abbia un costo costante, indicato genericamente con `c` (o `cᵢ` per l'istruzione i-esima). Le operazioni di base includono assegnamenti, confronti, operazioni aritmetiche semplici, accesso a elementi di array, incrementi/decrementi.</p>
+
+                <h3 class="subsection-title">Analisi del Tempo di Esecuzione di Insertion Sort</h3>
+                <p>Indichiamo con <code>n = A.length</code>. La funzione di costo <code>T(n)</code> è la somma dei costi di ogni istruzione moltiplicata per il numero di volte che viene eseguita.</p>
+                
+                <table class="complexity-table">
+                    <thead>
+                        <tr>
+                            <th>Istruzione (Pseudo-codice)</th>
+                            <th>Costo</th>
+                            <th>Numero di Esecuzioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>for j ← 2 to n</code></td>
+                            <td>c₁</td>
+                            <td>n volte (testa n+1, ma entra n-1 volte + 1 uscita)</td>
+                        </tr>
+                        <tr>
+                            <td><code>    key ← A[j]</code></td>
+                            <td>c₂</td>
+                            <td>n - 1 volte</td>
+                        </tr>
+                        <tr>
+                            <td><code>    i ← j - 1</code></td>
+                            <td>c₃</td>
+                            <td>n - 1 volte</td>
+                        </tr>
+                        <tr>
+                            <td><code>    while (i > 0 and A[i] > key) do</code></td>
+                            <td>c₄</td>
+                            <td>Σ<sub>j=2..n</sub> t<sub>j</sub></td>
+                        </tr>
+                        <tr>
+                            <td><code>        A[i+1] ← A[i]</code></td>
+                            <td>c₅</td>
+                            <td>Σ<sub>j=2..n</sub> (t<sub>j</sub> - 1)</td>
+                        </tr>
+                        <tr>
+                            <td><code>        i ← i - 1</code></td>
+                            <td>c₆</td>
+                            <td>Σ<sub>j=2..n</sub> (t<sub>j</sub> - 1)</td>
+                        </tr>
+                        <tr>
+                            <td><code>    A[i+1] ← key</code></td>
+                            <td>c₇</td>
+                            <td>n - 1 volte</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>Dove <strong>t<sub>j</sub></strong> è il numero di volte che il test della condizione del ciclo <code>while</code> viene eseguito per un dato valore di `j`.</p>
+
+                <h4 style="color: var(--accent-secondary); margin-top:1.5em; margin-bottom:0.5em;">Caso Ottimo (Best Case)</h4>
+                <p>L'array è già ordinato. La condizione <code>A[i] > key</code> del <code>while</code> è sempre falsa al primo controllo. Quindi, <strong>t<sub>j</sub> = 1</strong> per ogni `j`.</p>
+                <p class="math-notation">T<sub>ottimo</sub>(n) = c₁n + c₂(n-1) + c₃(n-1) + c₄(n-1) + c₅(0) + c₆(0) + c₇(n-1)<br>
+                T<sub>ottimo</sub>(n) = (c₁ + c₂ + c₃ + c₄ + c₇)n - (c₂ + c₃ + c₄ + c₇)<br>
+                Questa è una funzione lineare del tipo <code>an + b</code>. Asintoticamente: <strong>Θ(n)</strong>.</p>
+
+                <h4 style="color: var(--accent-secondary); margin-top:1.5em; margin-bottom:0.5em;">Caso Pessimo (Worst Case)</h4>
+                <p>L'array è ordinato in ordine inverso. La <code>key</code> è sempre più piccola di tutti gli elementi precedenti. Il ciclo <code>while</code> scorre tutti gli elementi fino all'inizio. Quindi, <strong>t<sub>j</sub> = j</strong>.</p>
+                <p>Dobbiamo calcolare le sommatorie:</p>
+                <p class="math-notation">Σ<sub>j=2..n</sub> t<sub>j</sub> = Σ<sub>j=2..n</sub> j = (Σ<sub>j=1..n</sub> j) - 1 = (n(n+1)/2) - 1</p>
+                <p class="math-notation">Σ<sub>j=2..n</sub> (t<sub>j</sub> - 1) = Σ<sub>j=2..n</sub> (j-1) = Σ<sub>k=1..n-1</sub> k = (n-1)n/2</p>
+                <p>Sostituendo nella formula generale di T(n), i termini dominanti saranno quelli con n².</p>
+                <p class="math-notation">T<sub>pessimo</sub>(n) è una funzione quadratica del tipo <code>an² + bn + c</code>. Asintoticamente: <strong>Θ(n²)</strong>.</p>
+
+                <h4 style="color: var(--accent-secondary); margin-top:1.5em; margin-bottom:0.5em;">Caso Medio (Average Case)</h4>
+                <p>Assumendo una distribuzione uniforme degli input (ogni permutazione è equiprobabile), in media la <code>key</code> viene spostata circa a metà della porzione ordinata. Quindi, <strong>t<sub>j</sub> ≈ j/2</strong>.</p>
+                <p>Anche in questo caso, la complessità risultante è quadratica. Asintoticamente: <strong>Θ(n²)</strong>.</p>
+                
+                <h3 class="subsection-title">Conclusione sull'Analisi di Insertion Sort</h3>
+                <ul>
+                    <li><strong>Spazio:</strong> Θ(1) (in-place).</li>
+                    <li><strong>Tempo:</strong>
+                        <ul>
+                            <li>Caso Ottimo: Θ(n)</li>
+                            <li>Caso Pessimo: Θ(n²)</li>
+                            <li>Caso Medio: Θ(n²)</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>Insertion Sort è efficiente per input piccoli o quasi ordinati, ma la sua complessità quadratica lo rende meno adatto per grandi set di dati disordinati.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+</body>
+</html>
