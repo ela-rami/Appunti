@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appunti Lezione 4: Notazione Asintotica e Somme Notevoli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Chart.js per grafici interattivi -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Plugin di annotazione per Chart.js (necessario per linee verticali come n₀) -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti in lezione3.html, li riporto per completezza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa; /* Blu per f(n), c*f(n) superiori */
+            --accent-secondary: #818cf8; /* Viola per g(n) */
+            --accent-tertiary: #a78bfa; /* Viola più chiaro per c1*f(n) */
+            --accent-quaternary: #f472b6; /* Rosa per n0 e aree */
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        
+        .chart-container {
+            position: relative;
+            margin: 1.5rem auto;
+            padding: 1rem;
+            height: 400px; /* Altezza fissa o usa aspect-ratio */
+            width: 100%;
+            max-width: 700px; /* Limita larghezza per leggibilità */
+            background-color: var(--bg-deep-space);
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+
+        .sort-example {
+            font-family: var(--font-code); line-height: 1.7; background-color: var(--bg-deep-space);
+            padding: 1.2rem; border-radius: var(--border-radius-small); margin-top: 1.2rem;
+            border: 1px solid var(--border-soft);
+        }
+        .array-step {
+            margin-bottom: 0.8rem; padding-left: 15px; border-left: 1px dotted var(--border-soft);
+            color: var(--text-secondary); font-size: 0.9em;
+        }
+        .array-item, .array-pointer {
+            padding: 3px 6px; border-radius: var(--border-radius-small); margin: 0 2px;
+            display: inline-block; text-align: center; min-width: 2em;
+        }
+        .array-item {
+            border: 1px solid var(--text-secondary);
+            background-color: rgba(156, 163, 175, 0.1);
+        }
+        .array-item.sorted { background-color: rgba(96, 165, 250, 0.15); color: var(--accent-primary); border-color: var(--accent-primary); }
+        .array-item.comparing { background-color: rgba(129, 140, 248, 0.2); color: var(--accent-secondary); border-color: var(--accent-secondary); }
+        .array-pointer { color: #f472b6; font-weight: bold; border: none; padding-bottom: 0; } 
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+            .chart-container { height: 300px; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+            .chart-container { height: 250px; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 12 ott 2020 (2).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Appunti Lezione 4: Notazione Asintotica e Somme Notevoli</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../../ASD_home.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#recap-mergesort" class="sidebar-link">1. Recap Mergesort</a></li>
+            <li><a href="#notazione-asintotica" class="sidebar-link">2. Notazione Asintotica</a></li>
+            <li><a href="#o-grande" class="sidebar-link">2.1. O-grande (Big-O)</a></li>
+            <li><a href="#omega-grande" class="sidebar-link">2.2. Ω-grande (Big-Omega)</a></li>
+            <li><a href="#theta" class="sidebar-link">2.3. Θ (Theta)</a></li>
+            <li><a href="#o-piccolo" class="sidebar-link">2.4. o-piccolo (little-o)</a></li>
+            <li><a href="#omega-piccolo" class="sidebar-link">2.5. ω-piccolo (little-omega)</a></li>
+            <li><a href="#proprieta-notazioni" class="sidebar-link">2.6. Proprietà delle Notazioni</a></li>
+            <li><a href="#caratterizzazione-limiti" class="sidebar-link">2.7. Caratterizzazione con Limiti</a></li>
+            <li><a href="#esempi-comparativi" class="sidebar-link">2.8. Esempi Comparativi</a></li>
+            <li><a href="#somme-notevoli" class="sidebar-link">3. Somme Notevoli</a></li>
+            <li><a href="#esercizio-log-n-fattoriale" class="sidebar-link">4. Esercizio: log(n!)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="recap-mergesort" class="content-section">
+            <h2 class="section-title">1. Recap Mergesort</h2>
+            <div class="section-content">
+                <p>La lezione precedente ha introdotto l'algoritmo Mergesort. Brevemente, si è discusso della sua complessità, che è \( \Theta(n \log n) \), e di come questa venga valutata.</p>
+            </div>
+        </article>
+
+        <article id="notazione-asintotica" class="content-section">
+            <h2 class="section-title">2. Strumenti Matematici: Notazione Asintotica</h2>
+            <div class="section-content">
+                <p>Per analizzare la complessità degli algoritmi in modo rigoroso, utilizziamo la <strong>notazione asintotica</strong>. Questa ci permette di descrivere il comportamento di una funzione (tipicamente il tempo di esecuzione o lo spazio utilizzato) al crescere della dimensione dell'input \(n\), ignorando costanti moltiplicative e termini di ordine inferiore.</p>
+                <p>Le notazioni principali che vedremo sono O-grande, Ω-grande, Θ, o-piccolo e ω-piccolo.</p>
+                <p>Nel libro di testo di riferimento (CLRS), questi argomenti sono trattati nel <strong>Capitolo 3</strong>.</p>
+                <p>La docente sottolinea l'importanza di studiare attivamente dai libri e prendere appunti personali, piuttosto che affidarsi unicamente a dispense fornite, per una migliore comprensione della materia.</p>
+
+                <h3 class="subsection-title">Motivazione</h3>
+                <p>La notazione asintotica serve a:</p>
+                <ul>
+                    <li>Confrontare l'efficienza di algoritmi diversi per problemi di grandi dimensioni.</li>
+                    <li>Fornire una misura astratta delle risorse, indipendente da fattori specifici come l'hardware o il linguaggio di programmazione.</li>
+                    <li>Concentrarsi sull'ordine di crescita della funzione di costo.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="o-grande" class="content-section">
+            <h2 class="section-title">2.1. O-grande (Big-O) - Limite Superiore Asintotico</h2>
+            <div class="section-content">
+                <p>La notazione O-grande fornisce un limite superiore asintotico per una funzione.</p>
+                <p><strong>Definizione Formale:</strong> Data una funzione \(f(n)\), diciamo che una funzione \(g(n)\) appartiene a \(O(f(n))\) (si legge "g di n è O grande di f di n") se esistono delle costanti positive \(c > 0\) e \(n_0 \ge 0\) tali che per tutti gli \(n \ge n_0\):</p>
+                <div class="math-block">
+                \( 0 \le g(n) \le c \cdot f(n) \)
+                </div>
+                <p>In pratica, \(g(n)\) non cresce più velocemente di \(f(n)\) (a meno di una costante moltiplicativa \(c\)) per valori di \(n\) sufficientemente grandi.</p>
+                <p>La funzione \(f(n)\) è tipicamente una funzione di costo (ad es. numero di operazioni), spesso positiva e monotona non decrescente per le funzioni di complessità.</p>
+
+                <h4 class="subsubsection-title">Interpretazione Grafica di O-grande</h4>
+                <div class="chart-container">
+                    <canvas id="oGrandeChart"></canvas>
+                </div>
+                <p>Nel grafico, da un certo punto \(n_0\) in poi, la curva della funzione \(g(n)\) (viola) si trova sempre al di sotto o coincide con la curva di \(c \cdot f(n)\) (blu scuro), dove \(f(n)\) è la funzione di riferimento (blu chiaro) e \(c\) è una costante positiva (qui ad esempio \(c=1.5\)). La linea verticale tratteggiata (rosa) indica \(n_0\).</p>
+
+                <h4 class="subsubsection-title">Esempi di O-grande</h4>
+                <ul>
+                    <li>Se \(g(n) = 5n^2 + 2n + 3\), allora \(g(n) \in O(n^2)\).
+                        <p>Dobbiamo trovare \(c > 0\) e \(n_0\) tali che \(5n^2 + 2n + 3 \le c \cdot n^2\) per \(n \ge n_0\).</p>
+                        <p>Se dividiamo per \(n^2\) (per \(n>0\)): \(5 + 2/n + 3/n^2 \le c\).</p>
+                        <p>Per \(n=1\), \(5+2+3 = 10\). Se \(n \to \infty\), il lato sinistro tende a 5.</p>
+                        <p>Possiamo scegliere \(c = 10\) (o qualsiasi valore maggiore di 5, ad es. 6).
+                        Se \(c=6\): \(5n^2 + 2n + 3 \le 6n^2 \implies 2n + 3 \le n^2 \implies n^2 - 2n - 3 \ge 0\).
+                        Le radici di \(x^2 - 2x - 3 = 0\) sono \(x = (2 \pm \sqrt{4+12})/2 = (2 \pm 4)/2\), quindi \(x_1 = 3, x_2 = -1\).
+                        La parabola è rivolta verso l'alto, quindi \(n^2 - 2n - 3 \ge 0\) per \(n \ge 3\).
+                        Quindi, con \(c=6\) e \(n_0=3\), \(5n^2 + 2n + 3 \in O(n^2)\).</p>
+                        <p class="math-block"> \(5n^2 + 2n + 3 \in O(n^3)\) è anche vero (con \(c=1, n_0=6\)). O-grande è un limite superiore, non necessariamente stretto.</p>
+                    </li>
+                    <li>Se \(g(n) = \log n\), allora \(g(n) \in O(n^3)\). Per \(n \ge 1\), \( \log n \le n^3 \). Quindi \(c=1, n_0=1\).</li>
+                    <li>Se \(g(n) = n^4\), allora \(g(n) \notin O(n^3)\). Non esiste alcuna costante \(c\) tale che \(n^4 \le c \cdot n^3\) (ovvero \(n \le c\)) per tutti gli \(n\) grandi.</li>
+                </ul>
+                <p><strong>Nota sull'uso dell'uguale:</strong> Scrivere \(g(n) = O(f(n))\) è un abuso di notazione comune. Formalmente, \(O(f(n))\) è un insieme di funzioni, quindi si dovrebbe scrivere \(g(n) \in O(f(n))\).</p>
+            </div>
+        </article>
+
+        <article id="omega-grande" class="content-section">
+            <h2 class="section-title">2.2. Ω-grande (Big-Omega) - Limite Inferiore Asintotico</h2>
+            <div class="section-content">
+                <p>La notazione Ω-grande fornisce un limite inferiore asintotico.</p>
+                <p><strong>Definizione Formale:</strong> Data una funzione \(f(n)\), diciamo che una funzione \(g(n)\) appartiene a \(\Omega(f(n))\) se esistono delle costanti positive \(c > 0\) e \(n_0 \ge 0\) tali che per tutti gli \(n \ge n_0\):</p>
+                <div class="math-block">
+                \( 0 \le c \cdot f(n) \le g(n) \)
+                </div>
+                <p>In pratica, \(g(n)\) non cresce più lentamente di \(f(n)\) (a meno di una costante moltiplicativa \(c\)) per valori di \(n\) sufficientemente grandi.</p>
+
+                <h4 class="subsubsection-title">Interpretazione Grafica di Ω-grande</h4>
+                 <div class="chart-container">
+                    <canvas id="omegaGrandeChart"></canvas>
+                </div>
+                <p>Nel grafico, da un certo punto \(n_0\) in poi, la curva della funzione \(g(n)\) (viola) si trova sempre al di sopra o coincide con la curva di \(c \cdot f(n)\) (viola chiaro), dove \(f(n)\) è la funzione di riferimento (blu chiaro) e \(c\) è una costante positiva (qui ad esempio \(c=0.5\)).</p>
+
+                <h4 class="subsubsection-title">Esempio di Ω-grande</h4>
+                <ul>
+                    <li>Se \(g(n) = 5n^2 + 2n + 3\), allora \(g(n) \in \Omega(n^2)\).
+                        <p>Dobbiamo trovare \(c > 0\) e \(n_0\) tali che \(c \cdot n^2 \le 5n^2 + 2n + 3\) per \(n \ge n_0\).</p>
+                        <p>Se scegliamo \(c=1\), vogliamo \(n^2 \le 5n^2 + 2n + 3 \implies 0 \le 4n^2 + 2n + 3\). Questo è sempre vero per \(n \ge 0\). Quindi \(c=1, n_0=0\).</p>
+                        <p>\(g(n) \in \Omega(n)\) è anche vero. Ω-grande è un limite inferiore, non necessariamente stretto.</p>
+                    </li>
+                     <li>Se \(g(n) = n^4\), allora \(g(n) \in \Omega(n^3)\). Possiamo prendere \(c=1, n_0=1\), dato che \(n^3 \le n^4\) per \(n \ge 1\).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="theta" class="content-section">
+            <h2 class="section-title">2.3. Θ (Theta) - Limite Stretto Asintotico</h2>
+            <div class="section-content">
+                <p>La notazione Θ fornisce un limite asintotico stretto (sia superiore che inferiore).</p>
+                <p><strong>Definizione Formale:</strong> Data una funzione \(f(n)\), diciamo che una funzione \(g(n)\) appartiene a \(\Theta(f(n))\) se esistono delle costanti positive \(c_1 > 0\), \(c_2 > 0\) e \(n_0 \ge 0\) tali che per tutti gli \(n \ge n_0\):</p>
+                <div class="math-block">
+                \( 0 \le c_1 \cdot f(n) \le g(n) \le c_2 \cdot f(n) \)
+                </div>
+                <p>In pratica, \(g(n)\) cresce allo stesso tasso di \(f(n)\) (a meno di costanti moltiplicative) per valori di \(n\) sufficientemente grandi.</p>
+                <p>Una funzione \(g(n) \in \Theta(f(n))\) se e solo se \(g(n) \in O(f(n))\) E \(g(n) \in \Omega(f(n))\).</p>
+
+                <h4 class="subsubsection-title">Interpretazione Grafica di Θ</h4>
+                 <div class="chart-container">
+                    <canvas id="thetaChart"></canvas>
+                </div>
+                <p>Nel grafico, da un certo punto \(n_0\) in poi, la curva della funzione \(g(n)\) (viola) è "intrappolata" tra le curve di \(c_1 \cdot f(n)\) (viola chiaro) e \(c_2 \cdot f(n)\) (blu scuro), dove \(f(n)\) è la funzione di riferimento (blu chiaro).</p>
+
+                <h4 class="subsubsection-title">Esempio di Θ</h4>
+                <ul>
+                    <li>Se \(g(n) = 5n^2 + 2n + 3\), allora \(g(n) \in \Theta(n^2)\).
+                        <p>Abbiamo già visto che \(g(n) \in O(n^2)\) (con \(c_2=6, n_0=3\)) e \(g(n) \in \Omega(n^2)\) (con \(c_1=1, n_0=0\)).</p>
+                        <p>Scegliendo \(n_0 = \max(3,0) = 3\), entrambe le disuguaglianze valgono. Quindi \(5n^2 + 2n + 3 \in \Theta(n^2)\).</p>
+                    </li>
+                    <li>\(10n^3 + 2n^2 + 5 \in \Theta(n^3)\). (Simile al precedente).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="o-piccolo" class="content-section">
+            <h2 class="section-title">2.4. o-piccolo (little-o) - Limite Superiore Stretto</h2>
+            <div class="section-content">
+                <p>La notazione o-piccolo indica che una funzione cresce <em>strettamente</em> più lentamente di un'altra.</p>
+                <p><strong>Definizione Formale (tramite limite):</strong> \(g(n) \in o(f(n))\) se:</p>
+                <div class="math-block">
+                \( \lim_{n \to \infty} \frac{g(n)}{f(n)} = 0 \)
+                </div>
+                <p><strong>Definizione Formale (tramite quantificatori):</strong> \(g(n) \in o(f(n))\) se per <strong>ogni</strong> costante \(c > 0\), esiste una costante \(n_0 \ge 0\) tale che per tutti gli \(n \ge n_0\):</p>
+                <div class="math-block">
+                \( 0 \le g(n) < c \cdot f(n) \)
+                </div>
+                <p>Notare la differenza con O-grande: in o-piccolo, la disuguaglianza deve valere per <em>qualsiasi</em> \(c > 0\) (possiamo rendere \(c\) arbitrariamente piccolo), non solo per <em>una</em> costante \(c\).</p>
+                <p>Se \(g(n) \in o(f(n))\), allora \(g(n) \in O(f(n))\), ma \(g(n) \notin \Theta(f(n))\) e \(g(n) \notin \Omega(f(n))\) (a meno che \(f(n)\) non sia identicamente zero, caso che solitamente escludiamo).</p>
+                
+                <h4 class="subsubsection-title">Esempio di o-piccolo</h4>
+                <ul>
+                    <li>\(n \in o(n^2)\) perché \( \lim_{n \to \infty} \frac{n}{n^2} = \lim_{n \to \infty} \frac{1}{n} = 0 \).</li>
+                    <li>\(\log n \in o(n^\epsilon)\) per ogni \(\epsilon > 0\).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="omega-piccolo" class="content-section">
+            <h2 class="section-title">2.5. ω-piccolo (little-omega) - Limite Inferiore Stretto</h2>
+            <div class="section-content">
+                <p>La notazione ω-piccolo indica che una funzione cresce <em>strettamente</em> più velocemente di un'altra.</p>
+                <p><strong>Definizione Formale (tramite limite):</strong> \(g(n) \in \omega(f(n))\) se:</p>
+                <div class="math-block">
+                \( \lim_{n \to \infty} \frac{g(n)}{f(n)} = \infty \)
+                </div>
+                <p><strong>Definizione Formale (tramite quantificatori):</strong> \(g(n) \in \omega(f(n))\) se per <strong>ogni</strong> costante \(c > 0\), esiste una costante \(n_0 \ge 0\) tale che per tutti gli \(n \ge n_0\):</p>
+                <div class="math-block">
+                \( 0 \le c \cdot f(n) < g(n) \)
+                </div>
+                 <p>Se \(g(n) \in \omega(f(n))\), allora \(g(n) \in \Omega(f(n))\), ma \(g(n) \notin \Theta(f(n))\) e \(g(n) \notin O(f(n))\).</p>
+
+                <h4 class="subsubsection-title">Esempio di ω-piccolo</h4>
+                <ul>
+                    <li>\(n^2 \in \omega(n)\) perché \( \lim_{n \to \infty} \frac{n^2}{n} = \lim_{n \to \infty} n = \infty \).</li>
+                    <li>\(2^{2n} \in \omega(2^n)\).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="proprieta-notazioni" class="content-section">
+            <h2 class="section-title">2.6. Proprietà delle Notazioni Asintotiche</h2>
+            <div class="section-content">
+                <ul>
+                    <li><strong>Riflessività:</strong>
+                        <ul>
+                            <li>\(f(n) \in O(f(n))\)</li>
+                            <li>\(f(n) \in \Omega(f(n))\)</li>
+                            <li>\(f(n) \in \Theta(f(n))\)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Simmetria:</strong>
+                        <ul>
+                            <li>\(f(n) \in \Theta(g(n)) \iff g(n) \in \Theta(f(n))\)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Simmetria Trasposta:</strong>
+                        <ul>
+                            <li>\(f(n) \in O(g(n)) \iff g(n) \in \Omega(f(n))\)</li>
+                            <li>\(f(n) \in o(g(n)) \iff g(n) \in \omega(f(n))\)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Transitività:</strong>
+                        <ul>
+                            <li>Se \(f(n) \in O(g(n))\) e \(g(n) \in O(h(n))\), allora \(f(n) \in O(h(n))\). (Vale anche per Ω, Θ, o, ω).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Regola della Somma:</strong>
+                        <ul>
+                            <li>Se \(g_1(n) \in O(f_1(n))\) e \(g_2(n) \in O(f_2(n))\), allora \(g_1(n) + g_2(n) \in O(\max(f_1(n), f_2(n)))\). Più semplicemente, se si sommano due termini, la complessità è dominata dal termine di ordine superiore. Ad esempio, \(O(n^2) + O(n) = O(n^2)\).</li>
+                            <li>La docente usa la notazione \(O(f_1(n) + f_2(n))\), che è equivalente a \(O(\max(f_1(n), f_2(n)))\) per funzioni di costo ragionevoli.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Regola del Prodotto:</strong>
+                        <ul>
+                             <li>Se \(g_1(n) \in O(f_1(n))\) e \(g_2(n) \in O(f_2(n))\), allora \(g_1(n) \cdot g_2(n) \in O(f_1(n) \cdot f_2(n))\). (Vale anche per Ω, Θ).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Attenzione con sottrazione e divisione:</strong> Le regole della somma e del prodotto non si estendono banalmente a sottrazione e divisione. Ad esempio, \(O(n^3) - O(n^3)\) non è \(O(n^3-n^3)=O(0)\), ma è ancora \(O(n^3)\).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="caratterizzazione-limiti" class="content-section">
+            <h2 class="section-title">2.7. Caratterizzazione delle Relazioni Asintotiche tramite Limiti</h2>
+            <div class="section-content">
+                <p>Se il limite \( L = \lim_{n \to \infty} \frac{g(n)}{f(n)} \) esiste (ed è finito o \( \pm\infty \)), allora possiamo dire:</p>
+                <ul>
+                    <li>Se \(L = 0\), allora \(g(n) \in o(f(n))\) (e quindi \(g(n) \in O(f(n))\)).</li>
+                    <li>Se \(0 < L < \infty\) (cioè L è una costante positiva), allora \(g(n) \in \Theta(f(n))\).</li>
+                    <li>Se \(L = \infty\), allora \(g(n) \in \omega(f(n))\) (e quindi \(g(n) \in \Omega(f(n))\)).</li>
+                </ul>
+                <p><strong>Importante:</strong> Se il limite non esiste, queste regole non possono essere usate, ma le definizioni originali con i quantificatori rimangono valide. Tuttavia, per la maggior parte delle funzioni incontrate nell'analisi degli algoritmi, il limite esiste.</p>
+            </div>
+        </article>
+
+        <article id="esempi-comparativi" class="content-section">
+            <h2 class="section-title">2.8. Esempi Comparativi tra Funzioni</h2>
+            <div class="section-content">
+                <ul>
+                    <li><strong>Logaritmi con basi diverse:</strong>
+                        <p>\(\log_a n\) vs \(\log_b n\). Ricordando la formula del cambio di base: \( \log_a n = \frac{\log_b n}{\log_b a} \).</p>
+                        <p>Poiché \( \frac{1}{\log_b a} \) è una costante (se a, b > 1), allora \( \log_a n \in \Theta(\log_b n) \).</p>
+                        <p><strong>Conclusione:</strong> La base del logaritmo non influenza l'ordine di grandezza asintotico.</p>
+                    </li>
+                    <li><strong>Polinomi:</strong> Un polinomio di grado \(d\), \(P(n) = \sum_{i=0}^d a_i n^i\) con \(a_d > 0\), è \( \Theta(n^d) \).</li>
+                    <li><strong>Logaritmo vs Potenza Polinomiale:</strong>
+                        <p>\(\log n\) vs \(n^\epsilon\) per qualsiasi \(\epsilon > 0\).</p>
+                        <p>Si può dimostrare (ad es. con la regola di de L'Hôpital) che \( \lim_{n \to \infty} \frac{\log n}{n^\epsilon} = 0 \).</p>
+                        <p>Quindi, \( \log n \in o(n^\epsilon) \). Il logaritmo cresce più lentamente di qualsiasi potenza polinomiale positiva.</p>
+                    </li>
+                    <li><strong>Potenza di Logaritmo vs Potenza Polinomiale:</strong>
+                        <p>\((\log n)^k\) vs \(n^\epsilon\) per qualsiasi \(k > 0, \epsilon > 0\).</p>
+                        <p>Si può dimostrare che \( \lim_{n \to \infty} \frac{(\log n)^k}{n^\epsilon} = 0 \).</p>
+                        <p>Quindi, \( (\log n)^k \in o(n^\epsilon) \). Anche una potenza di logaritmo cresce più lentamente di qualsiasi potenza polinomiale positiva.</p>
+                    </li>
+                    <li><strong>Confronto tra Esponenziali:</strong>
+                        <ul>
+                            <li>\(2^{n+1}\) vs \(2^n\).
+                                <p>\(2^{n+1} = 2 \cdot 2^n\). Quindi \(2^{n+1} \in \Theta(2^n)\).</p>
+                            </li>
+                            <li>\(2^{2n}\) vs \(2^n\).
+                                <p>\(2^{2n} = (2^n)^2\). Poiché \( \lim_{n \to \infty} \frac{(2^n)^2}{2^n} = \lim_{n \to \infty} 2^n = \infty \), allora \(2^{2n} \in \omega(2^n)\).</p>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="somme-notevoli" class="content-section">
+            <h2 class="section-title">3. Somme Notevoli</h2>
+            <div class="section-content">
+                <p>Alcune somme ricorrono frequentemente nell'analisi degli algoritmi.</p>
+                <ul>
+                    <li><strong>Progressione Aritmetica (Somma dei primi n interi, somma di Gauss):</strong>
+                        <div class="math-block">
+                        \( \sum_{i=1}^{n} i = 1 + 2 + \dots + n = \frac{n(n+1)}{2} \in \Theta(n^2) \)
+                        </div>
+                    </li>
+                    <li><strong>Somma delle prime n potenze k-esime:</strong>
+                        <div class="math-block">
+                        \( \sum_{i=1}^{n} i^k = 1^k + 2^k + \dots + n^k \in \Theta(n^{k+1}) \)
+                        </div>
+                        (Per \(k \ge 0\) costante). Il caso \(k=1\) è la somma di Gauss. Per \(k=2\), \( \sum i^2 = \Theta(n^3)\).
+                    </li>
+                    <li><strong>Serie Geometrica (Somma Parziale):</strong>
+                        <div class="math-block">
+                        \( \sum_{i=0}^{n} \rho^i = 1 + \rho + \rho^2 + \dots + \rho^n = \frac{\rho^{n+1} - 1}{\rho - 1} \) (per \( \rho \neq 1 \))
+                        </div>
+                        <ul>
+                            <li>Se \(0 < \rho < 1\), la serie converge a \( \frac{1}{1-\rho} \). La somma parziale è \( \Theta(1) \).</li>
+                            <li>Se \(\rho = 1\), la somma è \(n+1 \in \Theta(n)\).</li>
+                            <li>Se \(\rho > 1\), la somma è dominata dall'ultimo termine: \( \Theta(\rho^n) \).</li>
+                        </ul>
+                    </li>
+                     <li><strong>Serie Armonica (richiamata, ma la docente dice che non si usa molto nel corso):</strong>
+                        <div class="math-block">
+                        \( H_n = \sum_{i=1}^{n} \frac{1}{i} = 1 + \frac{1}{2} + \dots + \frac{1}{n} \in \Theta(\log n) \)
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="esercizio-log-n-fattoriale" class="content-section">
+            <h2 class="section-title">4. Esercizio: Dimostrare che \( \log(n!) \in \Theta(n \log n) \)</h2>
+            <div class="section-content">
+                <p>Dobbiamo dimostrare che esistono costanti \(c_1, c_2 > 0\) e \(n_0\) tali che per \(n \ge n_0\):</p>
+                <p class="math-block">\( c_1 \cdot n \log n \le \log(n!) \le c_2 \cdot n \log n \)</p>
+                <p>Ricordiamo che \( n! = 1 \cdot 2 \cdot \dots \cdot n \). Quindi, \( \log(n!) = \sum_{i=1}^{n} \log i \).</p>
+
+                <h3 class="subsection-title">Limite Superiore: \( \log(n!) \in O(n \log n) \)</h3>
+                <p class="math-block">
+                \( \log(n!) = \sum_{i=1}^{n} \log i = \log 1 + \log 2 + \dots + \log n \)
+                </p>
+                <p>Ogni termine \( \log i \le \log n \) (per \(i \le n\)). Ci sono \(n\) termini.</p>
+                <p class="math-block">
+                \( \sum_{i=1}^{n} \log i \le \sum_{i=1}^{n} \log n = n \cdot \log n \)
+                </p>
+                <p>Quindi, con \(c_2 = 1\) e \(n_0 = 1\) (o 2, se log base > 1), \( \log(n!) \le 1 \cdot n \log n \).
+                Pertanto, \( \log(n!) \in O(n \log n) \).</p>
+
+                <h3 class="subsection-title">Limite Inferiore: \( \log(n!) \in \Omega(n \log n) \)</h3>
+                <p class="math-block">
+                \( \log(n!) = \sum_{i=1}^{n} \log i = \sum_{i=1}^{\lfloor n/2 \rfloor - 1} \log i + \sum_{i=\lfloor n/2 \rfloor}^{n} \log i \)
+                </p>
+                <p>Consideriamo la seconda parte della somma, gli ultimi \(n - \lfloor n/2 \rfloor + 1 \ge n/2\) termini (per \(n \ge 1\)):</p>
+                <p class="math-block">
+                \( \sum_{i=\lfloor n/2 \rfloor}^{n} \log i \)
+                </p>
+                <p>Ogni termine in questa somma è \( \ge \log(\lfloor n/2 \rfloor) \). Ci sono almeno \(n/2\) termini.</p>
+                <p class="math-block">
+                \( \sum_{i=\lfloor n/2 \rfloor}^{n} \log i \ge \frac{n}{2} \cdot \log\left(\lfloor \frac{n}{2} \rfloor\right) \)
+                </p>
+                <p>Per \(n \ge 4\), \(\lfloor n/2 \rfloor \ge n/4\). E per \(n \ge 2\), \(\log(\lfloor n/2 \rfloor) \ge \log(n/2 -1)\) se necessario, ma è più semplice notare che per \(n \ge 4\), \( \log(\lfloor n/2 \rfloor) \approx \log(n/2) = \log n - \log 2 \). </p>
+                <p>Per \(n \ge 4\), \( \log n - \log 2 \ge \frac{1}{2}\log n \) (assumendo base 2, altrimenti la costante cambia ma il concetto resta).</p>
+                <p>Dunque, per \(n \ge 4\):</p>
+                <p class="math-block">
+                \( \frac{n}{2} \cdot \log\left(\lfloor \frac{n}{2} \rfloor\right) \ge \frac{n}{2} (\log n - \log 2) \ge \frac{n}{2} \cdot \frac{1}{2}\log n = \frac{1}{4} n \log n \)
+                </p>
+                <p>(Più rigorosamente, per \(n \ge 4\), \(\lfloor n/2 \rfloor \ge n/4\). Quindi \( \log(\lfloor n/2 \rfloor) \ge \log(n/4) = \log n - \log 4 \).
+                Allora \( \frac{n}{2} \log(\lfloor n/2 \rfloor) \ge \frac{n}{2}(\log n - \log 4) \).
+                Vogliamo \( \frac{n}{2}(\log n - \log 4) \ge c_1 n \log n \).
+                \( \frac{1}{2}\log n - \frac{\log 4}{2} \ge c_1 \log n \).
+                Se scegliamo \(c_1 = 1/4\), abbiamo \( \frac{1}{4}\log n \ge \log 2 \), che è vero per \(n \ge 16\).)</p>
+                <p>Quindi, con \(c_1 = 1/4\) e \(n_0 = 16\) (per essere sicuri), \( \log(n!) \ge \frac{1}{4} n \log n \).
+                Pertanto, \( \log(n!) \in \Omega(n \log n) \).</p>
+
+                <p>Poiché \( \log(n!) \in O(n \log n) \) e \( \log(n!) \in \Omega(n \log n) \), concludiamo che \( \log(n!) \in \Theta(n \log n) \).</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Registra il plugin di annotazione
+        if (Chart.plugins && Chart.plugins.register) { // Per Chart.js v2
+            Chart.plugins.register(ChartAnnotation);
+        } else if (Chart.register) { // Per Chart.js v3+
+             // Chart.js v3+ non richiede la registrazione esplicita di 'chartjs-plugin-annotation' in questo modo se importato come modulo
+             // Tuttavia, se si usa la CDN, il plugin deve essere caricato e Chart.js deve essere consapevole della sua esistenza.
+             // La configurazione options.plugins.annotation dovrebbe essere sufficiente se il plugin è accessibile globalmente.
+             // Se ci fossero problemi, si potrebbe dover fare Chart.register(ChartAnnotation); qui dopo averlo importato
+        }
+
+
+        const COLORS = {
+            fn: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+            g_n: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+            c_fn_upper: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+            c_fn_lower: getComputedStyle(document.documentElement).getPropertyValue('--accent-tertiary').trim(),
+            n0_line: getComputedStyle(document.documentElement).getPropertyValue('--accent-quaternary').trim(),
+            text: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim()
+        };
+
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    min: 0,
+                    max: 10,
+                    title: { display: true, text: 'n (dimensione input)', color: COLORS.text, font: { size: 14 } },
+                    ticks: { color: COLORS.text, stepSize: 1 },
+                    grid: { color: 'rgba(255,255,255,0.1)' }
+                },
+                y: {
+                    min: 0,
+                    // max: 100, // Lascia che Chart.js lo calcoli o impostalo dinamicamente
+                    title: { display: true, text: 'Valore Funzione / Costo', color: COLORS.text, font: { size: 14 } },
+                    ticks: { color: COLORS.text },
+                    grid: { color: 'rgba(255,255,255,0.1)' }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: { color: COLORS.text, font: { size: 12 } }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toFixed(2);
+                            }
+                            return label;
+                        }
+                    }
+                },
+                annotation: { // Configurazione base per il plugin
+                    drawTime: 'afterDatasetsDraw' // Disegna le annotazioni sopra i dataset
+                }
+            },
+            elements: {
+                point:{ radius: 1, hoverRadius: 4 }
+            }
+        };
+
+        const nValues = Array.from({length: 21}, (_, i) => i * 0.5);
+
+        // O-grande Chart
+        const oGrandeCtx = document.getElementById('oGrandeChart');
+        if (oGrandeCtx) {
+            const f_n_o = n => 2 * n + 10;
+            const g_n_o = n => 1.5 * n + 20;
+            const c_o = 2.0;
+            const n0_o = 5;
+
+            new Chart(oGrandeCtx, {
+                type: 'line',
+                data: {
+                    labels: nValues,
+                    datasets: [
+                        {
+                            label: 'g(n)',
+                            data: nValues.map(n => g_n_o(n)),
+                            borderColor: COLORS.g_n,
+                            backgroundColor: COLORS.g_n + '33', // trasparenza
+                            borderWidth: 2.5,
+                            tension: 0.1,
+                            fill: false
+                        },
+                        {
+                            label: `c⋅f(n) (c=${c_o})`,
+                            data: nValues.map(n => c_o * f_n_o(n)),
+                            borderColor: COLORS.c_fn_upper,
+                            backgroundColor: COLORS.c_fn_upper + '33',
+                            borderWidth: 2,
+                            borderDash: [6, 3],
+                            tension: 0.1,
+                            fill: false
+                        },
+                        {
+                            label: 'f(n)',
+                            data: nValues.map(n => f_n_o(n)),
+                            borderColor: 'rgba(96, 165, 250, 0.4)',
+                            borderWidth: 1.5,
+                            tension: 0.1,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                    plugins: {
+                        ...commonChartOptions.plugins,
+                        title: { display: true, text: 'O-grande: 0 ≤ g(n) ≤ c⋅f(n) per n ≥ n₀', color: COLORS.text, font: {size: 16}},
+                        annotation: {
+                            annotations: {
+                                n0_line: {
+                                    type: 'line',
+                                    xMin: n0_o,
+                                    xMax: n0_o,
+                                    borderColor: COLORS.n0_line,
+                                    borderWidth: 2,
+                                    borderDash: [6, 6],
+                                    label: {
+                                        content: `n₀=${n0_o}`,
+                                        display: true, // chartjs-plugin-annotation v2+
+                                        position: 'start',
+                                        color: COLORS.n0_line,
+                                        backgroundColor: 'rgba(31,41,55,0.7)', // var(--bg-card) con trasparenza
+                                        font: { style: 'italic', size: 10 }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                     scales: { ...commonChartOptions.scales, y: {...commonChartOptions.scales.y, max: Math.max(...nValues.map(n => c_o * f_n_o(n)), ...nValues.map(n => g_n_o(n))) * 1.1 || 50 }}
+                }
+            });
+        }
+
+        // Omega-grande Chart
+        const omegaGrandeCtx = document.getElementById('omegaGrandeChart');
+        if (omegaGrandeCtx) {
+            const f_n_omega = n => 2 * n + 5;
+            const g_n_omega = n => 2.5 * n + 10;
+            const c_omega = 1.0;
+            const n0_omega = 3;
+
+            new Chart(omegaGrandeCtx, {
+                type: 'line',
+                data: {
+                    labels: nValues,
+                    datasets: [
+                        {
+                            label: 'g(n)',
+                            data: nValues.map(n => g_n_omega(n)),
+                            borderColor: COLORS.g_n,
+                            backgroundColor: COLORS.g_n + '33',
+                            borderWidth: 2.5,
+                            tension: 0.1,
+                            fill: false
+                        },
+                        {
+                            label: `c⋅f(n) (c=${c_omega})`,
+                            data: nValues.map(n => c_omega * f_n_omega(n)),
+                            borderColor: COLORS.c_fn_lower,
+                            backgroundColor: COLORS.c_fn_lower + '33',
+                            borderWidth: 2,
+                            borderDash: [6, 3],
+                            tension: 0.1,
+                            fill: false
+                        },
+                        {
+                            label: 'f(n)',
+                            data: nValues.map(n => f_n_omega(n)),
+                            borderColor: 'rgba(96, 165, 250, 0.4)',
+                            borderWidth: 1.5,
+                            tension: 0.1,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                     plugins: {
+                        ...commonChartOptions.plugins,
+                        title: { display: true, text: 'Ω-grande: 0 ≤ c⋅f(n) ≤ g(n) per n ≥ n₀', color: COLORS.text, font: {size: 16}},
+                        annotation: {
+                            annotations: {
+                                n0_line: {
+                                    type: 'line',
+                                    xMin: n0_omega,
+                                    xMax: n0_omega,
+                                    borderColor: COLORS.n0_line,
+                                    borderWidth: 2,
+                                    borderDash: [6, 6],
+                                    label: { content: `n₀=${n0_omega}`, display: true, position: 'start', color: COLORS.n0_line, backgroundColor: 'rgba(31,41,55,0.7)', font: { style: 'italic', size: 10 }}
+                                }
+                            }
+                        }
+                    },
+                    scales: { ...commonChartOptions.scales, y: {...commonChartOptions.scales.y, max: Math.max(...nValues.map(n => g_n_omega(n))) * 1.1 || 50 }}
+                }
+            });
+        }
+
+        // Theta Chart
+        const thetaCtx = document.getElementById('thetaChart');
+        if (thetaCtx) {
+            const f_n_theta = n => 2 * n + 5;
+            const g_n_theta = n => 2.2 * n + 8;
+            const c1_theta = 0.8;
+            const c2_theta = 1.5;
+            const n0_theta = 4;
+
+            new Chart(thetaCtx, {
+                type: 'line',
+                data: {
+                    labels: nValues,
+                    datasets: [
+                         {
+                            label: `c₁⋅f(n) (c₁=${c1_theta})`,
+                            data: nValues.map(n => c1_theta * f_n_theta(n)),
+                            borderColor: COLORS.c_fn_lower,
+                            backgroundColor: COLORS.c_fn_lower + '1A', // Più trasparente per area
+                            borderWidth: 2,
+                            borderDash: [6, 3],
+                            tension: 0.1,
+                            fill: false // Non riempire la singola linea c1
+                        },
+                        {
+                            label: 'g(n)',
+                            data: nValues.map(n => g_n_theta(n)),
+                            borderColor: COLORS.g_n,
+                            backgroundColor: COLORS.g_n + '33',
+                            borderWidth: 2.5,
+                            tension: 0.1,
+                            fill: '+1' // Riempie fino alla prossima linea con fill abilitato (c2*f(n))
+                                      // Oppure, per riempire tra c1 e c2, dovresti impostare fill: {target: 'origin', above: COLORS.c_fn_upper + '33', below: COLORS.c_fn_lower + '33'}
+                                      // Ma il riempimento tra due dataset specifici è più complesso e richiede a volte di ordinare i dataset
+                        },
+                        {
+                            label: `c₂⋅f(n) (c₂=${c2_theta})`,
+                            data: nValues.map(n => c2_theta * f_n_theta(n)),
+                            borderColor: COLORS.c_fn_upper,
+                            backgroundColor: COLORS.c_fn_upper + '1A',
+                            borderWidth: 2,
+                            borderDash: [6, 3],
+                            tension: 0.1,
+                            fill: false // Non riempire la singola linea c2
+                        },
+                        {
+                            label: 'f(n)',
+                            data: nValues.map(n => f_n_theta(n)),
+                            borderColor: 'rgba(96, 165, 250, 0.4)',
+                            borderWidth: 1.5,
+                            tension: 0.1,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    ...commonChartOptions,
+                    plugins: {
+                        ...commonChartOptions.plugins,
+                        title: { display: true, text: 'Θ: 0 ≤ c₁⋅f(n) ≤ g(n) ≤ c₂⋅f(n) per n ≥ n₀', color: COLORS.text, font: {size: 16}},
+                         annotation: {
+                            annotations: {
+                                n0_line: {
+                                    type: 'line',
+                                    xMin: n0_theta,
+                                    xMax: n0_theta,
+                                    borderColor: COLORS.n0_line,
+                                    borderWidth: 2,
+                                    borderDash: [6, 6],
+                                    label: { content: `n₀=${n0_theta}`, display: true, position: 'start', color: COLORS.n0_line, backgroundColor: 'rgba(31,41,55,0.7)', font: { style: 'italic', size: 10 }}
+                                }
+                            }
+                        }
+                    },
+                    scales: { ...commonChartOptions.scales, y: {...commonChartOptions.scales.y, max: Math.max(...nValues.map(n => c2_theta * f_n_theta(n))) * 1.1 || 50 }}
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>
