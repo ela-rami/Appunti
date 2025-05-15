@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appunti Lezione 5: Equazioni Ricorsive di Complessità</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti in lezione3.html, li riporto per completezza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+
+        .sort-example {
+            font-family: var(--font-code); line-height: 1.7; background-color: var(--bg-deep-space);
+            padding: 1.2rem; border-radius: var(--border-radius-small); margin-top: 1.2rem;
+            border: 1px solid var(--border-soft);
+        }
+        .array-step {
+            margin-bottom: 0.8rem; padding-left: 15px; border-left: 1px dotted var(--border-soft);
+            color: var(--text-secondary); font-size: 0.9em;
+        }
+        .array-item, .array-pointer {
+            padding: 3px 6px; border-radius: var(--border-radius-small); margin: 0 2px;
+            display: inline-block; text-align: center; min-width: 2em;
+        }
+        .array-item {
+            border: 1px solid var(--text-secondary);
+            background-color: rgba(156, 163, 175, 0.1);
+        }
+        .array-item.sorted { background-color: rgba(96, 165, 250, 0.15); color: var(--accent-primary); border-color: var(--accent-primary); }
+        .array-item.comparing { background-color: rgba(129, 140, 248, 0.2); color: var(--accent-secondary); border-color: var(--accent-secondary); }
+        .array-pointer { color: #f472b6; font-weight: bold; border: none; padding-bottom: 0; } 
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 15 ott 2020 (2).pdf"> <!-- Assicurati che questo sia il nome corretto del PDF -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 5: Equazioni Ricorsive di Complessità</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../../ASD_home.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-equazioni-ricorsive" class="sidebar-link">1. Introduzione alle Equazioni Ricorsive</a></li>
+            <li><a href="#metodi-risoluzione" class="sidebar-link">2. Metodi di Risoluzione</a></li>
+            <li><a href="#metodo-sostituzione" class="sidebar-link">2.1. Metodo di Sostituzione</a></li>
+            <li><a href="#metodo-iterazione" class="sidebar-link">2.2. Metodo di Iterazione (Srotolamento)</a></li>
+            <li><a href="#metodo-albero-ricorsione" class="sidebar-link">2.3. Metodo dell'Albero delle Chiamate Ricorsive</a></li>
+            <li><a href="#esempi-pratici" class="sidebar-link">3. Esempi Pratici e Applicazioni</a></li>
+            <li><a href="#esercizio-insertion-sort-ric" class="sidebar-link">4. Esercizio: Insertion Sort Ricorsivo</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-equazioni-ricorsive" class="content-section">
+            <h2 class="section-title">1. Introduzione alle Equazioni Ricorsive di Complessità</h2>
+            <div class="section-content">
+                <p>Quando analizziamo algoritmi ricorsivi, la loro complessità (spesso il tempo di esecuzione \(T(n)\) in funzione della dimensione dell'input \(n\)) è naturalmente espressa tramite un'<strong>equazione di ricorrenza</strong> (o relazione di ricorrenza).</p>
+                <p>Un'equazione di ricorrenza definisce una funzione in termini di se stessa su input più piccoli, più un costo aggiuntivo per il lavoro svolto al di fuori delle chiamate ricorsive.</p>
+                <p>Forma generale per un algoritmo Divide et Impera:</p>
+                <div class="math-block">
+                \( T(n) = a T(n/b) + f(n) \)
+                </div>
+                <p>Dove:</p>
+                <ul>
+                    <li>\(T(n)\) è il tempo per risolvere un problema di dimensione \(n\).</li>
+                    <li>\(a\) è il numero di sottoproblemi generati.</li>
+                    <li>\(n/b\) è la dimensione di ciascun sottoproblema (assumendo che i sottoproblemi abbiano dimensioni simili).</li>
+                    <li>\(f(n)\) è il costo per dividere il problema e combinare le soluzioni dei sottoproblemi.</li>
+                </ul>
+                <p>L'equazione deve anche includere un <strong>caso base</strong>, ad esempio \(T(1) = \Theta(1)\), che rappresenta il costo per risolvere il problema quando è sufficientemente piccolo da non richiedere ulteriori ricorsioni.</p>
+                <p>Il nostro obiettivo è trovare una forma chiusa per \(T(n)\), tipicamente espressa usando la notazione asintotica (es. \( \Theta(n \log n) \)).</p>
+            </div>
+        </article>
+
+        <article id="metodi-risoluzione" class="content-section">
+            <h2 class="section-title">2. Metodi di Risoluzione delle Equazioni di Ricorrenza</h2>
+            <div class="section-content">
+                <p>Esistono diversi metodi per risolvere le equazioni di ricorrenza. In questa lezione ne vedremo tre principali (o due principali con una variante visuale):</p>
+                <ol>
+                    <li><strong>Metodo di Sostituzione:</strong>
+                        <ul>
+                            <li>Si indovina la forma della soluzione.</li>
+                            <li>Si utilizza l'induzione matematica per trovare le costanti e dimostrare che la soluzione funziona.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Metodo di Iterazione (o Srotolamento):</strong>
+                        <ul>
+                            <li>Si espande (itera) la ricorrenza più volte fino a quando emerge un pattern, che di solito si esprime come una sommatoria.</li>
+                            <li>Si calcola o si limita la sommatoria.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Metodo dell'Albero delle Chiamate Ricorsive:</strong>
+                        <ul>
+                            <li>Una visualizzazione del metodo di iterazione. Si rappresenta la ricorsione come un albero.</li>
+                            <li>Si calcola il costo a ogni livello dell'albero e si sommano i costi di tutti i livelli.</li>
+                        </ul>
+                    </li>
+                </ol>
+                <p>Esistono anche altre tecniche come il "Telescoping" o il "Cambio di Variabile" che possono aiutare a semplificare la ricorrenza, e il potente "Metodo Principale" (Master Theorem) che vedremo in seguito.</p>
+                <p><strong>Passo Fondamentale:</strong> Prima di applicare formalmente questi metodi, è utile "eliminare" la notazione asintotica presente nell'equazione di ricorrenza, sostituendola con costanti esplicite. Ad esempio, se \(T(n) = T(n-1) + \Theta(1)\), per la risoluzione si scrive \(T(n) = T(n-1) + c\) per qualche costante \(c > 0\).</p>
+            </div>
+        </article>
+
+        <article id="metodo-sostituzione" class="content-section">
+            <h2 class="section-title">2.1. Metodo di Sostituzione</h2>
+            <div class="section-content">
+                <p>Questo metodo richiede due passaggi:</p>
+                <ol>
+                    <li><strong>Indovinare la forma della soluzione:</strong> Questa è spesso la parte più difficile e può basarsi sull'esperienza, sull'intuizione o sull'uso preliminare di altri metodi (come iterazione o albero).</li>
+                    <li><strong>Verificare l'ipotesi per induzione matematica:</strong> Si dimostra che la soluzione indovinata è corretta, trovando le costanti appropriate.</li>
+                </ol>
+
+                <h3 class="subsection-title">Esempio: Risolvere \(T(n) = T(n-1) + \Theta(n)\) con \(T(1) = \Theta(1)\)</h3>
+                <p>Per l'analisi, sostituiamo la notazione asintotica:</p>
+                <div class="math-block">
+                \( T(n) = \begin{cases} c_0 & \text{se } n = 1 \\ T(n-1) + d \cdot n & \text{se } n > 1 \end{cases} \)
+                </div>
+                <p>Dove \(c_0, d\) sono costanti positive.</p>
+
+                <p><strong>Passo 1: Indovinare la soluzione.</strong> Potremmo sospettare (magari dopo aver usato il metodo di iterazione) che \(T(n) = O(n^2)\).</p>
+
+                <p><strong>Passo 2: Dimostrare per induzione che \(T(n) \le c \cdot n^2\) per una costante \(c > 0\) e \(n \ge n_0\).</strong></p>
+                
+                <h4 class="subsubsection-title">Ipotesi Induttiva (Hp.Ind.):</h4>
+                <p>Supponiamo che \(T(k) \le c \cdot k^2\) per tutti i \(k < n\). In particolare, per \(k = n-1\), assumiamo \(T(n-1) \le c \cdot (n-1)^2\).</p>
+
+                <h4 class="subsubsection-title">Passo Induttivo (Tesi da dimostrare per \(n\)):</h4>
+                <p>Dobbiamo mostrare che \(T(n) \le c \cdot n^2\).</p>
+                <p>Partiamo dalla definizione ricorsiva:</p>
+                <div class="math-block">
+                \( T(n) = T(n-1) + dn \)
+                </div>
+                <p>Applichiamo l'ipotesi induttiva su \(T(n-1)\):</p>
+                <div class="math-block">
+                \( T(n) \le c(n-1)^2 + dn \)
+                </div>
+                <div class="math-block">
+                \( T(n) \le c(n^2 - 2n + 1) + dn \)
+                </div>
+                <div class="math-block">
+                \( T(n) \le cn^2 - 2cn + c + dn \)
+                </div>
+                <p>Vogliamo che questo sia \( \le cn^2 \). Quindi, dobbiamo avere:</p>
+                <div class="math-block">
+                \( cn^2 - 2cn + c + dn \le cn^2 \)
+                </div>
+                <div class="math-block">
+                \( -2cn + c + dn \le 0 \)
+                </div>
+                <div class="math-block">
+                \( dn + c \le 2cn \)
+                </div>
+                <p>Questa disuguaglianza deve valere per \(n \ge n_0\). Dividendo per \(n\) (assumendo \(n>0\)):</p>
+                <div class="math-block">
+                \( d + \frac{c}{n} \le 2c \)
+                </div>
+                <p>Se scegliamo \(c\) in modo che \(d \le 2c - \epsilon\) per un \(\epsilon > 0\), ovvero \(c \ge (d+\epsilon)/2\), allora la disuguaglianza è soddisfatta per \(n\) sufficientemente grande. Ad esempio, se scegliamo \(c = d\), la condizione diventa \(d + d/n \le 2d \implies d/n \le d \implies 1/n \le 1\), che è vera per \(n \ge 1\).</p>
+                <p>Quindi, se scegliamo \(c \ge d\), il passo induttivo tiene. Ad esempio, scegliamo \(c=d\).</p>
+
+                <h4 class="subsubsection-title">Caso Base:</h4>
+                <p>Dobbiamo trovare un \(n_0\) per cui la nostra ipotesi \(T(n_0) \le c \cdot n_0^2\) sia vera. Di solito si parte da \(n_0=1\), ma a volte è necessario scegliere un \(n_0\) più grande.</p>
+                <p>Per \(n=1\): \(T(1) = c_0\). Vogliamo \(c_0 \le c \cdot 1^2 = c\).</p>
+                <p>Se abbiamo scelto \(c=d\), allora vogliamo \(c_0 \le d\). Questo potrebbe non essere vero. Tuttavia, la costante \(c\) nella nostra ipotesi \(O(n^2)\) può essere scelta arbitrariamente grande. Scegliamo \(c = \max(d, c_0)\).
+                Con questa scelta, sia il caso base (\(c_0 \le c\)) sia il passo induttivo (\(c \ge d\)) sono soddisfatti per \(n_0=1\).</p>
+                <p>Quindi, abbiamo dimostrato che \(T(n) = O(n^2)\).</p>
+                <p>Analogamente si può dimostrare \(T(n) = \Omega(n^2)\) per concludere \(T(n) = \Theta(n^2)\).</p>
+                <p><strong>Attenzione:</strong> L'errore comune è "imbrogliare" con le costanti, ad esempio se si arriva a \(T(n) \le cn^2 + \text{qualcosa_di_positivo}\) e si conclude che è \(O(n^2)\) senza mostrare che quel "qualcosa di positivo" può essere assorbito o reso negativo scegliendo opportunamente \(c\) e \(n_0\).</p>
+            </div>
+        </article>
+
+        <article id="metodo-iterazione" class="content-section">
+            <h2 class="section-title">2.2. Metodo di Iterazione (Srotolamento)</h2>
+            <div class="section-content">
+                <p>Questo metodo consiste nell'espandere la ricorrenza sostituendo ripetutamente il termine ricorsivo con la sua definizione, fino a quando non si individua un pattern generale, solitamente una sommatoria. Si calcola poi la sommatoria.</p>
+
+                <h3 class="subsection-title">Esempio 1: \(T(n) = T(n-1) + c\) (con \(T(1) = c_0\))</h3>
+                <div class="math-block"> \( T(n) = T(n-1) + c \) </div>
+                <div class="math-block"> \( = [T(n-2) + c] + c = T(n-2) + 2c \) </div>
+                <div class="math-block"> \( = [T(n-3) + c] + 2c = T(n-3) + 3c \) </div>
+                <p>Dopo \(k\) iterazioni, otteniamo:</p>
+                <div class="math-block"> \( T(n) = T(n-k) + kc \) </div>
+                <p>Il processo termina quando \(n-k = 1\) (caso base), ovvero quando \(k = n-1\).</p>
+                <p>Sostituendo \(k = n-1\):</p>
+                <div class="math-block"> \( T(n) = T(1) + (n-1)c = c_0 + (n-1)c \) </div>
+                <div class="math-block"> \( T(n) = cn + (c_0 - c) \in \Theta(n) \) </div>
+
+                <h3 class="subsection-title">Esempio 2: \(T(n) = T(n-1) + dn\) (con \(T(1) = c_0\))</h3>
+                <div class="math-block"> \( T(n) = T(n-1) + dn \) </div>
+                <div class="math-block"> \( = [T(n-2) + d(n-1)] + dn = T(n-2) + d(n-1) + dn \) </div>
+                <div class="math-block"> \( = [T(n-3) + d(n-2)] + d(n-1) + dn = T(n-3) + d(n-2) + d(n-1) + dn \) </div>
+                <p>Dopo \(k\) iterazioni:</p>
+                <div class="math-block"> \( T(n) = T(n-k) + d \sum_{i=0}^{k-1} (n-i) \) </div>
+                <p>Raggiungiamo il caso base quando \(n-k = 1 \implies k = n-1\).</p>
+                <div class="math-block"> \( T(n) = T(1) + d \sum_{i=0}^{n-2} (n-i) \) </div>
+                <p>La sommatoria \( \sum_{i=0}^{n-2} (n-i) \) è \(n + (n-1) + \dots + (n-(n-2)) = n + (n-1) + \dots + 2\).
+                Questa è la somma dei primi \(n\) interi meno 1: \( \frac{n(n+1)}{2} - 1 \).</p>
+                <div class="math-block"> \( T(n) = c_0 + d \left( \frac{n(n+1)}{2} - 1 \right) \) </div>
+                <div class="math-block"> \( T(n) = c_0 + \frac{d}{2}n^2 + \frac{d}{2}n - d \in \Theta(n^2) \) </div>
+            </div>
+        </article>
+
+        <article id="metodo-albero-ricorsione" class="content-section">
+            <h2 class="section-title">2.3. Metodo dell'Albero delle Chiamate Ricorsive</h2>
+            <div class="section-content">
+                <p>Questo metodo è una visualizzazione del metodo di iterazione. È particolarmente utile per ricorrenze del tipo "Divide et Impera" come \(T(n) = aT(n/b) + f(n)\), ma può essere adattato anche ad altre forme.</p>
+                <p>Si costruisce un albero dove ogni nodo rappresenta il costo di una singola chiamata ricorsiva (escludendo il costo delle chiamate figlie). La radice rappresenta \(T(n)\), i suoi figli le chiamate ricorsive dirette, e così via.</p>
+                <p>L'obiettivo è sommare i costi di tutti i nodi dell'albero. Questo si fa tipicamente sommando i costi per ogni livello dell'albero e poi sommando i totali dei livelli.</p>
+
+                <h3 class="subsection-title">Esempio 1 (Albero): \(T(n) = T(n-1) + c\)</h3>
+                <p>Questo albero è "degenerato", una singola catena:</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD;
+                        N0("T(n)\nCosto: c") --> N1("T(n-1)\nCosto: c");
+                        N1 --> N2("T(n-2)\nCosto: c");
+                        N2 --> Ndots("...");
+                        Ndots --> Nk_1("T(2)\nCosto: c");
+                        Nk_1 --> Nk("T(1)\nCosto: c₀");
+                    </pre>
+                </div>
+                <ul>
+                    <li>Livello 0 (radice): costo \(c\).</li>
+                    <li>Livello 1: costo \(c\).</li>
+                    <li>...</li>
+                    <li>Livello \(n-2\): nodo \(T(2)\), costo \(c\). (Ci sono \(n-1\) nodi con costo \(c\))</li>
+                    <li>Livello \(n-1\) (foglia): nodo \(T(1)\), costo \(c_0\).</li>
+                </ul>
+                <p>Costo totale: \( (n-1)c + c_0 = cn + (c_0-c) \in \Theta(n) \).</p>
+
+                <h3 class="subsection-title">Esempio 2 (Albero): \(T(n) = T(n-1) + dn\)</h3>
+                <p>Anche questo è un albero degenerato:</p>
+                 <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD;
+                        N0("T(n)\nCosto: dn") --> N1("T(n-1)\nCosto: d(n-1)");
+                        N1 --> N2("T(n-2)\nCosto: d(n-2)");
+                        N2 --> Ndots("...");
+                        Ndots --> Nk_1("T(2)\nCosto: d*2");
+                        Nk_1 --> Nk("T(1)\nCosto: c₀");
+                    </pre>
+                </div>
+                <p>Costi ai nodi (escludendo le chiamate ricorsive):</p>
+                <ul>
+                    <li>Radice (dim. \(n\)): costo \(dn\)</li>
+                    <li>Figlio (dim. \(n-1\)): costo \(d(n-1)\)</li>
+                    <li>Figlio del figlio (dim. \(n-2\)): costo \(d(n-2)\)</li>
+                    <li>...</li>
+                    <li>Nodo \(T(2)\) (dim. 2): costo \(d \cdot 2\)</li>
+                    <li>Foglia \(T(1)\) (dim. 1): costo \(c_0\)</li>
+                </ul>
+                <p>Costo totale sommando i costi dei nodi:</p>
+                <div class="math-block">
+                \( T(n) = c_0 + d \cdot 2 + d \cdot 3 + \dots + d \cdot (n-1) + d \cdot n \)
+                </div>
+                <div class="math-block">
+                \( T(n) = c_0 + d \sum_{i=2}^{n} i = c_0 + d \left( \left(\sum_{i=1}^{n} i\right) - 1 \right) \)
+                </div>
+                <div class="math-block">
+                \( T(n) = c_0 + d \left( \frac{n(n+1)}{2} - 1 \right) \in \Theta(n^2) \)
+                </div>
+                <p>La professoressa fa notare che il metodo di iterazione e quello dell'albero sono concettualmente molto simili: l'iterazione fa la somma "in riga", l'albero la fa "in colonna" (per livelli, anche se qui i livelli hanno un solo nodo).</p>
+            </div>
+        </article>
+
+        <article id="esempi-pratici" class="content-section">
+            <h2 class="section-title">3. Esempi Pratici e Applicazioni</h2>
+            <div class="section-content">
+                <h3 class="subsection-title">Ricerca del Massimo in un Vettore (Ricorsiva)</h3>
+                <p>Consideriamo una procedura ricorsiva per trovare il massimo in un vettore `A` dalla posizione `p` alla fine:</p>
+                <pre><code class="language-pseudocode">
+PROC-MAX(A, p) // Trova il massimo in A[p ... A.length]
+  if p == A.length then // Caso base: un solo elemento
+    return A[p]
+  else
+    max_resto ← PROC-MAX(A, p + 1)
+    if A[p] > max_resto then
+      return A[p]
+    else
+      return max_resto
+                </code></pre>
+                <p>L'equazione di ricorrenza per questa procedura è:</p>
+                <div class="math-block"> \( T(n) = T(n-1) + \Theta(1) \) </div>
+                <p>Dove \(n\) è il numero di elementi considerati (cioè `A.length - p + 1`).
+                Questa è la stessa ricorrenza dell'Esempio 1 del metodo di iterazione/albero, quindi \( T(n) \in \Theta(n) \).</p>
+
+                <h3 class="subsection-title">Selection Sort (Versione Ricorsiva Inefficiente)</h3>
+                <p>Si potrebbe pensare a una versione ricorsiva di Selection Sort:</p>
+                <pre><code class="language-pseudocode">
+REC-SELECTION-SORT(A, p) // Ordina A[p ... A.length]
+  if p < A.length then
+    // Trova l'indice min_idx del minimo in A[p ... A.length] (costo Θ(n-p+1) ≈ Θ(m) se m è la dim corrente)
+    // Scambia A[p] con A[min_idx] (costo Θ(1))
+    REC-SELECTION-SORT(A, p + 1)
+                </code></pre>
+                <p>Se \(m\) è la dimensione corrente del sottoproblema (`A.length - p + 1`), il costo per trovare il minimo e scambiare è \( \Theta(m) \). La chiamata ricorsiva è su \(m-1\) elementi.</p>
+                <p>L'equazione di ricorrenza è:</p>
+                <div class="math-block"> \( T(m) = T(m-1) + \Theta(m) \) </div>
+                <p>Questa è la stessa ricorrenza dell'Esempio 2 del metodo di iterazione/albero, quindi \( T(m) \in \Theta(m^2) \).
+                La complessità è la stessa della versione iterativa.</p>
+            </div>
+        </article>
+
+        <article id="esercizio-insertion-sort-ric" class="content-section">
+            <h2 class="section-title">4. Esercizio per Casa: Complessità di Insertion Sort Ricorsivo</h2>
+            <div class="section-content">
+                <p>La professoressa ha posto la seguente domanda da considerare:</p>
+                <p><strong>Cosa succede se si implementa Insertion Sort in modo ricorsivo? Qual è la sua equazione di ricorrenza e la sua complessità?</strong></p>
+                <p>Un modo per pensare a Insertion Sort ricorsivo è:</p>
+                <ol>
+                    <li>Ordina ricorsivamente i primi \(n-1\) elementi dell'array.</li>
+                    <li>Inserisci l'n-esimo elemento (<code>A[n]</code>) nella posizione corretta all'interno del sottoarray ordinato <code>A[1...n-1]</code>.</li>
+                </ol>
+                <p>L'operazione di inserimento dell'n-esimo elemento in un array ordinato di \(n-1\) elementi richiede, nel caso peggiore, \( \Theta(n) \) confronti e spostamenti (se l'elemento deve andare in prima posizione).</p>
+                <p>Quindi, l'equazione di ricorrenza per Insertion Sort ricorsivo sarebbe:</p>
+                <div class="math-block">
+                \( T(n) = T(n-1) + \Theta(n) \)
+                </div>
+                <p>con caso base \(T(1) = \Theta(1)\).</p>
+                <p>Questa è la stessa equazione di ricorrenza vista per il Selection Sort ricorsivo (e nell'Esempio 2 del metodo di iterazione/albero). La sua soluzione è:</p>
+                <div class="math-block">
+                \( T(n) \in \Theta(n^2) \)
+                </div>
+                <p>Quindi, anche la versione ricorsiva di Insertion Sort ha una complessità quadratica nel caso peggiore, come la sua controparte iterativa.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    // Stessa logica di Mermaid.js da lezione3.html per il rendering degli alberi
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, // Importante per l'evento personalizzato
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), // Sfondo dei nodi
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; // Usa innerHTML per preservare entità come <
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || ""; // Estrai il testo
+                mermaidOriginalDefinitions.set(id, decodedContent.trim());
+                diag.innerHTML = ''; // Pulisci il contenuto originale
+                diag.style.visibility = 'hidden'; // Nascondi finché non renderizzato
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    console.warn("Nessuna definizione originale per Mermaid ID:", diagramId);
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; // Assicurati che sia vuoto prima di renderizzare
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); // ID univoco per il rendering
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    console.error("Errore rendering Mermaid per ID:", diagramId, "\nErrore:", e, "\nDefinizione:", diagramDefinition);
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            // Ascolta l'evento personalizzato 'sectionshown' (definito in common.js)
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            // Render per la sezione inizialmente attiva
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
