@@ -288,14 +288,18 @@
                 <div class="math-block">
                 \( 0 \le g(n) \le c \cdot f(n) \)
                 </div>
-                <p>In pratica, \(g(n)\) non cresce più velocemente di \(f(n)\) (a meno di una costante moltiplicativa \(c\)) per valori di \(n\) sufficientemente grandi.</p>
+                <p>Equivalentemente, usando la notazione formale con i simboli logici:</p>
+                <div class="math-block">
+                \( O(f(n)) = \{ g(n) \mid \exists c > 0, \exists n_0 \ge 0 \text{ tale che } \forall n \ge n_0, 0 \le g(n) \le c \cdot f(n) \} \)
+                </div>
+                <p>In pratica, \(g(n)\) non cresce più velocemente di \(f(n)\) (a meno di una costante moltiplicativa \(c\)) per valori di \(n\) sufficientemente grandi (cioè da \(n_0\) in poi).</p>
                 <p>La funzione \(f(n)\) è tipicamente una funzione di costo (ad es. numero di operazioni), spesso positiva e monotona non decrescente per le funzioni di complessità.</p>
 
                 <h4 class="subsubsection-title">Interpretazione Grafica di O-grande</h4>
                 <div class="chart-container">
                     <canvas id="oGrandeChart"></canvas>
                 </div>
-                <p>Nel grafico, da un certo punto \(n_0\) in poi, la curva della funzione \(g(n)\) (viola) si trova sempre al di sotto o coincide con la curva di \(c \cdot f(n)\) (blu scuro), dove \(f(n)\) è la funzione di riferimento (blu chiaro) e \(c\) è una costante positiva (qui ad esempio \(c=1.5\)). La linea verticale tratteggiata (rosa) indica \(n_0\).</p>
+                <p>Nel grafico, la funzione \(g(n)\) (viola) può essere maggiore di \(c \cdot f(n)\) (blu scuro) per valori di \(n < n_0\). Tuttavia, da un certo punto \(n_0\) (indicato dalla linea rosa tratteggiata) in poi, la curva di \(g(n)\) si trova sempre al di sotto o coincide con la curva di \(c \cdot f(n)\).</p>
 
                 <h4 class="subsubsection-title">Esempi di O-grande</h4>
                 <ul>
@@ -303,12 +307,11 @@
                         <p>Dobbiamo trovare \(c > 0\) e \(n_0\) tali che \(5n^2 + 2n + 3 \le c \cdot n^2\) per \(n \ge n_0\).</p>
                         <p>Se dividiamo per \(n^2\) (per \(n>0\)): \(5 + 2/n + 3/n^2 \le c\).</p>
                         <p>Per \(n=1\), \(5+2+3 = 10\). Se \(n \to \infty\), il lato sinistro tende a 5.</p>
-                        <p>Possiamo scegliere \(c = 10\) (o qualsiasi valore maggiore di 5, ad es. 6).
-                        Se \(c=6\): \(5n^2 + 2n + 3 \le 6n^2 \implies 2n + 3 \le n^2 \implies n^2 - 2n - 3 \ge 0\).
-                        Le radici di \(x^2 - 2x - 3 = 0\) sono \(x = (2 \pm \sqrt{4+12})/2 = (2 \pm 4)/2\), quindi \(x_1 = 3, x_2 = -1\).
+                        <p>Possiamo scegliere \(c = 6\). Vogliamo \(5n^2 + 2n + 3 \le 6n^2 \implies 2n + 3 \le n^2 \implies n^2 - 2n - 3 \ge 0\).
+                        Le radici di \(x^2 - 2x - 3 = 0\) sono \(x_1 = 3, x_2 = -1\).
                         La parabola è rivolta verso l'alto, quindi \(n^2 - 2n - 3 \ge 0\) per \(n \ge 3\).
-                        Quindi, con \(c=6\) e \(n_0=3\), \(5n^2 + 2n + 3 \in O(n^2)\).</p>
-                        <p class="math-block"> \(5n^2 + 2n + 3 \in O(n^3)\) è anche vero (con \(c=1, n_0=6\)). O-grande è un limite superiore, non necessariamente stretto.</p>
+                        Quindi, con \(c=6\) e \(n_0=3\), la condizione è soddisfatta.</p>
+                        <p class="math-block"> \(5n^2 + 2n + 3 \in O(n^3)\) è anche vero (con \(c=1, n_0 \approx 5.5\), quindi scegliamo \(n_0=6\)). O-grande è un limite superiore, non necessariamente stretto.</p>
                     </li>
                     <li>Se \(g(n) = \log n\), allora \(g(n) \in O(n^3)\). Per \(n \ge 1\), \( \log n \le n^3 \). Quindi \(c=1, n_0=1\).</li>
                     <li>Se \(g(n) = n^4\), allora \(g(n) \notin O(n^3)\). Non esiste alcuna costante \(c\) tale che \(n^4 \le c \cdot n^3\) (ovvero \(n \le c\)) per tutti gli \(n\) grandi.</li>
@@ -325,19 +328,23 @@
                 <div class="math-block">
                 \( 0 \le c \cdot f(n) \le g(n) \)
                 </div>
+                <p>Equivalentemente, usando la notazione formale con i simboli logici:</p>
+                <div class="math-block">
+                \( \Omega(f(n)) = \{ g(n) \mid \exists c > 0, \exists n_0 \ge 0 \text{ tale che } \forall n \ge n_0, 0 \le c \cdot f(n) \le g(n) \} \)
+                </div>
                 <p>In pratica, \(g(n)\) non cresce più lentamente di \(f(n)\) (a meno di una costante moltiplicativa \(c\)) per valori di \(n\) sufficientemente grandi.</p>
 
                 <h4 class="subsubsection-title">Interpretazione Grafica di Ω-grande</h4>
                  <div class="chart-container">
                     <canvas id="omegaGrandeChart"></canvas>
                 </div>
-                <p>Nel grafico, da un certo punto \(n_0\) in poi, la curva della funzione \(g(n)\) (viola) si trova sempre al di sopra o coincide con la curva di \(c \cdot f(n)\) (viola chiaro), dove \(f(n)\) è la funzione di riferimento (blu chiaro) e \(c\) è una costante positiva (qui ad esempio \(c=0.5\)).</p>
+                <p>Nel grafico, la funzione \(g(n)\) (viola) può essere minore di \(c \cdot f(n)\) (viola chiaro) per valori di \(n < n_0\). Tuttavia, da un certo punto \(n_0\) (indicato dalla linea rosa tratteggiata) in poi, la curva di \(g(n)\) si trova sempre al di sopra o coincide con la curva di \(c \cdot f(n)\).</p>
 
                 <h4 class="subsubsection-title">Esempio di Ω-grande</h4>
                 <ul>
                     <li>Se \(g(n) = 5n^2 + 2n + 3\), allora \(g(n) \in \Omega(n^2)\).
                         <p>Dobbiamo trovare \(c > 0\) e \(n_0\) tali che \(c \cdot n^2 \le 5n^2 + 2n + 3\) per \(n \ge n_0\).</p>
-                        <p>Se scegliamo \(c=1\), vogliamo \(n^2 \le 5n^2 + 2n + 3 \implies 0 \le 4n^2 + 2n + 3\). Questo è sempre vero per \(n \ge 0\). Quindi \(c=1, n_0=0\).</p>
+                        <p>Se scegliamo \(c=5\), vogliamo \(5n^2 \le 5n^2 + 2n + 3 \implies 0 \le 2n + 3\). Questo è sempre vero per \(n \ge 0\). Quindi \(c=5, n_0=0\).</p>
                         <p>\(g(n) \in \Omega(n)\) è anche vero. Ω-grande è un limite inferiore, non necessariamente stretto.</p>
                     </li>
                      <li>Se \(g(n) = n^4\), allora \(g(n) \in \Omega(n^3)\). Possiamo prendere \(c=1, n_0=1\), dato che \(n^3 \le n^4\) per \(n \ge 1\).</li>
@@ -353,6 +360,10 @@
                 <div class="math-block">
                 \( 0 \le c_1 \cdot f(n) \le g(n) \le c_2 \cdot f(n) \)
                 </div>
+                <p>Equivalentemente, usando la notazione formale con i simboli logici:</p>
+                <div class="math-block">
+                \( \Theta(f(n)) = \{ g(n) \mid \exists c_1 > 0, \exists c_2 > 0, \exists n_0 \ge 0 \text{ tale che } \forall n \ge n_0, 0 \le c_1 \cdot f(n) \le g(n) \le c_2 \cdot f(n) \} \)
+                </div>
                 <p>In pratica, \(g(n)\) cresce allo stesso tasso di \(f(n)\) (a meno di costanti moltiplicative) per valori di \(n\) sufficientemente grandi.</p>
                 <p>Una funzione \(g(n) \in \Theta(f(n))\) se e solo se \(g(n) \in O(f(n))\) E \(g(n) \in \Omega(f(n))\).</p>
 
@@ -360,13 +371,13 @@
                  <div class="chart-container">
                     <canvas id="thetaChart"></canvas>
                 </div>
-                <p>Nel grafico, da un certo punto \(n_0\) in poi, la curva della funzione \(g(n)\) (viola) è "intrappolata" tra le curve di \(c_1 \cdot f(n)\) (viola chiaro) e \(c_2 \cdot f(n)\) (blu scuro), dove \(f(n)\) è la funzione di riferimento (blu chiaro).</p>
+                <p>Nel grafico, da un certo punto \(n_0\) (indicato dalla linea rosa tratteggiata) in poi, la curva della funzione \(g(n)\) (viola) è "intrappolata" tra le curve di \(c_1 \cdot f(n)\) (viola chiaro) e \(c_2 \cdot f(n)\) (blu scuro).</p>
 
                 <h4 class="subsubsection-title">Esempio di Θ</h4>
                 <ul>
                     <li>Se \(g(n) = 5n^2 + 2n + 3\), allora \(g(n) \in \Theta(n^2)\).
-                        <p>Abbiamo già visto che \(g(n) \in O(n^2)\) (con \(c_2=6, n_0=3\)) e \(g(n) \in \Omega(n^2)\) (con \(c_1=1, n_0=0\)).</p>
-                        <p>Scegliendo \(n_0 = \max(3,0) = 3\), entrambe le disuguaglianze valgono. Quindi \(5n^2 + 2n + 3 \in \Theta(n^2)\).</p>
+                        <p>Abbiamo già visto che \(g(n) \in O(n^2)\) (con \(c_2=6, n_0=3\)) e \(g(n) \in \Omega(n^2)\) (con \(c_1=5, n_0=0\)).</p>
+                        <p>Scegliendo \(n_0 = \max(3,0) = 3\), ed entrambe le costanti \(c_1=5, c_2=6\), le condizioni sono soddisfatte. Quindi \(5n^2 + 2n + 3 \in \Theta(n^2)\).</p>
                     </li>
                     <li>\(10n^3 + 2n^2 + 5 \in \Theta(n^3)\). (Simile al precedente).</li>
                 </ul>
@@ -381,11 +392,15 @@
                 <div class="math-block">
                 \( \lim_{n \to \infty} \frac{g(n)}{f(n)} = 0 \)
                 </div>
-                <p><strong>Definizione Formale (tramite quantificatori):</strong> \(g(n) \in o(f(n))\) se per <strong>ogni</strong> costante \(c > 0\), esiste una costante \(n_0 \ge 0\) tale che per tutti gli \(n \ge n_0\):</p>
+                <p><strong>Definizione Formale (tramite quantificatori):</strong> \(g(n) \in o(f(n))\) se per <strong>ogni</strong> costante \(c > 0\) (arbitrariamente piccola), esiste una costante \(n_0 \ge 0\) tale che per tutti gli \(n \ge n_0\):</p>
                 <div class="math-block">
                 \( 0 \le g(n) < c \cdot f(n) \)
                 </div>
-                <p>Notare la differenza con O-grande: in o-piccolo, la disuguaglianza deve valere per <em>qualsiasi</em> \(c > 0\) (possiamo rendere \(c\) arbitrariamente piccolo), non solo per <em>una</em> costante \(c\).</p>
+                <p>Equivalentemente, usando la notazione formale con i simboli logici:</p>
+                 <div class="math-block">
+                \( o(f(n)) = \{ g(n) \mid \forall c > 0, \exists n_0 \ge 0 \text{ tale che } \forall n \ge n_0, 0 \le g(n) < c \cdot f(n) \} \)
+                </div>
+                <p>Notare la differenza con O-grande: in o-piccolo, la disuguaglianza deve valere per <em>qualsiasi</em> \(c > 0\), non solo per <em>una</em> costante \(c\).</p>
                 <p>Se \(g(n) \in o(f(n))\), allora \(g(n) \in O(f(n))\), ma \(g(n) \notin \Theta(f(n))\) e \(g(n) \notin \Omega(f(n))\) (a meno che \(f(n)\) non sia identicamente zero, caso che solitamente escludiamo).</p>
                 
                 <h4 class="subsubsection-title">Esempio di o-piccolo</h4>
@@ -404,9 +419,13 @@
                 <div class="math-block">
                 \( \lim_{n \to \infty} \frac{g(n)}{f(n)} = \infty \)
                 </div>
-                <p><strong>Definizione Formale (tramite quantificatori):</strong> \(g(n) \in \omega(f(n))\) se per <strong>ogni</strong> costante \(c > 0\), esiste una costante \(n_0 \ge 0\) tale che per tutti gli \(n \ge n_0\):</p>
+                <p><strong>Definizione Formale (tramite quantificatori):</strong> \(g(n) \in \omega(f(n))\) se per <strong>ogni</strong> costante \(c > 0\) (arbitrariamente grande), esiste una costante \(n_0 \ge 0\) tale che per tutti gli \(n \ge n_0\):</p>
                 <div class="math-block">
                 \( 0 \le c \cdot f(n) < g(n) \)
+                </div>
+                <p>Equivalentemente, usando la notazione formale con i simboli logici:</p>
+                <div class="math-block">
+                \( \omega(f(n)) = \{ g(n) \mid \forall c > 0, \exists n_0 \ge 0 \text{ tale che } \forall n \ge n_0, 0 \le c \cdot f(n) < g(n) \} \)
                 </div>
                  <p>Se \(g(n) \in \omega(f(n))\), allora \(g(n) \in \Omega(f(n))\), ma \(g(n) \notin \Theta(f(n))\) e \(g(n) \notin O(f(n))\).</p>
 
@@ -470,7 +489,7 @@
                     <li>Se \(0 < L < \infty\) (cioè L è una costante positiva), allora \(g(n) \in \Theta(f(n))\).</li>
                     <li>Se \(L = \infty\), allora \(g(n) \in \omega(f(n))\) (e quindi \(g(n) \in \Omega(f(n))\)).</li>
                 </ul>
-                <p><strong>Importante:</strong> Se il limite non esiste, queste regole non possono essere usate, ma le definizioni originali con i quantificatori rimangono valide. Tuttavia, per la maggior parte delle funzioni incontrate nell'analisi degli algoritmi, il limite esiste.</p>
+                <p><strong>Importante:</strong> Se il limite non esiste (ad esempio, se oscilla), queste regole non possono essere usate, ma le definizioni originali con i quantificatori rimangono valide. Tuttavia, per la maggior parte delle funzioni incontrate nell'analisi degli algoritmi, il limite esiste.</p>
             </div>
         </article>
 
@@ -481,7 +500,7 @@
                     <li><strong>Logaritmi con basi diverse:</strong>
                         <p>\(\log_a n\) vs \(\log_b n\). Ricordando la formula del cambio di base: \( \log_a n = \frac{\log_b n}{\log_b a} \).</p>
                         <p>Poiché \( \frac{1}{\log_b a} \) è una costante (se a, b > 1), allora \( \log_a n \in \Theta(\log_b n) \).</p>
-                        <p><strong>Conclusione:</strong> La base del logaritmo non influenza l'ordine di grandezza asintotico.</p>
+                        <p><strong>Conclusione:</strong> La base del logaritmo non influenza l'ordine di grandezza asintotico. Per questo spesso si scrive solo \(\log n\).</p>
                     </li>
                     <li><strong>Polinomi:</strong> Un polinomio di grado \(d\), \(P(n) = \sum_{i=0}^d a_i n^i\) con \(a_d > 0\), è \( \Theta(n^d) \).</li>
                     <li><strong>Logaritmo vs Potenza Polinomiale:</strong>
@@ -501,6 +520,7 @@
                             </li>
                             <li>\(2^{2n}\) vs \(2^n\).
                                 <p>\(2^{2n} = (2^n)^2\). Poiché \( \lim_{n \to \infty} \frac{(2^n)^2}{2^n} = \lim_{n \to \infty} 2^n = \infty \), allora \(2^{2n} \in \omega(2^n)\).</p>
+                                <p>Attenzione: una costante moltiplicativa nell'esponente cambia drasticamente l'ordine di grandezza asintotico (a differenza di una costante moltiplicativa alla base di un logaritmo o di un polinomio).</p>
                             </li>
                         </ul>
                     </li>
@@ -522,7 +542,7 @@
                         <div class="math-block">
                         \( \sum_{i=1}^{n} i^k = 1^k + 2^k + \dots + n^k \in \Theta(n^{k+1}) \)
                         </div>
-                        (Per \(k \ge 0\) costante). Il caso \(k=1\) è la somma di Gauss. Per \(k=2\), \( \sum i^2 = \Theta(n^3)\).
+                        (Per \(k \ge 0\) costante). Il caso \(k=1\) è la somma di Gauss. Per \(k=2\), \( \sum i^2 \in \Theta(n^3)\).
                     </li>
                     <li><strong>Serie Geometrica (Somma Parziale):</strong>
                         <div class="math-block">
@@ -558,33 +578,24 @@
                 <p class="math-block">
                 \( \sum_{i=1}^{n} \log i \le \sum_{i=1}^{n} \log n = n \cdot \log n \)
                 </p>
-                <p>Quindi, con \(c_2 = 1\) e \(n_0 = 1\) (o 2, se log base > 1), \( \log(n!) \le 1 \cdot n \log n \).
+                <p>Quindi, con \(c_2 = 1\) e \(n_0 = 1\) (o 2, se log base > 1 e si vuole log(1)=0), \( \log(n!) \le 1 \cdot n \log n \).
                 Pertanto, \( \log(n!) \in O(n \log n) \).</p>
 
                 <h3 class="subsection-title">Limite Inferiore: \( \log(n!) \in \Omega(n \log n) \)</h3>
                 <p class="math-block">
-                \( \log(n!) = \sum_{i=1}^{n} \log i = \sum_{i=1}^{\lfloor n/2 \rfloor - 1} \log i + \sum_{i=\lfloor n/2 \rfloor}^{n} \log i \)
+                \( \log(n!) = \sum_{i=1}^{n} \log i = \sum_{i=1}^{\lceil n/2 \rceil - 1} \log i + \sum_{i=\lceil n/2 \rceil}^{n} \log i \)
                 </p>
-                <p>Consideriamo la seconda parte della somma, gli ultimi \(n - \lfloor n/2 \rfloor + 1 \ge n/2\) termini (per \(n \ge 1\)):</p>
+                <p>Consideriamo la seconda parte della somma, che contiene \(n - \lceil n/2 \rceil + 1 \ge n/2\) termini (per \(n \ge 1\)).</p>
+                <p>Ogni termine in questa seconda parte della somma, \( \log i \), è \( \ge \log(\lceil n/2 \rceil) \).</p>
                 <p class="math-block">
-                \( \sum_{i=\lfloor n/2 \rfloor}^{n} \log i \)
+                \( \sum_{i=\lceil n/2 \rceil}^{n} \log i \ge \frac{n}{2} \cdot \log\left(\lceil \frac{n}{2} \rceil\right) \)
                 </p>
-                <p>Ogni termine in questa somma è \( \ge \log(\lfloor n/2 \rfloor) \). Ci sono almeno \(n/2\) termini.</p>
-                <p class="math-block">
-                \( \sum_{i=\lfloor n/2 \rfloor}^{n} \log i \ge \frac{n}{2} \cdot \log\left(\lfloor \frac{n}{2} \rfloor\right) \)
-                </p>
-                <p>Per \(n \ge 4\), \(\lfloor n/2 \rfloor \ge n/4\). E per \(n \ge 2\), \(\log(\lfloor n/2 \rfloor) \ge \log(n/2 -1)\) se necessario, ma è più semplice notare che per \(n \ge 4\), \( \log(\lfloor n/2 \rfloor) \approx \log(n/2) = \log n - \log 2 \). </p>
-                <p>Per \(n \ge 4\), \( \log n - \log 2 \ge \frac{1}{2}\log n \) (assumendo base 2, altrimenti la costante cambia ma il concetto resta).</p>
-                <p>Dunque, per \(n \ge 4\):</p>
-                <p class="math-block">
-                \( \frac{n}{2} \cdot \log\left(\lfloor \frac{n}{2} \rfloor\right) \ge \frac{n}{2} (\log n - \log 2) \ge \frac{n}{2} \cdot \frac{1}{2}\log n = \frac{1}{4} n \log n \)
-                </p>
-                <p>(Più rigorosamente, per \(n \ge 4\), \(\lfloor n/2 \rfloor \ge n/4\). Quindi \( \log(\lfloor n/2 \rfloor) \ge \log(n/4) = \log n - \log 4 \).
-                Allora \( \frac{n}{2} \log(\lfloor n/2 \rfloor) \ge \frac{n}{2}(\log n - \log 4) \).
-                Vogliamo \( \frac{n}{2}(\log n - \log 4) \ge c_1 n \log n \).
-                \( \frac{1}{2}\log n - \frac{\log 4}{2} \ge c_1 \log n \).
-                Se scegliamo \(c_1 = 1/4\), abbiamo \( \frac{1}{4}\log n \ge \log 2 \), che è vero per \(n \ge 16\).)</p>
-                <p>Quindi, con \(c_1 = 1/4\) e \(n_0 = 16\) (per essere sicuri), \( \log(n!) \ge \frac{1}{4} n \log n \).
+                <p>Per \(n \ge 4\), \(\lceil n/2 \rceil \ge n/2\). Inoltre, \( \log(\lceil n/2 \rceil) \ge \log(n/2) = \log n - \log 2 \).</p>
+                <p>Vogliamo dimostrare che \( \frac{n}{2} (\log n - \log 2) \ge c_1 n \log n \) per un \(c_1 > 0\) e \(n \ge n_0\).</p>
+                <p>Dividendo per \(n \log n\) (per \(n > 1\)): \( \frac{1}{2} (1 - \frac{\log 2}{\log n}) \ge c_1 \).</p>
+                <p>Per \(n \to \infty\), \( \frac{\log 2}{\log n} \to 0 \). Quindi il lato sinistro tende a \(1/2\).</p>
+                <p>Possiamo scegliere \(c_1 = 1/4\). Allora vogliamo \( \frac{1}{2} - \frac{\log 2}{2\log n} \ge \frac{1}{4} \implies \frac{1}{4} \ge \frac{\log 2}{2\log n} \implies \log n \ge 2 \log 2 = \log 4 \). Questo è vero per \(n \ge 4\).</p>
+                <p>Quindi, con \(c_1 = 1/4\) e \(n_0 = 4\), \( \log(n!) \ge \frac{1}{4} n \log n \).
                 Pertanto, \( \log(n!) \in \Omega(n \log n) \).</p>
 
                 <p>Poiché \( \log(n!) \in O(n \log n) \) e \( \log(n!) \in \Omega(n \log n) \), concludiamo che \( \log(n!) \in \Theta(n \log n) \).</p>
@@ -601,21 +612,16 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Registra il plugin di annotazione
-        if (Chart.plugins && Chart.plugins.register) { // Per Chart.js v2
-            Chart.plugins.register(ChartAnnotation);
-        } else if (Chart.register) { // Per Chart.js v3+
-             // Chart.js v3+ non richiede la registrazione esplicita di 'chartjs-plugin-annotation' in questo modo se importato come modulo
-             // Tuttavia, se si usa la CDN, il plugin deve essere caricato e Chart.js deve essere consapevole della sua esistenza.
-             // La configurazione options.plugins.annotation dovrebbe essere sufficiente se il plugin è accessibile globalmente.
-             // Se ci fossero problemi, si potrebbe dover fare Chart.register(ChartAnnotation); qui dopo averlo importato
+        if (typeof Chart !== 'undefined' && typeof ChartAnnotation !== 'undefined') {
+             Chart.register(ChartAnnotation);
         }
 
 
         const COLORS = {
             fn: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
             g_n: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
-            c_fn_upper: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
-            c_fn_lower: getComputedStyle(document.documentElement).getPropertyValue('--accent-tertiary').trim(),
+            c_fn_upper: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(), // Blu per c*f(n) superiore e c2*f(n)
+            c_fn_lower: getComputedStyle(document.documentElement).getPropertyValue('--accent-tertiary').trim(), // Viola più chiaro per c*f(n) inferiore e c1*f(n)
             n0_line: getComputedStyle(document.documentElement).getPropertyValue('--accent-quaternary').trim(),
             text: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim()
         };
@@ -663,8 +669,8 @@
                         }
                     }
                 },
-                annotation: { // Configurazione base per il plugin
-                    drawTime: 'afterDatasetsDraw' // Disegna le annotazioni sopra i dataset
+                annotation: { 
+                    drawTime: 'afterDatasetsDraw' 
                 }
             },
             elements: {
@@ -672,15 +678,17 @@
             }
         };
 
-        const nValues = Array.from({length: 21}, (_, i) => i * 0.5);
+        const nValues = Array.from({length: 21}, (_, i) => i * 0.5); // Da 0 a 10 con passo 0.5
 
         // O-grande Chart
         const oGrandeCtx = document.getElementById('oGrandeChart');
         if (oGrandeCtx) {
-            const f_n_o = n => 2 * n + 10;
-            const g_n_o = n => 1.5 * n + 20;
-            const c_o = 2.0;
-            const n0_o = 5;
+            const f_n_o = n => n * n;          // f(n) = n^2
+            const c_o = 1.5;                   // costante c
+            const n0_o = 4;                    // n_0
+            // g(n) che per n < n0 è > c*f(n), poi <= c*f(n)
+            const g_n_o = n => (n < n0_o) ? (c_o * f_n_o(n) + 10 - n*1.5) : (0.8 * f_n_o(n));
+
 
             new Chart(oGrandeCtx, {
                 type: 'line',
@@ -697,7 +705,7 @@
                             fill: false
                         },
                         {
-                            label: `c⋅f(n) (c=${c_o})`,
+                            label: `c⋅f(n) (c=${c_o.toFixed(1)})`,
                             data: nValues.map(n => c_o * f_n_o(n)),
                             borderColor: COLORS.c_fn_upper,
                             backgroundColor: COLORS.c_fn_upper + '33',
@@ -706,10 +714,10 @@
                             tension: 0.1,
                             fill: false
                         },
-                        {
+                         {
                             label: 'f(n)',
                             data: nValues.map(n => f_n_o(n)),
-                            borderColor: 'rgba(96, 165, 250, 0.4)',
+                            borderColor: 'rgba(96, 165, 250, 0.4)', // Blu più trasparente
                             borderWidth: 1.5,
                             tension: 0.1,
                             fill: false
@@ -732,17 +740,17 @@
                                     borderDash: [6, 6],
                                     label: {
                                         content: `n₀=${n0_o}`,
-                                        display: true, // chartjs-plugin-annotation v2+
+                                        display: true, 
                                         position: 'start',
                                         color: COLORS.n0_line,
-                                        backgroundColor: 'rgba(31,41,55,0.7)', // var(--bg-card) con trasparenza
+                                        backgroundColor: 'rgba(31,41,55,0.7)',
                                         font: { style: 'italic', size: 10 }
                                     }
                                 }
                             }
                         }
                     },
-                     scales: { ...commonChartOptions.scales, y: {...commonChartOptions.scales.y, max: Math.max(...nValues.map(n => c_o * f_n_o(n)), ...nValues.map(n => g_n_o(n))) * 1.1 || 50 }}
+                     scales: { ...commonChartOptions.scales, y: {...commonChartOptions.scales.y, max: Math.max(...nValues.map(n => g_n_o(n)), ...nValues.map(n => c_o * f_n_o(n))) * 1.1 || 150 }}
                 }
             });
         }
@@ -750,10 +758,11 @@
         // Omega-grande Chart
         const omegaGrandeCtx = document.getElementById('omegaGrandeChart');
         if (omegaGrandeCtx) {
-            const f_n_omega = n => 2 * n + 5;
-            const g_n_omega = n => 2.5 * n + 10;
-            const c_omega = 1.0;
-            const n0_omega = 3;
+            const f_n_omega = n => n * n;         // f(n) = n^2
+            const c_omega = 0.5;                  // costante c
+            const n0_omega = 3;                   // n_0
+            // g(n) che per n < n0 è < c*f(n), poi >= c*f(n)
+            const g_n_omega = n => (n < n0_omega) ? (c_omega * f_n_omega(n) - 5 + n*0.8) : (1.2 * f_n_omega(n));
 
             new Chart(omegaGrandeCtx, {
                 type: 'line',
@@ -770,9 +779,9 @@
                             fill: false
                         },
                         {
-                            label: `c⋅f(n) (c=${c_omega})`,
+                            label: `c⋅f(n) (c=${c_omega.toFixed(1)})`,
                             data: nValues.map(n => c_omega * f_n_omega(n)),
-                            borderColor: COLORS.c_fn_lower,
+                            borderColor: COLORS.c_fn_lower, 
                             backgroundColor: COLORS.c_fn_lower + '33',
                             borderWidth: 2,
                             borderDash: [6, 3],
@@ -780,7 +789,7 @@
                             fill: false
                         },
                         {
-                            label: 'f(n)',
+                            label: 'f(n)', 
                             data: nValues.map(n => f_n_omega(n)),
                             borderColor: 'rgba(96, 165, 250, 0.4)',
                             borderWidth: 1.5,
@@ -808,7 +817,7 @@
                             }
                         }
                     },
-                    scales: { ...commonChartOptions.scales, y: {...commonChartOptions.scales.y, max: Math.max(...nValues.map(n => g_n_omega(n))) * 1.1 || 50 }}
+                    scales: { ...commonChartOptions.scales, y: {...commonChartOptions.scales.y, max: Math.max(...nValues.map(n => g_n_omega(n))) * 1.1 || 120 }}
                 }
             });
         }
@@ -816,11 +825,13 @@
         // Theta Chart
         const thetaCtx = document.getElementById('thetaChart');
         if (thetaCtx) {
-            const f_n_theta = n => 2 * n + 5;
-            const g_n_theta = n => 2.2 * n + 8;
-            const c1_theta = 0.8;
-            const c2_theta = 1.5;
-            const n0_theta = 4;
+            const f_n_theta = n => n * n;        // f(n) = n^2
+            const c1_theta = 0.8;                 // costante c1
+            const c2_theta = 1.2;                 // costante c2
+            const n0_theta = 5;                   // n_0
+            // g(n) che per n < n0 può uscire dal "corridoio", poi ci rientra
+            const g_n_theta = n => (n < n0_theta/2) ? (c2_theta * f_n_theta(n) + 10) : ((n < n0_theta) ? (c1_theta * f_n_theta(n) - 10) : (1.0 * f_n_theta(n) + 5) );
+
 
             new Chart(thetaCtx, {
                 type: 'line',
@@ -828,14 +839,14 @@
                     labels: nValues,
                     datasets: [
                          {
-                            label: `c₁⋅f(n) (c₁=${c1_theta})`,
+                            label: `c₁⋅f(n) (c₁=${c1_theta.toFixed(1)})`,
                             data: nValues.map(n => c1_theta * f_n_theta(n)),
                             borderColor: COLORS.c_fn_lower,
-                            backgroundColor: COLORS.c_fn_lower + '1A', // Più trasparente per area
+                            backgroundColor: COLORS.c_fn_lower + '1A', 
                             borderWidth: 2,
                             borderDash: [6, 3],
                             tension: 0.1,
-                            fill: false // Non riempire la singola linea c1
+                            fill: false 
                         },
                         {
                             label: 'g(n)',
@@ -844,22 +855,20 @@
                             backgroundColor: COLORS.g_n + '33',
                             borderWidth: 2.5,
                             tension: 0.1,
-                            fill: '+1' // Riempie fino alla prossima linea con fill abilitato (c2*f(n))
-                                      // Oppure, per riempire tra c1 e c2, dovresti impostare fill: {target: 'origin', above: COLORS.c_fn_upper + '33', below: COLORS.c_fn_lower + '33'}
-                                      // Ma il riempimento tra due dataset specifici è più complesso e richiede a volte di ordinare i dataset
+                            fill: false 
                         },
                         {
-                            label: `c₂⋅f(n) (c₂=${c2_theta})`,
+                            label: `c₂⋅f(n) (c₂=${c2_theta.toFixed(1)})`,
                             data: nValues.map(n => c2_theta * f_n_theta(n)),
-                            borderColor: COLORS.c_fn_upper,
+                            borderColor: COLORS.c_fn_upper, 
                             backgroundColor: COLORS.c_fn_upper + '1A',
                             borderWidth: 2,
                             borderDash: [6, 3],
                             tension: 0.1,
-                            fill: false // Non riempire la singola linea c2
+                            fill: false 
                         },
                         {
-                            label: 'f(n)',
+                            label: 'f(n)', 
                             data: nValues.map(n => f_n_theta(n)),
                             borderColor: 'rgba(96, 165, 250, 0.4)',
                             borderWidth: 1.5,
@@ -887,7 +896,7 @@
                             }
                         }
                     },
-                    scales: { ...commonChartOptions.scales, y: {...commonChartOptions.scales.y, max: Math.max(...nValues.map(n => c2_theta * f_n_theta(n))) * 1.1 || 50 }}
+                    scales: { ...commonChartOptions.scales, y: {...commonChartOptions.scales.y, max: Math.max(...nValues.map(n => c2_theta * f_n_theta(n)), ...nValues.map(n => g_n_theta(n))) * 1.1 || 120 }}
                 }
             });
         }
