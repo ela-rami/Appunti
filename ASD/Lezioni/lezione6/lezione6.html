@@ -270,20 +270,20 @@
                 <div class="mermaid-container">
                     <pre class="mermaid">
                     graph TD;
-                        N0("T(n)\nCosto: b log n") --> N1("T(n/3)\nCosto: b log(n/3)");
-                        N1 --> N2("T(n/3²)\nCosto: b log(n/3²)");
+                        N0("T(n)<br/>Costo: b log n") --> N1("T(n/3)<br/>Costo: b log(n/3)");
+                        N1 --> N2("T(n/3²)<br/>Costo: b log(n/3²)");
                         N2 --> Ndots("...");
-                        Ndots --> Nk_1("T(n/3^(x-1))\nCosto: b log(n/3^(x-1))");
-                        Nk_1 --> Nk("T(1)\nCosto: a (=Θ(1))");
+                        Ndots --> Nk_1("T(n/3^(x-1))<br/>Costo: b log(n/3^(x-1))");
+                        Nk_1 --> Nk("T(1)<br/>Costo: a (=Θ(1))");
                     </pre>
                 </div>
                 <p>Il problema di dimensione \(n\) al livello 0 ha un costo aggiuntivo di \(b \log n\).</p>
                 <p>Al livello 1, il sottoproblema ha dimensione \(n/3\) e un costo aggiuntivo di \(b \log(n/3)\).</p>
                 <p>Al livello \(i\), il sottoproblema ha dimensione \(n/3^i\) e un costo aggiuntivo di \(b \log(n/3^i)\).</p>
-                <p>Si raggiunge il caso base \(T(1)\) quando \(n/3^x = 1\), cioè quando \(n = 3^x\), il che implica \(x = \log_3 n\). Questa è l'altezza dell'albero (o il numero di livelli, da 0 a \(\log_3 n - 1\) per i nodi interni, più il livello delle foglie).</p>
+                <p>Si raggiunge il caso base \(T(1)\) quando \(n/3^x = 1\), cioè quando \(n = 3^x\), il che implica \(x = \log_3 n\). Questa è l'altezza dell'albero (o il numero di livelli interni è \(\log_3 n - 1\), più il livello delle foglie).</p>
                 <p>Il costo totale è la somma dei costi a ogni livello più il costo del caso base:</p>
                 <div class="math-block">
-                \( T(n) = \sum_{i=0}^{\log_3 n - 1} b \log\left(\frac{n}{3^i}\right) + a \)
+                \( T(n) = \left( \sum_{i=0}^{\log_3 n - 1} b \log\left(\frac{n}{3^i}\right) \right) + a \)
                 </div>
                 <p>Usando le proprietà dei logaritmi, \( \log(n/3^i) = \log n - \log(3^i) = \log n - i \log 3 \):</p>
                 <div class="math-block">
@@ -292,22 +292,21 @@
                 <div class="math-block">
                 \( T(n) = b \log n \sum_{i=0}^{\log_3 n - 1} 1 - b \log 3 \sum_{i=0}^{\log_3 n - 1} i + a \)
                 </div>
-                <p>La prima sommatoria \(\sum 1\) ha \(\log_3 n\) termini (da \(i=0\) a \(\log_3 n - 1\)).
-                La seconda sommatoria è la somma dei primi \(k = \log_3 n - 1\) interi, che è \(\frac{k(k+1)}{2}\).</p>
+                <p>La prima sommatoria \(\sum 1\) ha \(\log_3 n\) termini.
+                La seconda sommatoria è la somma dei primi \(k = \log_3 n - 1\) interi, che è \(\frac{k(k+1)}{2} = \frac{(\log_3 n - 1)(\log_3 n)}{2}\).</p>
                 <div class="math-block">
                 \( T(n) = b \log n \cdot (\log_3 n) - b \log 3 \cdot \frac{(\log_3 n - 1)(\log_3 n)}{2} + a \)
                 </div>
-                <p>Sviluppando e considerando i termini dominanti, si ottiene:</p>
+                <p>Sviluppando e considerando i termini dominanti (e ricordando che \(\log n = \log_3 n \cdot \log_3 e \cdot \ln 3 = \log_3 n \cdot \frac{\ln 3}{\ln 3_e} \), oppure più semplicemente \(\log n = \frac{\log_3 n}{\log_3 (\text{base implicita di log})}\)):
+                Se la base del \(\log n\) originale è \(e\) (naturale), allora \(\log n = \log_3 n \cdot \ln 3\). Se la base è 2, \(\log_2 n = \log_3 n \cdot \log_2 3\). Per semplicità, assumiamo \(\log = \log_3\) per il primo termine o si introduca una costante di conversione.</p>
+                <p>Assumendo \(\log = \log_3\) per il termine \(b \log n\), allora \(b (\log_3 n)^2\).</p>
                 <div class="math-block">
-                \( T(n) = b (\log_3 n)^2 \cdot \log 3 - \frac{b \log 3}{2} (\log_3 n)^2 + \text{termini di ordine inferiore} + a \)
+                \( T(n) = b (\log_3 n)^2 - \frac{b \log 3}{2} (\log_3 n)^2 + \frac{b \log 3}{2} (\log_3 n) + a \)
                 </div>
-                <p>(Ricordando che \(\log n = \log_3 n \cdot \log 3\))</p>
-                <div class="math-block">
-                \( T(n) = \frac{b \log 3}{2} (\log_3 n)^2 + \text{termini di ordine inferiore} + a \)
-                </div>
-                <p>Quindi, asintoticamente: </p>
+                 <p>(Attenzione: la professoressa negli appunti scrive \(b \log n \cdot (\log_3 n)\). Se \(\log\) è inteso come \(\log_3\), allora è \(b (\log_3 n)^2\). Se \(\log\) è \(\log_2\), allora è \(b \log_2 3 \cdot (\log_3 n)^2\). Il coefficiente costante cambia, ma l'ordine di crescita no).</p>
+                <p>Il termine dominante è \( (\log_3 n)^2 \). Quindi, asintoticamente: </p>
                 <div class="math-block"> \( T(n) \in \Theta((\log n)^2) \) </div>
-                <p>Si nota che il risultato è \(\Theta((\log_3 n)^2)\), ma poiché la base del logaritmo non conta nella notazione asintotica per i termini logaritmici (a meno che non siano all'esponente), si può scrivere \(\Theta((\log n)^2)\).</p>
+                <p>(La base del logaritmo non conta nella Θ-notazione per i termini polilogaritmici).</p>
             </div>
         </article>
 
@@ -323,19 +322,7 @@
                     <li>Trovare il massimo (ripartendo): \(n-1\) confronti.</li>
                     <li>Totale: \(2n-2\) confronti.</li>
                 </ul>
-                <p>Oppure, in un'unica scansione, si mantengono due variabili, `current_min` e `current_max`. Per ogni elemento, si fanno due confronti (uno con `current_min` e uno con `current_max`).</p>
-                <ul>
-                    <li>Inizializzazione: `min = A[1], max = A[1]`.</li>
-                    <li>Per \(i = 2 \dots n\):
-                        <ul>
-                            <li>`if A[i] < min then min = A[i]`</li>
-                            <li>`if A[i] > max then max = A[i]`</li>
-                        </ul>
-                    </li>
-                    <li>Nel caso peggiore (es. array ordinato crescente), si fanno \(2(n-1)\) confronti.</li>
-                    <li>Nel caso migliore (es. array ordinato decrescente), il secondo if non è mai vero dopo il primo: \(n-1\) confronti per il min, e \(n-1\) confronti per il max se l'aggiornamento del min non preclude il test del max. In realtà, il numero di confronti è sempre \(2(n-1)\) se si fanno entrambi i test per ogni elemento.</li>
-                </ul>
-                <p>Si può ottimizzare leggermente: se `A[i]` è minore del `min` corrente, non può essere maggiore del `max` corrente. Quindi si fa il secondo confronto solo se il primo è falso.</p>
+                <p>Oppure, in un'unica scansione ottimizzata:</p>
                 <pre><code class="language-pseudocode">
 MIN-MAX-SEQUENZIALE(A)
   min_val ← A[1]
@@ -348,8 +335,8 @@ MIN-MAX-SEQUENZIALE(A)
   return (min_val, max_val)
                 </code></pre>
                 <ul>
-                    <li>Caso peggiore (array ordinato crescente): \(1 + 2(n-2) = 2n-3\) confronti (il primo A[2] fa 2 confronti, gli altri (n-2) fanno 2 confronti).</li>
-                    <li>Caso migliore (array ordinato decrescente): \( (n-1) \) confronti (il secondo if non viene mai eseguito).</li>
+                    <li>Caso peggiore (array ordinato crescente): il primo `if A[i] < min_val` è sempre falso (tranne forse il primo elemento del ciclo), il secondo `else if A[i] > max_val` è sempre vero. Totale confronti \(\approx (n-1) + (n-1) = 2n-2\).</li>
+                    <li>Caso migliore (array ordinato decrescente): il primo `if` è sempre vero, il secondo `else if` non viene mai eseguito. Totale confronti \(\approx n-1\).</li>
                 </ul>
 
                 <h3 class="subsection-title">Seconda Soluzione: Divide et Impera</h3>
@@ -358,7 +345,7 @@ MIN-MAX-SEQUENZIALE(A)
 MIN-MAX-RICORSIVO(A, p, q) // Trova min e max in A[p..q]
   // Caso Base: 1 o 2 elementi
   if p == q then // Un solo elemento
-    return (A[p], A[p])
+    return (A[p], A[p])  // 0 confronti
   
   if p + 1 == q then // Due elementi
     if A[p] ≤ A[q] then
@@ -383,78 +370,44 @@ MIN-MAX-RICORSIVO(A, p, q) // Trova min e max in A[p..q]
                 <div class="math-block">
                 \( C(m) = \begin{cases} 0 & \text{se } m = 1 \\ 1 & \text{se } m = 2 \\ 2C(m/2) + 2 & \text{se } m > 2 \text{ (e } m \text{ potenza di 2)} \end{cases} \)
                 </div>
-                <p>Risolviamo \(C(m) = 2C(m/2) + 2\) con \(C(2)=1\) (per semplicità, il caso base \(m=1\) con costo 0 si adatta).
-                Assumiamo \(m = 2^h\), quindi \(h = \log_2 m\).</p>
-                
-                <h4 class="subsubsection-title">Albero delle Chiamate Ricorsive per \(C(m) = 2C(m/2) + 2\)</h4>
+                <p>Risolviamo \(C(m) = 2C(m/2) + 2\) con \(C(2)=1\).
+                Assumiamo \(m = 2^k\), quindi \(k = \log_2 m\).
+                L'altezza dell'albero per arrivare da \(m\) a sottoproblemi di dimensione 2 è \(h' = \log_2 m - 1\).</p>
+                <p>Costo totale: \(C(m) = (\text{costo nodi interni per la ricombinazione}) + (\text{costo foglie per il caso base m=2})\).</p>
+            </div>
+        </article>
+        
+        <article id="lemma-alberi-binari" class="content-section">
+            <h2 class="section-title">3.1. Lemma: Nodi Interni e Foglie in un Albero Binario Stretto</h2>
+             <div class="section-content">
+                <p><strong>Lemma:</strong> Un albero binario in cui ogni nodo interno ha esattamente 2 figli (detto albero binario stretto o proprio), se ha \(f\) foglie, allora ha \(f-1\) nodi interni.</p>
                 <div class="mermaid-container">
                     <pre class="mermaid">
-                    graph TD;
-                        N0("dim: m\nCosto Combina: 2") --> N1_1("dim: m/2\nCosto Combina: 2");
-                        N0 --> N1_2("dim: m/2\nCosto Combina: 2");
-                        
-                        N1_1 --> N2_1("dim: m/4\nCosto Combina: 2");
-                        N1_1 --> N2_2("dim: m/4\nCosto Combina: 2");
-                        N1_2 --> N2_3("dim: m/4\nCosto Combina: 2");
-                        N1_2 --> N2_4("dim: m/4\nCosto Combina: 2");
-
-                        N2_1 --> Ndots1("...");
-                        N2_2 --> Ndots2("...");
-                        N2_3 --> Ndots3("...");
-                        N2_4 --> Ndots4("...");
-                        
-                        Ndots1 --> Leaf1("dim: 2\nCosto Base: 1");
-                        Ndots2 --> Leaf2("dim: 2\nCosto Base: 1");
-                        Ndots_placeholder("... (m/2 foglie totali) ...");
-                        Ndots4 --> LeafN("dim: 2\nCosto Base: 1");
+                    graph TD
+                        subgraph "Albero Binario Stretto Esempio"
+                            R((Radice)) --- C1((Interno 1))
+                            R --- C2((Interno 2))
+                            C1 --- F1(Foglia 1)
+                            C1 --- F2(Foglia 2)
+                            C2 --- F3(Foglia 3)
+                            C2 --- F4(Foglia 4)
+                        end
+                        subgraph "Dimostrazione Lemma (idea per induzione)"
+                            direction TB
+                            A("<b>Caso Base:</b> 0 nodi interni.<br/>L'albero è una singola foglia.<br/>f=1, m.i.=0. => 0 = 1-1. Vero.") --> B("<b>Passo Induttivo:</b><br/>Hp.Ind: Vero per k < m.i. nodi interni.<br/>Tesi: Vero per m.i. nodi interni.");
+                            B --> C("Scegli nodo interno U con figli foglie v1, v2.<br/>(Esiste sempre se m.i. > 0)");
+                            C --> D("Rimuovi v1, v2. Nodo U diventa una foglia.");
+                            D --> E("Nuovo albero: m.i.' = m.i.-1 nodi interni<br/>Nuovo albero: f' = f-2(perse)+1(guadagnata U) = f-1 foglie");
+                            E --> F("Applico Hp.Ind. al nuovo albero:<br/>m.i.' = f'-1");
+                            F --> G("Sostituisco: (m.i.-1) = (f-1)-1<br/>m.i.-1 = f-2 => <b>m.i. = f-1</b>. Tesi dimostrata.");
+                        end
                     </pre>
                 </div>
-                <ul>
-                    <li>L'albero è completo e binario.</li>
-                    <li>L'altezza \(h'\) dell'albero per arrivare da \(m\) a sottoproblemi di dimensione 2 è tale che \(m/2^{h'} = 2 \implies m = 2^{h'+1} \implies h'+1 = \log_2 m \implies h' = \log_2 m - 1\).</li>
-                    <li>Ci sono \(h' = \log_2 m - 1\) livelli di nodi interni (dove si fa il lavoro di combinazione).</li>
-                    <li>Al livello \(i\) (con \(i=0 \dots h'-1\)), ci sono \(2^i\) nodi, ognuno con costo 2. Costo per livello \(i\): \(2^i \cdot 2 = 2^{i+1}\).</li>
-                    <li>Numero di foglie (sottoproblemi di dimensione 2): \(2^{h'} = 2^{\log_2 m - 1} = m/2\).</li>
-                    <li>Costo totale alle foglie: \((m/2) \cdot C(2) = (m/2) \cdot 1 = m/2\).</li>
-                    <li>Costo totale dei nodi interni: \( \sum_{i=0}^{h'-1} 2^{i+1} = 2 \sum_{i=0}^{\log_2 m - 2} 2^i \).
-                        <p>Questa è una serie geometrica di ragione 2: \( 2 \cdot \frac{2^{\log_2 m - 1} - 1}{2-1} = 2 \cdot (2^{\log_2 m - 1} - 1) = 2 \cdot (m/2 - 1) = m - 2 \).</p>
-                    </li>
-                </ul>
-                <p>Costo totale: \(C(m) = (\text{costo interni}) + (\text{costo foglie}) = (m-2) + (m/2) = \frac{3}{2}m - 2\).</p>
-                <p>Asintoticamente, \(C(m) = \Theta(m)\). Specificamente, \(\frac{3}{2}n - 2\) confronti.</p>
-                <p>Questo è meglio di \(2n-3\) (caso peggiore sequenziale) e \(2n-2\) (naïve sequenziale).</p>
-
-                <h3 class="subsection-title" id="lemma-alberi-binari">3.1. Lemma: Nodi Interni e Foglie in un Albero Binario Stretto</h3>
-                <p><strong>Lemma:</strong> Un albero binario in cui ogni nodo interno ha esattamente 2 figli (detto albero binario stretto o proprio), se ha \(f\) foglie, allora ha \(f-1\) nodi interni.</p>
-                
-                <h4 class="subsubsection-title">Dimostrazione per Induzione sul Numero di Nodi Interni (m.i.)</h4>
-                <p><strong>Caso Base: m.i. = 0</strong></p>
-                <ul>
-                    <li>Se ci sono 0 nodi interni, l'albero consiste in un unico nodo che è anche una foglia.</li>
-                    <li>Quindi \(f=1\).</li>
-                    <li>La formula \(m.i. = f-1\) diventa \(0 = 1-1\), che è vero.</li>
-                </ul>
-
-                <p><strong>Passo Induttivo:</strong></p>
-                <ul>
-                    <li><strong>Ipotesi Induttiva (Hp.Ind.):</strong> Assumiamo che il lemma sia vero per tutti gli alberi binari stretti con \(k < m.i.\) nodi interni.</li>
-                    <li><strong>Tesi da dimostrare:</strong> Il lemma è vero per un albero con \(m.i.\) nodi interni.</li>
-                    <li><strong>Dimostrazione del Passo Induttivo:</strong>
-                        <ol>
-                            <li>Prendiamo un albero con \(m.i. > 0\) nodi interni. Scegliamo un nodo interno \(u\) i cui figli, \(v_1\) e \(v_2\), siano entrambi foglie. (Un tale nodo esiste sempre in un albero binario stretto finito con più di un nodo).</li>
-                            <li>Rimuoviamo \(v_1\) e \(v_2\). Il nodo \(u\) diventa una foglia.</li>
-                            <li>Il nuovo albero ha \(m.i.' = m.i. - 1\) nodi interni.</li>
-                            <li>Il numero di foglie del nuovo albero è \(f' = f - 2 (\text{perse } v_1, v_2) + 1 (\text{guadagnata } u) = f - 1\).</li>
-                            <li>Per ipotesi induttiva (poiché \(m.i.' < m.i.\)), nel nuovo albero vale \(m.i.' = f' - 1\).</li>
-                            <li>Sostituendo: \(m.i. - 1 = (f - 1) - 1 \implies m.i. - 1 = f - 2 \implies m.i. = f - 1\).</li>
-                        </ol>
-                    </li>
-                </ul>
-                <p>Il lemma è dimostrato.</p>
-                <p>Nel nostro caso dell'algoritmo Min-Max, le foglie sono i problemi di dimensione 2 (o 1, a seconda di come si imposta il caso base). Se le foglie sono \(m/2\) problemi di dimensione 2, allora i nodi interni (dove si fa il lavoro di `merge` con costo 2) sono \((m/2) - 1\).
-                Il costo totale dei nodi interni è \(2 \cdot ((m/2)-1) = m-2\).
-                Il costo delle foglie è \((m/2) \cdot 1 = m/2\).
-                Totale: \(m-2 + m/2 = \frac{3}{2}m - 2\).</p>
+                <p>Applicazione al Min-Max: se le foglie sono i sottoproblemi di dimensione 2, e ce ne sono \(m/2\), allora i nodi interni (dove si fa il lavoro di `combina` con costo 2 confronti) sono \((m/2) - 1\).</p>
+                <p>Costo totale dei nodi interni: \(2 \cdot ((m/2)-1) = m-2\).</p>
+                <p>Costo totale delle foglie (ognuna con costo 1 confronto): \((m/2) \cdot 1 = m/2\).</p>
+                <p>Costo totale complessivo: \(C(m) = (m-2) + (m/2) = \frac{3}{2}m - 2\).</p>
+                <p>Asintoticamente, \(C(m) = \Theta(m)\), e più precisamente \(\frac{3}{2}n - 2\) confronti (quando \(m=n\)).</p>
             </div>
         </article>
 
@@ -464,77 +417,83 @@ MIN-MAX-RICORSIVO(A, p, q) // Trova min e max in A[p..q]
                 <p><strong>Problema:</strong> Moltiplicare due interi \(x\) e \(y\), ciascuno rappresentato da \(n\) bit.</p>
                 <div class="math-block"> \( x = (x_{n-1} x_{n-2} \dots x_1 x_0)_2 \) </div>
                 <div class="math-block"> \( y = (y_{n-1} y_{n-2} \dots y_1 y_0)_2 \) </div>
-                <p>Vogliamo calcolare \(x \cdot y\), contando le operazioni elementari tra bit (somme e prodotti di singoli bit).</p>
+                <p>Vogliamo calcolare \(x \cdot y\), contando le operazioni elementari tra bit.</p>
 
                 <h3 class="subsection-title">Algoritmo Naïve (Scolastico)</h3>
-                <p>L'algoritmo che si impara a scuola (convertito in base 2) richiede:</p>
-                <ul>
-                    <li>\(n\) prodotti parziali (ogni bit di \(y\) moltiplicato per tutti i bit di \(x\)). Ognuno di questi è facile (se \(y_i=0\), il prodotto parziale è 0; se \(y_i=1\), il prodotto parziale è \(x\) shiftato).</li>
-                    <li>La somma di questi \(n\) prodotti parziali, che possono essere lunghi fino a \(2n\) bit.</li>
-                </ul>
-                <p>Questa operazione ha una complessità di \(\Theta(n^2)\) operazioni tra bit.</p>
-
-                <h3 class="subsection-title" id="prodotto-interi-naive-ric">Algoritmo Divide et Impera (Prima Tentativa - Naïve Ricorsiva)</h3>
+                <p>L'algoritmo tradizionale richiede \(\Theta(n^2)\) operazioni tra bit.</p>
+            </div>
+        </article>
+        
+        <article id="prodotto-interi-naive-ric" class="content-section">
+            <h2 class="section-title">4.1. Algoritmo Divide et Impera (Prima Tentativa - Naïve Ricorsiva)</h2>
+            <div class="section-content">
                 <p>Supponiamo \(n\) sia una potenza di 2. Dividiamo \(x\) e \(y\) a metà:</p>
                 <div class="math-block"> \( x = x_a \cdot 2^{n/2} + x_b \) </div>
                 <div class="math-block"> \( y = y_a \cdot 2^{n/2} + y_b \) </div>
-                <p>Dove \(x_a, x_b, y_a, y_b\) sono numeri di \(n/2\) bit.
-                \(x_a\) sono i bit più significativi di \(x\), \(x_b\) i meno significativi (e analogamente per y).</p>
+                <p>Dove \(x_a\) (parte alta di x), \(x_b\) (parte bassa di x), \(y_a\), \(y_b\) sono numeri di \(n/2\) bit.</p>
                 <p>Allora il prodotto \(x \cdot y\) è:</p>
                 <div class="math-block"> \( x \cdot y = (x_a 2^{n/2} + x_b)(y_a 2^{n/2} + y_b) \) </div>
-                <div class="math-block"> \( = x_a y_a \cdot 2^n + (x_a y_b + x_b y_a) \cdot 2^{n/2} + x_b y_b \) </div>
-                <p>Questo richiede:</p>
+                <div class="math-block"> \( = (x_a y_a) \cdot 2^n + (x_a y_b + x_b y_a) \cdot 2^{n/2} + (x_b y_b) \) </div>
+                <p>Questo approccio richiede:</p>
                 <ul>
                     <li><strong>4 moltiplicazioni ricorsive</strong> di numeri di \(n/2\) bit: \(x_a y_a\), \(x_a y_b\), \(x_b y_a\), \(x_b y_b\).</li>
-                    <li><strong>3 somme</strong> di numeri che possono essere lunghi fino a \(n\) bit (o \(2n\) bit per il risultato finale). Le somme costano \(\Theta(n)\).</li>
-                    <li>Moltiplicazioni per potenze di 2 (come \(2^n\) e \(2^{n/2}\)) sono semplici shift a sinistra e costano \(\Theta(n)\) (aggiungere zeri).</li>
+                    <li>3 somme di numeri di al più \(n\) bit (costo \(\Theta(n)\)).</li>
+                    <li>2 shift (moltiplicazioni per \(2^n\) e \(2^{n/2}\)), che costano \(\Theta(n)\) (aggiungere zeri).</li>
                 </ul>
                 <p>L'equazione di ricorrenza per il numero di operazioni tra bit \(T(n)\) è:</p>
                 <div class="math-block">
                 \( T(n) = \begin{cases} \Theta(1) & \text{se } n = 1 \\ 4T(n/2) + \Theta(n) & \text{se } n > 1 \end{cases} \)
                 </div>
 
-                <h4 class="subsubsection-title">Esercizio/Approfondimento: Risoluzione di \(T(n) = 4T(n/2) + dn\)</h4>
-                <p>Usiamo l'albero delle chiamate ricorsive (assumendo \(T(1)=c\), costo per \(f(n)=dn\)).</p>
+                <h4 class="subsubsection-title">Esercizio per Casa (Svolgimento): Risoluzione di \(T(n) = 4T(n/2) + dn\)</h4>
+                <p>Usiamo l'albero delle chiamate ricorsive (assumendo \(T(1)=c\), e \(\Theta(n) = dn\)).</p>
                 <div class="mermaid-container">
                      <pre class="mermaid">
                      graph TD;
-                        N0("T(n)\nCosto f(n): dn") --> N1_1("T(n/2)");
+                        N0("T(n)<br/>Costo: dn") --> N1_1("T(n/2)");
                         N0 --> N1_2("T(n/2)");
                         N0 --> N1_3("T(n/2)");
                         N0 --> N1_4("T(n/2)");
                         
-                        N1_1("T(n/2)\nCosto f(n/2): d(n/2)")
-                        N1_2("T(n/2)\nCosto f(n/2): d(n/2)")
-                        N1_3("T(n/2)\nCosto f(n/2): d(n/2)")
-                        N1_4("T(n/2)\nCosto f(n/2): d(n/2)")
+                        N1_1 --- subN1_1["Costo: d(n/2)"];
+                        N1_2 --- subN1_2["Costo: d(n/2)"];
+                        N1_3 --- subN1_3["Costo: d(n/2)"];
+                        N1_4 --- subN1_4["Costo: d(n/2)"];
 
-                        N1_1 --> N2_1("...");
-                        N1_1 --> N2_2("...");
-                        N1_1 --> N2_3("...");
-                        N1_1 --> N2_4("...");
-                        % ... (and so on for N1_2, N1_3, N1_4)
+                        N1_1 --> M0("..."); N1_1 --> M1("..."); N1_1 --> M2("..."); N1_1 --> M3("...");
+                        N1_2 --> M4("..."); N1_2 --> M5("..."); N1_2 --> M6("..."); N1_2 --> M7("...");
+                        N1_3 --> M8("..."); N1_3 --> M9("..."); N1_3 --> M10("..."); N1_3 --> M11("...");
+                        N1_4 --> M12("..."); N1_4 --> M13("..."); N1_4 --> M14("..."); N1_4 --> M15("...");
+                        %% Stili per i nodi di costo (opzionale, per chiarezza se il tema non è sufficiente)
+                        style subN1_1 fill:#2a303c,stroke:#1f2937
+                        style subN1_2 fill:#2a303c,stroke:#1f2937
+                        style subN1_3 fill:#2a303c,stroke:#1f2937
+                        style subN1_4 fill:#2a303c,stroke:#1f2937
                      </pre>
                 </div>
                 <ul>
-                    <li>Livello 0 (radice): costo \(dn\).</li>
+                    <li>Livello 0 (radice): costo \(dn\). (1 nodo)</li>
                     <li>Livello 1: 4 nodi, ognuno con input \(n/2\). Costo per nodo \(d(n/2)\). Costo totale livello 1: \(4 \cdot d(n/2) = 2dn\).</li>
                     <li>Livello 2: \(4^2 = 16\) nodi, ognuno con input \(n/4\). Costo per nodo \(d(n/4)\). Costo totale livello 2: \(16 \cdot d(n/4) = 4dn\).</li>
                     <li>Livello \(i\): \(4^i\) nodi, ognuno con input \(n/2^i\). Costo per nodo \(d(n/2^i)\). Costo totale livello \(i\): \(4^i \cdot d(n/2^i) = d \cdot n \cdot (4/2)^i = d \cdot n \cdot 2^i\).</li>
                 </ul>
                 <p>L'albero ha altezza \(h = \log_2 n\). Il livello delle foglie è \(h\).</p>
-                <p>Costo totale dei nodi interni (somma dei costi per livello da \(i=0\) a \(h-1\)):</p>
+                <p>Costo totale dei nodi interni (somma dei costi per livello da \(i=0\) a \(h-1 = \log_2 n - 1\)):</p>
                 <div class="math-block">
                 \( \sum_{i=0}^{\log_2 n - 1} dn \cdot 2^i = dn \sum_{i=0}^{\log_2 n - 1} 2^i \)
                 </div>
-                <p>Questa è una serie geometrica: \( dn \cdot \frac{2^{\log_2 n} - 1}{2-1} = dn \cdot (n - 1) = dn^2 - dn \).</p>
+                <p>Questa è una serie geometrica di ragione 2: \( dn \cdot \frac{2^{\log_2 n} - 1}{2-1} = dn \cdot (n - 1) = dn^2 - dn \).</p>
                 <p>Numero di foglie: \(4^h = 4^{\log_2 n} = (2^2)^{\log_2 n} = (2^{\log_2 n})^2 = n^2\).</p>
                 <p>Costo totale delle foglie: \(n^2 \cdot T(1) = cn^2\).</p>
-                <p>Costo totale: \(T(n) = dn^2 - dn + cn^2 = (d+c)n^2 - dn \in \Theta(n^2)\).</p>
-                <p>Questo approccio Divide et Impera non ha migliorato la complessità rispetto all'algoritmo scolastico!</p>
+                <p>Costo totale: \(T(n) = (dn^2 - dn) + cn^2 = (d+c)n^2 - dn \in \Theta(n^2)\).</p>
+                <p>Questo approccio Divide et Impera, così com'è, non ha migliorato la complessità rispetto all'algoritmo scolastico!</p>
+            </div>
+        </article>
 
-                <h3 class="subsection-title" id="prodotto-interi-karatsuba-idea">Idea di Karatsuba (o simile) per Ridurre le Moltiplicazioni</h3>
-                <p>L'osservazione chiave è che il termine "centrale" \( (x_a y_b + x_b y_a) \) può essere calcolato in modo più furbo.</p>
+        <article id="prodotto-interi-karatsuba-idea" class="content-section">
+            <h2 class="section-title">4.2. Idea di Karatsuba (o simile) per Ridurre le Moltiplicazioni</h2>
+            <div class="section-content">
+                <p>L'osservazione chiave è che il termine "centrale" \( (x_a y_b + x_b y_a) \) può essere calcolato in modo più efficiente per ridurre il numero di moltiplicazioni ricorsive.</p>
                 <p>Notiamo che \( (x_a+x_b)(y_a+y_b) = x_a y_a + x_a y_b + x_b y_a + x_b y_b \).</p>
                 <p>Quindi, il termine che ci serve, \(x_a y_b + x_b y_a\), può essere scritto come:</p>
                 <div class="math-block">
@@ -542,9 +501,10 @@ MIN-MAX-RICORSIVO(A, p, q) // Trova min e max in A[p..q]
                 </div>
                 <p>L'algoritmo modificato calcola:</p>
                 <ol>
-                    <li>\(P_1 = x_a y_a\) (1ª moltiplicazione ricorsiva su \(n/2\) bit)</li>
-                    <li>\(P_2 = x_b y_b\) (2ª moltiplicazione ricorsiva su \(n/2\) bit)</li>
-                    <li>\(P_3 = (x_a+x_b)(y_a+y_b)\) (3ª moltiplicazione ricorsiva. Nota: \(x_a+x_b\) e \(y_a+y_b\) possono avere \(n/2+1\) bit, ma asintoticamente è ancora \(n/2\)).</li>
+                    <li>\(P_1 = x_a y_a\) (1ª moltiplicazione ricorsiva su \(\approx n/2\) bit)</li>
+                    <li>\(P_2 = x_b y_b\) (2ª moltiplicazione ricorsiva su \(\approx n/2\) bit)</li>
+                    <li>Calcola \(S_a = x_a+x_b\) e \(S_b = y_a+y_b\). Queste somme possono richiedere \(n/2+1\) bit.</li>
+                    <li>\(P_3 = S_a \cdot S_b = (x_a+x_b)(y_a+y_b)\) (3ª moltiplicazione ricorsiva. Se gli addendi hanno \(n/2+1\) bit, la moltiplicazione è su quella dimensione, ma asintoticamente è ancora considerata su \(n/2\)).</li>
                 </ol>
                 <p>Poi il prodotto \(x \cdot y\) si ottiene come:</p>
                 <div class="math-block">
@@ -553,13 +513,13 @@ MIN-MAX-RICORSIVO(A, p, q) // Trova min e max in A[p..q]
                 <p>Questo richiede:</p>
                 <ul>
                     <li><strong>3 moltiplicazioni ricorsive</strong> di numeri di \(\approx n/2\) bit.</li>
-                    <li>Un numero costante di somme, sottrazioni e shift, che costano \(\Theta(n)\). (Le somme \(x_a+x_b\) e \(y_a+y_b\) costano \(\Theta(n)\)).</li>
+                    <li>Un numero costante di somme, sottrazioni e shift, che costano complessivamente \(\Theta(n)\). (Le somme \(x_a+x_b\) e \(y_a+y_b\) costano \(\Theta(n)\), le sottrazioni \(P_3-P_1-P_2\) anche).</li>
                 </ul>
                 <p>La nuova equazione di ricorrenza è:</p>
                 <div class="math-block">
                 \( T(n) = \begin{cases} \Theta(1) & \text{se } n = 1 \\ 3T(n/2) + \Theta(n) & \text{se } n > 1 \end{cases} \)
                 </div>
-                <p>Questa ricorrenza può essere risolta (ad esempio con il Master Theorem, che vedremo) e si ottiene:</p>
+                <p>Questa ricorrenza (dell'algoritmo di Karatsuba) può essere risolta (ad esempio con il Master Theorem, che vedremo) e si ottiene:</p>
                 <div class="math-block">
                 \( T(n) \in \Theta(n^{\log_2 3}) \approx \Theta(n^{1.585}) \)
                 </div>
@@ -571,10 +531,10 @@ MIN-MAX-RICORSIVO(A, p, q) // Trova min e max in A[p..q]
             <h2 class="section-title">5. Riflessioni Finali e Anticipazioni</h2>
             <div class="section-content">
                 <p>La capacità di risolvere equazioni di ricorrenza è fondamentale per comprendere l'efficienza degli algoritmi ricorsivi, specialmente quelli basati sulla tecnica Divide et Impera.</p>
+                <p>L'esempio del prodotto di interi mostra come una modifica apparentemente piccola nel modo di scomporre e ricombinare il problema (passando da 4 a 3 moltiplicazioni ricorsive) possa portare a un miglioramento asintotico significativo.</p>
                 <p>Nelle prossime lezioni, introdurremo il **Teorema Principale (Master Theorem)**, uno strumento molto potente che permette di risolvere direttamente molte equazioni di ricorrenza della forma \(T(n) = aT(n/b) + f(n)\) senza dover ricorrere ogni volta al metodo di iterazione o dell'albero.</p>
             </div>
         </article>
-
     </main>
 
     <footer>
@@ -583,7 +543,7 @@ MIN-MAX-RICORSIVO(A, p, q) // Trova min e max in A[p..q]
 
     <script src="../../assets/js/common.js"></script>
     <script>
-    // Stessa logica di Mermaid.js da lezione3.html per il rendering degli alberi
+    // Stessa logica di Mermaid.js da lezione precedente per il rendering degli alberi
     document.addEventListener('DOMContentLoaded', function () {
         if (typeof mermaid !== 'undefined') {
             mermaid.initialize({
