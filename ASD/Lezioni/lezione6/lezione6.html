@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appunti Lezione 6: Equazioni Ricorsive (Continuazione) e Prodotto di Interi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti in lezione3.html, li riporto per completezza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+
+        .sort-example {
+            font-family: var(--font-code); line-height: 1.7; background-color: var(--bg-deep-space);
+            padding: 1.2rem; border-radius: var(--border-radius-small); margin-top: 1.2rem;
+            border: 1px solid var(--border-soft);
+        }
+        .array-step {
+            margin-bottom: 0.8rem; padding-left: 15px; border-left: 1px dotted var(--border-soft);
+            color: var(--text-secondary); font-size: 0.9em;
+        }
+        .array-item, .array-pointer {
+            padding: 3px 6px; border-radius: var(--border-radius-small); margin: 0 2px;
+            display: inline-block; text-align: center; min-width: 2em;
+        }
+        .array-item {
+            border: 1px solid var(--text-secondary);
+            background-color: rgba(156, 163, 175, 0.1);
+        }
+        .array-item.sorted { background-color: rgba(96, 165, 250, 0.15); color: var(--accent-primary); border-color: var(--accent-primary); }
+        .array-item.comparing { background-color: rgba(129, 140, 248, 0.2); color: var(--accent-secondary); border-color: var(--accent-secondary); }
+        .array-pointer { color: #f472b6; font-weight: bold; border: none; padding-bottom: 0; } 
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 19 ott 2020 (2).pdf"> <!-- Assicurati che il nome PDF sia corretto -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 6: Equazioni Ricorsive di Complessità; massimo e minimo; prodotto di interi</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../../ASD_home.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#recap-risoluzione-ricorrenze" class="sidebar-link">1. Recap Risoluzione Ricorrenze</a></li>
+            <li><a href="#esempio-albero-tnb-log" class="sidebar-link">2. Esempio Albero: \(T(n) = T(n/3) + \Theta(\log n)\)</a></li>
+            <li><a href="#esercizio-min-max" class="sidebar-link">3. Esercizio: Minimo e Massimo (Divide et Impera)</a></li>
+            <li><a href="#lemma-alberi-binari" class="sidebar-link">3.1. Lemma: Nodi Interni e Foglie</a></li>
+            <li><a href="#prodotto-interi" class="sidebar-link">4. Prodotto di Interi (Divide et Impera)</a></li>
+            <li><a href="#prodotto-interi-naive-ric" class="sidebar-link">4.1. Algoritmo Naïve Ricorsivo e sua Complessità</a></li>
+            <li><a href="#prodotto-interi-karatsuba-idea" class="sidebar-link">4.2. Idea di Karatsuba (3 Moltiplicazioni)</a></li>
+            <li><a href="#riflessioni-finali" class="sidebar-link">5. Riflessioni Finali e Anticipazioni</a></li>
+
+        </ul>
+    </nav>
+
+    <main>
+        <article id="recap-risoluzione-ricorrenze" class="content-section">
+            <h2 class="section-title">1. Recap sui Metodi di Risoluzione delle Equazioni di Ricorrenza</h2>
+            <div class="section-content">
+                <p>La lezione precedente ha introdotto tre metodi principali per risolvere le equazioni di ricorrenza:</p>
+                <ul>
+                    <li><strong>Metodo di Sostituzione:</strong> Si indovina la soluzione e si dimostra per induzione.</li>
+                    <li><strong>Metodo di Iterazione:</strong> Si "srotola" la ricorrenza per trovare un pattern.</li>
+                    <li><strong>Metodo dell'Albero delle Chiamate Ricorsive:</strong> Visualizzazione del metodo di iterazione.</li>
+                </ul>
+                <p>È importante ricordare di eliminare la notazione asintotica (es. \(\Theta(1)\)) sostituendola con costanti esplicite (es. \(c\)) prima di procedere con i calcoli formali.</p>
+            </div>
+        </article>
+
+        <article id="esempio-albero-tnb-log" class="content-section">
+            <h2 class="section-title">2. Esempio con Metodo dell'Albero: \(T(n) = T(n/3) + \Theta(\log n)\)</h2>
+            <div class="section-content">
+                <p>Consideriamo l'equazione di ricorrenza (con \(T(1) = \Theta(1)\)):</p>
+                <div class="math-block">
+                \( T(n) = T(n/3) + b \log n \)
+                </div>
+                <p>dove \(b\) è una costante positiva.</p>
+                <p>L'albero delle chiamate ricorsive sarà anche qui una catena (degenere), dato che c'è una sola chiamata ricorsiva per passo.</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD;
+                        N0("T(n)\nCosto: b log n") --> N1("T(n/3)\nCosto: b log(n/3)");
+                        N1 --> N2("T(n/3²)\nCosto: b log(n/3²)");
+                        N2 --> Ndots("...");
+                        Ndots --> Nk_1("T(n/3^(x-1))\nCosto: b log(n/3^(x-1))");
+                        Nk_1 --> Nk("T(1)\nCosto: a (=Θ(1))");
+                    </pre>
+                </div>
+                <p>Il problema di dimensione \(n\) al livello 0 ha un costo aggiuntivo di \(b \log n\).</p>
+                <p>Al livello 1, il sottoproblema ha dimensione \(n/3\) e un costo aggiuntivo di \(b \log(n/3)\).</p>
+                <p>Al livello \(i\), il sottoproblema ha dimensione \(n/3^i\) e un costo aggiuntivo di \(b \log(n/3^i)\).</p>
+                <p>Si raggiunge il caso base \(T(1)\) quando \(n/3^x = 1\), cioè quando \(n = 3^x\), il che implica \(x = \log_3 n\). Questa è l'altezza dell'albero (o il numero di livelli, da 0 a \(\log_3 n - 1\) per i nodi interni, più il livello delle foglie).</p>
+                <p>Il costo totale è la somma dei costi a ogni livello più il costo del caso base:</p>
+                <div class="math-block">
+                \( T(n) = \sum_{i=0}^{\log_3 n - 1} b \log\left(\frac{n}{3^i}\right) + a \)
+                </div>
+                <p>Usando le proprietà dei logaritmi, \( \log(n/3^i) = \log n - \log(3^i) = \log n - i \log 3 \):</p>
+                <div class="math-block">
+                \( T(n) = \sum_{i=0}^{\log_3 n - 1} (b \log n - bi \log 3) + a \)
+                </div>
+                <div class="math-block">
+                \( T(n) = b \log n \sum_{i=0}^{\log_3 n - 1} 1 - b \log 3 \sum_{i=0}^{\log_3 n - 1} i + a \)
+                </div>
+                <p>La prima sommatoria \(\sum 1\) ha \(\log_3 n\) termini (da \(i=0\) a \(\log_3 n - 1\)).
+                La seconda sommatoria è la somma dei primi \(k = \log_3 n - 1\) interi, che è \(\frac{k(k+1)}{2}\).</p>
+                <div class="math-block">
+                \( T(n) = b \log n \cdot (\log_3 n) - b \log 3 \cdot \frac{(\log_3 n - 1)(\log_3 n)}{2} + a \)
+                </div>
+                <p>Sviluppando e considerando i termini dominanti, si ottiene:</p>
+                <div class="math-block">
+                \( T(n) = b (\log_3 n)^2 \cdot \log 3 - \frac{b \log 3}{2} (\log_3 n)^2 + \text{termini di ordine inferiore} + a \)
+                </div>
+                <p>(Ricordando che \(\log n = \log_3 n \cdot \log 3\))</p>
+                <div class="math-block">
+                \( T(n) = \frac{b \log 3}{2} (\log_3 n)^2 + \text{termini di ordine inferiore} + a \)
+                </div>
+                <p>Quindi, asintoticamente: </p>
+                <div class="math-block"> \( T(n) \in \Theta((\log n)^2) \) </div>
+                <p>Si nota che il risultato è \(\Theta((\log_3 n)^2)\), ma poiché la base del logaritmo non conta nella notazione asintotica per i termini logaritmici (a meno che non siano all'esponente), si può scrivere \(\Theta((\log n)^2)\).</p>
+            </div>
+        </article>
+
+        <article id="esercizio-min-max" class="content-section">
+            <h2 class="section-title">3. Esercizio: Trovare Minimo e Massimo in un Vettore (Divide et Impera)</h2>
+            <div class="section-content">
+                <p><strong>Problema:</strong> Dato un vettore \(A\) di interi di lunghezza \(n\), determinare sia l'elemento massimo che l'elemento minimo.</p>
+                
+                <h3 class="subsection-title">Prima Soluzione (Naïve)</h3>
+                <p>Si potrebbe fare una prima scansione per trovare il minimo e una seconda scansione per trovare il massimo.</p>
+                <ul>
+                    <li>Trovare il minimo: \(n-1\) confronti.</li>
+                    <li>Trovare il massimo (ripartendo): \(n-1\) confronti.</li>
+                    <li>Totale: \(2n-2\) confronti.</li>
+                </ul>
+                <p>Oppure, in un'unica scansione, si mantengono due variabili, `current_min` e `current_max`. Per ogni elemento, si fanno due confronti (uno con `current_min` e uno con `current_max`).</p>
+                <ul>
+                    <li>Inizializzazione: `min = A[1], max = A[1]`.</li>
+                    <li>Per \(i = 2 \dots n\):
+                        <ul>
+                            <li>`if A[i] < min then min = A[i]`</li>
+                            <li>`if A[i] > max then max = A[i]`</li>
+                        </ul>
+                    </li>
+                    <li>Nel caso peggiore (es. array ordinato crescente), si fanno \(2(n-1)\) confronti.</li>
+                    <li>Nel caso migliore (es. array ordinato decrescente), il secondo if non è mai vero dopo il primo: \(n-1\) confronti per il min, e \(n-1\) confronti per il max se l'aggiornamento del min non preclude il test del max. In realtà, il numero di confronti è sempre \(2(n-1)\) se si fanno entrambi i test per ogni elemento.</li>
+                </ul>
+                <p>Si può ottimizzare leggermente: se `A[i]` è minore del `min` corrente, non può essere maggiore del `max` corrente. Quindi si fa il secondo confronto solo se il primo è falso.</p>
+                <pre><code class="language-pseudocode">
+MIN-MAX-SEQUENZIALE(A)
+  min_val ← A[1]
+  max_val ← A[1]
+  for i ← 2 to A.length
+    if A[i] < min_val then
+      min_val ← A[i]
+    else if A[i] > max_val then // Eseguito solo se A[i] >= min_val
+      max_val ← A[i]
+  return (min_val, max_val)
+                </code></pre>
+                <ul>
+                    <li>Caso peggiore (array ordinato crescente): \(1 + 2(n-2) = 2n-3\) confronti (il primo A[2] fa 2 confronti, gli altri (n-2) fanno 2 confronti).</li>
+                    <li>Caso migliore (array ordinato decrescente): \( (n-1) \) confronti (il secondo if non viene mai eseguito).</li>
+                </ul>
+
+                <h3 class="subsection-title">Seconda Soluzione: Divide et Impera</h3>
+                <p>L'idea è dividere il vettore a metà, trovare ricorsivamente (min, max) nella prima metà e (min, max) nella seconda metà, e poi combinare i risultati.</p>
+                <pre><code class="language-pseudocode">
+MIN-MAX-RICORSIVO(A, p, q) // Trova min e max in A[p..q]
+  // Caso Base: 1 o 2 elementi
+  if p == q then // Un solo elemento
+    return (A[p], A[p])
+  
+  if p + 1 == q then // Due elementi
+    if A[p] ≤ A[q] then
+      return (A[p], A[q])  // 1 confronto
+    else
+      return (A[q], A[p])  // 1 confronto
+  
+  // Divide
+  r ← floor((p + q) / 2)
+  
+  // Impera
+  (min1, max1) ← MIN-MAX-RICORSIVO(A, p, r)
+  (min2, max2) ← MIN-MAX-RICORSIVO(A, r + 1, q)
+  
+  // Combina
+  min_finale ← min(min1, min2) // 1 confronto
+  max_finale ← max(max1, max2) // 1 confronto
+  return (min_finale, max_finale)
+                </code></pre>
+                <p>Sia \(C(m)\) il numero di confronti per un sottoproblema di dimensione \(m = q - p + 1\).</p>
+                <p>Equazione di ricorrenza per il numero di confronti \(C(m)\):</p>
+                <div class="math-block">
+                \( C(m) = \begin{cases} 0 & \text{se } m = 1 \\ 1 & \text{se } m = 2 \\ 2C(m/2) + 2 & \text{se } m > 2 \text{ (e } m \text{ potenza di 2)} \end{cases} \)
+                </div>
+                <p>Risolviamo \(C(m) = 2C(m/2) + 2\) con \(C(2)=1\) (per semplicità, il caso base \(m=1\) con costo 0 si adatta).
+                Assumiamo \(m = 2^h\), quindi \(h = \log_2 m\).</p>
+                
+                <h4 class="subsubsection-title">Albero delle Chiamate Ricorsive per \(C(m) = 2C(m/2) + 2\)</h4>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD;
+                        N0("dim: m\nCosto Combina: 2") --> N1_1("dim: m/2\nCosto Combina: 2");
+                        N0 --> N1_2("dim: m/2\nCosto Combina: 2");
+                        
+                        N1_1 --> N2_1("dim: m/4\nCosto Combina: 2");
+                        N1_1 --> N2_2("dim: m/4\nCosto Combina: 2");
+                        N1_2 --> N2_3("dim: m/4\nCosto Combina: 2");
+                        N1_2 --> N2_4("dim: m/4\nCosto Combina: 2");
+
+                        N2_1 --> Ndots1("...");
+                        N2_2 --> Ndots2("...");
+                        N2_3 --> Ndots3("...");
+                        N2_4 --> Ndots4("...");
+                        
+                        Ndots1 --> Leaf1("dim: 2\nCosto Base: 1");
+                        Ndots2 --> Leaf2("dim: 2\nCosto Base: 1");
+                        Ndots_placeholder("... (m/2 foglie totali) ...");
+                        Ndots4 --> LeafN("dim: 2\nCosto Base: 1");
+                    </pre>
+                </div>
+                <ul>
+                    <li>L'albero è completo e binario.</li>
+                    <li>L'altezza \(h'\) dell'albero per arrivare da \(m\) a sottoproblemi di dimensione 2 è tale che \(m/2^{h'} = 2 \implies m = 2^{h'+1} \implies h'+1 = \log_2 m \implies h' = \log_2 m - 1\).</li>
+                    <li>Ci sono \(h' = \log_2 m - 1\) livelli di nodi interni (dove si fa il lavoro di combinazione).</li>
+                    <li>Al livello \(i\) (con \(i=0 \dots h'-1\)), ci sono \(2^i\) nodi, ognuno con costo 2. Costo per livello \(i\): \(2^i \cdot 2 = 2^{i+1}\).</li>
+                    <li>Numero di foglie (sottoproblemi di dimensione 2): \(2^{h'} = 2^{\log_2 m - 1} = m/2\).</li>
+                    <li>Costo totale alle foglie: \((m/2) \cdot C(2) = (m/2) \cdot 1 = m/2\).</li>
+                    <li>Costo totale dei nodi interni: \( \sum_{i=0}^{h'-1} 2^{i+1} = 2 \sum_{i=0}^{\log_2 m - 2} 2^i \).
+                        <p>Questa è una serie geometrica di ragione 2: \( 2 \cdot \frac{2^{\log_2 m - 1} - 1}{2-1} = 2 \cdot (2^{\log_2 m - 1} - 1) = 2 \cdot (m/2 - 1) = m - 2 \).</p>
+                    </li>
+                </ul>
+                <p>Costo totale: \(C(m) = (\text{costo interni}) + (\text{costo foglie}) = (m-2) + (m/2) = \frac{3}{2}m - 2\).</p>
+                <p>Asintoticamente, \(C(m) = \Theta(m)\). Specificamente, \(\frac{3}{2}n - 2\) confronti.</p>
+                <p>Questo è meglio di \(2n-3\) (caso peggiore sequenziale) e \(2n-2\) (naïve sequenziale).</p>
+
+                <h3 class="subsection-title" id="lemma-alberi-binari">3.1. Lemma: Nodi Interni e Foglie in un Albero Binario Stretto</h3>
+                <p><strong>Lemma:</strong> Un albero binario in cui ogni nodo interno ha esattamente 2 figli (detto albero binario stretto o proprio), se ha \(f\) foglie, allora ha \(f-1\) nodi interni.</p>
+                
+                <h4 class="subsubsection-title">Dimostrazione per Induzione sul Numero di Nodi Interni (m.i.)</h4>
+                <p><strong>Caso Base: m.i. = 0</strong></p>
+                <ul>
+                    <li>Se ci sono 0 nodi interni, l'albero consiste in un unico nodo che è anche una foglia.</li>
+                    <li>Quindi \(f=1\).</li>
+                    <li>La formula \(m.i. = f-1\) diventa \(0 = 1-1\), che è vero.</li>
+                </ul>
+
+                <p><strong>Passo Induttivo:</strong></p>
+                <ul>
+                    <li><strong>Ipotesi Induttiva (Hp.Ind.):</strong> Assumiamo che il lemma sia vero per tutti gli alberi binari stretti con \(k < m.i.\) nodi interni.</li>
+                    <li><strong>Tesi da dimostrare:</strong> Il lemma è vero per un albero con \(m.i.\) nodi interni.</li>
+                    <li><strong>Dimostrazione del Passo Induttivo:</strong>
+                        <ol>
+                            <li>Prendiamo un albero con \(m.i. > 0\) nodi interni. Scegliamo un nodo interno \(u\) i cui figli, \(v_1\) e \(v_2\), siano entrambi foglie. (Un tale nodo esiste sempre in un albero binario stretto finito con più di un nodo).</li>
+                            <li>Rimuoviamo \(v_1\) e \(v_2\). Il nodo \(u\) diventa una foglia.</li>
+                            <li>Il nuovo albero ha \(m.i.' = m.i. - 1\) nodi interni.</li>
+                            <li>Il numero di foglie del nuovo albero è \(f' = f - 2 (\text{perse } v_1, v_2) + 1 (\text{guadagnata } u) = f - 1\).</li>
+                            <li>Per ipotesi induttiva (poiché \(m.i.' < m.i.\)), nel nuovo albero vale \(m.i.' = f' - 1\).</li>
+                            <li>Sostituendo: \(m.i. - 1 = (f - 1) - 1 \implies m.i. - 1 = f - 2 \implies m.i. = f - 1\).</li>
+                        </ol>
+                    </li>
+                </ul>
+                <p>Il lemma è dimostrato.</p>
+                <p>Nel nostro caso dell'algoritmo Min-Max, le foglie sono i problemi di dimensione 2 (o 1, a seconda di come si imposta il caso base). Se le foglie sono \(m/2\) problemi di dimensione 2, allora i nodi interni (dove si fa il lavoro di `merge` con costo 2) sono \((m/2) - 1\).
+                Il costo totale dei nodi interni è \(2 \cdot ((m/2)-1) = m-2\).
+                Il costo delle foglie è \((m/2) \cdot 1 = m/2\).
+                Totale: \(m-2 + m/2 = \frac{3}{2}m - 2\).</p>
+            </div>
+        </article>
+
+        <article id="prodotto-interi" class="content-section">
+            <h2 class="section-title">4. Prodotto di Interi (Divide et Impera)</h2>
+            <div class="section-content">
+                <p><strong>Problema:</strong> Moltiplicare due interi \(x\) e \(y\), ciascuno rappresentato da \(n\) bit.</p>
+                <div class="math-block"> \( x = (x_{n-1} x_{n-2} \dots x_1 x_0)_2 \) </div>
+                <div class="math-block"> \( y = (y_{n-1} y_{n-2} \dots y_1 y_0)_2 \) </div>
+                <p>Vogliamo calcolare \(x \cdot y\), contando le operazioni elementari tra bit (somme e prodotti di singoli bit).</p>
+
+                <h3 class="subsection-title">Algoritmo Naïve (Scolastico)</h3>
+                <p>L'algoritmo che si impara a scuola (convertito in base 2) richiede:</p>
+                <ul>
+                    <li>\(n\) prodotti parziali (ogni bit di \(y\) moltiplicato per tutti i bit di \(x\)). Ognuno di questi è facile (se \(y_i=0\), il prodotto parziale è 0; se \(y_i=1\), il prodotto parziale è \(x\) shiftato).</li>
+                    <li>La somma di questi \(n\) prodotti parziali, che possono essere lunghi fino a \(2n\) bit.</li>
+                </ul>
+                <p>Questa operazione ha una complessità di \(\Theta(n^2)\) operazioni tra bit.</p>
+
+                <h3 class="subsection-title" id="prodotto-interi-naive-ric">Algoritmo Divide et Impera (Prima Tentativa - Naïve Ricorsiva)</h3>
+                <p>Supponiamo \(n\) sia una potenza di 2. Dividiamo \(x\) e \(y\) a metà:</p>
+                <div class="math-block"> \( x = x_a \cdot 2^{n/2} + x_b \) </div>
+                <div class="math-block"> \( y = y_a \cdot 2^{n/2} + y_b \) </div>
+                <p>Dove \(x_a, x_b, y_a, y_b\) sono numeri di \(n/2\) bit.
+                \(x_a\) sono i bit più significativi di \(x\), \(x_b\) i meno significativi (e analogamente per y).</p>
+                <p>Allora il prodotto \(x \cdot y\) è:</p>
+                <div class="math-block"> \( x \cdot y = (x_a 2^{n/2} + x_b)(y_a 2^{n/2} + y_b) \) </div>
+                <div class="math-block"> \( = x_a y_a \cdot 2^n + (x_a y_b + x_b y_a) \cdot 2^{n/2} + x_b y_b \) </div>
+                <p>Questo richiede:</p>
+                <ul>
+                    <li><strong>4 moltiplicazioni ricorsive</strong> di numeri di \(n/2\) bit: \(x_a y_a\), \(x_a y_b\), \(x_b y_a\), \(x_b y_b\).</li>
+                    <li><strong>3 somme</strong> di numeri che possono essere lunghi fino a \(n\) bit (o \(2n\) bit per il risultato finale). Le somme costano \(\Theta(n)\).</li>
+                    <li>Moltiplicazioni per potenze di 2 (come \(2^n\) e \(2^{n/2}\)) sono semplici shift a sinistra e costano \(\Theta(n)\) (aggiungere zeri).</li>
+                </ul>
+                <p>L'equazione di ricorrenza per il numero di operazioni tra bit \(T(n)\) è:</p>
+                <div class="math-block">
+                \( T(n) = \begin{cases} \Theta(1) & \text{se } n = 1 \\ 4T(n/2) + \Theta(n) & \text{se } n > 1 \end{cases} \)
+                </div>
+
+                <h4 class="subsubsection-title">Esercizio/Approfondimento: Risoluzione di \(T(n) = 4T(n/2) + dn\)</h4>
+                <p>Usiamo l'albero delle chiamate ricorsive (assumendo \(T(1)=c\), costo per \(f(n)=dn\)).</p>
+                <div class="mermaid-container">
+                     <pre class="mermaid">
+                     graph TD;
+                        N0("T(n)\nCosto f(n): dn") --> N1_1("T(n/2)");
+                        N0 --> N1_2("T(n/2)");
+                        N0 --> N1_3("T(n/2)");
+                        N0 --> N1_4("T(n/2)");
+                        
+                        N1_1("T(n/2)\nCosto f(n/2): d(n/2)")
+                        N1_2("T(n/2)\nCosto f(n/2): d(n/2)")
+                        N1_3("T(n/2)\nCosto f(n/2): d(n/2)")
+                        N1_4("T(n/2)\nCosto f(n/2): d(n/2)")
+
+                        N1_1 --> N2_1("...");
+                        N1_1 --> N2_2("...");
+                        N1_1 --> N2_3("...");
+                        N1_1 --> N2_4("...");
+                        % ... (and so on for N1_2, N1_3, N1_4)
+                     </pre>
+                </div>
+                <ul>
+                    <li>Livello 0 (radice): costo \(dn\).</li>
+                    <li>Livello 1: 4 nodi, ognuno con input \(n/2\). Costo per nodo \(d(n/2)\). Costo totale livello 1: \(4 \cdot d(n/2) = 2dn\).</li>
+                    <li>Livello 2: \(4^2 = 16\) nodi, ognuno con input \(n/4\). Costo per nodo \(d(n/4)\). Costo totale livello 2: \(16 \cdot d(n/4) = 4dn\).</li>
+                    <li>Livello \(i\): \(4^i\) nodi, ognuno con input \(n/2^i\). Costo per nodo \(d(n/2^i)\). Costo totale livello \(i\): \(4^i \cdot d(n/2^i) = d \cdot n \cdot (4/2)^i = d \cdot n \cdot 2^i\).</li>
+                </ul>
+                <p>L'albero ha altezza \(h = \log_2 n\). Il livello delle foglie è \(h\).</p>
+                <p>Costo totale dei nodi interni (somma dei costi per livello da \(i=0\) a \(h-1\)):</p>
+                <div class="math-block">
+                \( \sum_{i=0}^{\log_2 n - 1} dn \cdot 2^i = dn \sum_{i=0}^{\log_2 n - 1} 2^i \)
+                </div>
+                <p>Questa è una serie geometrica: \( dn \cdot \frac{2^{\log_2 n} - 1}{2-1} = dn \cdot (n - 1) = dn^2 - dn \).</p>
+                <p>Numero di foglie: \(4^h = 4^{\log_2 n} = (2^2)^{\log_2 n} = (2^{\log_2 n})^2 = n^2\).</p>
+                <p>Costo totale delle foglie: \(n^2 \cdot T(1) = cn^2\).</p>
+                <p>Costo totale: \(T(n) = dn^2 - dn + cn^2 = (d+c)n^2 - dn \in \Theta(n^2)\).</p>
+                <p>Questo approccio Divide et Impera non ha migliorato la complessità rispetto all'algoritmo scolastico!</p>
+
+                <h3 class="subsection-title" id="prodotto-interi-karatsuba-idea">Idea di Karatsuba (o simile) per Ridurre le Moltiplicazioni</h3>
+                <p>L'osservazione chiave è che il termine "centrale" \( (x_a y_b + x_b y_a) \) può essere calcolato in modo più furbo.</p>
+                <p>Notiamo che \( (x_a+x_b)(y_a+y_b) = x_a y_a + x_a y_b + x_b y_a + x_b y_b \).</p>
+                <p>Quindi, il termine che ci serve, \(x_a y_b + x_b y_a\), può essere scritto come:</p>
+                <div class="math-block">
+                \( x_a y_b + x_b y_a = (x_a+x_b)(y_a+y_b) - x_a y_a - x_b y_b \)
+                </div>
+                <p>L'algoritmo modificato calcola:</p>
+                <ol>
+                    <li>\(P_1 = x_a y_a\) (1ª moltiplicazione ricorsiva su \(n/2\) bit)</li>
+                    <li>\(P_2 = x_b y_b\) (2ª moltiplicazione ricorsiva su \(n/2\) bit)</li>
+                    <li>\(P_3 = (x_a+x_b)(y_a+y_b)\) (3ª moltiplicazione ricorsiva. Nota: \(x_a+x_b\) e \(y_a+y_b\) possono avere \(n/2+1\) bit, ma asintoticamente è ancora \(n/2\)).</li>
+                </ol>
+                <p>Poi il prodotto \(x \cdot y\) si ottiene come:</p>
+                <div class="math-block">
+                \( x \cdot y = P_1 \cdot 2^n + (P_3 - P_1 - P_2) \cdot 2^{n/2} + P_2 \)
+                </div>
+                <p>Questo richiede:</p>
+                <ul>
+                    <li><strong>3 moltiplicazioni ricorsive</strong> di numeri di \(\approx n/2\) bit.</li>
+                    <li>Un numero costante di somme, sottrazioni e shift, che costano \(\Theta(n)\). (Le somme \(x_a+x_b\) e \(y_a+y_b\) costano \(\Theta(n)\)).</li>
+                </ul>
+                <p>La nuova equazione di ricorrenza è:</p>
+                <div class="math-block">
+                \( T(n) = \begin{cases} \Theta(1) & \text{se } n = 1 \\ 3T(n/2) + \Theta(n) & \text{se } n > 1 \end{cases} \)
+                </div>
+                <p>Questa ricorrenza può essere risolta (ad esempio con il Master Theorem, che vedremo) e si ottiene:</p>
+                <div class="math-block">
+                \( T(n) \in \Theta(n^{\log_2 3}) \approx \Theta(n^{1.585}) \)
+                </div>
+                <p>Questo è significativamente migliore di \(\Theta(n^2)\) per \(n\) grandi!</p>
+            </div>
+        </article>
+
+        <article id="riflessioni-finali" class="content-section">
+            <h2 class="section-title">5. Riflessioni Finali e Anticipazioni</h2>
+            <div class="section-content">
+                <p>La capacità di risolvere equazioni di ricorrenza è fondamentale per comprendere l'efficienza degli algoritmi ricorsivi, specialmente quelli basati sulla tecnica Divide et Impera.</p>
+                <p>Nelle prossime lezioni, introdurremo il **Teorema Principale (Master Theorem)**, uno strumento molto potente che permette di risolvere direttamente molte equazioni di ricorrenza della forma \(T(n) = aT(n/b) + f(n)\) senza dover ricorrere ogni volta al metodo di iterazione o dell'albero.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    // Stessa logica di Mermaid.js da lezione3.html per il rendering degli alberi
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || ""; 
+                mermaidOriginalDefinitions.set(id, decodedContent.trim());
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    console.warn("Nessuna definizione originale per Mermaid ID:", diagramId);
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    console.error("Errore rendering Mermaid per ID:", diagramId, "\nErrore:", e, "\nDefinizione:", diagramDefinition);
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
