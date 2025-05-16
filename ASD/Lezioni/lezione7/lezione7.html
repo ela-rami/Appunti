@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lezione 7: Equazioni Ricorsive di Complessità - Esercizi</title>
+    <title>Appunti Lezione 7: Equazioni Ricorsive di Complessità - Esercizi</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
     <!-- MathJax per rendering formule LaTeX -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="../../assets/css/common.css">
 
     <style>
-        /* Stili specifici già presenti in lezione3.html, li riporto per completezza */
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
         :root {
             --bg-deep-space: #111827;
             --bg-card: #1f2937;
@@ -121,7 +121,6 @@
             margin: 1.5rem auto;
             font-size: 1.1em; 
             color: var(--text-primary); 
-            overflow-x: auto; /* Per formule lunghe */
         }
         .mermaid-container { 
             background-color: var(--bg-deep-space); 
@@ -149,18 +148,26 @@
         }
         pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
 
-        .exercise-box {
-            border: 1px dashed var(--accent-secondary);
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-            margin-bottom: 2rem;
-            border-radius: var(--border-radius-small);
-            background-color: rgba(var(--accent-secondary-rgb), 0.05); /* Usa RGB per trasparenza */
+        .sort-example {
+            font-family: var(--font-code); line-height: 1.7; background-color: var(--bg-deep-space);
+            padding: 1.2rem; border-radius: var(--border-radius-small); margin-top: 1.2rem;
+            border: 1px solid var(--border-soft);
         }
-        .exercise-box .subsection-title {
-            color: var(--accent-primary); /* Evidenzia il titolo dell'esercizio */
-            border-bottom-style: solid;
+        .array-step {
+            margin-bottom: 0.8rem; padding-left: 15px; border-left: 1px dotted var(--border-soft);
+            color: var(--text-secondary); font-size: 0.9em;
         }
+        .array-item, .array-pointer {
+            padding: 3px 6px; border-radius: var(--border-radius-small); margin: 0 2px;
+            display: inline-block; text-align: center; min-width: 2em;
+        }
+        .array-item {
+            border: 1px solid var(--text-secondary);
+            background-color: rgba(156, 163, 175, 0.1);
+        }
+        .array-item.sorted { background-color: rgba(96, 165, 250, 0.15); color: var(--accent-primary); border-color: var(--accent-primary); }
+        .array-item.comparing { background-color: rgba(129, 140, 248, 0.2); color: var(--accent-secondary); border-color: var(--accent-secondary); }
+        .array-pointer { color: #f472b6; font-weight: bold; border: none; padding-bottom: 0; } 
 
 
         footer {
@@ -210,7 +217,7 @@
         }
     </style>
 </head>
-<body data-pdf-path="Nota 22 ott 2020 (2).pdf">
+<body data-pdf-path="Nota 22 ott 2020 (2).pdf"> <!-- Assicurati che il nome PDF sia corretto per questa lezione -->
     <div class="overlay"></div>
     <header>
         <button class="hamburger-menu" id="hamburger-btn">☰</button>
@@ -223,228 +230,566 @@
             <a href="../../ASD_home.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
             <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
         </div>
-        <h2>Indice Argomenti (Lezione 3A & 3B)</h2>
+        <h2>Indice Argomenti</h2>
         <ul>
-            <li><a href="#esercizio1-tnb-log" class="sidebar-link">1. Esercizio 1: \(T(n) = T(n/3) + \Theta(\log n)\) (Svolto)</a></li>
-            <li><a href="#esercizio2-min-max" class="sidebar-link">2. Esercizio 2: Minimo e Massimo (Svolto)</a></li>
-            <li><a href="#prodotto-interi-karatsuba" class="sidebar-link">3. Esercizio 3: Prodotto di Interi (Karatsuba) (Svolto)</a></li>
-            <li><a href="#esercizio4-albero-asimm" class="sidebar-link">4. Esercizio 4: \(T(n) = T(n/4) + T(n/2) + \Theta(n^2)\) (Svolto)</a></li>
-            <li><a href="#esercizio-casa-fibonacci" class="sidebar-link">5. Esercizio per Casa: Fibonacci Ricorsivo (Dettagliato)</a></li>
+            <li><a href="#intro-esercizi" class="sidebar-link">1. Introduzione agli Esercizi</a></li>
+            <li><a href="#esercizio1-tntn4-tn3-thetan2" class="sidebar-link">2. Esercizio 1: \(T(n) = T(n/4) + T(n/3) + \Theta(n^2)\)</a></li>
+            <li><a href="#esercizio2-tntn2-thetan" class="sidebar-link">3. Esercizio 2: \(T(n) = 2T(n/2) + \Theta(n)\) (Merge Sort)</a></li>
+            <li><a href="#alberi-k-ari-completi" class="sidebar-link">3.1. (Parentesi) Alberi k-ari Completi</a></li>
+            <li><a href="#esercizio3-tntn2-thetan3" class="sidebar-link">4. Esercizio 3: \(T(n) = 2T(n/2) + \Theta(n^3)\)</a></li>
+            <li><a href="#esercizio4-tntn2-theta1" class="sidebar-link">5. Esercizio 4: \(T(n) = 3T(n/2) + \Theta(1)\)</a></li>
+            <li><a href="#fibonacci-complessita" class="sidebar-link">6. Esempio Fibonacci: Analisi Complessità</a></li>
+            <li><a href="#fibonacci-ricorsivo" class="sidebar-link">6.1. Fibonacci Ricorsivo e sua Complessità</a></li>
+            <li><a href="#fibonacci-iterativo" class="sidebar-link">6.2. Fibonacci Iterativo e sua Complessità</a></li>
+            <li><a href="#metodo-sostituzione-variabile" class="sidebar-link">7. Metodo Sostituzione di Variabile: \(T(n) = 2T(\sqrt{n}) + \Theta(\log n)\)</a></li>
         </ul>
     </nav>
 
     <main>
-        <article id="esercizio1-tnb-log" class="content-section">
-            <h2 class="section-title">1. Esercizio 1 (Svolto): Risoluzione di \(T(n) = T(n/3) + \Theta(\log n)\)</h2>
+        <article id="intro-esercizi" class="content-section">
+            <h2 class="section-title">1. Introduzione agli Esercizi della Lezione</h2>
             <div class="section-content">
-                <p>Questa equazione di ricorrenza è stata introdotta alla fine della lezione precedente e risolta utilizzando il metodo dell'albero delle chiamate ricorsive.</p>
-                <p>Equazione (con costanti esplicite):</p>
-                <div class="math-block">
-                \( T(n) = \begin{cases} a & \text{se } n = 1 \\ T(n/3) + b \log n & \text{se } n > 1 \end{cases} \)
-                </div>
-                <p>L'albero è una catena. Il costo al livello \(i\) (con \(i=0\) per la radice) è \(b \log(n/3^i)\). L'altezza dell'albero è \(x = \log_3 n\).</p>
-                <p>Costo totale:</p>
-                <div class="math-block">
-                \( T(n) = \left( \sum_{i=0}^{\log_3 n - 1} b \log\left(\frac{n}{3^i}\right) \right) + a \)
-                </div>
-                <p>Utilizzando \( \log(n/3^i) = \log n - i \log 3 \), la sommatoria diventa:</p>
-                <div class="math-block">
-                \( \sum_{i=0}^{\log_3 n - 1} (b \log n - bi \log 3) = b \log n \sum_{i=0}^{\log_3 n - 1} 1 - b \log 3 \sum_{i=0}^{\log_3 n - 1} i \)
-                </div>
-                <p>La prima somma è \(b \log n \cdot (\log_3 n)\). La seconda somma è \(b \log 3 \cdot \frac{(\log_3 n - 1)(\log_3 n)}{2}\).</p>
-                <p>Il termine dominante è \((\log_3 n)^2\), quindi:</p>
-                <div class="math-block"> \( T(n) \in \Theta((\log n)^2) \) </div>
-                <p>(La base del logaritmo non altera l'ordine di grandezza asintotico in questo caso).</p>
-            </div>
-        </article>
-
-        <article id="esercizio2-min-max" class="content-section">
-            <h2 class="section-title">2. Esercizio 2 (Svolto): Trovare Minimo e Massimo (Divide et Impera)</h2>
-            <div class="section-content">
-                <p>L'algoritmo ricorsivo per trovare minimo e massimo in un array \(A[p..q]\) presentato è:</p>
-                <pre><code class="language-pseudocode">
-MIN-MAX-RICORSIVO(A, p, q)
-  if p == q then return (A[p], A[p])
-  if p + 1 == q then 
-    if A[p] ≤ A[q] then return (A[p], A[q]) else return (A[q], A[p])
-  
-  r ← floor((p + q) / 2)
-  (min1, max1) ← MIN-MAX-RICORSIVO(A, p, r)
-  (min2, max2) ← MIN-MAX-RICORSIVO(A, r + 1, q)
-  
-  min_finale ← min(min1, min2) 
-  max_finale ← max(max1, max2) 
-  return (min_finale, max_finale)
-                </code></pre>
-                <p>Equazione di ricorrenza per il numero di confronti \(C(m)\), dove \(m\) è la dimensione del sottoproblema:</p>
-                <div class="math-block">
-                \( C(m) = \begin{cases} 0 & \text{se } m = 1 \\ 1 & \text{se } m = 2 \\ 2C(m/2) + 2 & \text{se } m > 2 \end{cases} \)
-                </div>
-                <p>Utilizzando l'albero delle chiamate ricorsive e il lemma che un albero binario stretto con \(f\) foglie ha \(f-1\) nodi interni:</p>
-                <ul>
-                    <li>Numero di foglie (sottoproblemi di dimensione 2, se \(m\) è potenza di 2): \(m/2\). Costo per foglia: 1 confronto. Totale foglie: \(m/2 \cdot 1 = m/2\).</li>
-                    <li>Numero di nodi interni: \((m/2) - 1\). Costo per nodo interno (combinazione): 2 confronti. Totale interni: \(2 \cdot (m/2 - 1) = m - 2\).</li>
-                </ul>
-                <p>Costo totale: \(C(m) = (m-2) + m/2 = \frac{3}{2}m - 2 \in \Theta(m)\).</p>
-            </div>
-        </article>
-
-        <article id="prodotto-interi-karatsuba" class="content-section">
-            <h2 class="section-title">3. Esercizio 3 (Svolto): Prodotto di Interi (Karatsuba)</h2>
-            <div class="section-content">
-                <p>Per il prodotto di due interi \(x, y\) di \(n\) bit, l'algoritmo di Karatsuba (o simile) riduce le 4 moltiplicazioni ricorsive della versione naïve a 3.</p>
-                <p>Sia \( x = x_a 2^{n/2} + x_b \) e \( y = y_a 2^{n/2} + y_b \).</p>
-                <p>Si calcolano:</p>
+                <p>Questa lezione si concentra sulla risoluzione di diverse equazioni di ricorrenza, applicando i metodi visti precedentemente, in particolare il metodo dell'albero di ricorsione e il metodo della sostituzione di variabile. Verranno ripresi alcuni esercizi già impostati e ne verranno introdotti di nuovi.</p>
+                <p>La professoressa condivide il suo tablet per visualizzare i passaggi.</p>
+                <p>Si parte da due equazioni di ricorrenza principali:</p>
                 <ol>
-                    <li>\(P_1 = x_a y_a\)</li>
-                    <li>\(P_2 = x_b y_b\)</li>
-                    <li>\(P_3 = (x_a+x_b)(y_a+y_b)\)</li>
+                    <li>La prima (in verdolino sugli appunti della prof, dalla lezione precedente): \(T(n) = T(n/4) + T(n/3) + \Theta(n^2)\) con caso base \(T(1) = \Theta(1)\).</li>
+                    <li>La seconda (in blu, segnalata da studenti): \(T(n) = 2T(n/2) + \Theta(n)\) con caso base \(T(1) = \Theta(1)\).</li>
                 </ol>
-                <p>E poi \( x \cdot y = P_1 \cdot 2^n + (P_3 - P_1 - P_2) \cdot 2^{n/2} + P_2 \).</p>
-                <p>L'equazione di ricorrenza diventa:</p>
-                <div class="math-block">
-                \( T(n) = 3T(n/2) + \Theta(n) \)
-                </div>
-                <p>Risoluzione con l'albero delle chiamate ricorsive (assumendo \(\Theta(n) = dn\), \(T(1)=c\)):</p>
-                <div class="mermaid-container">
-                    <pre class="mermaid">
-                    graph TD;
-                        N0("T(n)<br/>Costo: dn") --> N1_1("T(n/2)");
-                        N0 --> N1_2("T(n/2)");
-                        N0 --> N1_3("T(n/2)");
-                        
-                        N1_1 --- subN1_1["Costo: d(n/2)"];
-                        N1_2 --- subN1_2["Costo: d(n/2)"];
-                        N1_3 --- subN1_3["Costo: d(n/2)"];
-
-                        N1_1 --> M0("..."); N1_1 --> M1("..."); N1_1 --> M2("...");
-                        N1_2 --> M3("..."); N1_2 --> M4("..."); N1_2 --> M5("...");
-                        N1_3 --> M6("..."); N1_3 --> M7("..."); N1_3 --> M8("...");
-                        %% Stili per i nodi di costo (opzionale, per chiarezza se il tema non è sufficiente)
-                        style subN1_1 fill:#2a303c,stroke:#1f2937,color:var(--text-secondary)
-                        style subN1_2 fill:#2a303c,stroke:#1f2937,color:var(--text-secondary)
-                        style subN1_3 fill:#2a303c,stroke:#1f2937,color:var(--text-secondary)
-                    </pre>
-                </div>
-                <ul>
-                    <li>Livello 0: costo \(dn\). (1 nodo)</li>
-                    <li>Livello 1: 3 nodi, ognuno costo \(d(n/2)\). Totale: \(3d(n/2) = (3/2)dn\).</li>
-                    <li>Livello 2: \(3^2=9\) nodi, ognuno costo \(d(n/4)\). Totale: \(9d(n/4) = (9/4)dn = (3/2)^2 dn\).</li>
-                    <li>Livello \(i\): \(3^i\) nodi, ognuno costo \(d(n/2^i)\). Totale: \(3^i d(n/2^i) = dn (3/2)^i\).</li>
-                </ul>
-                <p>Altezza albero \(h = \log_2 n\).</p>
-                <p>Costo totale nodi interni (fino a \(h-1\)):</p>
-                <div class="math-block">
-                \( \sum_{i=0}^{\log_2 n - 1} dn \left(\frac{3}{2}\right)^i = dn \sum_{i=0}^{\log_2 n - 1} \left(\frac{3}{2}\right)^i \)
-                </div>
-                <p>Serie geometrica di ragione \(\rho = 3/2 > 1\). La somma è dominata dall'ultimo termine (per \(i = \log_2 n - 1\)):</p>
-                <div class="math-block">
-                \( dn \cdot \Theta\left(\left(\frac{3}{2}\right)^{\log_2 n - 1}\right) = \Theta\left(dn \left(\frac{3}{2}\right)^{\log_2 n}\right) \)
-                </div>
-                <div class="math-block">
-                \( = \Theta\left(dn \frac{3^{\log_2 n}}{2^{\log_2 n}}\right) = \Theta\left(dn \frac{n^{\log_2 3}}{n}\right) = \Theta(d \cdot n^{\log_2 3}) \)
-                </div>
-                <p>Numero di foglie: \(3^h = 3^{\log_2 n} = n^{\log_2 3}\).</p>
-                <p>Costo foglie: \(n^{\log_2 3} \cdot T(1) = c \cdot n^{\log_2 3}\).</p>
-                <p>Costo totale: \(T(n) = \Theta(n^{\log_2 3}) + \Theta(n^{\log_2 3}) = \Theta(n^{\log_2 3}) \approx \Theta(n^{1.585})\).</p>
+                <p>Inizia con la prima equazione.</p>
             </div>
         </article>
 
-        <article id="esercizio4-albero-asimm" class="content-section">
-            <h2 class="section-title">4. Esercizio 4 (Svolto): Albero Asimmetrico - \(T(n) = T(n/4) + T(n/2) + \Theta(n^2)\)</h2>
+        <article id="esercizio1-tntn4-tn3-thetan2" class="content-section">
+            <h2 class="section-title">2. Esercizio 1: Risoluzione di \(T(n) = T(n/4) + T(n/3) + \Theta(n^2)\)</h2>
             <div class="section-content">
-                <p>Consideriamo l'equazione di ricorrenza (con \(T(1) = \Theta(1)\)):</p>
+                <p><strong>Equazione di Ricorrenza:</strong></p>
                 <div class="math-block">
-                \( T(n) = T(n/4) + T(n/2) + cn^2 \)
+                \( T(n) = \begin{cases} \Theta(1) & \text{se } n = 1 \\ T(n/4) + T(n/3) + \Theta(n^2) & \text{se } n > 1 \end{cases} \)
                 </div>
-                <p>L'albero delle chiamate ricorsive non è bilanciato.</p>
+
+                <h3 class="subsection-title">Passaggio 1: Sostituzione delle Notazioni Asintotiche</h3>
+                <p>Per l'analisi, sostituiamo le notazioni \(\Theta\) con costanti esplicite:</p>
+                <div class="math-block">
+                \( T(n) = \begin{cases} a & \text{se } n = 1 \\ T(n/4) + T(n/3) + bn^2 & \text{se } n > 1 \end{cases} \)
+                </div>
+                <p>dove \(a, b\) sono costanti positive.</p>
+
+                <h3 class="subsection-title">Passaggio 2: Metodo dell'Albero delle Chiamate Ricorsive</h3>
+                
+                <h4 class="subsubsection-title">Livello 0 (Radice)</h4>
                 <div class="mermaid-container">
                     <pre class="mermaid">
                     graph TD;
-                        N0("T(n)<br/>Costo: cn²") --> N1_1("T(n/4)");
-                        N0 --> N1_2("T(n/2)");
-
-                        N1_1 --- S1_1["Costo: c(n/4)²"];
-                        N1_2 --- S1_2["Costo: c(n/2)²"];
-                        
-                        N1_1 --> N2_1("T(n/16)");
-                        N1_1 --> N2_2("T(n/8)");
-                        
-                        N1_2 --> N2_3("T(n/8)");
-                        N1_2 --> N2_4("T(n/4)");
-
-                        N2_1 --- S2_1["Costo: c(n/16)²"];
-                        N2_2 --- S2_2["Costo: c(n/8)²"];
-                        N2_3 --- S2_3["Costo: c(n/8)²"];
-                        N2_4 --- S2_4["Costo: c(n/4)²"];
-
-                        N2_4 --> Ndots("...");
-                        % Stili per i nodi di costo
-                        style S1_1 fill:#2a303c,stroke:#1f2937,color:var(--text-secondary)
-                        style S1_2 fill:#2a303c,stroke:#1f2937,color:var(--text-secondary)
-                        style S2_1 fill:#2a303c,stroke:#1f2937,color:var(--text-secondary)
-                        style S2_2 fill:#2a303c,stroke:#1f2937,color:var(--text-secondary)
-                        style S2_3 fill:#2a303c,stroke:#1f2937,color:var(--text-secondary)
-                        style S2_4 fill:#2a303c,stroke:#1f2937,color:var(--text-secondary)
+                        N0("n<br/>Costo: bn²");
                     </pre>
                 </div>
-                <p>Analizziamo i costi per livello:</p>
-                <ul>
-                    <li>Livello 0: \(cn^2\)</li>
-                    <li>Livello 1: \(c(n/4)^2 + c(n/2)^2 = cn^2(1/16 + 1/4) = cn^2(1/16 + 4/16) = cn^2(5/16)\)</li>
-                    <li>Livello 2: \(c(n/16)^2 + c(n/8)^2 + c(n/8)^2 + c(n/4)^2 = cn^2(1/256 + 1/64 + 1/64 + 1/16) = cn^2(1/256 + 4/256 + 4/256 + 16/256) = cn^2(25/256) = cn^2(5/16)^2\).</li>
-                </ul>
-                <p>Sembra che il costo al livello \(i\) sia \(cn^2 \left(\frac{5}{16}\right)^i\).</p>
-                <p>L'albero non è completo. Il ramo più a sinistra "muore" prima (arriva a dimensione 1). Altezza del ramo più a sinistra: \(n/(4^x) = 1 \implies x = \log_4 n\).</p>
-                <p>L'albero ha altezze diverse. L'altezza massima è data dal ramo più a destra (quello che divide sempre per 2): \(h_{max} = \log_2 n\).</p>
-                <p>Il costo totale è la somma dei costi per livello. Questa è una serie geometrica di ragione \(5/16 < 1\).</p>
-                <div class="math-block">
-                \( T(n) \le \sum_{i=0}^{\log_2 n} cn^2 \left(\frac{5}{16}\right)^i + \text{Costo Foglie} \)
+                <p>Il costo (lavoro addizionale) alla radice, con input \(n\), è \(bn^2\).</p>
+
+                <h4 class="subsubsection-title">Livello 1</h4>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD;
+                        N0("n<br/>Costo: bn²") --> N1_1("n/4<br/>Costo: b(n/4)²");
+                        N0 --> N1_2("n/3<br/>Costo: b(n/3)²");
+                    </pre>
                 </div>
-                <p>(Stiamo maggiorando sommando fino all'altezza massima).</p>
-                <p>La serie geometrica \(\sum_{i=0}^{\infty} r^i = \frac{1}{1-r}\) se \(|r|<1\).
-                Quindi la somma dei costi dei nodi interni è \(cn^2 \sum_{i=0}^{\infty} (5/16)^i = cn^2 \frac{1}{1-5/16} = cn^2 \frac{1}{11/16} = cn^2 \frac{16}{11}\).</p>
-                <p>Il costo è dominato dalla radice (o dai primi livelli). Quindi \(T(n) = \Theta(n^2)\).</p>
-                <p>Per essere più precisi, il costo dei nodi interni è \( \Theta(n^2) \). Il numero di foglie è al massimo \(2^{\log_2 n} = n\) (se l'albero fosse bilanciato con fattore di divisione 2). Se ogni foglia costa \(\Theta(1)\), il costo totale delle foglie è al più \(O(n)\).</p>
-                <p>Quindi, \(T(n) = \Theta(n^2) + O(n) = \Theta(n^2)\).</p>
+                <p>Ci sono due chiamate ricorsive:</p>
+                <ul>
+                    <li>\(T(n/4)\) con costo associato (lavoro addizionale) \(b(n/4)^2 = bn^2/16\).</li>
+                    <li>\(T(n/3)\) con costo associato \(b(n/3)^2 = bn^2/9\).</li>
+                </ul>
+                <p><strong>Costo totale del Livello 1:</strong> \(bn^2/16 + bn^2/9 = bn^2 (1/16 + 1/9) = bn^2 ( (9+16)/144 ) = bn^2 (25/144)\).</p>
+                <p class="math-notation"><em>Nota importante:</em> La professoressa sottolinea l'errore comune di calcolare \((n/c)^k\) come \(n^k/c\) invece del corretto \(n^k/c^k\).</p>
+
+                <h4 class="subsubsection-title">Livello 2</h4>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD;
+                        N0("n<br/>bn²") --> N1_1("n/4");
+                        N0 --> N1_2("n/3");
+                        N1_1 --> N2_1("n/16<br/>b(n/16)²");
+                        N1_1 --> N2_2("n/12<br/>b(n/12)²");
+                        N1_2 --> N2_3("n/12<br/>b(n/12)²");
+                        N1_2 --> N2_4("n/9<br/>b(n/9)²");
+                    </pre>
+                </div>
+                <p>Il nodo \(T(n/4)\) genera figli con input \((n/4)/4 = n/16\) e \((n/4)/3 = n/12\).</p>
+                <p>Il nodo \(T(n/3)\) genera figli con input \((n/3)/4 = n/12\) e \((n/3)/3 = n/9\).</p>
+                <p>Il costo totale del Livello 2 può essere visto come: il costo del Livello 1 del sottoalbero radicato in \(T(n/4)\) più il costo del Livello 1 del sottoalbero radicato in \(T(n/3)\).</p>
+                <div class="math-block">
+                \( \text{Costo Livello 2} = \left[ b\left(\frac{n}{4}\right)^2 \cdot \frac{25}{144} \right] + \left[ b\left(\frac{n}{3}\right)^2 \cdot \frac{25}{144} \right] \)
+                </div>
+                <div class="math-block">
+                \( = \left[ b\left(\frac{n}{4}\right)^2 + b\left(\frac{n}{3}\right)^2 \right] \cdot \frac{25}{144} = \left[ bn^2 \cdot \frac{25}{144} \right] \cdot \frac{25}{144} = bn^2 \left(\frac{25}{144}\right)^2 \)
+                </div>
+
+                <h4 class="subsubsection-title">Livello i-esimo (Generalizzazione)</h4>
+                <p>Continuando questo pattern, il costo totale del lavoro addizionale al livello \(i\) dell'albero è:</p>
+                <div class="math-block">
+                \( \text{Costo Livello } i = bn^2 \left(\frac{25}{144}\right)^i \)
+                </div>
+                <p><em>Nota della Professoressa:</em> Generalizzare dopo solo due livelli è una scorciatoia; per una dimostrazione rigorosa si userebbe l'induzione. Tuttavia, in questo contesto è accettabile.</p>
+
+                <h4 class="subsubsection-title">Profondità dell'Albero e Costo delle Foglie</h4>
+                <p>L'albero non è bilanciato. Le foglie si raggiungono quando la dimensione dell'input diventa 1.</p>
+                <ul>
+                    <li><strong>Cammino più lungo:</strong> Si ottiene dividendo sempre per il fattore più piccolo (3). Profondità \(x_{max} \approx \log_3 n\).</li>
+                    <li><strong>Cammino più corto:</strong> Si ottiene dividendo sempre per il fattore più grande (4). Profondità \(x_{min} \approx \log_4 n\).</li>
+                </ul>
+                <p>Le foglie hanno costo \(T(1) = a\). Per stimare il costo totale delle foglie, consideriamo il numero massimo di foglie, che è \(2^{x_{max}} = 2^{\log_3 n}\). Utilizzando la proprietà \(k^{\log_c m} = m^{\log_c k}\), questo diventa \(n^{\log_3 2}\). (Notare che \(\log_3 2 \approx 0.63\)).</p>
+                <p>Costo totale massimo delle foglie \(\approx a \cdot n^{\log_3 2}\).</p>
+
+                <h4 class="subsubsection-title">Somma Totale dei Costi</h4>
+                <p>Il costo totale \(T(n)\) è la somma dei costi di tutti i nodi interni più il costo delle foglie.
+                Il costo dei nodi interni è \( \sum_{i=0}^{\text{profondità massima}-1} bn^2 \left(\frac{25}{144}\right)^i \).</p>
+                <p>Poiché la ragione \(r = 25/144 < 1\), la serie geometrica \( \sum r^i \) converge a una costante \( \frac{1}{1-r} \) quando \(i \to \infty\). Per una somma finita, il valore è comunque una costante (inferiore a \(1/(1-r)\)).
+                Quindi, la somma dei costi dei nodi interni è \( bn^2 \cdot \text{Costante}_1 \), dove \(\text{Costante}_1 = \frac{1}{1 - 25/144} = \frac{144}{119}\) (se la somma fosse infinita; per la somma finita è un valore simile ma minore).</p>
+
+                <h4 class="subsubsection-title">Analisi Asintotica</h4>
+                <p><strong>Stima per eccesso (Limite Superiore \(R\)):</strong></p>
+                <p>Si considera l'albero come se fosse "riempito" fino alla profondità massima, \(x_{max} = \log_3 n\).
+                Il costo totale è \( T(n) \le (\text{somma costi nodi interni fino a } x_{max}-1) + (\text{costo massimo foglie}) \).</p>
+                <div class="math-block">
+                \( R = bn^2 \sum_{i=0}^{\log_3 n - 1} \left(\frac{25}{144}\right)^i + a \cdot n^{\log_3 2} \)
+                </div>
+                <p>Poiché la serie geometrica con ragione \(<1\) è dominata dal primo termine (costante), la somma dei costi dei nodi interni è \(\Theta(bn^2)\).</p>
+                <div class="math-block">
+                \( R \le b'n^2 + a \cdot n^{\log_3 2} \) (dove \(b'\) è \(b\) per la costante della serie)
+                </div>
+                <p>Poiché \(2 > \log_3 2 \approx 0.63\), il termine \(n^2\) domina.
+                Quindi, \(T(n) = O(n^2)\).</p>
+
+                <p><strong>Stima per difetto (Limite Inferiore \(S\)):</strong></p>
+                <p>Il costo della sola radice è \(bn^2\).</p>
+                <p>Quindi, \(T(n) = \Omega(n^2)\).</p>
+
+                <h4 class="subsubsection-title">Conclusione per Esercizio 1</h4>
+                <p>Poiché \(T(n) = O(n^2)\) e \(T(n) = \Omega(n^2)\), si conclude che:</p>
+                <div class="math-block">
+                \( T(n) = \Theta(n^2) \)
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio2-tntn2-thetan" class="content-section">
+            <h2 class="section-title">3. Esercizio 2: Risoluzione di \(T(n) = 2T(n/2) + \Theta(n)\) (Ricorrenza del Merge Sort)</h2>
+            <div class="section-content">
+                <p><strong>Equazione di Ricorrenza:</strong></p>
+                <div class="math-block">
+                \( T(n) = \begin{cases} \Theta(1) & \text{se } n = 1 \\ 2T(n/2) + \Theta(n) & \text{se } n > 1 \end{cases} \)
+                </div>
+
+                <h3 class="subsection-title">Passaggio 1: Sostituzione delle Notazioni Asintotiche</h3>
+                <div class="math-block">
+                \( T(n) = \begin{cases} a & \text{se } n = 1 \\ 2T(n/2) + bn & \text{se } n > 1 \end{cases} \)
+                </div>
+
+                <h3 class="subsection-title">Passaggio 2: Metodo dell'Albero delle Chiamate Ricorsive</h3>
+                 <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD;
+                        N0("n<br/>Costo: bn") --> N1_1("n/2<br/>Costo: b(n/2)");
+                        N0 --> N1_2("n/2<br/>Costo: b(n/2)");
+                        N1_1 --> N2_1("n/4<br/>Costo: b(n/4)");
+                        N1_1 --> N2_2("n/4<br/>Costo: b(n/4)");
+                        N1_2 --> N2_3("n/4<br/>Costo: b(n/4)");
+                        N1_2 --> N2_4("n/4<br/>Costo: b(n/4)");
+                        N2_1 --> Ndots1("...");
+                        N2_2 --> Ndots2("...");
+                        N2_3 --> Ndots3("...");
+                        N2_4 --> Ndots4("...");
+                        subgraph Livello_0 ["Costo Totale Livello 0: bn"]
+                            N0
+                        end
+                        subgraph Livello_1 ["Costo Totale Livello 1: 2 * b(n/2) = bn"]
+                            N1_1
+                            N1_2
+                        end
+                        subgraph Livello_2 ["Costo Totale Livello 2: 4 * b(n/4) = bn"]
+                            N2_1
+                            N2_2
+                            N2_3
+                            N2_4
+                        end
+                        subgraph Livello_i ["Costo Totale Livello i: 2ⁱ * b(n/2ⁱ) = bn"]
+                            Ndots1
+                            Ndots2
+                            Ndots3
+                            Ndots4
+                        end
+                    </pre>
+                </div>
+                <ul>
+                    <li><strong>Livello 0 (Radice):</strong> Costo \(bn\).</li>
+                    <li><strong>Livello 1:</strong> 2 nodi, ciascuno con input \(n/2\). Costo per nodo \(b(n/2)\). Costo totale Livello 1: \(2 \cdot b(n/2) = bn\).</li>
+                    <li><strong>Livello 2:</strong> \(2^2=4\) nodi, ciascuno con input \(n/4\). Costo per nodo \(b(n/4)\). Costo totale Livello 2: \(4 \cdot b(n/4) = bn\).</li>
+                    <li><strong>Livello i-esimo:</strong> \(2^i\) nodi, ciascuno con input \(n/2^i\). Costo per nodo \(b(n/2^i)\). Costo totale Livello \(i\): \(2^i \cdot b(n/2^i) = bn\).</li>
+                </ul>
+                <p><strong>Profondità dell'Albero (Altezza \(x\)):</strong></p>
+                <p>Si arriva alle foglie quando la dimensione dell'input è 1: \(n/2^x = 1 \implies 2^x = n \implies x = \log_2 n\).</p>
+                <p>L'albero ha \(x = \log_2 n\) livelli di nodi interni (da 0 a \(\log_2 n - 1\)), ognuno con costo totale \(bn\).</p>
+                <p><strong>Foglie:</strong></p>
+                <p>Si trovano al livello \(x = \log_2 n\).
+                Numero di foglie: \(2^x = 2^{\log_2 n} = n\).
+                Costo di ogni foglia (caso base \(T(1)\)): \(a\).
+                Costo totale delle foglie: \(n \cdot a = an\).</p>
+                <p><strong>Somma Totale dei Costi:</strong></p>
+                <div class="math-block">
+                \( T(n) = (\text{Costo per livello}) \times (\text{Numero di livelli interni}) + (\text{Costo totale foglie}) \)
+                </div>
+                <div class="math-block">
+                \( T(n) = (bn) \cdot (\log_2 n) + an = bn \log_2 n + an \)
+                </div>
+
+                <h4 class="subsubsection-title">Conclusione per Esercizio 2</h4>
+                <p>Il termine dominante è \(bn \log_2 n\).</p>
+                <div class="math-block">
+                \( T(n) = \Theta(n \log n) \)
+                </div>
             </div>
         </article>
         
-        <article id="esercizio-casa-fibonacci" class="content-section exercise-box">
-            <h2 class="subsection-title">5. Esercizio per Casa (Dettagliato): Complessità di Fibonacci Ricorsivo</h2>
+        <article id="alberi-k-ari-completi" class="content-section">
+            <h2 class="section-title">3.1. (Parentesi) Proprietà degli Alberi k-ari Completi</h2>
             <div class="section-content">
-                <p>La professoressa ha menzionato l'algoritmo ricorsivo per calcolare i numeri di Fibonacci e ha accennato alla sua inefficienza. Analizziamolo.</p>
-                <pre><code class="language-pseudocode">
-FIB(n)
+                <p>La professoressa fa una breve digressione per richiamare alcune proprietà degli alberi k-ari completi, utili per l'analisi degli algoritmi basati su Divide et Impera.</p>
+                <p>Un <strong>albero k-ario completo</strong> di altezza \(x\) (dove la radice è a livello 0 e le foglie a livello \(x\)) ha le seguenti caratteristiche:</p>
+                <ul>
+                    <li>Ogni nodo interno ha esattamente \(k\) figli.</li>
+                    <li>Tutte le foglie si trovano allo stesso livello \(x\).</li>
+                    <li>Tutti i livelli da 0 a \(x-1\) sono "pieni".</li>
+                </ul>
+                <p>Proprietà:</p>
+                <ul>
+                    <li><strong>Numero di nodi a livello \(i\):</strong> \(k^i\) (per \(0 \le i \le x\)).</li>
+                    <li><strong>Numero di foglie (a livello \(x\)):</strong> \(k^x\).</li>
+                    <li><strong>Numero di nodi interni (da livello 0 a \(x-1\)):</strong>
+                        <div class="math-block"> \( \sum_{j=0}^{x-1} k^j = \frac{k^x - 1}{k - 1} \) </div>
+                        (Somma di una progressione geometrica).
+                    </li>
+                    <li><strong>Numero totale di nodi nell'albero:</strong>
+                        <div class="math-block"> \( \sum_{j=0}^{x} k^j = \frac{k^{x+1} - 1}{k - 1} \) </div>
+                    </li>
+                </ul>
+                <p><strong>Altezza (x):</strong> È la lunghezza del cammino più lungo dalla radice a una foglia. In un albero completo, tutti i cammini radice-foglia hanno la stessa lunghezza.</p>
+                <p><em>Esempio per albero binario completo (k=2):</em></p>
+                <ul>
+                    <li>Foglie: \(2^x\).</li>
+                    <li>Nodi interni: \(2^x - 1\).</li>
+                    <li>Nodi totali: \(2^{x+1} - 1\).</li>
+                </ul>
+                <p>Queste formule sono utili quando si analizzano ricorrenze in cui il problema viene diviso in \(k\) sottoproblemi di dimensione uguale.</p>
+            </div>
+        </article>
+
+        <article id="esercizio3-tntn2-thetan3" class="content-section">
+            <h2 class="section-title">4. Esercizio 3: Risoluzione di \(T(n) = 2T(n/2) + \Theta(n^3)\)</h2>
+            <div class="section-content">
+                <p><strong>Equazione di Ricorrenza:</strong></p>
+                <div class="math-block">
+                \( T(n) = \begin{cases} \Theta(1) & \text{se } n = 1 \\ 2T(n/2) + \Theta(n^3) & \text{se } n > 1 \end{cases} \)
+                </div>
+
+                <h3 class="subsection-title">Passaggio 1: Sostituzione delle Notazioni Asintotiche</h3>
+                <div class="math-block">
+                \( T(n) = \begin{cases} a & \text{se } n = 1 \\ 2T(n/2) + bn^3 & \text{se } n > 1 \end{cases} \)
+                </div>
+
+                <h3 class="subsection-title">Passaggio 2: Metodo dell'Albero delle Chiamate Ricorsive</h3>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD;
+                        N0("n<br/>Costo: bn³") --> N1_1("n/2<br/>Costo: b(n/2)³");
+                        N0 --> N1_2("n/2<br/>Costo: b(n/2)³");
+                        N1_1 --> N2_1("n/4<br/>Costo: b(n/4)³");
+                        N1_1 --> N2_2("n/4<br/>Costo: b(n/4)³");
+                        N1_2 --> N2_3("n/4<br/>Costo: b(n/4)³");
+                        N1_2 --> N2_4("n/4<br/>Costo: b(n/4)³");
+                        N2_1 --> Ndots1("...");
+                        N2_2 --> Ndots2("...");
+                        N2_3 --> Ndots3("...");
+                        N2_4 --> Ndots4("...");
+                        subgraph Livello_0 ["Costo Totale Livello 0: bn³"]
+                            N0
+                        end
+                        subgraph Livello_1 ["Costo Totale Livello 1: 2 * b(n/2)³ = bn³/4"]
+                            N1_1
+                            N1_2
+                        end
+                        subgraph Livello_2 ["Costo Totale Livello 2: 4 * b(n/4)³ = bn³/16"]
+                            N2_1
+                            N2_2
+                            N2_3
+                            N2_4
+                        end
+                         subgraph Livello_i ["Costo Totale Livello i: 2ⁱ * b(n/2ⁱ)³ = bn³(1/4)ⁱ"]
+                            Ndots1
+                            Ndots2
+                            Ndots3
+                            Ndots4
+                        end
+                    </pre>
+                </div>
+                <ul>
+                    <li><strong>Livello 0 (Radice):</strong> Costo \(bn^3\).</li>
+                    <li><strong>Livello 1:</strong> 2 nodi, input \(n/2\). Costo per nodo \(b(n/2)^3 = bn^3/8\). Costo totale Livello 1: \(2 \cdot (bn^3/8) = bn^3 \cdot (1/4)\).</li>
+                    <li><strong>Livello 2:</strong> \(2^2=4\) nodi, input \(n/4\). Costo per nodo \(b(n/4)^3 = bn^3/64\). Costo totale Livello 2: \(4 \cdot (bn^3/64) = bn^3 \cdot (1/16) = bn^3 \cdot (1/4)^2\).</li>
+                    <li><strong>Livello i-esimo:</strong> \(2^i\) nodi, input \(n/2^i\). Costo per nodo \(b(n/2^i)^3 = b n^3 / (2^i)^3 = b n^3 / 2^{3i}\).
+                    Costo totale Livello \(i\): \(2^i \cdot (b n^3 / 2^{3i}) = bn^3 \cdot (2^i / (2^i \cdot 2^{2i})) = bn^3 \cdot (1 / 2^{2i}) = bn^3 \cdot (1 / (2^2)^i) = bn^3 \cdot (1/4)^i\).
+                    <p><em>Proprietà algebrica utilizzata:</em> \( (c^k)^m = c^{km} \) e \( \frac{c^k}{d^k} = \left(\frac{c}{d}\right)^k \). E anche \( a^x \cdot b^x = (ab)^x \), quindi \( 2^i \cdot (1/2^3)^i = (2 \cdot 1/8)^i = (1/4)^i \).</p>
+                    </li>
+                </ul>
+                <p><strong>Profondità dell'Albero (Altezza \(x\)):</strong> \(x = \log_2 n\).</p>
+                <p><strong>Foglie:</strong> Numero di foglie \(n\). Costo totale delle foglie \(an\).</p>
+                <p><strong>Somma Totale dei Costi:</strong></p>
+                <div class="math-block">
+                \( T(n) = \sum_{i=0}^{\log_2 n - 1} bn^3 \left(\frac{1}{4}\right)^i + an = bn^3 \sum_{i=0}^{\log_2 n - 1} \left(\frac{1}{4}\right)^i + an \)
+                </div>
+                <p>La serie geometrica \( \sum (1/4)^i \) ha ragione \(r = 1/4 < 1\). La somma di questa serie (anche finita) è limitata da una costante (inferiore a \(1/(1-1/4) = 4/3\)).</p>
+                <p>Il costo dei nodi interni è quindi \( bn^3 \cdot \text{Costante}_2 \).</p>
+
+                <h4 class="subsubsection-title">Conclusione per Esercizio 3</h4>
+                <p>Il termine dominante è \(bn^3\) (il costo alla radice).</p>
+                <div class="math-block">
+                \( T(n) = \Theta(n^3) \)
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio4-tntn2-theta1" class="content-section">
+            <h2 class="section-title">5. Esercizio 4: Risoluzione di \(T(n) = 3T(n/2) + \Theta(1)\)</h2>
+            <div class="section-content">
+                <p><strong>Equazione di Ricorrenza:</strong></p>
+                <div class="math-block">
+                \( T(n) = \begin{cases} \Theta(1) & \text{se } n = 1 \\ 3T(n/2) + \Theta(1) & \text{se } n > 1 \end{cases} \)
+                </div>
+
+                <h3 class="subsection-title">Passaggio 1: Sostituzione delle Notazioni Asintotiche</h3>
+                <div class="math-block">
+                \( T(n) = \begin{cases} a & \text{se } n = 1 \\ 3T(n/2) + b & \text{se } n > 1 \end{cases} \)
+                </div>
+                <p>(dove \(b\) è il costo costante addizionale per ogni chiamata).</p>
+
+                <h3 class="subsection-title">Passaggio 2: Metodo dell'Albero delle Chiamate Ricorsive</h3>
+                 <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD;
+                        N0("n<br/>Costo: b") --> N1_1("n/2<br/>Costo: b");
+                        N0 --> N1_2("n/2<br/>Costo: b");
+                        N0 --> N1_3("n/2<br/>Costo: b");
+
+                        N1_1 --> N2_1_1("n/4<br/>Costo: b"); N1_1 --> N2_1_2("n/4<br/>Costo: b"); N1_1 --> N2_1_3("n/4<br/>Costo: b");
+                        N1_2 --> N2_2_1("n/4<br/>Costo: b"); N1_2 --> N2_2_2("n/4<br/>Costo: b"); N1_2 --> N2_2_3("n/4<br/>Costo: b");
+                        N1_3 --> N2_3_1("n/4<br/>Costo: b"); N1_3 --> N2_3_2("n/4<br/>Costo: b"); N1_3 --> N2_3_3("n/4<br/>Costo: b");
+                        
+                        subgraph Livello_0 ["Costo Totale Livello 0: b"]
+                            N0
+                        end
+                        subgraph Livello_1 ["Costo Totale Livello 1: 3b"]
+                            N1_1; N1_2; N1_3;
+                        end
+                        subgraph Livello_2 ["Costo Totale Livello 2: 3²b = 9b"]
+                            N2_1_1; N2_1_2; N2_1_3; N2_2_1; N2_2_2; N2_2_3; N2_3_1; N2_3_2; N2_3_3;
+                        end
+                        %% ... (omettiamo i livelli successivi per brevità, ma l'idea è chiara)
+                    </pre>
+                </div>
+                <ul>
+                    <li><strong>Livello 0 (Radice):</strong> Costo \(b\). (1 nodo)</li>
+                    <li><strong>Livello 1:</strong> 3 nodi, ciascuno con input \(n/2\). Costo per nodo \(b\). Costo totale Livello 1: \(3 \cdot b = 3b\).</li>
+                    <li><strong>Livello 2:</strong> \(3^2=9\) nodi, ciascuno con input \(n/4\). Costo per nodo \(b\). Costo totale Livello 2: \(3^2 \cdot b = 9b\).</li>
+                    <li><strong>Livello i-esimo:</strong> \(3^i\) nodi, ciascuno con input \(n/2^i\). Costo per nodo \(b\). Costo totale Livello \(i\): \(3^i \cdot b\).</li>
+                </ul>
+                <p><strong>Profondità dell'Albero (Altezza \(x\)):</strong> Si arriva alle foglie quando \(n/2^x = 1 \implies x = \log_2 n\).</p>
+                <p><strong>Foglie:</strong></p>
+                <p>Si trovano al livello \(x = \log_2 n\).
+                Numero di foglie: \(3^x = 3^{\log_2 n}\).
+                Utilizzando la proprietà \(k^{\log_c m} = m^{\log_c k}\):
+                Numero di foglie = \(n^{\log_2 3}\). (Notare che \(\log_2 3 \approx 1.585\)).
+                Costo di ogni foglia (caso base \(T(1)\)): \(a\).
+                Costo totale delle foglie: \(a \cdot n^{\log_2 3}\).</p>
+                <p><strong>Somma Totale dei Costi dei Nodi Interni:</strong></p>
+                <p>I nodi interni vanno dal livello 0 al livello \(x-1 = \log_2 n - 1\).</p>
+                <div class="math-block">
+                \( \sum_{i=0}^{\log_2 n - 1} b \cdot 3^i = b \sum_{i=0}^{\log_2 n - 1} 3^i \)
+                </div>
+                <p>Questa è una serie geometrica di ragione \(r = 3 > 1\).</p>
+                <div class="math-block">
+                \( b \cdot \frac{3^{(\log_2 n - 1) + 1} - 1}{3 - 1} = b \cdot \frac{3^{\log_2 n} - 1}{2} = \frac{b}{2} (n^{\log_2 3} - 1) \)
+                </div>
+
+                <h4 class="subsubsection-title">Conclusione per Esercizio 4</h4>
+                <p>Il costo totale \(T(n)\) è la somma del costo dei nodi interni e del costo delle foglie:</p>
+                <div class="math-block">
+                \( T(n) = \frac{b}{2} (n^{\log_2 3} - 1) + a \cdot n^{\log_2 3} \)
+                </div>
+                <p>Raccogliendo i termini con \(n^{\log_2 3}\):</p>
+                <div class="math-block">
+                \( T(n) = \left(\frac{b}{2} + a\right) n^{\log_2 3} - \frac{b}{2} \)
+                </div>
+                <p>Il termine dominante è \(n^{\log_2 3}\).</p>
+                <div class="math-block">
+                \( T(n) = \Theta(n^{\log_2 3}) \)
+                </div>
+            </div>
+        </article>
+
+        <article id="fibonacci-complessita" class="content-section">
+            <h2 class="section-title">6. Esempio: Analisi di Complessità della Successione di Fibonacci</h2>
+            <div class="section-content">
+                <p>La successione di Fibonacci è definita come:</p>
+                <ul>
+                    <li>\(F(0) = 0\)</li>
+                    <li>\(F(1) = 1\)</li>
+                    <li>\(F(n) = F(n-1) + F(n-2)\) per \(n > 1\)</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="fibonacci-ricorsivo" class="content-section">
+            <h3 class="subsection-title">6.1. Algoritmo Ricorsivo per Fibonacci e sua Complessità</h3>
+            <pre><code class="language-pseudocode">
+FIBONACCI-RIC(n)
   if n == 0 then return 0
   if n == 1 then return 1
-  return FIB(n-1) + FIB(n-2)
-                </code></pre>
-                <p>Sia \(T(n)\) il numero di chiamate ricorsive (o, equivalentemente, il numero di addizioni se consideriamo quelle come operazione dominante al di fuori dei casi base).</p>
-                <p>L'equazione di ricorrenza è:</p>
-                <div class="math-block">
-                \( T(n) = \begin{cases} \Theta(1) & \text{se } n \le 1 \\ T(n-1) + T(n-2) + \Theta(1) & \text{se } n > 1 \end{cases} \)
-                </div>
-                <p>Questo tipo di ricorrenza è più difficile da risolvere esattamente con l'albero standard perché le dimensioni dei sottoproblemi non sono frazioni di \(n\).</p>
-                <p>Possiamo però stabilire dei limiti inferiori e superiori.</p>
-                
-                <h4 class="subsubsection-title">Limite Inferiore</h4>
-                <p>Notiamo che \(T(n) > T(n-1)\) e \(T(n) > T(n-2)\). Quindi \(T(n) > 2T(n-2)\).</p>
-                <p>Srotolando \(T(n) > 2T(n-2)\):</p>
-                <div class="math-block"> \( T(n) > 2T(n-2) > 2[2T(n-4)] = 2^2 T(n-4) > \dots > 2^{n/2} T(0) \) (per \(n\) pari) </div>
-                <p>Se \(T(0) = \Theta(1)\), allora \(T(n) \in \Omega(2^{n/2}) = \Omega((\sqrt{2})^n)\).</p>
-                <p>Questo ci dice che la complessità è almeno esponenziale.</p>
+  return FIBONACCI-RIC(n-1) + FIBONACCI-RIC(n-2)
+            </code></pre>
+            <p>L'equazione di ricorrenza per il tempo di esecuzione \(T(n)\) di questa procedura è:</p>
+            <div class="math-block">
+            \( T(n) = \begin{cases} \Theta(1) & \text{se } n \le 1 \\ T(n-1) + T(n-2) + \Theta(1) & \text{se } n > 1 \end{cases} \)
+            </div>
+            <p>Sostituendo le notazioni asintotiche con costanti:</p>
+            <div class="math-block">
+            \( T(n) = \begin{cases} a & \text{se } n \le 1 \\ T(n-1) + T(n-2) + b & \text{se } n > 1 \end{cases} \)
+            </div>
+            <p><strong>Analisi con Albero di Ricorsione (intuitiva):</strong></p>
+            <div class="mermaid-container">
+                <pre class="mermaid">
+                graph TD;
+                    N("T(n)<br/>b") --> N_1("T(n-1)<br/>b");
+                    N --> N_2("T(n-2)<br/>b");
+                    N_1 --> N_11("T(n-2)<br/>b");
+                    N_1 --> N_12("T(n-3)<br/>b");
+                    N_2 --> N_21("T(n-3)<br/>b");
+                    N_2 --> N_22("T(n-4)<br/>b");
+                    N_11 --> Ndots1("...");
+                    N_12 --> Ndots2("...");
+                    N_21 --> Ndots3("...");
+                    N_22 --> Ndots4("...");
+                </pre>
+            </div>
+            <p>L'albero cresce in modo esponenziale. Per ottenere un limite inferiore, consideriamo il caso in cui si sottrae sempre 2 (il ramo "più corto" che porta a un caso base più velocemente, ma che genera comunque molte chiamate). La profondità di questo cammino è circa \(n/2\). Poiché ogni nodo interno genera almeno una chiamata (nel caso di T(n-2)), il numero di nodi (e quindi di operazioni con costo \(b\)) è almeno proporzionale a \(2^{n/2}\).</p>
+            <p>Più formalmente (la professoressa usa una semplificazione per il limite inferiore):</p>
+            <p>Se \(T(n) \ge T(n-2) + T(n-2) = 2T(n-2)\) (ignorando T(n-1) per il lower bound).</p>
+            <p>Sia \(n=2k\). \(T(2k) \ge 2T(2k-2)\). Iterando, \(T(2k) \ge 2^k T(0) = 2^{n/2} \cdot a\).</p>
+            <p>Quindi, \(T(n) \ge b \sum_{i=0}^{n/2-1} 2^i \approx b \cdot 2^{n/2}\) (considerando i nodi fino a metà profondità).</p>
+            <div class="math-block">
+            \( T(n) = \Omega(2^{n/2}) \)
+            </div>
+            <p>Questa è una complessità esponenziale, molto inefficiente.</p>
+        </article>
 
-                <h4 class="subsubsection-title">Limite Superiore</h4>
-                <p>Notiamo che \(T(n-2) < T(n-1)\). Quindi \(T(n) < 2T(n-1) + \Theta(1)\).</p>
-                <p>Srotolando \(T(n) < 2T(n-1) + c\):</p>
-                <div class="math-block"> \( T(n) < 2T(n-1) + c < 2[2T(n-2)+c] + c = 2^2 T(n-2) + 2c + c \) </div>
-                <div class="math-block"> \( < \dots < 2^{n-1} T(1) + c \sum_{i=0}^{n-2} 2^i \) </div>
-                <p>Se \(T(1) = \Theta(1)\), e la sommatoria è \( \Theta(2^{n-1}) \), allora \(T(n) \in O(2^n)\).</p>
-                <p>Quindi, la complessità è esponenziale, compresa tra \((\sqrt{2})^n\) e \(2^n\).</p>
-                <p>Infatti, si può dimostrare che \(T(n) = \Theta(\phi^n)\), dove \(\phi = \frac{1+\sqrt{5}}{2} \approx 1.618\) è la sezione aurea.
-                L'algoritmo ricorsivo naïf per Fibonacci è molto inefficiente a causa delle numerose chiamate ridondanti.</p>
-                <p>La versione iterativa (vista nella Lezione 2C) che calcola i valori e li memorizza in un array ha invece complessità \(\Theta(n)\) (se si considera l'addizione come operazione a costo unitario, altrimenti dipende dal numero di bit).</p>
+        <article id="fibonacci-iterativo" class="content-section">
+            <h3 class="subsection-title">6.2. Algoritmo Iterativo per Fibonacci e sua Complessità</h3>
+            <p>Si può calcolare Fibonacci in modo più efficiente utilizzando un approccio iterativo (programmazione dinamica).</p>
+            <pre><code class="language-pseudocode">
+FIBONACCI-ITER(n)
+  // Crea un array per memorizzare i valori di Fibonacci
+  Fib = new_array(n + 1) 
+  
+  Fib[0] = 0
+  if n >= 1 then
+    Fib[1] = 1
+  
+  for i from 2 to n do
+    Fib[i] = Fib[i-1] + Fib[i-2]
+  
+  return Fib[n]
+            </code></pre>
+            <p><strong>Complessità Temporale:</strong> Il ciclo <code>for</code> esegue \(n-1\) (o \(n\)) iterazioni. Ogni iterazione compie un numero costante di operazioni. Quindi, \(T(n) = \Theta(n)\).</p>
+            <p><strong>Complessità Spaziale:</strong> Utilizza un array di dimensione \(n+1\). Quindi, \(S(n) = \Theta(n)\).</p>
+
+            <h4 class="subsubsection-title">Versione Iterativa "In Place" (con spazio costante)</h4>
+            <p>Poiché per calcolare \(F(i)\) servono solo \(F(i-1)\) e \(F(i-2)\), non è necessario un intero array. Si possono usare solo tre variabili.</p>
+            <pre><code class="language-pseudocode">
+FIBONACCI-ITER-INPLACE(n)
+  if n == 0 then return 0
+  if n == 1 then return 1
+  
+  x = 0  // Rappresenta F(i-2)
+  y = 1  // Rappresenta F(i-1)
+  
+  for i from 2 to n do
+    z = x + y  // Calcola F(i)
+    x = y      // Aggiorna x per la prossima iterazione
+    y = z      // Aggiorna y per la prossima iterazione
+  
+  return y // y conterrà F(n)
+            </code></pre>
+            <p><strong>Complessità Temporale:</strong> \(\Theta(n)\).</p>
+            <p><strong>Complessità Spaziale:</strong> \(\Theta(1)\) (usa un numero costante di variabili). Questa è considerata "in place".</p>
+        </article>
+
+        <article id="metodo-sostituzione-variabile" class="content-section">
+            <h2 class="section-title">7. Metodo della Sostituzione di Variabile: \(T(n) = 2T(\sqrt{n}) + \Theta(\log n)\)</h2>
+            <div class="section-content">
+                <p>Questa tecnica è utile quando l'argomento della chiamata ricorsiva non è una semplice frazione di \(n\) (come \(n/b\)), ma una funzione più complessa come \(\sqrt{n}\).</p>
+                <p><strong>Equazione di Ricorrenza:</strong></p>
+                <div class="math-block">
+                \( T(n) = \begin{cases} \Theta(1) & \text{se } n \le 2 \text{ (o altra piccola costante)} \\ 2T(\sqrt{n}) + \Theta(\log n) & \text{se } n > 2 \end{cases} \)
+                </div>
+
+                <h3 class="subsection-title">Passaggio 1: Sostituzione delle Notazioni Asintotiche</h3>
+                <div class="math-block">
+                \( T(n) = \begin{cases} a & \text{se } n \le 2 \\ 2T(\sqrt{n}) + b \log n & \text{se } n > 2 \end{cases} \)
+                </div>
+                <p>(Assumiamo \(\log\) in base 2 per semplicità iniziale).</p>
+
+                <h3 class="subsection-title">Passaggio 2: Introduzione di una Nuova Variabile \(m\)</h3>
+                <p>L'obiettivo è trasformare \(\sqrt{n}\) in qualcosa come \(m/k\).</p>
+                <p>Si definisce \(n = 2^m\). Questo implica \(m = \log_2 n\).</p>
+                <p>Ora, trasformiamo \(\sqrt{n}\) in termini di \(m\):</p>
+                <div class="math-block">
+                \( \sqrt{n} = n^{1/2} = (2^m)^{1/2} = 2^{m \cdot (1/2)} = 2^{m/2} \)
+                </div>
+
+                <h3 class="subsection-title">Passaggio 3: Sostituire \(n\) nell'Equazione di Ricorrenza</h3>
+                <p>Sostituendo \(n = 2^m\) e \(\sqrt{n} = 2^{m/2}\) nell'equazione originale:</p>
+                <div class="math-block">
+                \( T(2^m) = 2T(2^{m/2}) + b \log_2(2^m) \)
+                </div>
+                <div class="math-block">
+                \( T(2^m) = 2T(2^{m/2}) + b \cdot m \)
+                </div>
+
+                <h3 class="subsection-title">Passaggio 4: Definire una Nuova Funzione \(S(m)\)</h3>
+                <p>Per semplificare la notazione, definiamo \(S(m) = T(2^m)\).</p>
+                <p>L'equazione trasformata diventa:</p>
+                <div class="math-block">
+                \( S(m) = 2S(m/2) + bm \)
+                </div>
+
+                <h3 class="subsection-title">Passaggio 5: Risolvere la Nuova Ricorrenza per \(S(m)\)</h3>
+                <p>Questa è l'equazione di ricorrenza del Merge Sort (vista nell'Esercizio 2), con \(m\) al posto di \(n\).</p>
+                <p>La soluzione è:</p>
+                <div class="math-block">
+                \( S(m) = \Theta(m \log m) \)
+                </div>
+
+                <h3 class="subsection-title">Passaggio 6: Sostituire Indietro per Ottenere \(T(n)\)</h3>
+                <p>Ricordiamo che \(T(n) = S(m)\) e \(m = \log_2 n\).</p>
+                <p>Sostituendo \(m\) nella soluzione di \(S(m)\):</p>
+                <div class="math-block">
+                \( T(n) = \Theta( (\log_2 n) \cdot \log_2(\log_2 n) ) \)
+                </div>
+
+                <h4 class="subsubsection-title">Conclusione per Esercizio con Sostituzione di Variabile</h4>
+                <div class="math-block">
+                \( T(n) = \Theta(\log n \cdot \log \log n) \)
+                </div>
+                <p>(La base del logaritmo non influenza la \(\Theta\)-notazione).</p>
+                <p>Questo metodo permette di trasformare ricorrenze "difficili" in forme più standard e risolvibili con tecniche note.</p>
             </div>
         </article>
 
@@ -456,7 +801,7 @@ FIB(n)
 
     <script src="../../assets/js/common.js"></script>
     <script>
-    // Stessa logica di Mermaid.js da lezione precedente per il rendering degli alberi
+    // Stessa logica di Mermaid.js da lezioni precedenti per il rendering degli alberi
     document.addEventListener('DOMContentLoaded', function () {
         if (typeof mermaid !== 'undefined') {
             mermaid.initialize({
