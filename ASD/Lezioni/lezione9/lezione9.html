@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appunti Lezione 9: Heap (Continuazione), HeapSort e BuildHeap</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        .example-title { font-size: 1.05rem; color: var(--accent-secondary); margin-top: 1.2rem; margin-bottom: 0.5rem; font-style: italic;}
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+            margin-top: 1rem;
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+
+        .array-representation table {
+            margin: 0 auto; /* Centra la tabella */
+            border-collapse: collapse;
+            font-family: var(--font-code);
+        }
+        .array-representation th, .array-representation td {
+            border: 1px solid var(--border-soft);
+            padding: 0.5em 0.75em;
+            min-width: 30px; /* Larghezza minima cella */
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .array-representation th { /* Indici */
+            background-color: var(--code-bg);
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .array-representation td { /* Valori */
+             background-color: var(--bg-card);
+             color: var(--text-primary);
+        }
+        .array-representation td.highlight-swap {
+            background-color: var(--accent-secondary) !important;
+            color: var(--bg-deep-space) !important;
+            font-weight: bold;
+        }
+        .array-representation td.highlight-boundary {
+            border-right: 2px solid var(--accent-primary) !important;
+        }
+        .array-representation .heap-part {
+            background-color: rgba(96, 165, 250, 0.08) !important;
+        }
+        .array-representation .sorted-part {
+            background-color: rgba(129, 140, 248, 0.12) !important;
+        }
+        .array-caption {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1); /* Usa var(--accent-secondary-rgb) se definita, altrimenti un colore fisso */
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em;
+            margin: 1.5em 0;
+            border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 26 ott 2020 (2).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 9: Heap (Continuazione), HeapSort e BuildHeap</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../../ASD_home.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#recap-max-heap-insert" class="sidebar-link">1. Recap: Max-Heap-Insert</a></li>
+            <li><a href="#max-heap-extract-max" class="sidebar-link">2. Operazione Max-Heap-Extract-Max</a></li>
+            <li><a href="#procedura-heapify" class="sidebar-link">3. Procedura Heapify (Max-Heapify)</a></li>
+            <li><a href="#analisi-heapify" class="sidebar-link">3.1. Analisi di Complessità di Heapify</a></li>
+            <li><a href="#correttezza-heapify" class="sidebar-link">3.2. Correttezza di Heapify</a></li>
+            <li><a href="#esercizio-max-heap-modify" class="sidebar-link">4. Esercizio (per casa): Max-Heap-Modify-Key</a></li>
+            <li><a href="#algoritmo-heapsort" class="sidebar-link">5. Algoritmo HeapSort</a></li>
+            <li><a href="#idea-heapsort" class="sidebar-link">5.1. Idea di Base di HeapSort</a></li>
+            <li><a href="#procedura-build-heap" class="sidebar-link">5.2. Procedura Build-Heap (Costruzione di un Heap)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="recap-max-heap-insert" class="content-section">
+            <h2 class="section-title">1. Recap: Operazione Max-Heap-Insert</h2>
+            <div class="section-content">
+                <p>Nella lezione precedente, abbiamo iniziato a discutere l'operazione di inserimento in una Max-Heap, <code>Max-Heap-Insert(H, K)</code>, che inserisce una nuova chiave `K` nell'heap `H` (rappresentato come un vettore).</p>
+                <p><strong>Passaggi Fondamentali dell'Algoritmo:</strong></p>
+                <ol>
+                    <li><strong>Controllo Spazio:</strong> Si verifica se c'è spazio nel vettore sovradimensionato (<code>if H.heapsize < H.length</code>).</li>
+                    <li><strong>Incremento Dimensione:</strong> <code>H.heapsize ← H.heapsize + 1</code>.</li>
+                    <li><strong>Inserimento Iniziale:</strong> La nuova chiave <code>K</code> viene posta nell'ultima posizione disponibile dell'heap, cioè in <code>H[H.heapsize]</code>. Questo nuovo nodo è una foglia.</li>
+                    <li><strong>Ristabilire Proprietà di Max-Heap ("Heapify-Up"):</strong>
+                        <ul>
+                            <li>Si confronta la nuova chiave <code>K</code> (ora in <code>H[i]</code>, dove <code>i = H.heapsize</code>) con la chiave del suo genitore <code>H[PARENT(i)]</code>.</li>
+                            <li>Se <code>H[i] > H[PARENT(i)]</code> (violazione della proprietà di Max-Heap), si scambiano <code>H[i]</code> e <code>H[PARENT(i)]</code>.</li>
+                            <li>Si ripete questo processo di confronto e scambio risalendo l'albero (<code>i ← PARENT(i)</code>) finché:
+                                <ul>
+                                    <li>Il nodo corrente <code>i</code> diventa la radice (<code>i=1</code>, non ha più un genitore con cui confrontarsi).</li>
+                                    <li>Oppure, la proprietà di Max-Heap è soddisfatta (<code>H[i] ≤ H[PARENT(i)]</code>).</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+                <p><strong>Pseudo-codice (Iterativo):</strong></p>
+                <pre><code class="language-pseudocode">
+Max-Heap-Insert(H, K)
+  if H.heapsize < H.length then
+    H.heapsize ← H.heapsize + 1
+    H[H.heapsize] ← K
+    i ← H.heapsize
+    // Loop per far "risalire" la chiave K
+    while (i > 1 AND H[i] > H[PARENT(i)]) do
+      SWAP(H[i], H[PARENT(i)]) // Θ(1)
+      i ← PARENT(i)             // Θ(1)
+  // else: gestione errore heap pieno
+                </code></pre>
+                <p class="math-notation"><em>Nota:</em> <code>PARENT(i)</code> restituisce <code>floor(i/2)</code>.</p>
+                <div class="mermaid-container">
+                     <pre class="mermaid">
+                        graph TD
+                            A["Radice<br/>(potenzialmente < K)"] --> B["Parent(K)<br/>(potenzialmente < K)"];
+                            B --> C["K (nuova chiave)<br/>H[heapsize]"];
+                            C -.->|SWAP se K > Parent(K)| B;
+                            subgraph "Ristabilimento Proprietà"
+                                C
+                                B
+                                A
+                            end
+                            Note right of C: K risale scambiandosi<br/>col genitore finché<br/>non è al posto giusto<br/>o diventa radice.
+                     </pre>
+                </div>
+                <p><strong>Complessità di Max-Heap-Insert:</strong></p>
+                <ul>
+                    <li>Le operazioni al di fuori del ciclo `while` sono \(\Theta(1)\).</li>
+                    <li>Il ciclo `while` esegue un numero di iterazioni pari, nel caso peggiore, all'altezza dell'heap, che è \(h = \Theta(\log n)\) (dove \(n = \text{H.heapsize}\)).</li>
+                    <li>Ogni iterazione del ciclo `while` (confronto, SWAP, PARENT) costa \(\Theta(1)\).</li>
+                    <li><strong>Complessità totale:</strong> \(O(\log n)\).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="max-heap-extract-max" class="content-section">
+            <h2 class="section-title">2. Operazione Max-Heap-Extract-Max (Estrazione dell'Elemento Massimo)</h2>
+            <div class="section-content">
+                <p>L'operazione <code>Max-Heap-Extract-Max(H)</code> rimuove e restituisce l'elemento con la chiave (priorità) più alta dall'heap `H`.</p>
+                <p><strong>Idea dell'Algoritmo:</strong></p>
+                <ol>
+                    <li><strong>Identificare il Massimo:</strong> In una Max-Heap, l'elemento massimo si trova sempre alla radice, cioè in <code>H[1]</code>.</li>
+                    <li><strong>Rimuovere il Massimo e Preservare la Struttura:</strong>
+                        <ul>
+                            <li>Salvare il valore di <code>H[1]</code> (il massimo da restituire).</li>
+                            <li>Sostituire la radice (<code>H[1]</code>) con l'ultimo elemento dell'heap (<code>H[H.heapsize]</code>). Questa è una foglia (la più a destra dell'ultimo livello).</li>
+                            <li>Ridurre la dimensione dell'heap: <code>H.heapsize ← H.heapsize - 1</code>. L'ex ultima foglia ora non fa più parte dell'heap.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Ristabilire la Proprietà di Max-Heap:</strong> L'elemento che è stato spostato alla radice (l'ex ultima foglia) potrebbe essere più piccolo dei suoi nuovi figli, violando la proprietà di Max-Heap. Bisogna "far scendere" questo elemento nell'albero scambiandolo con il maggiore dei suoi figli, finché la proprietà non è soddisfatta o finché non diventa una foglia. Questa operazione di ripristino è chiamata <strong>Heapify</strong> (o Max-Heapify).</li>
+                </ol>
+
+                <h4 class="subsubsection-title">Visualizzazione dell'Eliminazione della Chiave Massima (dagli appunti della prof)</h4>
+                <p>1. La chiave massima è alla radice (es. 100).</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD;
+                        A("100 (radice)") --> B("Figlio SX");
+                        A --> C("Figlio DX");
+                        B --> D("...");
+                        C --> E("...");
+                        subgraph AlberoOriginale
+                           direction LR
+                           F(("...")) --- UltimaFoglia("5 (ultima foglia)"); 
+                        end
+                    </pre>
+                </div>
+                <p>2. Si scambia la chiave della radice con quella dell'ultima foglia.</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                     graph TD;
+                        A("5 (ex ultima foglia)") --> B("Figlio SX");
+                        A --> C("Figlio DX");
+                        B --> D("...");
+                        C --> E("...");
+                         subgraph AlberoDopoScambioRadiceFoglia
+                           direction LR
+                           F(("...")) --- RadiceOriginale("100 (ex radice, ora fuori heap)"); 
+                        end
+                        style RadiceOriginale fill:#818cf833,stroke:#818cf8
+                    </pre>
+                </div>
+                 <p>3. Si "accorcia" l'heap, eliminando concettualmente l'ultima foglia (che ora contiene il vecchio massimo). Il vettore H[1] ora contiene '5'.</p>
+                 <div class="array-representation">
+                    <table>
+                        <thead><tr><th>Idx:</th><th>1</th><th>2</th><th>3</th><th>...</th><th>heapsize-1</th><th>heapsize (vecchio max)</th></tr></thead>
+                        <tbody><tr><td>Val:</td><td>5</td><td>SX</td><td>DX</td><td>...</td><td>...</td><td class="highlight-swap">100</td></tr></tbody>
+                    </table>
+                    <div class="array-caption">H.heapsize ora punta all'elemento prima del 100.</div>
+                </div>
+                <p>4. Ora il valore '5' alla radice potrebbe violare la proprietà di Max-Heap. È necessario chiamare Heapify sulla radice.</p>
+                 <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD;
+                        A("5 (problema!)") --> B("Figlio SX (es. 80)");
+                        A --> C("Figlio DX (es. 90)");
+                        subgraph "Situazione prima di Heapify(1)"
+                            A; B; C;
+                        end
+                        Note right of C: Se 5 < 90 (max tra figli),<br/>5 e 90 si scambiano.<br/>Poi si continua ricorsivamente<br/>sul sottoalbero radicato<br/>dove è finito il 5.
+                    </pre>
+                </div>
+                <p>La professoressa sottolinea che l'elemento spostato alla radice (ad esempio '5') potrebbe essere "troppo piccolo" e dover scendere.</p>
+
+                <p><strong>Pseudo-codice di Max-Heap-Extract-Max:</strong></p>
+                <pre><code class="language-pseudocode">
+Max-Heap-Extract-Max(H)
+  if H.heapsize < 1 then
+    error "Heap underflow" // Heap vuoto
+  
+  max_val ← H[1] // Salva il massimo
+  H[1] ← H[H.heapsize] // Sposta l'ultimo elemento alla radice
+  H.heapsize ← H.heapsize - 1
+  
+  // Chiama Heapify sulla radice (indice 1) per ripristinare la proprietà
+  // Questa è la chiamata che sistemerà il problema
+  Heapify(H, 1) // Θ(log n)
+  
+  return max_val // Θ(1)
+                </code></pre>
+                <p><strong>Complessità di Max-Heap-Extract-Max:</strong></p>
+                <ul>
+                    <li>Le operazioni di accesso, assegnamento e decremento di `heapsize` sono \(\Theta(1)\).</li>
+                    <li>La chiamata a `Heapify(H, 1)` (che vedremo tra poco) costa \(O(\log n)\).</li>
+                    <li><strong>Complessità totale:</strong> \(O(\log n)\).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="procedura-heapify" class="content-section">
+            <h2 class="section-title">3. Procedura Heapify (o Max-Heapify)</h2>
+            <div class="section-content">
+                <p>La procedura `Heapify(H, i)` è un mattoncino fondamentale per mantenere la proprietà di Max-Heap. È chiamata quando si sospetta che il nodo all'indice `i` possa violare la proprietà di Max-Heap, ma si assume che i suoi sottoalberi sinistro e destro (radicati in `LEFT(i)` e `RIGHT(i)`) siano già delle Max-Heap valide.</p>
+                <p><strong>Precondizione per `Heapify(H, i)`:</strong> I sottoalberi radicati in `LEFT(i)` e `RIGHT(i)` sono Max-Heap.</p>
+                <p><strong>Postcondizione:</strong> L'albero radicato in `i` diventa una Max-Heap.</p>
+                <p><strong>Idea dell'Algoritmo `Heapify(H, i)`:</strong></p>
+                <ol>
+                    <li>Confronta la chiave di <code>H[i]</code> con le chiavi dei suoi figli <code>H[LEFT(i)]</code> e <code>H[RIGHT(i)]</code> (se esistono).</li>
+                    <li>Trova il più grande tra <code>H[i]</code>, <code>H[LEFT(i)]</code> e <code>H[RIGHT(i)]</code>. Sia questo il nodo all'indice `m` (massimo).</li>
+                    <li>Se `m` è diverso da `i` (cioè, se <code>H[i]</code> non era il più grande tra sé e i suoi figli), allora la proprietà di Max-Heap è violata in `i`.
+                        <ul>
+                            <li>Scambia <code>H[i]</code> con <code>H[m]</code>.</li>
+                            <li>Ora <code>H[i]</code> (che contiene il vecchio valore di <code>H[m]</code>) è al posto giusto rispetto ai suoi figli. Tuttavia, l'elemento che è sceso in posizione `m` (il vecchio <code>H[i]</code>) potrebbe violare la proprietà di Max-Heap nel sottoalbero radicato in `m`.</li>
+                            <li>Quindi, chiama ricorsivamente <code>Heapify(H, m)</code> per far "scendere" ulteriormente questo elemento se necessario.</li>
+                        </ul>
+                    </li>
+                    <li>Se `m == i`, la proprietà di Max-Heap è già soddisfatta in `i` e non si fa nulla.</li>
+                </ol>
+
+                <p><strong>Pseudo-codice di Heapify(H, i):</strong></p>
+                <pre><code class="language-pseudocode">
+Heapify(H, i) // Anche noto come Max-Heapify
+  l ← LEFT(i)   // Indice figlio sinistro
+  r ← RIGHT(i)  // Indice figlio destro
+  
+  // Trova l'indice 'm' dell'elemento più grande tra H[i], H[l], H[r]
+  // (controllando che l e r siano indici validi dentro l'heap)
+  m ← i // Inizialmente, assumi che i sia il più grande
+  
+  if l ≤ H.heapsize AND H[l] > H[i] then
+    m ← l
+  // else (implicito): m rimane i (o il valore precedentemente assegnato)
+  
+  if r ≤ H.heapsize AND H[r] > H[m] then // Confronta con H[m], non con H[i] originale!
+    m ← r
+  // else (implicito): m rimane il valore precedentemente assegnato
+  
+  // Se il più grande non è il nodo corrente i
+  if m ≠ i then
+    SWAP(H[i], H[m])
+    Heapify(H, m) // Chiama ricorsivamente sul sottoalbero modificato
+                </code></pre>
+                <div class="note-box">
+                    <strong>Nota sulla Precondizione di Heapify (dettaglio dalla prof):</strong>
+                    La precondizione fondamentale per `Heapify(H, i)` è che i sottoalberi radicati nel figlio sinistro `LEFT(i)` e nel figlio destro `RIGHT(i)` siano già delle Max-Heap. L'elemento in `H[i]` è l'unico che potrebbe violare la proprietà rispetto ai suoi figli. L'algoritmo `Heapify` ripristina questa proprietà "localmente" e, se necessario, propaga la correzione verso il basso.
+                </div>
+                <p>Il diagramma a pagina 4 degli appunti OCR mostra questo processo: se `H[i]` (K) è più piccolo di uno dei suoi figli, viene scambiato col maggiore dei figli, e il problema si sposta nel sottoalbero del figlio con cui è avvenuto lo scambio.</p>
+            </div>
+        </article>
+
+        <article id="analisi-heapify" class="content-section">
+            <h3 class="subsection-title">3.1. Analisi di Complessità di Heapify</h3>
+            <div class="section-content">
+                <p>Sia \(T(h)\) il tempo di esecuzione di `Heapify` su un nodo la cui altezza nell'albero dell'heap è \(h\) (altezza del sottoalbero radicato in quel nodo).</p>
+                <ul>
+                    <li>Il lavoro svolto all'interno di una singola chiamata a `Heapify` (esclusa la chiamata ricorsiva) è costante: calcolo di `LEFT` e `RIGHT`, confronti, eventuale `SWAP`. Questo è \(\Theta(1)\).</li>
+                    <li>Nel caso peggiore, la chiamata ricorsiva avviene su un nodo figlio la cui altezza è \(h-1\) (o al massimo \(2h/3 - 1\) in un albero non perfettamente bilanciato, ma qui l'heap è quasi completo, quindi l'altezza dei figli è al più \(h-1\)).</li>
+                </ul>
+                <p>L'equazione di ricorrenza per `Heapify` in termini di altezza \(h\) del sottoalbero radicato in `i` è:</p>
+                <div class="math-block">
+                \( T(h) \le \begin{cases} \Theta(1) & \text{se } h = 0 \text{ (foglia)} \\ \Theta(1) + T(h-1) & \text{se } h > 0 \end{cases} \)
+                </div>
+                <p>(In realtà, la chiamata ricorsiva non è sempre su \(h-1\), potrebbe essere su un sottoalbero di altezza inferiore se l'altro figlio era più piccolo, ma per il caso peggiore si considera \(h-1\). Una stima più precisa per alberi non completi sarebbe \(T(2n/3)\) ma per l'heap quasi-completo va bene \(h-1\)).</p>
+                <p>Questa ricorrenza si srotola in \(T(h) = h \cdot \Theta(1) = \Theta(h)\).</p>
+                <p>Poiché l'altezza \(h\) di un heap con \(n\) nodi è \(O(\log n)\), la complessità di `Heapify` è:</p>
+                <div class="math-block">
+                \( O(\log n) \)
+                </div>
+                <p>La professoressa scrive anche la ricorrenza in termini di \(n\) (numero di nodi nel sottoalbero radicato in `i`). Se \(n_i\) è il numero di nodi nel sottoalbero radicato in `i`, la chiamata ricorsiva sarà su un sottoalbero con al più \(2n_i/3\) nodi (questo è un limite superiore generale per alberi binari, per un heap quasi-completo la situazione è più bilanciata).
+                La ricorrenza sarebbe \(T(n) \le T(2n/3) + \Theta(1)\), che risolta (ad es. con Master Theorem, caso 2 se \(f(n) = \Theta(1)\) e \(a=1, b=3/2\), quindi \(\log_b a = \log_{3/2} 1 = 0\). Dato che \(n^0 = \Theta(1)\), si ricade nel caso 2 del Master Theorem) dà \(T(n) = \Theta(\log n)\).</p>
+            </div>
+        </article>
+
+        <article id="correttezza-heapify" class="content-section">
+            <h3 class="subsection-title">3.2. Correttezza di Heapify (Dimostrazione per Induzione sull'Altezza)</h3>
+            <div class="section-content">
+                <p><strong>Teorema:</strong> Se i sottoalberi radicati in `LEFT(i)` e `RIGHT(i)` sono Max-Heap, allora `Heapify(H, i)` termina con il sottoalbero radicato in `i` che è una Max-Heap.</p>
+                <p>Si dimostra per induzione sull'altezza \(h\) del nodo `i` (altezza del sottoalbero radicato in `i`).</p>
+                <p><strong>Caso Base (h=0):</strong> Il nodo `i` è una foglia.</p>
+                <ul>
+                    <li>In questo caso, `LEFT(i)` e `RIGHT(i)` saranno indici maggiori di `H.heapsize`.</li>
+                    <li>Le condizioni `l ≤ H.heapsize` e `r ≤ H.heapsize` saranno false.</li>
+                    <li>La variabile `m` rimarrà uguale a `i`.</li>
+                    <li>La condizione `m ≠ i` sarà falsa, quindi non ci saranno scambi né chiamate ricorsive.</li>
+                    <li>L'algoritmo termina. Un albero composto da una singola foglia è banalmente una Max-Heap. Il caso base è verificato.</li>
+                </ul>
+
+                <p><strong>Passo Induttivo (h > 0):</strong></p>
+                <ul>
+                    <li><strong>Ipotesi Induttiva (Hp.Ind.):</strong> Assumiamo che `Heapify` sia corretta per tutti i nodi con altezza \(k < h\).
+                    (Cioè, se chiamata su un nodo `j` con altezza \(k < h\), e i sottoalberi dei figli di `j` sono Max-Heap, allora `Heapify(H,j)` rende il sottoalbero radicato in `j` una Max-Heap).</li>
+                    <li><strong>Tesi da dimostrare:</strong> `Heapify(H, i)` (dove `i` ha altezza \(h\)) è corretta, date le precondizioni (sottoalberi sinistro e destro di `i` sono Max-Heap).</li>
+                    <li><strong>Dimostrazione del Passo Induttivo:</strong>
+                        <ol>
+                            <li>L'algoritmo trova `m`, l'indice del massimo tra `H[i]`, `H[LEFT(i)]` (se esiste) e `H[RIGHT(i)]` (se esiste).</li>
+                            <li><strong>Caso 1: `m == i`</strong>.
+                                <ul>
+                                    <li>Significa che `H[i]` è già maggiore o uguale ai suoi figli.</li>
+                                    <li>Poiché per precondizione i sottoalberi sinistro e destro sono già Max-Heap, e ora anche la radice `i` soddisfa la proprietà rispetto ai suoi figli, l'intero sottoalbero radicato in `i` è una Max-Heap.</li>
+                                    <li>L'algoritmo termina senza fare nulla, e la postcondizione è soddisfatta.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Caso 2: `m ≠ i`</strong>.
+                                <ul>
+                                    <li>Significa che `H[m]` (uno dei figli) è strettamente maggiore di `H[i]`. L'algoritmo scambia `H[i]` con `H[m]`.</li>
+                                    <li>Dopo lo scambio, il nuovo `H[i]` (che era il vecchio `H[m]`) è ora il più grande tra sé e i suoi figli (il vecchio `H[LEFT(i)]` e `H[RIGHT(i)]`). Quindi la proprietà di Max-Heap è soddisfatta alla radice `i` rispetto ai suoi figli diretti.</li>
+                                    <li>L'elemento che è sceso (il vecchio `H[i]`) si trova ora in `H[m]`. Questo elemento potrebbe essere più piccolo dei figli di `m` (i nipoti originali di `i`), violando la proprietà di Max-Heap nel sottoalbero radicato in `m`.</li>
+                                    <li>Tuttavia, il sottoalbero radicato in `m` ha un'altezza strettamente minore di \(h\) (al massimo \(h-1\)). I figli di `m` (se esistono) erano radici di Max-Heap (per la precondizione originale, o perché l'altro figlio di `i` non è stato toccato e il suo sottoalbero era già Max-Heap).</li>
+                                    <li>Viene chiamata ricorsivamente `Heapify(H, m)`. Per ipotesi induttiva (poiché l'altezza del sottoalbero in `m` è \(<h\)), questa chiamata termina e rende il sottoalbero radicato in `m` una Max-Heap.</li>
+                                    <li>Avendo ripristinato la proprietà in `m` e mantenendola in `i` e nell'altro figlio di `i`, l'intero sottoalbero radicato in `i` è ora una Max-Heap.</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </li>
+                </ul>
+                <p>La correttezza è provata per induzione sull'altezza.</p>
+            </div>
+        </article>
+
+        <article id="esercizio-max-heap-modify" class="content-section">
+            <h2 class="section-title">4. Esercizio (Assegnato per Casa dalla Professoressa): Max-Heap-Modify-Key</h2>
+            <div class="section-content">
+                <p><strong>Testo del Problema:</strong> Scrivere una procedura <code>Max-Heap-Modify-Key(H, i, s)</code> che modifica la chiave del nodo all'indice `i` dell'heap `H` aggiungendogli il valore `s`, e poi ripristina la proprietà di Max-Heap.</p>
+                <div class="math-block">
+                H[i] \leftarrow H[i] + s
+                </div>
+                <p>La nota della professoressa specifica che `s` può essere sia \(>0\) (aumento di priorità) che \(<0\) (decremento di priorità).</p>
+                <p>La complessità richiesta è \(O(\log n)\).</p>
+
+                <h4 class="subsubsection-title">Svolgimento e Spiegazione (Come da riflessione)</h4>
+                <p>L'idea è di modificare la chiave e poi capire se l'elemento deve "risalire" (se la sua priorità è aumentata e ora è maggiore del padre) o "scendere" (se la sua priorità è diminuita e ora è minore di uno dei figli).</p>
+                <pre><code class="language-pseudocode">
+Max-Heap-Modify-Key(H, i, s)
+  if i < 1 OR i > H.heapsize then
+    error "Indice non valido"
+  
+  old_key ← H[i]
+  H[i] ← H[i] + s // Modifica la chiave
+
+  if s > 0 then // La priorità è aumentata (o rimasta uguale, ma controlliamo lo stesso)
+    // Potrebbe essere necessario far risalire H[i] (Heapify-Up)
+    while (i > 1 AND H[i] > H[PARENT(i)]) do
+      SWAP(H[i], H[PARENT(i)])
+      i ← PARENT(i)
+  else if s < 0 then // La priorità è diminuita (o rimasta uguale)
+    // Potrebbe essere necessario far scendere H[i]
+    // Questo è esattamente ciò che fa Heapify(H, i)
+    Heapify(H, i)
+  // Se s == 0, non si fa nulla perché l'heap era già valido.
+                </code></pre>
+                <p><strong>Spiegazione:</strong></p>
+                <ul>
+                    <li>Prima si aggiorna la chiave <code>H[i]</code>.</li>
+                    <li><strong>Se <code>s > 0</code> (aumento di priorità):</strong> La nuova chiave <code>H[i]</code> potrebbe essere diventata più grande di quella del suo genitore. In questo caso, si applica la logica "Heapify-Up" (vista per <code>Max-Heap-Insert</code>) per far risalire l'elemento fino a quando la proprietà di Max-Heap è ristabilita o si raggiunge la radice. Questo percorso è lungo al massimo l'altezza dell'heap, \(O(\log n)\).</li>
+                    <li><strong>Se <code>s < 0</code> (decremento di priorità):</strong> La nuova chiave <code>H[i]</code> potrebbe essere diventata più piccola di uno o entrambi i suoi figli. In questo caso, i sottoalberi figli di `i` sono ancora Max-Heap (non sono stati toccati), ma `H[i]` potrebbe violare la proprietà. Questa è esattamente la precondizione per chiamare la procedura `Heapify(H, i)` che abbiamo appena visto. `Heapify` farà "scendere" l'elemento al posto giusto. Anche questo costa \(O(\log n)\).</li>
+                    <li><strong>Se <code>s == 0</code>:</strong> La chiave non cambia, l'heap rimane valido, non si fa nulla.</li>
+                </ul>
+                <p><strong>Complessità Totale:</strong> In entrambi i casi (aumento o decremento), il ripristino costa \(O(\log n)\). Quindi, l'operazione complessiva è \(O(\log n)\).</p>
+            </div>
+        </article>
+
+        <article id="algoritmo-heapsort" class="content-section">
+            <h2 class="section-title">5. Algoritmo di Ordinamento: HeapSort</h2>
+            <div class="section-content">
+                <p>HeapSort è un algoritmo di ordinamento che utilizza la struttura dati Max-Heap (o Min-Heap) per ordinare un array.</p>
+                <p>È un algoritmo di ordinamento basato su confronti, con complessità temporale \(O(n \log n)\) e può essere implementato in-place (spazio \(\Theta(1)\) aggiuntivo).</p>
+            </div>
+        </article>
+
+        <article id="idea-heapsort" class="content-section">
+            <h3 class="subsection-title">5.1. Idea di Base di HeapSort</h3>
+            <p>L'algoritmo HeapSort si articola in due fasi principali:</p>
+            <ol>
+                <li><strong>Costruzione dell'Heap (Build-Heap):</strong>
+                    <ul>
+                        <li>Dato un array di input \(A\) non ordinato, lo si trasforma in una Max-Heap.</li>
+                        <li>L'operazione <code>Build-Heap(A)</code> riorganizza gli elementi di \(A\) in modo che soddisfino la proprietà di Max-Heap.</li>
+                    </ul>
+                </li>
+                <li><strong>Ordinamento Effettivo (Ciclo di Estrazioni):</strong>
+                    <ul>
+                        <li>Dopo che \(A\) è una Max-Heap, l'elemento massimo si trova in \(A[1]\).</li>
+                        <li>Si scambia \(A[1]\) con l'ultimo elemento dell'heap corrente, \(A[\text{heapsize}]\). Ora l'elemento massimo è nell'ultima posizione dell'array, che è la sua posizione finale nell'array ordinato.</li>
+                        <li>Si decrementa `heapsize` di 1 (escludendo l'elemento massimo appena posizionato dalla porzione di heap).</li>
+                        <li>L'elemento che è stato spostato in \(A[1]\) (l'ex ultima foglia) potrebbe violare la proprietà di Max-Heap. Si chiama `Heapify(A, 1)` per ripristinare la proprietà sulla nuova radice dell'heap ridotto.</li>
+                        <li>Si ripete questo processo di scambio, decremento di `heapsize` e `Heapify` finché l'heap non contiene più di un elemento.</li>
+                    </ul>
+                </li>
+            </ol>
+            <p>Alla fine, l'array \(A\) conterrà gli elementi ordinati in modo non decrescente.</p>
+            <h4 class="subsubsection-title">Visualizzazione dell'Idea di HeapSort (dagli appunti della prof)</h4>
+            <p>1. Inizialmente si ha un vettore A (non ordinato).</p>
+            <div class="array-representation">
+                <table>
+                    <thead><tr><th>...</th><th>...</th><th>...</th><th>...</th><th>...</th></tr></thead>
+                    <tbody><tr><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr></tbody>
+                </table>
+            </div>
+            <p>2. Si applica `BuildHeap(A)`. Ora il vettore A rappresenta una Max-Heap. La `heapsize` è uguale alla lunghezza dell'array.</p>
+             <div class="array-representation">
+                <table>
+                    <thead><tr><th>1</th><th>2</th><th>3</th><th>...</th><th>heapsize</th></tr></thead>
+                    <tbody><tr class="heap-part"><td>MAX</td><td>...</td><td>...</td><td>...</td><td>...</td></tr></tbody>
+                </table>
+                <div class="array-caption">A è una Max-Heap. A[1] è il massimo.</div>
+            </div>
+            <p>3. Inizia il ciclo di ordinamento:</p>
+            <ul>
+                <li>Si scambia `A[1]` (il massimo corrente dell'heap) con `A[heapsize]`.</li>
+                <div class="array-representation">
+                    <table>
+                        <thead><tr><th>1</th><th>2</th><th>...</th><th>heapsize-1</th><th>heapsize</th></tr></thead>
+                        <tbody><tr><td class="highlight-swap heap-part">A[hs]</td><td class="heap-part">...</td><td class="heap-part">...</td><td class="highlight-boundary heap-part">...</td><td class="highlight-swap sorted-part">MAX</td></tr></tbody>
+                    </table>
+                    <div class="array-caption">Scambio avvenuto. MAX è ora in posizione finale.</div>
+                </div>
+                <li>Si decrementa `heapsize`. La parte "ordinata" dell'array cresce da destra.</li>
+                <li>Si chiama `Heapify(A, 1)` sulla porzione di heap rimanente (da 1 a `heapsize` nuovo) per ripristinare la proprietà di Max-Heap.</li>
+                <div class="array-representation">
+                    <table>
+                        <thead><tr><th>1</th><th>2</th><th>...</th><th>heapsize-1</th><th>heapsize (ex)</th></tr></thead>
+                        <tbody><tr><td class="heap-part">Nuovo MAX</td><td class="heap-part">...</td><td class="heap-part">...</td><td class="highlight-boundary heap-part">...</td><td class="sorted-part">MAX_prec</td></tr></tbody>
+                    </table>
+                    <div class="array-caption">Heapify su A[1] ha ripristinato l'heap. A[1] è il nuovo massimo dell'heap ridotto.</div>
+                </div>
+                <li>Si ripete lo scambio, il decremento e Heapify.</li>
+            </ul>
+            <p>Questo processo continua fino a quando `heapsize` diventa 1. A quel punto, l'intero array è ordinato.</p>
+        </article>
+        
+        <article id="procedura-build-heap" class="content-section">
+            <h3 class="subsection-title">5.2. Procedura Build-Heap (Costruzione di un Heap da un Array non Ordinato)</h3>
+            <div class="section-content">
+                <p>Come si trasforma un array generico \(A\) in una Max-Heap?</p>
+                <p>L'idea è di utilizzare la procedura `Heapify` in modo iterativo.</p>
+                <p>Ricordiamo che gli elementi da <code>H[floor(H.heapsize / 2) + 1]</code> a <code>H[H.heapsize]</code> sono già foglie, e ogni foglia è banalmente una Max-Heap (o Min-Heap) di un solo elemento.</p>
+                <p>Quindi, possiamo iniziare a chiamare `Heapify` sui nodi che sono genitori di foglie, e procedere all'indietro (bottom-up) verso la radice.</p>
+                <p>L'ultimo nodo che potrebbe non essere una foglia (cioè, l'ultimo nodo interno) è quello all'indice <code>floor(A.length / 2)</code>.</p>
+
+                <p><strong>Pseudo-codice di Build-Heap(A):</strong></p>
+                <pre><code class="language-pseudocode">
+Build-Heap(A)
+  A.heapsize ← A.length // L'heap inizialmente occupa tutto l'array
+  
+  // Itera all'indietro dagli ultimi nodi interni fino alla radice
+  for i ← floor(A.length / 2) downto 1 do
+    Heapify(A, i) 
+                </code></pre>
+                <p><strong>Spiegazione:</strong></p>
+                <ul>
+                    <li>Quando `Heapify(A, i)` viene chiamata, per l'ordine decrescente degli indici `i`, si può garantire che i sottoalberi radicati nei figli di `i` (cioè `LEFT(i)` e `RIGHT(i)`) sono già stati trasformati in Max-Heap dalle precedenti chiamate a `Heapify` (perché gli indici dei figli sono maggiori di `i`).</li>
+                    <li>Questo soddisfa la precondizione di `Heapify`.</li>
+                    <li>Partendo dai nodi più "bassi" che non sono foglie e risalendo, si costruisce progressivamente la proprietà di Max-Heap per alberi sempre più grandi, fino a includere la radice.</li>
+                </ul>
+                <p>La complessità di `Build-Heap` non è banale come \( (\text{numero di nodi}) \times O(\log n) \). Si può dimostrare (analisi più avanzata, spesso vista nel corso) che `Build-Heap` ha una complessità temporale:</p>
+                <div class="math-block">
+                \( T_{\text{Build-Heap}}(n) = O(n) \)
+                </div>
+                <p>Questa è una complessità lineare, il che è molto efficiente.</p>
+
+                <h4 class="subsubsection-title">Complessità Totale di HeapSort</h4>
+                <p>HeapSort consiste in:</p>
+                <ol>
+                    <li><code>Build-Heap(A)</code>: \(O(n)\)</li>
+                    <li>Un ciclo che si ripete \(n-1\) volte. Ad ogni iterazione del ciclo:
+                        <ul>
+                            <li>Uno scambio: \(\Theta(1)\)</li>
+                            <li>Un decremento di `heapsize`: \(\Theta(1)\)</li>
+                            <li>Una chiamata a `Heapify(A, 1)`: \(O(\log k)\), dove \(k\) è la dimensione corrente dell'heap (che va da \(n-1\) a 2).</li>
+                        </ul>
+                        Quindi, il costo totale del ciclo di estrazioni è \( \sum_{k=2}^{n-1} O(\log k) \approx O(n \log n) \). (La professoressa accenna che la somma esatta è \(O(n \log n)\)).
+                    </li>
+                </ol>
+                <p><strong>Complessità Totale di HeapSort:</strong> \(O(n) + O(n \log n) = O(n \log n)\).</p>
+                <p>Poiché HeapSort è un algoritmo di ordinamento basato su confronti e \(n \log n\) è un limite inferiore per tali algoritmi, HeapSort è asintoticamente ottimale.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    // Stessa logica di Mermaid.js da lezioni precedenti per il rendering degli alberi
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || ""; 
+                mermaidOriginalDefinitions.set(id, decodedContent.trim());
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    // console.warn("Nessuna definizione originale per Mermaid ID:", diagramId);
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    // console.error("Errore rendering Mermaid per ID:", diagramId, "\nErrore:", e, "\nDefinizione:", diagramDefinition);
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
