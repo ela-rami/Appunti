@@ -1,9 +1,10 @@
+ASD/Lezioni/lezione9/lezione9.html:
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appunti Lezione 9: Heap (Continuazione), HeapSort e BuildHeap</title>
+    <title>Appunti Lezione 9: HeapSort e Costruzione di un Heap (BuildHeap)</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
     <!-- MathJax per rendering formule LaTeX -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -107,7 +108,7 @@
         .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
         .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
         .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
-        .example-title { font-size: 1.05rem; color: var(--accent-secondary); margin-top: 1.2rem; margin-bottom: 0.5rem; font-style: italic;}
+
 
         .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
 
@@ -129,7 +130,6 @@
             border: 1px solid var(--border-soft);
             text-align: center; 
             overflow-x: auto; 
-            margin-top: 1rem;
         }
         .mermaid { 
              text-align: center; 
@@ -162,20 +162,14 @@
             color: var(--bg-deep-space) !important;
             font-weight: bold;
         }
-        .array-representation td.highlight-boundary {
-            border-right: 2px solid var(--accent-primary) !important;
+        .array-representation td.highlight-max {
+            border: 2px solid var(--accent-primary) !important;
+            font-weight: bold;
         }
-        .array-representation .heap-part {
-            background-color: rgba(96, 165, 250, 0.08) !important;
-        }
-        .array-representation .sorted-part {
-            background-color: rgba(129, 140, 248, 0.12) !important;
-        }
-        .array-caption {
-            font-size: 0.85em;
-            color: var(--text-secondary);
-            margin-top: 0.5rem;
-            text-align: center;
+         .array-representation td.greyed-out {
+            background-color: #4b5563 !important; /* Grigio più scuro per elementi "fuori heapsize" */
+            color: #9ca3af !important;
+            font-style: italic;
         }
 
 
@@ -193,7 +187,7 @@
         pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
         
         .note-box {
-            background-color: rgba(129, 140, 248, 0.1); /* Usa var(--accent-secondary-rgb) se definita, altrimenti un colore fisso */
+            background-color: rgba(129, 140, 248, 0.1); /* Viola chiaro trasparente */
             border-left: 4px solid var(--accent-secondary);
             padding: 1em;
             margin: 1.5em 0;
@@ -249,11 +243,11 @@
         }
     </style>
 </head>
-<body data-pdf-path="Nota 26 ott 2020 (2).pdf">
+<body data-pdf-path="Nota 29 ott 2020 (2).pdf">
     <div class="overlay"></div>
     <header>
         <button class="hamburger-menu" id="hamburger-btn">☰</button>
-        <h1>Lezione 9: Heap (Continuazione), HeapSort e BuildHeap</h1>
+        <h1>Lezione 9: HeapSort e Costruzione di un Heap (BuildHeap)</h1>
         <div></div>
     </header>
 
@@ -264,451 +258,406 @@
         </div>
         <h2>Indice Argomenti</h2>
         <ul>
-            <li><a href="#recap-max-heap-insert" class="sidebar-link">1. Recap: Max-Heap-Insert</a></li>
-            <li><a href="#max-heap-extract-max" class="sidebar-link">2. Operazione Max-Heap-Extract-Max</a></li>
-            <li><a href="#procedura-heapify" class="sidebar-link">3. Procedura Heapify (Max-Heapify)</a></li>
-            <li><a href="#analisi-heapify" class="sidebar-link">3.1. Analisi di Complessità di Heapify</a></li>
-            <li><a href="#correttezza-heapify" class="sidebar-link">3.2. Correttezza di Heapify</a></li>
-            <li><a href="#esercizio-max-heap-modify" class="sidebar-link">4. Esercizio (per casa): Max-Heap-Modify-Key</a></li>
-            <li><a href="#algoritmo-heapsort" class="sidebar-link">5. Algoritmo HeapSort</a></li>
-            <li><a href="#idea-heapsort" class="sidebar-link">5.1. Idea di Base di HeapSort</a></li>
-            <li><a href="#procedura-build-heap" class="sidebar-link">5.2. Procedura Build-Heap (Costruzione di un Heap)</a></li>
+            <li><a href="#recap-heap-insert" class="sidebar-link">1. Recap: Max-Heap-Insert</a></li>
+            <li><a href="#max-heap-extract" class="sidebar-link">2. Operazione Max-Heap-Extract (Extract-Max)</a></li>
+            <li><a href="#heapify-procedura" class="sidebar-link">2.1. Procedura Ausiliaria: Heapify (o Max-Heapify)</a></li>
+            <li><a href="#complessita-heapify" class="sidebar-link">2.2. Complessità di Heapify</a></li>
+            <li><a href="#correttezza-heapify" class="sidebar-link">2.3. Correttezza di Heapify</a></li>
+            <li><a href="#esercizio-max-heap-modify" class="sidebar-link">3. Esercizio (per casa): Max-Heap-Modify-Key</a></li>
+            <li><a href="#heapsort-algoritmo" class="sidebar-link">4. Algoritmo HeapSort</a></li>
+            <li><a href="#build-heap-procedura" class="sidebar-link">4.1. Procedura Ausiliaria: Build-Max-Heap</a></li>
+            <li><a href="#complessita-build-heap" class="sidebar-link">4.2. Complessità di Build-Max-Heap (Analisi più precisa)</a></li>
+            <li><a href="#complessita-heapsort" class="sidebar-link">4.3. Complessità di HeapSort</a></li>
         </ul>
     </nav>
 
     <main>
-        <article id="recap-max-heap-insert" class="content-section">
+        <article id="recap-heap-insert" class="content-section">
             <h2 class="section-title">1. Recap: Operazione Max-Heap-Insert</h2>
             <div class="section-content">
-                <p>Nella lezione precedente, abbiamo iniziato a discutere l'operazione di inserimento in una Max-Heap, <code>Max-Heap-Insert(H, K)</code>, che inserisce una nuova chiave `K` nell'heap `H` (rappresentato come un vettore).</p>
-                <p><strong>Passaggi Fondamentali dell'Algoritmo:</strong></p>
+                <p>Nella lezione precedente abbiamo introdotto l'operazione <code>Max-Heap-Insert(H, K)</code>, che inserisce una nuova chiave <code>K</code> in una Max-Heap <code>H</code>.</p>
+                <p><strong>Idea chiave:</strong></p>
                 <ol>
-                    <li><strong>Controllo Spazio:</strong> Si verifica se c'è spazio nel vettore sovradimensionato (<code>if H.heapsize < H.length</code>).</li>
-                    <li><strong>Incremento Dimensione:</strong> <code>H.heapsize ← H.heapsize + 1</code>.</li>
-                    <li><strong>Inserimento Iniziale:</strong> La nuova chiave <code>K</code> viene posta nell'ultima posizione disponibile dell'heap, cioè in <code>H[H.heapsize]</code>. Questo nuovo nodo è una foglia.</li>
-                    <li><strong>Ristabilire Proprietà di Max-Heap ("Heapify-Up"):</strong>
-                        <ul>
-                            <li>Si confronta la nuova chiave <code>K</code> (ora in <code>H[i]</code>, dove <code>i = H.heapsize</code>) con la chiave del suo genitore <code>H[PARENT(i)]</code>.</li>
-                            <li>Se <code>H[i] > H[PARENT(i)]</code> (violazione della proprietà di Max-Heap), si scambiano <code>H[i]</code> e <code>H[PARENT(i)]</code>.</li>
-                            <li>Si ripete questo processo di confronto e scambio risalendo l'albero (<code>i ← PARENT(i)</code>) finché:
-                                <ul>
-                                    <li>Il nodo corrente <code>i</code> diventa la radice (<code>i=1</code>, non ha più un genitore con cui confrontarsi).</li>
-                                    <li>Oppure, la proprietà di Max-Heap è soddisfatta (<code>H[i] ≤ H[PARENT(i)]</code>).</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
+                    <li>Si incrementa <code>H.heapsize</code>.</li>
+                    <li>Si inserisce <code>K</code> nella nuova ultima posizione (foglia).</li>
+                    <li>Si fa "risalire" <code>K</code> scambiandola con il genitore finché la proprietà di Max-Heap non è ristabilita o si raggiunge la radice.</li>
                 </ol>
-                <p><strong>Pseudo-codice (Iterativo):</strong></p>
                 <pre><code class="language-pseudocode">
-Max-Heap-Insert(H, K)
+Max-Heap-Insert(H, K)  // Costo O(1) + costo del while
   if H.heapsize < H.length then
     H.heapsize ← H.heapsize + 1
     H[H.heapsize] ← K
+    
     i ← H.heapsize
-    // Loop per far "risalire" la chiave K
-    while (i > 1 AND H[i] > H[PARENT(i)]) do
-      SWAP(H[i], H[PARENT(i)]) // Θ(1)
-      i ← PARENT(i)             // Θ(1)
-  // else: gestione errore heap pieno
+    
+    // Ciclo per far risalire l'elemento (Heapify-Up implicito)
+    while (i > 1 AND H[PARENT(i)] < H[i]) do  // Errore corretto: H[PARENT(i)] < H[i] per Max-Heap
+      SWAP(H[i], H[PARENT(i)])
+      i ← PARENT(i)
+  // else: gestire overflow (heap pieno)
                 </code></pre>
-                <p class="math-notation"><em>Nota:</em> <code>PARENT(i)</code> restituisce <code>floor(i/2)</code>.</p>
-                <div class="mermaid-container">
-                     <pre class="mermaid">
-                        graph TD
-                            A["Radice<br/>(potenzialmente < K)"] --> B["Parent(K)<br/>(potenzialmente < K)"];
-                            B --> C["K (nuova chiave)<br/>H[heapsize]"];
-                            C -.->|SWAP se K > Parent(K)| B;
-                            subgraph "Ristabilimento Proprietà"
-                                C
-                                B
-                                A
-                            end
-                            Note right of C: K risale scambiandosi<br/>col genitore finché<br/>non è al posto giusto<br/>o diventa radice.
-                     </pre>
+                 <div class="note-box">
+                    <strong>Attenzione (Correzione dallo pseudo-codice della lezione precedente):</strong> Per una Max-Heap, la condizione del `while` per far risalire l'elemento è <code>H[PARENT(i)] < H[i]</code> (se il genitore è più piccolo del figlio, scambio). Nell'immagine OCR della lezione 8 c'era un <code>></code>, che sarebbe stato per una Min-Heap o un errore di trascrizione. La logica corretta per Max-Heap è "se il figlio è più grande del padre, scambia per far salire il figlio".
                 </div>
-                <p><strong>Complessità di Max-Heap-Insert:</strong></p>
-                <ul>
-                    <li>Le operazioni al di fuori del ciclo `while` sono \(\Theta(1)\).</li>
-                    <li>Il ciclo `while` esegue un numero di iterazioni pari, nel caso peggiore, all'altezza dell'heap, che è \(h = \Theta(\log n)\) (dove \(n = \text{H.heapsize}\)).</li>
-                    <li>Ogni iterazione del ciclo `while` (confronto, SWAP, PARENT) costa \(\Theta(1)\).</li>
-                    <li><strong>Complessità totale:</strong> \(O(\log n)\).</li>
-                </ul>
+                <p>La complessità di questa operazione è \(O(\log n)\) perché nel caso peggiore l'elemento risale dalla foglia più profonda fino alla radice, percorrendo un cammino di lunghezza pari all'altezza dell'heap, che è \(O(\log n)\).</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD;
+                        R("Radice") --> P("Genitore (P)");
+                        P --> I_new("Nuovo K (i)");
+                        I_new --> LP("...eventuali figli di K...");
+                        style R fill:#ddd,stroke:#333,stroke-width:2px;
+                        style P fill:#ddd,stroke:#333,stroke-width:2px;
+                        style I_new fill:#60a5fa,stroke:#333,stroke-width:2px;
+
+                        subgraph "Logica di Heapify-Up"
+                        direction LR
+                           Start("K inserito in H[heapsize]") --> C1{"i > 1 AND H[PARENT(i)] < H[i] ?"};
+                           C1 -- Vero --> SWAP["SWAP(H[i], H[PARENT(i)])"];
+                           SWAP --> UPD_I["i ← PARENT(i)"];
+                           UPD_I --> C1;
+                           C1 -- Falso --> End("Fine");
+                        end
+                    </pre>
+                </div>
+                 <p>L'immagine della lavagna (pagina 1) mostra un albero e un array, illustrando che `m = H.heapsize` e che l'inserimento avviene "gonfiando" l'heap e poi ristabilendo la proprietà.</p>
             </div>
         </article>
 
-        <article id="max-heap-extract-max" class="content-section">
-            <h2 class="section-title">2. Operazione Max-Heap-Extract-Max (Estrazione dell'Elemento Massimo)</h2>
+        <article id="max-heap-extract" class="content-section">
+            <h2 class="section-title">2. Operazione Max-Heap-Extract (Extract-Max)</h2>
             <div class="section-content">
-                <p>L'operazione <code>Max-Heap-Extract-Max(H)</code> rimuove e restituisce l'elemento con la chiave (priorità) più alta dall'heap `H`.</p>
+                <p>L'operazione <code>Max-Heap-Extract(H)</code> (o semplicemente <code>Extract-Max</code>) rimuove e restituisce l'elemento con la chiave (priorità) massima dalla Max-Heap <code>H</code>.</p>
+                <p><strong>Proprietà:</strong> In una Max-Heap, l'elemento con la chiave massima si trova sempre alla radice, cioè in <code>H[1]</code>.</p>
                 <p><strong>Idea dell'Algoritmo:</strong></p>
                 <ol>
-                    <li><strong>Identificare il Massimo:</strong> In una Max-Heap, l'elemento massimo si trova sempre alla radice, cioè in <code>H[1]</code>.</li>
-                    <li><strong>Rimuovere il Massimo e Preservare la Struttura:</strong>
-                        <ul>
-                            <li>Salvare il valore di <code>H[1]</code> (il massimo da restituire).</li>
-                            <li>Sostituire la radice (<code>H[1]</code>) con l'ultimo elemento dell'heap (<code>H[H.heapsize]</code>). Questa è una foglia (la più a destra dell'ultimo livello).</li>
-                            <li>Ridurre la dimensione dell'heap: <code>H.heapsize ← H.heapsize - 1</code>. L'ex ultima foglia ora non fa più parte dell'heap.</li>
-                        </ul>
-                    </li>
-                    <li><strong>Ristabilire la Proprietà di Max-Heap:</strong> L'elemento che è stato spostato alla radice (l'ex ultima foglia) potrebbe essere più piccolo dei suoi nuovi figli, violando la proprietà di Max-Heap. Bisogna "far scendere" questo elemento nell'albero scambiandolo con il maggiore dei suoi figli, finché la proprietà non è soddisfatta o finché non diventa una foglia. Questa operazione di ripristino è chiamata <strong>Heapify</strong> (o Max-Heapify).</li>
+                    <li>Se l'heap è vuoto (<code>H.heapsize < 1</code>), restituisci un errore.</li>
+                    <li>Salva il valore della radice (<code>H[1]</code>), che è il massimo da restituire.</li>
+                    <li>Sposta l'ultimo elemento dell'heap (quello in posizione <code>H[H.heapsize]</code>) alla radice (<code>H[1]</code>). Questo crea un "buco" alla fine dell'heap.</li>
+                    <li>Decrementa la dimensione dell'heap: <code>H.heapsize ← H.heapsize - 1</code>. (Il "buco" ora è formalmente fuori dall'heap).</li>
+                    <li>L'elemento spostato alla radice potrebbe violare la proprietà di Max-Heap (potrebbe essere più piccolo dei suoi nuovi figli). Bisogna ristabilire la proprietà facendo "scendere" questo elemento nella posizione corretta. Questa operazione di ripristino si chiama <strong>Heapify</strong> (o Max-Heapify).</li>
                 </ol>
-
-                <h4 class="subsubsection-title">Visualizzazione dell'Eliminazione della Chiave Massima (dagli appunti della prof)</h4>
-                <p>1. La chiave massima è alla radice (es. 100).</p>
-                <div class="mermaid-container">
-                    <pre class="mermaid">
-                    graph TD;
-                        A("100 (radice)") --> B("Figlio SX");
-                        A --> C("Figlio DX");
-                        B --> D("...");
-                        C --> E("...");
-                        subgraph AlberoOriginale
-                           direction LR
-                           F(("...")) --- UltimaFoglia("5 (ultima foglia)"); 
-                        end
-                    </pre>
-                </div>
-                <p>2. Si scambia la chiave della radice con quella dell'ultima foglia.</p>
-                <div class="mermaid-container">
-                    <pre class="mermaid">
-                     graph TD;
-                        A("5 (ex ultima foglia)") --> B("Figlio SX");
-                        A --> C("Figlio DX");
-                        B --> D("...");
-                        C --> E("...");
-                         subgraph AlberoDopoScambioRadiceFoglia
-                           direction LR
-                           F(("...")) --- RadiceOriginale("100 (ex radice, ora fuori heap)"); 
-                        end
-                        style RadiceOriginale fill:#818cf833,stroke:#818cf8
-                    </pre>
-                </div>
-                 <p>3. Si "accorcia" l'heap, eliminando concettualmente l'ultima foglia (che ora contiene il vecchio massimo). Il vettore H[1] ora contiene '5'.</p>
-                 <div class="array-representation">
+                <p>La professoressa illustra questo con un diagramma (pagina 1 e 2 degli appunti OCR): il massimo (100) viene scambiato con l'ultima foglia (5). Il 100 viene "tolto" (la heapsize si accorcia). Il 5 ora è alla radice e potrebbe essere "troppo piccolo".</p>
+                <div class="array-representation">
+                    <p>Situazione Iniziale (esempio):</p>
                     <table>
-                        <thead><tr><th>Idx:</th><th>1</th><th>2</th><th>3</th><th>...</th><th>heapsize-1</th><th>heapsize (vecchio max)</th></tr></thead>
-                        <tbody><tr><td>Val:</td><td>5</td><td>SX</td><td>DX</td><td>...</td><td>...</td><td class="highlight-swap">100</td></tr></tbody>
+                        <thead><tr><th>Idx:</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>...</th><th>size</th></tr></thead>
+                        <tbody><tr><td>Val:</td><td class="highlight-max">100</td><td>80</td><td>90</td><td>...</td><td>...</td><td>...</td><td>5</td></tr></tbody>
                     </table>
-                    <div class="array-caption">H.heapsize ora punta all'elemento prima del 100.</div>
+                    <p>Passo 1: Scambia H[1] con H[heapsize]</p>
+                     <table>
+                        <thead><tr><th>Idx:</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>...</th><th>size</th></tr></thead>
+                        <tbody><tr><td>Val:</td><td class="highlight-swap">5</td><td>80</td><td>90</td><td>...</td><td>...</td><td>...</td><td class="highlight-swap">100</td></tr></tbody>
+                    </table>
+                    <p>Passo 2: Decrementa heapsize. Il 100 è ora "fuori" dall'heap (ma ancora nel vettore, pronto per essere restituito).</p>
+                     <table>
+                        <thead><tr><th>Idx:</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>...</th><th>size-1</th><th>size</th></tr></thead>
+                        <tbody><tr><td>Val:</td><td class="highlight-max">5</td><td>80</td><td>90</td><td>...</td><td>...</td><td>...</td><td>...</td><td class="greyed-out">100</td></tr></tbody>
+                    </table>
+                    <p>Passo 3: Il 5 alla radice potrebbe violare la proprietà di Max-Heap. Si chiama Heapify(H, 1).</p>
                 </div>
-                <p>4. Ora il valore '5' alla radice potrebbe violare la proprietà di Max-Heap. È necessario chiamare Heapify sulla radice.</p>
-                 <div class="mermaid-container">
-                    <pre class="mermaid">
-                    graph TD;
-                        A("5 (problema!)") --> B("Figlio SX (es. 80)");
-                        A --> C("Figlio DX (es. 90)");
-                        subgraph "Situazione prima di Heapify(1)"
-                            A; B; C;
-                        end
-                        Note right of C: Se 5 < 90 (max tra figli),<br/>5 e 90 si scambiano.<br/>Poi si continua ricorsivamente<br/>sul sottoalbero radicato<br/>dove è finito il 5.
-                    </pre>
-                </div>
-                <p>La professoressa sottolinea che l'elemento spostato alla radice (ad esempio '5') potrebbe essere "troppo piccolo" e dover scendere.</p>
 
-                <p><strong>Pseudo-codice di Max-Heap-Extract-Max:</strong></p>
                 <pre><code class="language-pseudocode">
-Max-Heap-Extract-Max(H)
+Max-Heap-Extract(H) // Costo O(log n)
   if H.heapsize < 1 then
     error "Heap underflow" // Heap vuoto
   
-  max_val ← H[1] // Salva il massimo
+  max_val ← H[1]
   H[1] ← H[H.heapsize] // Sposta l'ultimo elemento alla radice
   H.heapsize ← H.heapsize - 1
   
-  // Chiama Heapify sulla radice (indice 1) per ripristinare la proprietà
-  // Questa è la chiamata che sistemerà il problema
-  Heapify(H, 1) // Θ(log n)
+  // Ristabilisce la proprietà di Max-Heap a partire dalla radice
+  Max-Heapify(H, 1) // Chiamata alla procedura ausiliaria
   
-  return max_val // Θ(1)
+  return max_val
                 </code></pre>
-                <p><strong>Complessità di Max-Heap-Extract-Max:</strong></p>
-                <ul>
-                    <li>Le operazioni di accesso, assegnamento e decremento di `heapsize` sono \(\Theta(1)\).</li>
-                    <li>La chiamata a `Heapify(H, 1)` (che vedremo tra poco) costa \(O(\log n)\).</li>
-                    <li><strong>Complessità totale:</strong> \(O(\log n)\).</li>
-                </ul>
             </div>
         </article>
 
-        <article id="procedura-heapify" class="content-section">
-            <h2 class="section-title">3. Procedura Heapify (o Max-Heapify)</h2>
+        <article id="heapify-procedura" class="content-section">
+            <h3 class="subsection-title">2.1. Procedura Ausiliaria: Max-Heapify(H, i)</h3>
             <div class="section-content">
-                <p>La procedura `Heapify(H, i)` è un mattoncino fondamentale per mantenere la proprietà di Max-Heap. È chiamata quando si sospetta che il nodo all'indice `i` possa violare la proprietà di Max-Heap, ma si assume che i suoi sottoalberi sinistro e destro (radicati in `LEFT(i)` e `RIGHT(i)`) siano già delle Max-Heap valide.</p>
-                <p><strong>Precondizione per `Heapify(H, i)`:</strong> I sottoalberi radicati in `LEFT(i)` e `RIGHT(i)` sono Max-Heap.</p>
-                <p><strong>Postcondizione:</strong> L'albero radicato in `i` diventa una Max-Heap.</p>
-                <p><strong>Idea dell'Algoritmo `Heapify(H, i)`:</strong></p>
+                <p>La procedura <code>Max-Heapify(H, i)</code> (spesso chiamata solo `Heapify`) è cruciale. Ha una <strong>precondizione</strong> fondamentale:</p>
+                <p><strong>Precondizione per Max-Heapify(H, i):</strong> Si assume che i sottoalberi radicati nei figli di `i` (cioè <code>LEFT(i)</code> e <code>RIGHT(i)</code>) siano già delle Max-Heap. L'elemento in <code>H[i]</code> potrebbe essere più piccolo di uno dei suoi figli, violando la proprietà di Max-Heap per il nodo `i`.</p>
+                <p><strong>Obiettivo di Max-Heapify(H, i):</strong> Far "scendere" (<em>float down</em>) l'elemento <code>H[i]</code> nell'albero in modo che il sottoalbero radicato in `i` diventi una Max-Heap.</p>
+                <p><strong>Idea dell'Algoritmo Max-Heapify(H, i):</strong></p>
                 <ol>
-                    <li>Confronta la chiave di <code>H[i]</code> con le chiavi dei suoi figli <code>H[LEFT(i)]</code> e <code>H[RIGHT(i)]</code> (se esistono).</li>
-                    <li>Trova il più grande tra <code>H[i]</code>, <code>H[LEFT(i)]</code> e <code>H[RIGHT(i)]</code>. Sia questo il nodo all'indice `m` (massimo).</li>
-                    <li>Se `m` è diverso da `i` (cioè, se <code>H[i]</code> non era il più grande tra sé e i suoi figli), allora la proprietà di Max-Heap è violata in `i`.
+                    <li>Trova il più grande tra <code>H[i]</code>, <code>H[LEFT(i)]</code> (se esiste), e <code>H[RIGHT(i)]</code> (se esiste). Sia <code>m</code> l'indice di questo elemento più grande.</li>
+                    <li>Se il più grande non è <code>H[i]</code> (cioè se <code>m ≠ i</code>), allora <code>H[i]</code> viola la proprietà di Max-Heap con uno dei suoi figli.
                         <ul>
-                            <li>Scambia <code>H[i]</code> con <code>H[m]</code>.</li>
-                            <li>Ora <code>H[i]</code> (che contiene il vecchio valore di <code>H[m]</code>) è al posto giusto rispetto ai suoi figli. Tuttavia, l'elemento che è sceso in posizione `m` (il vecchio <code>H[i]</code>) potrebbe violare la proprietà di Max-Heap nel sottoalbero radicato in `m`.</li>
-                            <li>Quindi, chiama ricorsivamente <code>Heapify(H, m)</code> per far "scendere" ulteriormente questo elemento se necessario.</li>
+                            <li>Scambia <code>H[i]</code> con <code>H[m]</code> (l'elemento più grande tra i tre).</li>
+                            <li>Ora <code>H[i]</code> (il nuovo valore in posizione i) soddisfa la proprietà rispetto ai suoi figli (era il più grande). Tuttavia, l'elemento che è stato spostato in basso (l'originale <code>H[i]</code>, che ora è in <code>H[m]</code>) potrebbe violare la proprietà di Max-Heap nel sottoalbero radicato in `m`.</li>
+                            <li>Richiama ricorsivamente <code>Max-Heapify(H, m)</code> per correggere il sottoalbero.</li>
                         </ul>
                     </li>
-                    <li>Se `m == i`, la proprietà di Max-Heap è già soddisfatta in `i` e non si fa nulla.</li>
+                    <li>Se il più grande è già <code>H[i]</code> (cioè <code>m = i</code>), allora il sottoalbero radicato in `i` è già una Max-Heap e non si deve fare nulla.</li>
                 </ol>
+                <p>La professoressa illustra (pagina 2) uno scenario: se 5 è alla radice, e i figli sono 80 e 90. Il massimo tra {5, 80, 90} è 90. Quindi 5 e 90 vengono scambiati. Ora 90 è alla radice, ma 5 è finito al posto del 90 e potrebbe essere più piccolo dei *suoi* nuovi figli. Si prosegue ricorsivamente.</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD
+                        I["H[i] (valore iniziale K)"] -- Figlio Sinistro --> L["H[LEFT(i)]"];
+                        I -- Figlio Destro --> R["H[RIGHT(i)]"];
 
-                <p><strong>Pseudo-codice di Heapify(H, i):</strong></p>
+                        subgraph "Logica di Max-Heapify(H,i)"
+                            S("Inizio con nodo i") --> C1{"Trova 'largest' tra i, LEFT(i), RIGHT(i)"};
+                            C1 --> C2{"largest ≠ i ?"};
+                            C2 -- Vero --> Swap["SWAP(H[i], H[largest])"];
+                            Swap --> RecCall["Max-Heapify(H, largest)"];
+                            RecCall --> E("Fine");
+                            C2 -- Falso --> E;
+                        end
+                    </pre>
+                </div>
+
                 <pre><code class="language-pseudocode">
-Heapify(H, i) // Anche noto come Max-Heapify
-  l ← LEFT(i)   // Indice figlio sinistro
-  r ← RIGHT(i)  // Indice figlio destro
+Max-Heapify(H, i) // Costo O(log n) o O(altezza dell'heap radicato in i)
+  l ← LEFT(i)
+  r ← RIGHT(i)
   
-  // Trova l'indice 'm' dell'elemento più grande tra H[i], H[l], H[r]
-  // (controllando che l e r siano indici validi dentro l'heap)
-  m ← i // Inizialmente, assumi che i sia il più grande
-  
+  // Determina quale tra i, l, r contiene la chiave più grande
+  largest ← i 
   if l ≤ H.heapsize AND H[l] > H[i] then
-    m ← l
-  // else (implicito): m rimane i (o il valore precedentemente assegnato)
+    largest ← l
+  // else: largest rimane i (o diventa l se H[l] > H[i])
   
-  if r ≤ H.heapsize AND H[r] > H[m] then // Confronta con H[m], non con H[i] originale!
-    m ← r
-  // else (implicito): m rimane il valore precedentemente assegnato
+  if r ≤ H.heapsize AND H[r] > H[largest] then 
+    // Nota: confronto H[r] con H[largest], non con H[i] direttamente. 
+    // Questo assicura che 'largest' sia l'indice del massimo dei tre.
+    largest ← r
   
-  // Se il più grande non è il nodo corrente i
-  if m ≠ i then
-    SWAP(H[i], H[m])
-    Heapify(H, m) // Chiama ricorsivamente sul sottoalbero modificato
+  // Se i non è il più grande, scambia e richiama ricorsivamente
+  if largest ≠ i then
+    SWAP(H[i], H[largest])
+    Max-Heapify(H, largest) // Chiamata ricorsiva sul sottoalbero modificato
                 </code></pre>
-                <div class="note-box">
-                    <strong>Nota sulla Precondizione di Heapify (dettaglio dalla prof):</strong>
-                    La precondizione fondamentale per `Heapify(H, i)` è che i sottoalberi radicati nel figlio sinistro `LEFT(i)` e nel figlio destro `RIGHT(i)` siano già delle Max-Heap. L'elemento in `H[i]` è l'unico che potrebbe violare la proprietà rispetto ai suoi figli. L'algoritmo `Heapify` ripristina questa proprietà "localmente" e, se necessario, propaga la correzione verso il basso.
-                </div>
-                <p>Il diagramma a pagina 4 degli appunti OCR mostra questo processo: se `H[i]` (K) è più piccolo di uno dei suoi figli, viene scambiato col maggiore dei figli, e il problema si sposta nel sottoalbero del figlio con cui è avvenuto lo scambio.</p>
             </div>
         </article>
 
-        <article id="analisi-heapify" class="content-section">
-            <h3 class="subsection-title">3.1. Analisi di Complessità di Heapify</h3>
+        <article id="complessita-heapify" class="content-section">
+            <h3 class="subsection-title">2.2. Complessità di Max-Heapify</h3>
             <div class="section-content">
-                <p>Sia \(T(h)\) il tempo di esecuzione di `Heapify` su un nodo la cui altezza nell'albero dell'heap è \(h\) (altezza del sottoalbero radicato in quel nodo).</p>
-                <ul>
-                    <li>Il lavoro svolto all'interno di una singola chiamata a `Heapify` (esclusa la chiamata ricorsiva) è costante: calcolo di `LEFT` e `RIGHT`, confronti, eventuale `SWAP`. Questo è \(\Theta(1)\).</li>
-                    <li>Nel caso peggiore, la chiamata ricorsiva avviene su un nodo figlio la cui altezza è \(h-1\) (o al massimo \(2h/3 - 1\) in un albero non perfettamente bilanciato, ma qui l'heap è quasi completo, quindi l'altezza dei figli è al più \(h-1\)).</li>
-                </ul>
-                <p>L'equazione di ricorrenza per `Heapify` in termini di altezza \(h\) del sottoalbero radicato in `i` è:</p>
+                <p>Il costo di <code>Max-Heapify(H, i)</code> dipende dall'altezza del sottoalbero radicato in `i`.</p>
+                <p>Le operazioni all'interno di una singola chiamata a `Max-Heapify` (calcolo di `l` e `r`, confronti, eventuale swap) costano \(\Theta(1)\).</p>
+                <p>La chiamata ricorsiva, se avviene, è su un sottoalbero la cui radice è un figlio di `i`. Nel caso peggiore, la chiamata ricorsiva scende lungo un cammino dalla radice del sottoalbero originale (nodo `i`) fino a una foglia.</p>
+                <p>La lunghezza di questo cammino è al più l'altezza \(h_i\) del sottoalbero radicato in `i`.</p>
+                <p>Quindi, la complessità di <code>Max-Heapify(H, i)</code> è \(O(h_i)\), dove \(h_i\) è l'altezza del nodo `i` (distanza massima da `i` a una foglia nel suo sottoalbero).</p>
+                <p>Se `Max-Heapify` è chiamata sulla radice dell'intero heap (indice 1), l'altezza è l'altezza dell'heap, \(h = \Theta(\log n)\).</p>
+                <p>Quindi, <code>Max-Heapify(H, 1)</code> costa \(O(\log n)\).</p>
+                <p><strong>Equazione di Ricorrenza per T(h) (complessità di Heapify in funzione dell'altezza h del sottoalbero):</strong></p>
+                <p>Sia \(T(h)\) il costo di `Heapify` su un nodo di altezza \(h\).</p>
                 <div class="math-block">
-                \( T(h) \le \begin{cases} \Theta(1) & \text{se } h = 0 \text{ (foglia)} \\ \Theta(1) + T(h-1) & \text{se } h > 0 \end{cases} \)
+                \( T(h) \le \begin{cases} \Theta(1) & \text{se } h=0 \text{ (foglia)} \\ \Theta(1) + T(h-1) & \text{se } h > 0 \end{cases} \)
                 </div>
-                <p>(In realtà, la chiamata ricorsiva non è sempre su \(h-1\), potrebbe essere su un sottoalbero di altezza inferiore se l'altro figlio era più piccolo, ma per il caso peggiore si considera \(h-1\). Una stima più precisa per alberi non completi sarebbe \(T(2n/3)\) ma per l'heap quasi-completo va bene \(h-1\)).</p>
-                <p>Questa ricorrenza si srotola in \(T(h) = h \cdot \Theta(1) = \Theta(h)\).</p>
-                <p>Poiché l'altezza \(h\) di un heap con \(n\) nodi è \(O(\log n)\), la complessità di `Heapify` è:</p>
-                <div class="math-block">
-                \( O(\log n) \)
-                </div>
-                <p>La professoressa scrive anche la ricorrenza in termini di \(n\) (numero di nodi nel sottoalbero radicato in `i`). Se \(n_i\) è il numero di nodi nel sottoalbero radicato in `i`, la chiamata ricorsiva sarà su un sottoalbero con al più \(2n_i/3\) nodi (questo è un limite superiore generale per alberi binari, per un heap quasi-completo la situazione è più bilanciata).
-                La ricorrenza sarebbe \(T(n) \le T(2n/3) + \Theta(1)\), che risolta (ad es. con Master Theorem, caso 2 se \(f(n) = \Theta(1)\) e \(a=1, b=3/2\), quindi \(\log_b a = \log_{3/2} 1 = 0\). Dato che \(n^0 = \Theta(1)\), si ricade nel caso 2 del Master Theorem) dà \(T(n) = \Theta(\log n)\).</p>
+                <p>Questa ricorrenza si srotola in \(T(h) = \sum_{j=0}^{h} \Theta(1) = \Theta(h)\).</p>
+                <p>Poiché \(h = O(\log n)\), allora \(T(n) = O(\log n)\).</p>
+                <p>La professoressa disegna un albero (pagina 4 OCR) e mostra come la chiamata ricorsiva di Heapify segua un cammino. Il costo è proporzionale alla lunghezza del cammino più lungo da `i` a una foglia.
+                Un'altra analisi è stata fatta considerando `n` come il numero di nodi nel sottoalbero radicato in `i`.
+                Se la chiamata ricorsiva avviene, va o sul sottoalbero sinistro o su quello destro.
+                Nel caso peggiore, uno dei due sottoalberi potrebbe contenere fino a \(\approx 2n/3\) dei nodi del sottoalbero corrente (questo avviene quando l'ultimo livello è pieno solo per metà circa da un lato).
+                Quindi, \(T(n) \le T(2n/3) + \Theta(1)\).
+                Usando il Master Theorem (Caso 2, dato che \(n^{\log_b a} = n^{\log_{3/2} 1} = n^0 = 1\), e \(f(n) = \Theta(1)\)), si ottiene \(T(n) = \Theta(\log n)\).</p>
             </div>
         </article>
-
+        
         <article id="correttezza-heapify" class="content-section">
-            <h3 class="subsection-title">3.2. Correttezza di Heapify (Dimostrazione per Induzione sull'Altezza)</h3>
+            <h3 class="subsection-title">2.3. Correttezza di Max-Heapify</h3>
             <div class="section-content">
-                <p><strong>Teorema:</strong> Se i sottoalberi radicati in `LEFT(i)` e `RIGHT(i)` sono Max-Heap, allora `Heapify(H, i)` termina con il sottoalbero radicato in `i` che è una Max-Heap.</p>
-                <p>Si dimostra per induzione sull'altezza \(h\) del nodo `i` (altezza del sottoalbero radicato in `i`).</p>
-                <p><strong>Caso Base (h=0):</strong> Il nodo `i` è una foglia.</p>
+                <p><strong>Teorema di Correttezza per Max-Heapify(H, i):</strong> Data una Max-Heap <code>H</code> e un indice <code>i</code>, se i sottoalberi radicati in <code>LEFT(i)</code> e <code>RIGHT(i)</code> sono Max-Heap, allora <code>Max-Heapify(H, i)</code> fa sì che il sottoalbero radicato in <code>i</code> diventi una Max-Heap.</p>
+                <p><strong>Dimostrazione per Induzione (sull'altezza del nodo `i` o sul numero di chiamate ricorsive):</strong></p>
                 <ul>
-                    <li>In questo caso, `LEFT(i)` e `RIGHT(i)` saranno indici maggiori di `H.heapsize`.</li>
-                    <li>Le condizioni `l ≤ H.heapsize` e `r ≤ H.heapsize` saranno false.</li>
-                    <li>La variabile `m` rimarrà uguale a `i`.</li>
-                    <li>La condizione `m ≠ i` sarà falsa, quindi non ci saranno scambi né chiamate ricorsive.</li>
-                    <li>L'algoritmo termina. Un albero composto da una singola foglia è banalmente una Max-Heap. Il caso base è verificato.</li>
-                </ul>
-
-                <p><strong>Passo Induttivo (h > 0):</strong></p>
-                <ul>
-                    <li><strong>Ipotesi Induttiva (Hp.Ind.):</strong> Assumiamo che `Heapify` sia corretta per tutti i nodi con altezza \(k < h\).
-                    (Cioè, se chiamata su un nodo `j` con altezza \(k < h\), e i sottoalberi dei figli di `j` sono Max-Heap, allora `Heapify(H,j)` rende il sottoalbero radicato in `j` una Max-Heap).</li>
-                    <li><strong>Tesi da dimostrare:</strong> `Heapify(H, i)` (dove `i` ha altezza \(h\)) è corretta, date le precondizioni (sottoalberi sinistro e destro di `i` sono Max-Heap).</li>
-                    <li><strong>Dimostrazione del Passo Induttivo:</strong>
-                        <ol>
-                            <li>L'algoritmo trova `m`, l'indice del massimo tra `H[i]`, `H[LEFT(i)]` (se esiste) e `H[RIGHT(i)]` (se esiste).</li>
-                            <li><strong>Caso 1: `m == i`</strong>.
-                                <ul>
-                                    <li>Significa che `H[i]` è già maggiore o uguale ai suoi figli.</li>
-                                    <li>Poiché per precondizione i sottoalberi sinistro e destro sono già Max-Heap, e ora anche la radice `i` soddisfa la proprietà rispetto ai suoi figli, l'intero sottoalbero radicato in `i` è una Max-Heap.</li>
-                                    <li>L'algoritmo termina senza fare nulla, e la postcondizione è soddisfatta.</li>
-                                </ul>
-                            </li>
-                            <li><strong>Caso 2: `m ≠ i`</strong>.
-                                <ul>
-                                    <li>Significa che `H[m]` (uno dei figli) è strettamente maggiore di `H[i]`. L'algoritmo scambia `H[i]` con `H[m]`.</li>
-                                    <li>Dopo lo scambio, il nuovo `H[i]` (che era il vecchio `H[m]`) è ora il più grande tra sé e i suoi figli (il vecchio `H[LEFT(i)]` e `H[RIGHT(i)]`). Quindi la proprietà di Max-Heap è soddisfatta alla radice `i` rispetto ai suoi figli diretti.</li>
-                                    <li>L'elemento che è sceso (il vecchio `H[i]`) si trova ora in `H[m]`. Questo elemento potrebbe essere più piccolo dei figli di `m` (i nipoti originali di `i`), violando la proprietà di Max-Heap nel sottoalbero radicato in `m`.</li>
-                                    <li>Tuttavia, il sottoalbero radicato in `m` ha un'altezza strettamente minore di \(h\) (al massimo \(h-1\)). I figli di `m` (se esistono) erano radici di Max-Heap (per la precondizione originale, o perché l'altro figlio di `i` non è stato toccato e il suo sottoalbero era già Max-Heap).</li>
-                                    <li>Viene chiamata ricorsivamente `Heapify(H, m)`. Per ipotesi induttiva (poiché l'altezza del sottoalbero in `m` è \(<h\)), questa chiamata termina e rende il sottoalbero radicato in `m` una Max-Heap.</li>
-                                    <li>Avendo ripristinato la proprietà in `m` e mantenendola in `i` e nell'altro figlio di `i`, l'intero sottoalbero radicato in `i` è ora una Max-Heap.</li>
-                                </ul>
-                            </li>
-                        </ol>
+                    <li><strong>Caso Base (0 chiamate ricorsive):</strong>
+                        Questo avviene quando `m = i` (cioè `H[i]` è già il massimo tra `H[i]`, `H[LEFT(i)]`, `H[RIGHT(i)]`).
+                        In questo caso, la proprietà di Max-Heap è già soddisfatta localmente al nodo `i` rispetto ai suoi figli. Poiché per precondizione i sottoalberi figli erano già Max-Heap, l'intero sottoalbero radicato in `i` è una Max-Heap. L'algoritmo termina correttamente senza fare nulla.
+                    </li>
+                    <li><strong>Passo Induttivo:</strong>
+                        Supponiamo che `Max-Heapify` sia corretta per tutte le chiamate ricorsive che coinvolgono al più \(k\) chiamate ricorsive (o per nodi di altezza al più \(h-1\)).
+                        Vogliamo dimostrare che è corretta quando fa \(k+1\) chiamate (o per un nodo di altezza \(h\)).
+                        Se `m ≠ i`, allora <code>H[i]</code> viene scambiato con <code>H[m]</code> (dove `m` è l'indice del figlio con la chiave più grande, che è anche più grande di <code>H[i]</code>).
+                        Dopo lo scambio:
+                        <ul>
+                            <li>Il nuovo <code>H[i]</code> (che era <code>H[m]</code>) è ora il più grande tra sé stesso e i suoi figli (l'altro figlio, se esiste, era già più piccolo di <code>H[m]</code> per la precondizione sul sottoalbero di `m` o per il confronto fatto).</li>
+                            <li>L'elemento originale <code>H[i]</code> è ora in <code>H[m]</code>. Questo potrebbe aver violato la proprietà di Max-Heap nel sottoalbero radicato in `m`.</li>
+                            <li>Viene fatta una chiamata ricorsiva <code>Max-Heapify(H, m)</code>. Poiché il nodo `m` ha un'altezza strettamente minore di `i` (o la chiamata ricorsiva farà meno chiamate ricorsive), per ipotesi induttiva, questa chiamata a <code>Max-Heapify(H, m)</code> renderà il sottoalbero radicato in `m` una Max-Heap.</li>
+                        </ul>
+                        Poiché il nodo `i` ora soddisfa la proprietà di Max-Heap e i suoi sottoalberi sono stati resi Max-Heap (quello non toccato lo era già, quello toccato lo è diventato per ipotesi induttiva), l'intero sottoalbero radicato in `i` è una Max-Heap.
                     </li>
                 </ul>
-                <p>La correttezza è provata per induzione sull'altezza.</p>
+                <p>La professoressa illustra il passo induttivo con un diagramma (pagina 6 OCR): mostra il nodo K (ex H\[i]), i suoi figli (che sono radici di Max-Heap per precondizione). Se K è scambiato con il figlio sinistro L (che era il massimo dei tre), L va al posto di K. Ora K è al posto di L. Il sottoalbero radicato in L (ora contenente K) deve essere ripristinato con una chiamata ricorsiva, che per ipotesi induttiva funziona. Il sottoalbero destro non è stato toccato e rimane una Max-Heap. Il nuovo nodo radice (ex L) è maggiore dei suoi figli (K e il figlio destro originale).</p>
             </div>
         </article>
 
         <article id="esercizio-max-heap-modify" class="content-section">
-            <h2 class="section-title">4. Esercizio (Assegnato per Casa dalla Professoressa): Max-Heap-Modify-Key</h2>
+            <h3 class="subsection-title">3. Esercizio (Lasciato per Casa): Max-Heap-Modify-Key(H, i, S)</h3>
             <div class="section-content">
-                <p><strong>Testo del Problema:</strong> Scrivere una procedura <code>Max-Heap-Modify-Key(H, i, s)</code> che modifica la chiave del nodo all'indice `i` dell'heap `H` aggiungendogli il valore `s`, e poi ripristina la proprietà di Max-Heap.</p>
-                <div class="math-block">
-                H[i] \leftarrow H[i] + s
-                </div>
-                <p>La nota della professoressa specifica che `s` può essere sia \(>0\) (aumento di priorità) che \(<0\) (decremento di priorità).</p>
+                <p><strong>Testo del Problema (come da appunti della prof):</strong></p>
+                <p>Scrivere una procedura <code>Max-Heap-Modify-Key(H, i, S)</code> che modifica la chiave dell'elemento in posizione <code>i</code> dell'heap <code>H</code> al nuovo valore <code>S</code>, e poi ripristina la proprietà di Max-Heap.</p>
+                <p><strong>Nota:</strong> La nuova chiave <code>S</code> può essere sia maggiore (\(S > H[i]\)) sia minore (\(S < H[i]\)) della chiave originale. Si assume che l'indice `i` sia valido e che `H` sia una Max-Heap prima della modifica.</p>
                 <p>La complessità richiesta è \(O(\log n)\).</p>
 
-                <h4 class="subsubsection-title">Svolgimento e Spiegazione (Come da riflessione)</h4>
-                <p>L'idea è di modificare la chiave e poi capire se l'elemento deve "risalire" (se la sua priorità è aumentata e ora è maggiore del padre) o "scendere" (se la sua priorità è diminuita e ora è minore di uno dei figli).</p>
-                <pre><code class="language-pseudocode">
-Max-Heap-Modify-Key(H, i, s)
-  if i < 1 OR i > H.heapsize then
-    error "Indice non valido"
-  
-  old_key ← H[i]
-  H[i] ← H[i] + s // Modifica la chiave
-
-  if s > 0 then // La priorità è aumentata (o rimasta uguale, ma controlliamo lo stesso)
-    // Potrebbe essere necessario far risalire H[i] (Heapify-Up)
-    while (i > 1 AND H[i] > H[PARENT(i)]) do
-      SWAP(H[i], H[PARENT(i)])
-      i ← PARENT(i)
-  else if s < 0 then // La priorità è diminuita (o rimasta uguale)
-    // Potrebbe essere necessario far scendere H[i]
-    // Questo è esattamente ciò che fa Heapify(H, i)
-    Heapify(H, i)
-  // Se s == 0, non si fa nulla perché l'heap era già valido.
-                </code></pre>
-                <p><strong>Spiegazione:</strong></p>
-                <ul>
-                    <li>Prima si aggiorna la chiave <code>H[i]</code>.</li>
-                    <li><strong>Se <code>s > 0</code> (aumento di priorità):</strong> La nuova chiave <code>H[i]</code> potrebbe essere diventata più grande di quella del suo genitore. In questo caso, si applica la logica "Heapify-Up" (vista per <code>Max-Heap-Insert</code>) per far risalire l'elemento fino a quando la proprietà di Max-Heap è ristabilita o si raggiunge la radice. Questo percorso è lungo al massimo l'altezza dell'heap, \(O(\log n)\).</li>
-                    <li><strong>Se <code>s < 0</code> (decremento di priorità):</strong> La nuova chiave <code>H[i]</code> potrebbe essere diventata più piccola di uno o entrambi i suoi figli. In questo caso, i sottoalberi figli di `i` sono ancora Max-Heap (non sono stati toccati), ma `H[i]` potrebbe violare la proprietà. Questa è esattamente la precondizione per chiamare la procedura `Heapify(H, i)` che abbiamo appena visto. `Heapify` farà "scendere" l'elemento al posto giusto. Anche questo costa \(O(\log n)\).</li>
-                    <li><strong>Se <code>s == 0</code>:</strong> La chiave non cambia, l'heap rimane valido, non si fa nulla.</li>
-                </ul>
-                <p><strong>Complessità Totale:</strong> In entrambi i casi (aumento o decremento), il ripristino costa \(O(\log n)\). Quindi, l'operazione complessiva è \(O(\log n)\).</p>
-            </div>
-        </article>
-
-        <article id="algoritmo-heapsort" class="content-section">
-            <h2 class="section-title">5. Algoritmo di Ordinamento: HeapSort</h2>
-            <div class="section-content">
-                <p>HeapSort è un algoritmo di ordinamento che utilizza la struttura dati Max-Heap (o Min-Heap) per ordinare un array.</p>
-                <p>È un algoritmo di ordinamento basato su confronti, con complessità temporale \(O(n \log n)\) e può essere implementato in-place (spazio \(\Theta(1)\) aggiuntivo).</p>
-            </div>
-        </article>
-
-        <article id="idea-heapsort" class="content-section">
-            <h3 class="subsection-title">5.1. Idea di Base di HeapSort</h3>
-            <p>L'algoritmo HeapSort si articola in due fasi principali:</p>
-            <ol>
-                <li><strong>Costruzione dell'Heap (Build-Heap):</strong>
-                    <ul>
-                        <li>Dato un array di input \(A\) non ordinato, lo si trasforma in una Max-Heap.</li>
-                        <li>L'operazione <code>Build-Heap(A)</code> riorganizza gli elementi di \(A\) in modo che soddisfino la proprietà di Max-Heap.</li>
-                    </ul>
-                </li>
-                <li><strong>Ordinamento Effettivo (Ciclo di Estrazioni):</strong>
-                    <ul>
-                        <li>Dopo che \(A\) è una Max-Heap, l'elemento massimo si trova in \(A[1]\).</li>
-                        <li>Si scambia \(A[1]\) con l'ultimo elemento dell'heap corrente, \(A[\text{heapsize}]\). Ora l'elemento massimo è nell'ultima posizione dell'array, che è la sua posizione finale nell'array ordinato.</li>
-                        <li>Si decrementa `heapsize` di 1 (escludendo l'elemento massimo appena posizionato dalla porzione di heap).</li>
-                        <li>L'elemento che è stato spostato in \(A[1]\) (l'ex ultima foglia) potrebbe violare la proprietà di Max-Heap. Si chiama `Heapify(A, 1)` per ripristinare la proprietà sulla nuova radice dell'heap ridotto.</li>
-                        <li>Si ripete questo processo di scambio, decremento di `heapsize` e `Heapify` finché l'heap non contiene più di un elemento.</li>
-                    </ul>
-                </li>
-            </ol>
-            <p>Alla fine, l'array \(A\) conterrà gli elementi ordinati in modo non decrescente.</p>
-            <h4 class="subsubsection-title">Visualizzazione dell'Idea di HeapSort (dagli appunti della prof)</h4>
-            <p>1. Inizialmente si ha un vettore A (non ordinato).</p>
-            <div class="array-representation">
-                <table>
-                    <thead><tr><th>...</th><th>...</th><th>...</th><th>...</th><th>...</th></tr></thead>
-                    <tbody><tr><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr></tbody>
-                </table>
-            </div>
-            <p>2. Si applica `BuildHeap(A)`. Ora il vettore A rappresenta una Max-Heap. La `heapsize` è uguale alla lunghezza dell'array.</p>
-             <div class="array-representation">
-                <table>
-                    <thead><tr><th>1</th><th>2</th><th>3</th><th>...</th><th>heapsize</th></tr></thead>
-                    <tbody><tr class="heap-part"><td>MAX</td><td>...</td><td>...</td><td>...</td><td>...</td></tr></tbody>
-                </table>
-                <div class="array-caption">A è una Max-Heap. A[1] è il massimo.</div>
-            </div>
-            <p>3. Inizia il ciclo di ordinamento:</p>
-            <ul>
-                <li>Si scambia `A[1]` (il massimo corrente dell'heap) con `A[heapsize]`.</li>
-                <div class="array-representation">
-                    <table>
-                        <thead><tr><th>1</th><th>2</th><th>...</th><th>heapsize-1</th><th>heapsize</th></tr></thead>
-                        <tbody><tr><td class="highlight-swap heap-part">A[hs]</td><td class="heap-part">...</td><td class="heap-part">...</td><td class="highlight-boundary heap-part">...</td><td class="highlight-swap sorted-part">MAX</td></tr></tbody>
-                    </table>
-                    <div class="array-caption">Scambio avvenuto. MAX è ora in posizione finale.</div>
-                </div>
-                <li>Si decrementa `heapsize`. La parte "ordinata" dell'array cresce da destra.</li>
-                <li>Si chiama `Heapify(A, 1)` sulla porzione di heap rimanente (da 1 a `heapsize` nuovo) per ripristinare la proprietà di Max-Heap.</li>
-                <div class="array-representation">
-                    <table>
-                        <thead><tr><th>1</th><th>2</th><th>...</th><th>heapsize-1</th><th>heapsize (ex)</th></tr></thead>
-                        <tbody><tr><td class="heap-part">Nuovo MAX</td><td class="heap-part">...</td><td class="heap-part">...</td><td class="highlight-boundary heap-part">...</td><td class="sorted-part">MAX_prec</td></tr></tbody>
-                    </table>
-                    <div class="array-caption">Heapify su A[1] ha ripristinato l'heap. A[1] è il nuovo massimo dell'heap ridotto.</div>
-                </div>
-                <li>Si ripete lo scambio, il decremento e Heapify.</li>
-            </ul>
-            <p>Questo processo continua fino a quando `heapsize` diventa 1. A quel punto, l'intero array è ordinato.</p>
-        </article>
-        
-        <article id="procedura-build-heap" class="content-section">
-            <h3 class="subsection-title">5.2. Procedura Build-Heap (Costruzione di un Heap da un Array non Ordinato)</h3>
-            <div class="section-content">
-                <p>Come si trasforma un array generico \(A\) in una Max-Heap?</p>
-                <p>L'idea è di utilizzare la procedura `Heapify` in modo iterativo.</p>
-                <p>Ricordiamo che gli elementi da <code>H[floor(H.heapsize / 2) + 1]</code> a <code>H[H.heapsize]</code> sono già foglie, e ogni foglia è banalmente una Max-Heap (o Min-Heap) di un solo elemento.</p>
-                <p>Quindi, possiamo iniziare a chiamare `Heapify` sui nodi che sono genitori di foglie, e procedere all'indietro (bottom-up) verso la radice.</p>
-                <p>L'ultimo nodo che potrebbe non essere una foglia (cioè, l'ultimo nodo interno) è quello all'indice <code>floor(A.length / 2)</code>.</p>
-
-                <p><strong>Pseudo-codice di Build-Heap(A):</strong></p>
-                <pre><code class="language-pseudocode">
-Build-Heap(A)
-  A.heapsize ← A.length // L'heap inizialmente occupa tutto l'array
-  
-  // Itera all'indietro dagli ultimi nodi interni fino alla radice
-  for i ← floor(A.length / 2) downto 1 do
-    Heapify(A, i) 
-                </code></pre>
-                <p><strong>Spiegazione:</strong></p>
-                <ul>
-                    <li>Quando `Heapify(A, i)` viene chiamata, per l'ordine decrescente degli indici `i`, si può garantire che i sottoalberi radicati nei figli di `i` (cioè `LEFT(i)` e `RIGHT(i)`) sono già stati trasformati in Max-Heap dalle precedenti chiamate a `Heapify` (perché gli indici dei figli sono maggiori di `i`).</li>
-                    <li>Questo soddisfa la precondizione di `Heapify`.</li>
-                    <li>Partendo dai nodi più "bassi" che non sono foglie e risalendo, si costruisce progressivamente la proprietà di Max-Heap per alberi sempre più grandi, fino a includere la radice.</li>
-                </ul>
-                <p>La complessità di `Build-Heap` non è banale come \( (\text{numero di nodi}) \times O(\log n) \). Si può dimostrare (analisi più avanzata, spesso vista nel corso) che `Build-Heap` ha una complessità temporale:</p>
-                <div class="math-block">
-                \( T_{\text{Build-Heap}}(n) = O(n) \)
-                </div>
-                <p>Questa è una complessità lineare, il che è molto efficiente.</p>
-
-                <h4 class="subsubsection-title">Complessità Totale di HeapSort</h4>
-                <p>HeapSort consiste in:</p>
+                <h4 class="subsubsection-title">Svolgimento e Spiegazione (Esercizio per Casa)</h4>
+                <p>L'idea è la seguente:</p>
                 <ol>
-                    <li><code>Build-Heap(A)</code>: \(O(n)\)</li>
-                    <li>Un ciclo che si ripete \(n-1\) volte. Ad ogni iterazione del ciclo:
+                    <li><strong>Aggiornare la chiave:</strong> Imposta <code>H[i] ← S</code>.</li>
+                    <li><strong>Ripristinare la proprietà di Heap:</strong> Dopo aver cambiato la chiave in <code>H[i]</code>, la proprietà di Max-Heap potrebbe essere violata.
                         <ul>
-                            <li>Uno scambio: \(\Theta(1)\)</li>
-                            <li>Un decremento di `heapsize`: \(\Theta(1)\)</li>
-                            <li>Una chiamata a `Heapify(A, 1)`: \(O(\log k)\), dove \(k\) è la dimensione corrente dell'heap (che va da \(n-1\) a 2).</li>
+                            <li><strong>Caso 1: La nuova chiave <code>S</code> è maggiore della chiave originale <code>H[i]</code>.</strong>
+                                L'elemento <code>H[i]</code> potrebbe ora essere più grande del suo genitore. Bisogna farlo "risalire" (<em>float up</em>), simile a quanto avviene in <code>Max-Heap-Insert</code>. Si confronta <code>H[i]</code> con <code>H[PARENT(i)]</code> e si scambia se necessario, continuando a risalire.
+                            </li>
+                            <li><strong>Caso 2: La nuova chiave <code>S</code> è minore della chiave originale <code>H[i]</code>.</strong>
+                                L'elemento <code>H[i]</code> potrebbe ora essere più piccolo di uno o entrambi i suoi figli. Bisogna farlo "scendere" (<em>float down</em>), esattamente come fa la procedura <code>Max-Heapify(H, i)</code>.
+                            </li>
                         </ul>
-                        Quindi, il costo totale del ciclo di estrazioni è \( \sum_{k=2}^{n-1} O(\log k) \approx O(n \log n) \). (La professoressa accenna che la somma esatta è \(O(n \log n)\)).
                     </li>
                 </ol>
-                <p><strong>Complessità Totale di HeapSort:</strong> \(O(n) + O(n \log n) = O(n \log n)\).</p>
-                <p>Poiché HeapSort è un algoritmo di ordinamento basato su confronti e \(n \log n\) è un limite inferiore per tali algoritmi, HeapSort è asintoticamente ottimale.</p>
+                <p>Poiché non sappiamo a priori se la chiave è aumentata o diminuita, possiamo scrivere l'algoritmo in modo che gestisca entrambi i casi. Tuttavia, solo uno dei due percorsi (risalita o discesa) sarà effettivamente necessario.</p>
+
+                <pre><code class="language-pseudocode">
+Max-Heap-Modify-Key(H, i, S)
+  if S > H[i] then // La chiave è aumentata, potrebbe dover risalire
+    H[i] ← S
+    // Loop per far risalire l'elemento (Heapify-Up)
+    while (i > 1 AND H[PARENT(i)] < H[i]) do
+      SWAP(H[i], H[PARENT(i)])
+      i ← PARENT(i)
+  else if S < H[i] then // La chiave è diminuita, potrebbe dover scendere
+    H[i] ← S
+    Max-Heapify(H, i) // Chiama la procedura standard per far scendere
+  // else S == H[i], non fare nulla, l'heap è già corretto
+                </code></pre>
+                <p><strong>Complessità:</strong></p>
+                <ul>
+                    <li>Il caso \(S > H[i]\) richiede un ciclo `while` che risale l'albero, al massimo per l'altezza dell'heap: \(O(\log n)\).</li>
+                    <li>Il caso \(S < H[i]\) chiama `Max-Heapify(H, i)`, che, come abbiamo visto, costa \(O(\log n)\) (o \(O(\text{altezza del nodo i})\), che è al massimo \(O(\log n)\)).</li>
+                </ul>
+                <p>Quindi, la complessità totale di <code>Max-Heap-Modify-Key</code> è \(O(\log n)\).</p>
             </div>
         </article>
+
+        <article id="heapsort-algoritmo" class="content-section">
+            <h2 class="section-title">4. Algoritmo di Ordinamento: HeapSort</h2>
+            <div class="section-content">
+                <p>HeapSort è un algoritmo di ordinamento che utilizza la struttura dati Max-Heap. È un algoritmo di ordinamento basato su confronti, efficiente e in-place (se implementato con attenzione).</p>
+                <p><strong>Idea Generale di HeapSort:</strong></p>
+                <ol>
+                    <li><strong>Costruire una Max-Heap:</strong> Dato un array di input \(A\), trasformarlo in una Max-Heap. Questa operazione è svolta da una procedura chiamata <code>Build-Max-Heap(A)</code>. Dopo questo passo, l'elemento più grande dell'array si troverà alla radice dell'heap (<code>A[1]</code>).</li>
+                    <li><strong>Fase di Ordinamento:</strong>
+                        <ul>
+                            <li>Ripetere per \(i\) da <code>A.length</code> decrescendo fino a 2:
+                                <ol>
+                                    <li><strong>Scambiare</strong> l'elemento alla radice <code>A[1]</code> (che è il massimo corrente nell'heap rimanente) con l'elemento <code>A[i]</code> (l'ultima posizione corrente dell'heap). Ora l'elemento massimo per questa iterazione è nella sua posizione finale corretta nell'array ordinato (alla fine della porzione ancora da ordinare).</li>
+                                    <li><strong>Ridurre la dimensione dell'heap:</strong> <code>A.heapsize ← A.heapsize - 1</code>. L'elemento <code>A[i]</code> (il massimo appena posizionato) non fa più parte dell'heap.</li>
+                                    <li><strong>Ripristinare la proprietà di Max-Heap:</strong> L'elemento che è stato spostato alla radice (l'ex <code>A[i]</code>) potrebbe violare la proprietà. Chiamare <code>Max-Heapify(A, 1)</code> sull'heap ridotto per ripristinare la proprietà.</li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+                <p>Al termine, l'array \(A\) sarà ordinato in modo non decrescente.</p>
+                <p>La professoressa illustra (pagina 7 OCR) l'idea: si ha un vettore A. Prima si fa `BuildHeap(A)` per trasformarlo in una Max-Heap. Poi, iterativamente, si prende l'elemento massimo (alla radice), lo si sposta all'ultima posizione dell'heap corrente, si "accorcia" l'heap (diminuendo `heapsize`) e si chiama `Heapify` sulla nuova radice.</p>
+                <div class="array-representation">
+                    <p>Idea di HeapSort:</p>
+                    <p>1. Array Iniziale A: <code>[X, X, X, X, X, X]</code></p>
+                    <p>2. Dopo Build-Max-Heap(A): <code>[MAX₁, Y, Z, ..., W]</code> (heapsize = n)</p>
+                    <p>3. Iterazione 1 (i=n):</p>
+                    <p>   Scambia A[1] (MAX₁) con A[n] (W): <code>[W, Y, Z, ..., MAX₁]</code></p>
+                    <p>   heapsize = n-1. Ora MAX₁ è "fuori" dall'heap, nella sua posizione finale.</p>
+                    <p>   Max-Heapify(A, 1) sull'heap A[1...n-1]. L'array diventa: <code>[MAX₂, Y', Z', ...] | [MAX₁]</code></p>
+                    <p>4. Iterazione 2 (i=n-1):</p>
+                    <p>   Scambia A[1] (MAX₂) con A[n-1]: <code>[..., Y', Z', MAX₂] | [MAX₁]</code></p>
+                    <p>   heapsize = n-2. Ora MAX₂ è nella sua posizione finale.</p>
+                    <p>   Max-Heapify(A, 1) sull'heap A[1...n-2].</p>
+                    <p>...e così via.</p>
+                </div>
+
+                <pre><code class="language-pseudocode">
+HeapSort(A)
+  Build-Max-Heap(A) // Trasforma A in una Max-Heap
+  for i ← A.length downto 2 do
+    SWAP(A[1], A[i])
+    A.heapsize ← A.heapsize - 1 
+    Max-Heapify(A, 1)
+                </code></pre>
+                <p><strong>Nota:</strong> Nello pseudo-codice, <code>A.heapsize</code> deve essere gestito correttamente. Inizialmente, <code>A.heapsize = A.length</code> dopo <code>Build-Max-Heap</code>. All'interno del ciclo <code>for</code>, <code>Max-Heapify</code> opera sulla porzione dell'array che costituisce l'heap corrente, la cui dimensione è data da <code>A.heapsize</code> (che viene decrementata).</p>
+            </div>
+        </article>
+
+        <article id="build-heap-procedura" class="content-section">
+            <h3 class="subsection-title">4.1. Procedura Ausiliaria: Build-Max-Heap(A)</h3>
+            <div class="section-content">
+                <p>La procedura <code>Build-Max-Heap(A)</code> costruisce una Max-Heap a partire da un array \(A\) non ordinato.</p>
+                <p><strong>Idea:</strong> Si utilizza la procedura <code>Max-Heapify</code>. Ricordiamo che <code>Max-Heapify(H, i)</code> funziona correttamente se i sottoalberi radicati nei figli di `i` sono già Max-Heap.</p>
+                <p>Le foglie di un albero sono, per definizione, delle Max-Heap (banalmente, non hanno figli, quindi la proprietà è soddisfatta).</p>
+                <p>Sappiamo che in un array che rappresenta un heap, gli elementi con indici da <code>floor(A.length / 2) + 1</code> fino a <code>A.length</code> sono foglie.</p>
+                <p>Quindi, possiamo costruire l'heap "dal basso verso l'alto":</p>
+                <ol>
+                    <li>Imposta <code>A.heapsize ← A.length</code>.</li>
+                    <li>Itera con un indice `i` a partire dall'ultimo nodo che NON è una foglia (cioè <code>floor(A.length / 2)</code>) e vai a ritroso fino alla radice (indice 1).</li>
+                    <li>Per ogni tale nodo `i`, chiama <code>Max-Heapify(A, i)</code>.</li>
+                </ol>
+                <p>Quando <code>Max-Heapify(A, i)</code> viene chiamata, i figli di `i` (che hanno indici <code>2i</code> e <code>2i+1</code>) sono già stati processati dal ciclo (perché <code>2i > i</code> e il ciclo va a ritroso) oppure sono foglie. In entrambi i casi, i sottoalberi radicati nei figli di `i` sono già Max-Heap, soddisfacendo la precondizione di `Max-Heapify`.</p>
+                <pre><code class="language-pseudocode">
+Build-Max-Heap(A)
+  A.heapsize ← A.length
+  for i ← floor(A.length / 2) downto 1 do
+    Max-Heapify(A, i)
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="complessita-build-heap" class="content-section">
+            <h3 class="subsection-title">4.2. Complessità di Build-Max-Heap (Analisi più precisa)</h3>
+            <div class="section-content">
+                <p>Una stima approssimativa della complessità di <code>Build-Max-Heap</code> potrebbe essere: il ciclo <code>for</code> esegue circa \(n/2\) iterazioni. Ogni chiamata a <code>Max-Heapify</code> costa \(O(\log n)\). Quindi, \( (n/2) \cdot O(\log n) = O(n \log n) \).</p>
+                <p>Questa stima è corretta (è un limite superiore), ma non è stretta. Si può dimostrare che <strong><code>Build-Max-Heap</code> ha una complessità lineare, cioè \(\Theta(n)\)</strong>.</p>
+                <p><strong>Analisi più stretta (Idea):</strong></p>
+                <p>La maggior parte delle chiamate a <code>Max-Heapify</code> avviene su nodi che sono vicini alle foglie, e quindi hanno un'altezza piccola. Il costo di <code>Max-Heapify(A, i)</code> è \(O(h_i)\), dove \(h_i\) è l'altezza del nodo `i`.</p>
+                <p>In un heap con \(n\) nodi, ci sono al più \(\lceil n / 2^{h+1} \rceil\) nodi di altezza \(h\).</p>
+                <p>Il costo totale di <code>Build-Max-Heap</code> è quindi:</p>
+                <div class="math-block">
+                \( \sum_{h=0}^{\lfloor \log n \rfloor} \left\lceil \frac{n}{2^{h+1}} \right\rceil O(h) \)
+                </div>
+                <p>Questa sommatoria si può dimostrare essere \(O(n)\) (non \(\Theta(n \log n)\)).
+                (La dimostrazione dettagliata coinvolge la sostituzione \(\lceil n / 2^{h+1} \rceil \le n / 2^h\) e la manipolazione della serie \(\sum_{h=0}^{\log n} h/2^h\), che converge a una costante).</p>
+                <p><strong>Conclusione per Build-Max-Heap:</strong> Tempo \(\Theta(n)\).</p>
+            </div>
+        </article>
+
+        <article id="complessita-heapsort" class="content-section">
+            <h3 class="subsection-title">4.3. Complessità Complessiva di HeapSort</h3>
+            <p>Riprendiamo l'algoritmo <code>HeapSort(A)</code>:</p>
+                <pre><code class="language-pseudocode">
+HeapSort(A)
+  1. Build-Max-Heap(A)  // Costo Θ(n)
+  2. for i ← A.length downto 2 do // Ciclo eseguito n-1 volte
+  3.   SWAP(A[1], A[i])           // Costo Θ(1)
+  4.   A.heapsize ← A.heapsize - 1 // Costo Θ(1)
+  5.   Max-Heapify(A, 1)          // Costo O(log i) o O(log(A.heapsize))
+                </code></pre>
+            <p>Analisi dei costi:</p>
+            <ul>
+                <li><strong>Riga 1 (Build-Max-Heap):</strong> \(\Theta(n)\).</li>
+                <li><strong>Ciclo for (Righe 2-5):</strong>
+                    <ul>
+                        <li>Le righe 3 e 4 sono \(\Theta(1)\) per ogni iterazione.</li>
+                        <li>La riga 5 (<code>Max-Heapify</code>) viene chiamata su un heap la cui dimensione diminuisce ad ogni iterazione. Il costo è \(O(\log k)\) dove \(k\) è la dimensione corrente dell'heap.
+                        Il ciclo va per \(i\) da \(n\) a \(2\). La dimensione dell'heap va da \(n-1\) a \(1\).</li>
+                        <li>Costo totale del ciclo: \( \sum_{k=1}^{n-1} O(\log k) \).</li>
+                        <li>Questa somma è \(O(n \log n)\). (Poiché \( \sum_{k=1}^{m} \log k \approx \int_1^m \log x \,dx = [x \log x - x]_1^m \approx m \log m \)).</li>
+                    </ul>
+                </li>
+            </ul>
+            <p><strong>Complessità Totale di HeapSort:</strong></p>
+            <div class="math-block">
+            \( T(n) = \Theta(n) + O(n \log n) = O(n \log n) \)
+            </div>
+            <p>Poiché HeapSort è un algoritmo di ordinamento basato su confronti e il limite inferiore per l'ordinamento basato su confronti è \(\Omega(n \log n)\), allora HeapSort è asintoticamente ottimale.</p>
+            <div class="math-block">
+            \( T(n) = \Theta(n \log n) \)
+            </div>
+            <p><strong>Spazio:</strong> HeapSort è un algoritmo <strong>in-place</strong> (spazio \(\Theta(1)\) aggiuntivo), poiché tutte le operazioni avvengono direttamente sull'array di input (se si implementa `Max-Heapify` iterativamente o se la ricorsione è ottimizzata dal compilatore per non consumare stack proporzionale a \(\log n\)).</p>
+        </article>
+
     </main>
 
     <footer>
