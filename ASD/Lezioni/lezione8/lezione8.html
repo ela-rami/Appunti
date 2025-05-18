@@ -498,37 +498,50 @@ ASD/Lezioni/lezione8/lezione8.html:
                 <li>L'<strong>ultimo livello</strong> (quello delle foglie più profonde) è riempito da sinistra verso destra, senza "buchi".</li>
             </ol>
             <div class="mermaid-container">
-                 <pre class="mermaid">
-                    graph TD
-                        subgraph "Albero Binario Quasi-Completo (Valido)"
-                            A --- B; A --- C;
-                            B --- D; B --- E;
-                            C --- F; 
-                        end
-                        subgraph "NON Quasi-Completo (buco)"
-                            A1 --- B1; A1 --- C1;
-                            B1 --- D1; %% E1 mancante
-                            C1 --- F1; C1 --- G1;
-                        end
-                        subgraph "NON Quasi-Completo (non da sx)"
-                            A2 --- B2; A2 --- C2;
-                            B2 --- D2; 
-                            C2 --- G2; %% F2 mancante
-                        end
-                        subgraph "Riempimento da sx a dx (Ultimo Livello)"
-                           L0(( )) --- L1_1(( )); L0 --- L1_2(( ));
-                           L1_1 --- L2_1(( )); L1_1 --- L2_2(( ));
-                           L1_2 --- L2_3(( )); L1_2 --- L2_4(( ));
-                           L2_1 --- L3_1("✔"); L2_1 --- L3_2("✔"); 
-                           L2_2 --- L3_3("✔"); L2_2 --- L3_4("✔");
-                           L2_3 --- L3_5("✔"); L2_3 --- L3_6("?"); L3_6{{"?"}}; style L3_6 fill:#111827,stroke:transparent,color:transparent
-                           L2_4 --- L3_7("✘"); L3_7{{"✘"}}; style L3_7 fill:#111827,stroke:transparent,color:transparent
-                           L2_4 --- L3_8("✘"); L3_8{{"✘"}}; style L3_8 fill:#111827,stroke:transparent,color:transparent
-                           
-                           Note right of L3_8: L'ultimo livello è riempito<br/>da sinistra. Se L3_5 è presente,<br/>allora L3_1, L3_2, L3_3, L3_4 DEVONO<br/>essere presenti. L3_6 può o non può<br/>esserci. L3_7 e L3_8 NON possono<br/>esserci se L3_6 manca.
-                        end
-
-                 </pre>
+                <pre class="mermaid" id="mermaid-dynamic-init-2">
+                graph TD;
+                    subgraph "Albero Binario Quasi-Completo (Valido)"
+                        A --- B; A --- C;
+                        B --- D; B --- E;
+                        C --- F; 
+                    end
+                    subgraph "NON Quasi-Completo (buco)"
+                        A1 --- B1; A1 --- C1;
+                        B1 --- D1; 
+                        C1 --- F1; C1 --- G1;
+                    end
+                    subgraph "NON Quasi-Completo (non da sx)"
+                        A2 --- B2; A2 --- C2;
+                        B2 --- D2; 
+                        C2 --- G2; 
+                    end
+                    subgraph "Riempimento da sx a dx (Ultimo Livello)"
+                       L0(( )) --- L1_1(( )); 
+                       L0 --- L1_2(( ));
+                       L1_1 --- L2_1(( )); 
+                       L1_1 --- L2_2(( ));
+                       L1_2 --- L2_3(( )); 
+                       L1_2 --- L2_4(( ));
+                       L2_1 --- L3_1("✔"); 
+                       L2_1 --- L3_2("✔"); 
+                       L2_2 --- L3_3("✔"); 
+                       L2_2 --- L3_4("✔");
+                       L2_3 --- L3_5("✔"); 
+                       L2_3 --- L3_6("?");    
+                       L2_4 --- L3_7("✘");    
+                       L2_4 --- L3_8("✘");    
+                    end
+                </pre>
+            </div>
+            <!-- NOTA ESPLICATIVA FUORI DAL DIAGRAMMA -->
+            <div class="note-box"> 
+                <strong>Nota sul Riempimento dell'Ultimo Livello:</strong>
+                <p>L'ultimo livello di un albero binario quasi-completo è riempito rigorosamente da sinistra verso destra. Nell'esempio "Riempimento da sx a dx":</p>
+                <ul>
+                    <li>Se il nodo L3_5 (quello con "✔" sotto L2_3) è presente, allora tutti i nodi alla sua sinistra nello stesso livello (L3_1, L3_2, L3_3, L3_4) DEVONO essere presenti.</li>
+                    <li>Il nodo L3_6 (con testo "?") può o non può esserci. Se non c'è, l'albero è comunque quasi-completo (in tal caso, L3_7 e L3_8 non dovrebbero esistere).</li>
+                    <li>I nodi L3_7 e L3_8 (con testo "✘") NON possono essere presenti se L3_6 (o qualsiasi nodo alla loro sinistra nello stesso livello che dovrebbe esserci, come L3_5) è mancante. Se L3_6 è presente, allora L3_7 potrebbe esserci o meno, e così via.</li>
+                </ul>
             </div>
             <p>Immagine d (dagli appunti della prof): Visualizzazione di un albero binario quasi-completo, dove l'ultimo livello è riempito da sinistra a destra. Se ci fosse un nodo più a destra nell'ultimo livello, tutti quelli alla sua sinistra dovrebbero essere presenti.</p>
         </article>
