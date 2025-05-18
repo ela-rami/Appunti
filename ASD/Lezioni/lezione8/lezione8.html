@@ -1,0 +1,848 @@
+ASD/Lezioni/lezione8/lezione8.html:
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 8: Code con priorità; Heap; Inserimento in una Heap</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+
+        .array-representation table {
+            margin: 0 auto; /* Centra la tabella */
+            border-collapse: collapse;
+            font-family: var(--font-code);
+        }
+        .array-representation th, .array-representation td {
+            border: 1px solid var(--border-soft);
+            padding: 0.5em 0.75em;
+            min-width: 30px; /* Larghezza minima cella */
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .array-representation th { /* Indici */
+            background-color: var(--code-bg);
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .array-representation td { /* Valori */
+             background-color: var(--bg-card);
+             color: var(--text-primary);
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(var(--accent-secondary-rgb), 0.1); /* Usa variabile RGB per trasparenza */
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em;
+            margin: 1.5em 0;
+            border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 26 ott 2020 (2).pdf"> <!-- Aggiorna con il nome corretto del PDF per la Lezione 8 -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 8: Code con priorità; Heap; Inserimento in una Heap</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../../ASD_home.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-esercizi-precedenti" class="sidebar-link">1. Esercizi Assegnati (Riflessioni)</a></li>
+            <li><a href="#ex1-somma-k" class="sidebar-link">1.1. Esercizio: Coppia con Somma K</a></li>
+            <li><a href="#ex2-elementi-ripetuti" class="sidebar-link">1.2. Esercizio: Elementi Ripetuti</a></li>
+            <li><a href="#ex3-majority-candidate" class="sidebar-link">1.3. Esercizio: Majority Candidate</a></li>
+            <li><a href="#code-struttura-astratta" class="sidebar-link">2. Code: Struttura Dati Astratta</a></li>
+            <li><a href="#implementazioni-code" class="sidebar-link">2.1. Implementazioni di Code Standard</a></li>
+            <li><a href="#code-con-priorita" class="sidebar-link">3. Code con Priorità (Priority Queue)</a></li>
+            <li><a href="#heap-introduzione" class="sidebar-link">4. Heap: Definizione e Proprietà</a></li>
+            <li><a href="#albero-binario-quasi-completo" class="sidebar-link">4.1. Albero Binario Quasi-Completo</a></li>
+            <li><a href="#definizione-max-heap" class="sidebar-link">4.2. Definizione di Max-Heap (e Min-Heap)</a></li>
+            <li><a href="#proprieta-heap" class="sidebar-link">4.3. Proprietà degli Heap</a></li>
+            <li><a href="#altezza-heap" class="sidebar-link">4.4. Altezza di un Heap</a></li>
+            <li><a href="#implementazione-heap-vettore" class="sidebar-link">5. Implementazione di Heap con Vettori</a></li>
+            <li><a href="#navigazione-heap-vettore" class="sidebar-link">5.1. Navigazione nell'Heap basato su Vettore</a></li>
+            <li><a href="#proprieta-foglie-heap-vettore" class="sidebar-link">5.2. Identificare le Foglie in un Heap basato su Vettore</a></li>
+            <li><a href="#operazioni-heap" class="sidebar-link">6. Operazioni su Heap</a></li>
+            <li><a href="#heap-insert" class="sidebar-link">6.1. Max-Heap-Insert (Completamento per Casa)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-esercizi-precedenti" class="content-section">
+            <h2 class="section-title">1. Esercizi Assegnati per Casa (Riflessioni dalla Lezione Precedente)</h2>
+            <div class="section-content">
+                <p>La professoressa inizia riprendendo tre esercizi che erano stati lasciati come spunto di riflessione nella lezione precedente. Questi esercizi non sono stati svolti in dettaglio in aula, ma vengono brevemente discussi per fornire un'idea della soluzione o della complessità attesa.</p>
+            </div>
+        </article>
+
+        <article id="ex1-somma-k" class="content-section">
+            <h3 class="subsection-title">1.1. Esercizio Assegnato: Coppia di Elementi con Somma K</h3>
+            <div class="section-content">
+                <p><strong>Testo del Problema (come da appunti della prof):</strong></p>
+                <p>Dato un vettore \(A\) di interi di lunghezza \(n\) e dato un intero \(k\), decidere se esistono due elementi \(x, y \in A\) tali che \(x + y = k\).</p>
+                <p><strong>Soluzione suggerita (Complessità):</strong> \(O(n \log n)\)</p>
+                
+                <h4 class="subsubsection-title">Svolgimento e Spiegazione (Come da riflessione, non svolto in dettaglio dalla prof)</h4>
+                <p>Un modo per ottenere una soluzione \(O(n \log n)\) è il seguente:</p>
+                <ol>
+                    <li><strong>Ordinare il vettore \(A\):</strong> Questo passo richiede \(O(n \log n)\) tempo, ad esempio utilizzando Merge Sort.</li>
+                    <li><strong>Ricerca della coppia:</strong> Una volta che l'array è ordinato, possiamo cercare la coppia in modo efficiente. Per ogni elemento \(A[i]\) nell'array ordinato, vogliamo determinare se esiste un elemento \(A[j]\) (con \(j \neq i\)) tale che \(A[j] = k - A[i]\).
+                        <ul>
+                            <li>Possiamo scorrere l'array con un indice \(i\) da \(1\) a \(n\).</li>
+                            <li>Per ogni \(A[i]\), cerchiamo l'elemento \(target = k - A[i]\) nel resto dell'array ordinato (escludendo \(A[i]\) stesso se necessario). Questa ricerca può essere fatta in \(O(\log n)\) tempo usando la ricerca binaria.</li>
+                            <li>Quindi, questo secondo passo richiederebbe \(n \cdot O(\log n) = O(n \log n)\) tempo.</li>
+                        </ul>
+                        <p><strong>Alternativa più efficiente per il passo 2 (dopo l'ordinamento):</strong></p>
+                        <ul>
+                            <li>Utilizzare due puntatori (o indici), `left` che parte dall'inizio dell'array (indice 0 o 1) e `right` che parte dalla fine (indice n-1 o n).</li>
+                            <li>Finché `left < right`:
+                                <ul>
+                                    <li>Calcola `current_sum = A[left] + A[right]`.</li>
+                                    <li>Se `current_sum == k`, allora abbiamo trovato la coppia. Restituisci `true`.</li>
+                                    <li>Se `current_sum < k`, significa che la somma è troppo piccola. Dobbiamo aumentarla, quindi spostiamo il puntatore sinistro: `left++`.</li>
+                                    <li>Se `current_sum > k`, significa che la somma è troppo grande. Dobbiamo diminuirla, quindi spostiamo il puntatore destro: `right--`.</li>
+                                </ul>
+                            </li>
+                            <li>Se il ciclo termina senza trovare la coppia, restituisci `false`.</li>
+                            <li>Questo secondo passo con i due puntatori richiede \(O(n)\) tempo, poiché ad ogni iterazione almeno uno dei due puntatori si muove e non tornano mai indietro, coprendo l'array una sola volta.</li>
+                        </ul>
+                    </li>
+                </ol>
+                <p><strong>Complessità Totale:</strong> Il costo dell'ordinamento \(O(n \log n)\) domina sul costo della ricerca della coppia (che è \(O(n)\) con l'approccio a due puntatori, o \(O(n \log n)\) con la ricerca binaria ripetuta). Quindi la complessità totale è \(O(n \log n)\).</p>
+                <div class="note-box">
+                    <strong>Nota Bene:</strong> Esistono anche soluzioni \(O(n)\) in tempo medio utilizzando una tabella hash (si inseriscono gli elementi e per ogni elemento \(x\) si controlla se \(k-x\) è presente nella tabella), ma queste richiedono spazio aggiuntivo \(\Theta(n)\) in media/caso peggiore. La soluzione \(O(n \log n)\) con ordinamento può essere fatta in-place se si usa un algoritmo di ordinamento in-place come HeapSort (anche se la ricerca a due puntatori o la ricerca binaria richiedono solo spazio costante aggiuntivo dopo l'ordinamento).
+                </div>
+            </div>
+        </article>
+
+        <article id="ex2-elementi-ripetuti" class="content-section">
+            <h3 class="subsection-title">1.2. Esercizio Assegnato: Decidere se in A ci sono Elementi Ripetuti</h3>
+            <div class="section-content">
+                <p><strong>Testo del Problema (come da appunti della prof):</strong></p>
+                <p>Dato un vettore \(A\), decidere se in \(A\) ci sono elementi ripetuti.</p>
+                <p><strong>Soluzione suggerita (Complessità):</strong> \(O(n \log n)\)</p>
+
+                <h4 class="subsubsection-title">Svolgimento e Spiegazione (Come da riflessione, non svolto in dettaglio dalla prof)</h4>
+                <p>Anche qui, un approccio efficiente prevede l'ordinamento:</p>
+                <ol>
+                    <li><strong>Ordinare il vettore \(A\):</strong> Costo \(O(n \log n)\).</li>
+                    <li><strong>Scansione per elementi adiacenti uguali:</strong> Una volta che l'array è ordinato, tutti gli elementi uguali saranno adiacenti.
+                        <ul>
+                            <li>Si scorre l'array ordinato da \(i=1\) a \(n-1\).</li>
+                            <li>Per ogni \(i\), si confronta \(A[i]\) con \(A[i+1]\).</li>
+                            <li>Se si trova una coppia \(A[i] == A[i+1]\), allora esistono elementi ripetuti. Restituisci `true`.</li>
+                        </ul>
+                    </li>
+                    <li>Se la scansione termina senza trovare coppie adiacenti uguali, allora non ci sono elementi ripetuti. Restituisci `false`.</li>
+                </ol>
+                <p>Il secondo passo (scansione) richiede \(O(n)\) tempo.</p>
+                <p><strong>Complessità Totale:</strong> Dominata dall'ordinamento, quindi \(O(n \log n)\).</p>
+                 <div class="note-box">
+                    <strong>Nota Bene:</strong> Come per l'esercizio precedente, una soluzione \(O(n)\) in tempo medio è possibile usando una tabella hash per contare le occorrenze o semplicemente per marcare gli elementi già visti, con un costo spaziale aggiuntivo.
+                </div>
+            </div>
+        </article>
+
+        <article id="ex3-majority-candidate" class="content-section">
+            <h3 class="subsection-title">1.3. Esercizio Assegnato: Majority Candidate</h3>
+            <div class="section-content">
+                <p><strong>Definizione (come da appunti della prof):</strong></p>
+                <p>In un vettore \(A\) di interi, chiamiamo <strong>Majority Candidate</strong> un elemento che compare in \(A\) più di \(\lfloor n/2 \rfloor\) volte (dove \(n\) è la lunghezza di \(A\)).</p>
+                <p>Potrebbe non esistere un Majority Candidate.</p>
+                <p><strong>Testo del Problema:</strong></p>
+                <p>Descrivere un algoritmo che, dato \(A\):</p>
+                <ul>
+                    <li>Se \(A\) ha un Majority Candidate \(x\), restituisce \(x\).</li>
+                    <li>Se \(A\) non ha un Majority Candidate, restituisce `NULL` (o un valore speciale).</li>
+                </ul>
+                <p><strong>Soluzione suggerita (Complessità):</strong> Tempo \(\Theta(n)\) e <strong>in-place</strong> (spazio \(\Theta(1)\) aggiuntivo).</p>
+
+                <h4 class="subsubsection-title">Svolgimento e Spiegazione (Algoritmo di Boyer-Moore per la Maggioranza - Come da riflessione, non svolto in dettaglio dalla prof)</h4>
+                <p>Questo problema ha una soluzione classica nota come l'<strong>Algoritmo di Voto di Boyer-Moore</strong>, che soddisfa i requisiti di tempo \(\Theta(n)\) e spazio \(\Theta(1)\).</p>
+                <p>L'algoritmo si svolge in due fasi:</p>
+                <p><strong>Fase 1: Trovare un candidato.</strong></p>
+                <ol>
+                    <li>Inizializza una variabile `candidate` a `null` (o al primo elemento dell'array) e un contatore `count` a 0 (o 1 se si inizializza `candidate` con il primo elemento).</li>
+                    <li>Scorri l'array \(A\):
+                        <ul>
+                            <li>Se `count` è 0, imposta `candidate = A[i]` e `count = 1`.</li>
+                            <li>Altrimenti, se `A[i] == candidate`, incrementa `count`.</li>
+                            <li>Altrimenti (se `A[i] != candidate`), decrementa `count`.</li>
+                        </ul>
+                    </li>
+                    <li>Al termine della scansione, il valore in `candidate` è l'unico possibile Majority Candidate. Questo perché ogni volta che si incontra un elemento diverso dal candidato corrente, è come se "annullasse" una delle occorrenze del candidato. Se un elemento ha la maggioranza assoluta, sopravviverà a questi "annullamenti".</li>
+                </ol>
+
+                <p><strong>Fase 2: Verificare se il candidato è effettivamente il Majority Candidate.</strong></p>
+                <ol>
+                    <li>Resetta `count` a 0.</li>
+                    <li>Scorri nuovamente l'array \(A\):
+                        <ul>
+                            <li>Se `A[i] == candidate` (quello trovato nella Fase 1), incrementa `count`.</li>
+                        </ul>
+                    </li>
+                    <li>Se `count > n/2`, allora `candidate` è il Majority Candidate e viene restituito.</li>
+                    <li>Altrimenti, non esiste un Majority Candidate e si restituisce `NULL`.</li>
+                </ol>
+                <p><strong>Complessità:</strong></p>
+                <ul>
+                    <li><strong>Tempo:</strong> Entrambe le fasi richiedono una scansione dell'array, quindi \(O(n) + O(n) = O(n)\). Poiché dobbiamo almeno leggere tutto l'array, è anche \(\Omega(n)\). Quindi, \(\Theta(n)\).</li>
+                    <li><strong>Spazio:</strong> L'algoritmo usa solo un numero costante di variabili aggiuntive (`candidate`, `count`, l'indice del ciclo), quindi è \(\Theta(1)\) (in-place).</li>
+                </ul>
+                <p>Questo algoritmo è elegante perché risolve il problema in tempo lineare e spazio costante, che è ottimale.</p>
+            </div>
+        </article>
+
+        <article id="code-struttura-astratta" class="content-section">
+            <h2 class="section-title">2. Code (Queue): Struttura Dati Astratta</h2>
+            <div class="section-content">
+                <p>La professoressa introduce il concetto di <strong>Coda</strong> come una Struttura Dati Astratta (ADT).</p>
+                <p>Caratteristiche di una coda standard:</p>
+                <ul>
+                    <li>È una sequenza di elementi.</li>
+                    <li>Gli inserimenti avvengono da un lato (spesso chiamato "coda" o "retro" - <em>tail/rear</em>).</li>
+                    <li>Le cancellazioni (estrazioni) avvengono dall'altro lato (spesso chiamato "testa" o "fronte" - <em>head/front</em>).</li>
+                    <li>La politica di gestione è <strong>FIFO (First-In, First-Out)</strong>: il primo elemento inserito è il primo ad essere estratto.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="implementazioni-code" class="content-section">
+            <h3 class="subsection-title">2.1. Implementazioni Comuni di Code Standard</h3>
+            <p>Vengono discusse brevemente alcune possibili implementazioni concrete di una coda FIFO:</p>
+            
+            <h4 class="subsubsection-title">Liste Concatenate (Linked Lists)</h4>
+            <div class="mermaid-container">
+                <pre class="mermaid">
+                graph LR
+                    subgraph "Lista Concatenata per Coda (con puntatore a ultimo)"
+                        HEAD --> N1["elem1 | key"] --> N2["elem2 | key"] --> Nldots["..."] --> NLast["elemN | key"] --> NULL1(("null"));
+                        TAIL((TAIL)) --> NLast;
+                    end
+                </pre>
+            </div>
+            <ul>
+                <li><strong>Con solo puntatore alla testa (<code>head</code>):</strong>
+                    <ul>
+                        <li><strong>Inserimento (in coda, <em>enqueue</em>):</strong> Per inserire in fondo, bisogna scorrere tutta la lista. Costo \(\Theta(n)\) se ci sono \(n\) elementi.</li>
+                        <li><strong>Cancellazione (dalla testa, <em>dequeue</em>):</strong> Si rimuove l'elemento in testa. Costo \(\Theta(1)\).</li>
+                    </ul>
+                </li>
+                <li><strong>Con puntatori alla testa (<code>head</code>) e alla coda (<code>last</code>/<code>tail</code>):</strong>
+                    <ul>
+                        <li><strong>Inserimento (in coda, <em>enqueue</em>):</strong> Si aggiunge il nuovo elemento dopo `last` e si aggiorna `last`. Costo \(\Theta(1)\).</li>
+                        <li><strong>Cancellazione (dalla testa, <em>dequeue</em>):</strong> Si rimuove `head` e si aggiorna `head`. Costo \(\Theta(1)\).</li>
+                    </ul>
+                Questa seconda implementazione è efficiente per entrambe le operazioni.
+                </li>
+            </ul>
+
+            <h4 class="subsubsection-title">Liste Circolari</h4>
+            <div class="mermaid-container">
+                <pre class="mermaid">
+                graph LR
+                    subgraph "Lista Circolare per Coda (un solo puntatore a 'last')"
+                        NLast["elemN | key (last)"] --> N1["elem1 | key (last.next è head)"];
+                        N1 --> N2["elem2 | key"];
+                        N2 --> Nldots["..."];
+                        Nldots --> NLast;
+                    end
+                </pre>
+            </div>
+            <p>Con una lista circolare, mantenendo un solo puntatore all'ultimo elemento (<code>last</code>), si può accedere alla testa come `last.next`. Anche qui, inserimento in coda e cancellazione in testa possono essere \(\Theta(1)\).</p>
+
+            <h4 class="subsubsection-title">Vettore Sovradimensionato (Array Circolare)</h4>
+             <div class="array-representation">
+                <table>
+                    <thead><tr><th>...</th><th>head ↓</th><th>...</th><th>tail ↓</th><th>...</th></tr></thead>
+                    <tbody><tr><td></td><td>X</td><td>...</td><td>X</td><td></td></tr></tbody>
+                </table>
+            </div>
+            <p>Si usa un array di dimensione fissa (più grande del numero massimo di elementi attesi). Si mantengono due indici, `head` e `tail`, che "circolano" nell'array usando l'aritmetica modulare.</p>
+            <ul>
+                <li><strong>Inserimento (in coda):</strong> Si inserisce in posizione `tail` e si incrementa `tail` (modulo dimensione array). Costo \(\Theta(1)\).</li>
+                <li><strong>Cancellazione (dalla testa):</strong> Si estrae da `head` e si incrementa `head` (modulo dimensione array). Costo \(\Theta(1)\).</li>
+            </ul>
+            <p>La professoressa rimanda al Capitolo 10 del Cormen per i dettagli sull'implementazione con array circolari.</p>
+        </article>
+
+        <article id="code-con-priorita" class="content-section">
+            <h2 class="section-title">3. Code con Priorità (Priority Queue)</h2>
+            <p>Viene introdotta la <strong>Coda con Priorità</strong>, un'importante Struttura Dati Astratta (Capitolo 6 del Cormen).</p>
+            <p>A differenza delle code FIFO, in una coda con priorità:</p>
+            <ul>
+                <li><strong>Ad ogni elemento è associata una priorità</strong> (un valore numerico).</li>
+                <li>L'operazione di estrazione (o cancellazione) <strong>rimuove sempre l'elemento con la priorità più alta</strong> (o più bassa, a seconda della convenzione: Max-Priority Queue o Min-Priority Queue).</li>
+            </ul>
+            <p><strong>Operazioni fondamentali su una Coda con Priorità (Max-Priority Queue):</strong></p>
+            <ul>
+                <li><strong><code>INSERT(S, x)</code>:</strong> Inserisce l'elemento \(x\) nell'insieme \(S\).</li>
+                <li><strong><code>MAXIMUM(S)</code>:</strong> Restituisce l'elemento di \(S\) con la chiave (priorità) più grande.</li>
+                <li><strong><code>EXTRACT-MAX(S)</code>:</strong> Rimuove e restituisce l'elemento di \(S\) con la chiave più grande.</li>
+                <li><strong><code>INCREASE-KEY(S, x, k)</code>:</strong> Aumenta il valore della chiave dell'elemento \(x\) al nuovo valore \(k\) (assumendo \(k \ge \text{chiave corrente di } x\)). (Questa è la "Modifica della priorità" menzionata negli appunti della prof).</li>
+            </ul>
+            <p>La professoressa indica che si concentreranno su Inserimento, Cancellazione (Extract-Max) e Modifica della priorità. L'operazione `MAXIMUM` è spesso implicita o molto rapida con le implementazioni comuni.</p>
+        </article>
+
+        <article id="heap-introduzione" class="content-section">
+            <h2 class="section-title">4. Heap: Definizione e Proprietà</h2>
+            <div class="section-content">
+                <p>Una delle implementazioni più efficienti per le code con priorità è l'<strong>Heap</strong>.</p>
+                <p>Un Heap è una struttura dati basata su un albero che soddisfa specifiche proprietà.</p>
+            </div>
+        </article>
+        
+        <article id="albero-binario-quasi-completo" class="content-section">
+            <h3 class="subsection-title">4.1. Albero Binario Quasi-Completo</h3>
+            <p>Prima di definire l'Heap, è necessario definire cos'è un <strong>albero binario quasi-completo</strong>.</p>
+            <p>Un albero binario è quasi-completo se:</p>
+            <ol>
+                <li>È un albero binario <strong>completo</strong> (tutti i livelli sono pieni) fino al penultimo livello.</li>
+                <li>L'<strong>ultimo livello</strong> (quello delle foglie più profonde) è riempito da sinistra verso destra, senza "buchi".</li>
+            </ol>
+            <div class="mermaid-container">
+                 <pre class="mermaid">
+                    graph TD
+                        subgraph "Albero Binario Quasi-Completo (Valido)"
+                            A --- B; A --- C;
+                            B --- D; B --- E;
+                            C --- F; 
+                        end
+                        subgraph "NON Quasi-Completo (buco)"
+                            A1 --- B1; A1 --- C1;
+                            B1 --- D1; %% E1 mancante
+                            C1 --- F1; C1 --- G1;
+                        end
+                        subgraph "NON Quasi-Completo (non da sx)"
+                            A2 --- B2; A2 --- C2;
+                            B2 --- D2; 
+                            C2 --- G2; %% F2 mancante
+                        end
+                        subgraph "Riempimento da sx a dx (Ultimo Livello)"
+                           L0(( )) --- L1_1(( )); L0 --- L1_2(( ));
+                           L1_1 --- L2_1(( )); L1_1 --- L2_2(( ));
+                           L1_2 --- L2_3(( )); L1_2 --- L2_4(( ));
+                           L2_1 --- L3_1("✔"); L2_1 --- L3_2("✔"); 
+                           L2_2 --- L3_3("✔"); L2_2 --- L3_4("✔");
+                           L2_3 --- L3_5("✔"); L2_3 --- L3_6("?"); L3_6{{"?"}}; style L3_6 fill:#111827,stroke:transparent,color:transparent
+                           L2_4 --- L3_7("✘"); L3_7{{"✘"}}; style L3_7 fill:#111827,stroke:transparent,color:transparent
+                           L2_4 --- L3_8("✘"); L3_8{{"✘"}}; style L3_8 fill:#111827,stroke:transparent,color:transparent
+                           
+                           Note right of L3_8: L'ultimo livello è riempito<br/>da sinistra. Se L3_5 è presente,<br/>allora L3_1, L3_2, L3_3, L3_4 DEVONO<br/>essere presenti. L3_6 può o non può<br/>esserci. L3_7 e L3_8 NON possono<br/>esserci se L3_6 manca.
+                        end
+
+                 </pre>
+            </div>
+            <p>Immagine d (dagli appunti della prof): Visualizzazione di un albero binario quasi-completo, dove l'ultimo livello è riempito da sinistra a destra. Se ci fosse un nodo più a destra nell'ultimo livello, tutti quelli alla sua sinistra dovrebbero essere presenti.</p>
+        </article>
+
+        <article id="definizione-max-heap" class="content-section">
+            <h3 class="subsection-title">4.2. Definizione di Max-Heap (e Min-Heap per analogia)</h3>
+            <p><strong>Definizione (Max-Heap):</strong> Una <strong>Max-Heap</strong> è un albero binario <strong>quasi-completo</strong> in cui per ogni nodo \(x\) (diverso dalla radice), la chiave memorizzata in \(x\) è minore o uguale alla chiave memorizzata nel suo genitore.</p>
+            <div class="math-block">
+            \( \forall x \neq \text{radice}, \quad x.\text{key} \le x.\text{parent.key} \)
+            </div>
+            <p>Questo implica che la chiave più grande (massima priorità) si trova sempre alla radice dell'albero.</p>
+            <p>Ogni nodo in un heap avrà tipicamente:</p>
+            <ul>
+                <li><code>x.key</code>: la chiave (priorità) dell'elemento.</li>
+                <li><code>x.left</code>: puntatore al figlio sinistro.</li>
+                <li><code>x.right</code>: puntatore al figlio destro.</li>
+                <li><code>x.parent</code>: puntatore al genitore.</li>
+            </ul>
+            <p>(Questi puntatori sono concettuali se l'heap è implementato con un vettore).</p>
+            <div class="mermaid-container">
+                 <pre class="mermaid">
+                    graph TD
+                        P["x.parent.key"] --> X["x.key (≤ P)"];
+                        X --> XL["x.left.key (≤ X)"];
+                        X --> XR["x.right.key (≤ X)"];
+                 </pre>
+            </div>
+
+            <p><strong>Definizione (Min-Heap):</strong> Analogamente, una Min-Heap è un albero binario quasi-completo in cui per ogni nodo \(x\) (diverso dalla radice), la chiave di \(x\) è maggiore o uguale alla chiave del suo genitore.</p>
+            <div class="math-block">
+            \( \forall x \neq \text{radice}, \quad x.\text{key} \ge x.\text{parent.key} \)
+            </div>
+            <p>In una Min-Heap, la chiave più piccola si trova alla radice.</p>
+            <p>La professoressa mostra un esempio di Max-Heap e uno di Min-Heap (scambiando `<` con `>`).</p>
+            <div class="mermaid-container">
+                 <pre class="mermaid">
+                    graph TD
+                        subgraph "Esempio Max-Heap"
+                            N19("19") --> N8("8");
+                            N19 --> N2("2");
+                            N8 --> N5("5");
+                            N8 --> N8_child("8"); 
+                        end
+                 </pre>
+            </div>
+            <p>In questo esempio di Max-Heap: 19 è la radice. I suoi figli 8 e 2 sono ≤ 19. I figli di 8 (il primo 8) sono 5 e 8 (l'altro 8), entrambi ≤ 8. L'albero è anche quasi-completo.</p>
+        </article>
+        
+        <article id="proprieta-heap" class="content-section">
+            <h3 class="subsection-title">4.3. Proprietà Fondamentali degli Heap</h3>
+            <ul>
+                <li><strong>Proprietà di Max-Heap (o Min-Heap):</strong> La relazione tra chiave del nodo e chiave del genitore deve valere per ogni nodo (eccetto la radice).</li>
+                <li><strong>Struttura di Albero Binario Quasi-Completo:</strong> Determina la forma dell'albero.</li>
+            </ul>
+            <p>Conseguenze dirette dalla definizione di Max-Heap:</p>
+            <ul>
+                <li>La <strong>radice</strong> dell'albero contiene sempre l'elemento con la priorità (chiave) <strong>massima</strong>.</li>
+                <li>La priorità <strong>minima</strong> (se esiste un unico minimo) si troverà necessariamente in una delle <strong>foglie</strong>. (Un nodo interno ha figli con chiavi minori o uguali, quindi non può essere il minimo assoluto a meno che non sia anche una foglia, o che tutti gli elementi siano uguali).</li>
+            </ul>
+        </article>
+
+        <article id="altezza-heap" class="content-section">
+            <h3 class="subsection-title">4.4. Altezza di un Heap</h3>
+            <p>Dato un heap con \(n\) nodi, la sua altezza \(h\) è \(\Theta(\log n)\).</p>
+            <p>Più precisamente, per un albero binario quasi-completo con \(n\) nodi, l'altezza \(h = \lfloor \log_2 n \rfloor\).</p>
+            <p>Questo deriva dal fatto che un albero binario completo di altezza \(h\) ha \(2^{h+1}-1\) nodi. Un albero quasi-completo con \(n\) nodi avrà un'altezza tale che:</p>
+            <div class="math-block">
+            Numero nodi in albero completo altezza \(h-1 < n \le\) Numero nodi in albero completo altezza \(h\)
+            </div>
+            <div class="math-block">
+            \( (2^h - 1) < n \le (2^{h+1} - 1) \)
+            </div>
+            <p>Prendendo il logaritmo in base 2:</p>
+            <div class="math-block">
+            \( \log_2(2^h) < \log_2(n+1) \le \log_2(2^{h+1}) \)
+            </div>
+            <div class="math-block">
+            \( h < \log_2(n+1) \le h+1 \)
+            </div>
+            <p>Da cui si deduce \(h = \lfloor \log_2 n \rfloor\) (o, più precisamente, \(\lfloor \log_2(n+1) \rfloor - 1\) per alcuni intervalli di n, ma asintoticamente è \(\Theta(\log n)\)).
+            La professoressa mostra anche che per un albero completo: \(n = \sum_{i=0}^{h} 2^i = 2^{h+1}-1\), quindi \(h+1 = \log_2(n+1)\) e \(h = \log_2(n+1) - 1 \in \Theta(\log n)\).
+            E per un albero "pettine" (il caso peggiore di sbilanciamento, ma non un heap), l'altezza sarebbe \(n-1\). Un heap è sempre bilanciato in altezza grazie alla proprietà di essere quasi-completo.</p>
+            <p><em>Nota sulla base del logaritmo:</em> La professoressa ribadisce che nella notazione \(\Theta\), la base del logaritmo non è rilevante: \(\log_b n = \frac{\log_c n}{\log_c b}\), quindi \(\log_b n \in \Theta(\log_c n)\) se \(b, c > 1\).</p>
+        </article>
+
+        <article id="implementazione-heap-vettore" class="content-section">
+            <h2 class="section-title">5. Implementazione di Heap con Vettori (Array) Sovradimensionati</h2>
+            <div class="section-content">
+                <p>Un heap (albero binario quasi-completo) può essere rappresentato in modo molto efficiente usando un vettore (array), senza bisogno di puntatori espliciti padre-figlio.</p>
+                <p><strong>Idea:</strong> Si memorizzano i nodi dell'albero nel vettore "per livelli", da sinistra a destra all'interno di ogni livello.</p>
+                <ul>
+                    <li>La radice dell'albero è memorizzata in <code>A[1]</code> (assumendo indicizzazione da 1).</li>
+                    <li>Dato un nodo memorizzato in <code>A[i]</code>:
+                        <ul>
+                            <li>Il suo figlio sinistro (se esiste) è in <code>A[2*i]</code>.</li>
+                            <li>Il suo figlio destro (se esiste) è in <code>A[2*i + 1]</code>.</li>
+                            <li>Il suo genitore (se esiste, cioè se \(i > 1\)) è in <code>A[floor(i/2)]</code>.</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>L'array sarà "sovradimensionato", significa che avrà una lunghezza massima (<code>H.length</code>) ma conterrà un numero effettivo di elementi dell'heap (<code>H.heapsize</code>) che può essere minore o uguale a <code>H.length</code>. L'heap occupa la porzione <code>H[1...H.heapsize]</code>.</p>
+                <p><strong>Esempio di Mappatura Albero -> Vettore:</strong></p>
+                 <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD
+                        N10("10 (idx 1)") --> N8("8 (idx 2)");
+                        N10 --> N2_v("2 (idx 3)");
+                        N8 --> N5("5 (idx 4)");
+                        N8 --> N8_child("8 (idx 5)");
+                        N2_v --> N1_v("1 (idx 6)");
+                        N2_v --> N2_child("2 (idx 7)");
+                    </pre>
+                </div>
+                <p>Questo albero sarebbe memorizzato nel vettore come:</p>
+                <div class="array-representation">
+                    <table>
+                        <thead><tr><th>Idx:</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>...</th></tr></thead>
+                        <tbody><tr><td>Val:</td><td>10</td><td>8</td><td>2</td><td>5</td><td>8</td><td>1</td><td>2</td><td></td></tr></tbody>
+                    </table>
+                </div>
+                <p>Un altro esempio (dagli appunti della prof): L'albero con radice 20, figli 15 e 10, ecc. viene mappato nel vettore: <code>[20, 15, 10, 3, 8, 5, 6, 2, 1]</code> (assumendo che <code>H.heapsize = 9</code>).</p>
+            </div>
+        </article>
+
+        <article id="navigazione-heap-vettore" class="content-section">
+            <h3 class="subsection-title">5.1. Funzioni di Navigazione nell'Heap basato su Vettore</h3>
+            <p>Per navigare la struttura ad albero implicita nel vettore, si usano le seguenti funzioni (assumendo indicizzazione da 1):</p>
+            <ul>
+                <li><strong><code>PARENT(i)</code>:</strong> Restituisce <code>floor(i/2)</code>. (Se <code>i=1</code>, non ha genitore).</li>
+                <li><strong><code>LEFT(i)</code>:</strong> Restituisce <code>2*i</code>.</li>
+                <li><strong><code>RIGHT(i)</code>:</strong> Restituisce <code>2*i + 1</code>.</li>
+            </ul>
+            <p>Queste operazioni sono molto efficienti (divisioni e moltiplicazioni per 2 sono shift di bit).</p>
+        </article>
+
+        <article id="proprieta-foglie-heap-vettore" class="content-section">
+            <h3 class="subsection-title">5.2. Identificare le Foglie in un Heap basato su Vettore</h3>
+            <p>Dato un heap <code>H</code> con <code>H.heapsize</code> elementi, un nodo memorizzato all'indice <code>j</code> (<code>H[j]</code>) è una foglia se il suo figlio sinistro (che sarebbe all'indice <code>2*j</code>) si trova oltre la dimensione corrente dell'heap.</p>
+            <p><strong>Proprietà:</strong> Se <code>H</code> è un vettore che memorizza una Max-Heap (o Min-Heap), gli elementi da <code>H[floor(H.heapsize / 2) + 1]</code> fino a <code>H[H.heapsize]</code> sono foglie.</p>
+            <p><strong>Dimostrazione informale:</strong></p>
+            <ul>
+                <li>Consideriamo un nodo <code>H[j]</code>.</li>
+                <li>Il suo figlio sinistro è <code>H[2j]</code>.</li>
+                <li>Se <code>H[j]</code> NON è una foglia, allora deve avere almeno un figlio sinistro, quindi <code>2j ≤ H.heapsize</code>.</li>
+                <li>Questo implica <code>j ≤ H.heapsize / 2</code>.</li>
+                <li>Quindi, tutti i nodi con indice <code>j > H.heapsize / 2</code> (o più precisamente <code>j > floor(H.heapsize / 2)</code>) devono essere foglie.</li>
+                <li>Gli indici dei nodi interni vanno quindi da 1 a <code>floor(H.heapsize / 2)</code>.</li>
+            </ul>
+            <p>La professoressa mostra un diagramma (pagina 7 degli appunti OCR) che illustra come gli indici dei figli si relazionano all'indice del padre, e come si possono identificare le foglie. Il nodo con indice <code>i</code> ha figlio sinistro <code>2i</code> e figlio destro <code>2i+1</code>. Un nodo <code>J</code> non è una foglia se <code>2J <= H.heapsize</code>.</p>
+        </article>
+
+        <article id="operazioni-heap" class="content-section">
+            <h2 class="section-title">6. Operazioni Fondamentali su Heap</h2>
+            <p>L'implementazione di Heap (ad esempio Max-Heap) con vettori permette di realizzare le operazioni della coda con priorità in modo efficiente, tipicamente in \(O(\log n)\) tempo.</p>
+            <p>Vediamo l'operazione di inserimento.</p>
+        </article>
+        
+        <article id="heap-insert" class="content-section">
+            <h3 class="subsection-title">6.1. Max-Heap-Insert (Inserimento di una Nuova Chiave) - <em>Completamento per Casa/Riflessione</em></h3>
+            <p>La professoressa inizia a descrivere l'algoritmo `Max-Heap-Insert(H, K)` che inserisce una nuova chiave `K` nell'heap `H`.</p>
+            <p><strong>Idea dell'Algoritmo:</strong></p>
+            <ol>
+                <li><strong>Incrementare la dimensione dell'heap:</strong> <code>H.heapsize ← H.heapsize + 1</code>. (Si assume che ci sia spazio nel vettore sovradimensionato, cioè <code>H.heapsize < H.length</code> prima dell'incremento).</li>
+                <li><strong>Inserire la nuova chiave:</strong> La nuova chiave `K` viene temporaneamente inserita nell'ultima posizione disponibile dell'heap, cioè in <code>H[H.heapsize]</code> (dopo l'incremento). Questo nodo è una nuova foglia.</li>
+                <li><strong>Ristabilire la proprietà di Max-Heap:</strong> La nuova chiave `K` potrebbe essere più grande del suo genitore, violando la proprietà di Max-Heap. Bisogna "far risalire" `K` nell'albero scambiandola con il suo genitore finché la proprietà di Max-Heap non è soddisfatta, oppure finché `K` non diventa la radice.</li>
+            </ol>
+
+            <p><strong>Pseudo-codice (iniziato dalla prof, completato come riflessione):</strong></p>
+            <pre><code class="language-pseudocode">
+Max-Heap-Insert(H, K)
+  // Controlla se c'è spazio nell'array sovradimensionato
+  if H.heapsize < H.length then
+    H.heapsize ← H.heapsize + 1
+    H[H.heapsize] ← K  // Inserisce K come nuova ultima foglia
+    
+    i ← H.heapsize     // i è l'indice del nodo corrente (inizialmente la nuova foglia)
+    
+    // Finché i non è la radice (i > 1) E la chiave di i è maggiore della chiave del suo genitore
+    // (NB: la prof usa H[i] > H[Parent(i)] che è corretto per Max-Heap)
+    // (Nei suoi appunti scritti c'è una E commerciale &&)
+    while (i > 1 AND H[i] > H[PARENT(i)]) do 
+      SWAP(H[i], H[PARENT(i)]) // Scambia H[i] con il suo genitore
+      i ← PARENT(i)             // Risali all'indice del genitore
+    // Fine while
+  // Fine if (spazio disponibile)
+  // else: gestire l'errore di heap pieno (non mostrato qui)
+            </code></pre>
+            
+            <div class="note-box">
+                <strong>Svolgimento/Completamento (come da riflessione):</strong>
+                <p>L'algoritmo è quasi completo come abbozzato. La condizione <code>i > 1</code> assicura che non si cerchi il genitore della radice. La condizione <code>H[i] > H[PARENT(i)]</code> verifica se la proprietà di Max-Heap è violata. Se lo è, si scambiano i valori e si continua a controllare verso l'alto.</p>
+                <p>La professoressa chiede: "Versione Ricorsiva? Complessità?"</p>
+                <p><strong>Versione Ricorsiva (concettuale):</strong></p>
+                <p>Si potrebbe definire una procedura ausiliaria, ad esempio `Heapify-Up(H, i)`:</p>
+                <pre><code class="language-pseudocode">
+Heapify-Up(H, i)
+  if i > 1 AND H[i] > H[PARENT(i)] then
+    SWAP(H[i], H[PARENT(i)])
+    Heapify-Up(H, PARENT(i)) 
+                </code></pre>
+                <p>E `Max-Heap-Insert` diventerebbe:</p>
+                 <pre><code class="language-pseudocode">
+Max-Heap-Insert-Recursive(H, K)
+  if H.heapsize < H.length then
+    H.heapsize ← H.heapsize + 1
+    H[H.heapsize] ← K
+    Heapify-Up(H, H.heapsize)
+                 </code></pre>
+
+                <p><strong>Complessità di Max-Heap-Insert:</strong></p>
+                <ul>
+                    <li>L'incremento di `heapsize` e l'inserimento iniziale sono \(\Theta(1)\).</li>
+                    <li>Il ciclo `while` (o le chiamate ricorsive di `Heapify-Up`) risale l'albero dal nuovo nodo foglia fino alla radice nel caso peggiore.</li>
+                    <li>L'altezza dell'heap è \(h = \Theta(\log(\text{H.heapsize}))\).</li>
+                    <li>Quindi, il ciclo `while` (o la ricorsione) esegue al massimo \(h\) iterazioni/chiamate.</li>
+                    <li>Ogni iterazione/chiamata del `while`/`Heapify-Up` (confronto, swap, calcolo di PARENT) costa \(\Theta(1)\).</li>
+                    <li><strong>Complessità Totale:</strong> \(O(\log n)\), dove \(n\) è `H.heapsize`.</li>
+                </ul>
+                <p><em>(La registrazione audio si interrompe qui, mentre la professoressa stava per scrivere/discutere il ciclo `while` e il confronto con il genitore).</em></p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    // Stessa logica di Mermaid.js da lezioni precedenti per il rendering degli alberi
+    document.addEventListener('DOMContentLoaded', function () {
+        // Inizializza Mermaid.js solo se la libreria è caricata
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, // Manuale per l'evento 'sectionshown'
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: { // Personalizzazione per coerenza con il tema del sito
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            // Pre-processa tutti i diagrammi per memorizzare le loro definizioni
+            // e pulire il loro contenuto HTML per il rendering dinamico
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`; // Assicura un ID
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; // Usa innerHTML per preservare entità come <
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || ""; // Estrai il testo
+                mermaidOriginalDefinitions.set(id, decodedContent.trim());
+                diag.innerHTML = ''; // Pulisci il contenuto originale
+                diag.style.visibility = 'hidden'; // Nascondi finché non renderizzato
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    console.warn("Nessuna definizione originale per Mermaid ID:", diagramId);
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; // Assicurati che sia vuoto prima di renderizzare
+                try {
+                    // Usa un ID temporaneo per il rendering per evitare conflitti se mermaid.render viene chiamato più volte
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    console.error("Errore rendering Mermaid per ID:", diagramId, "\nErrore:", e, "\nDefinizione:", diagramDefinition);
+                    // Mostra l'errore e la definizione per debug
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            // Ascolta l'evento personalizzato 'sectionshown' (definito in common.js)
+            // per renderizzare i diagrammi solo quando la sezione diventa visibile
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    // console.log('Section shown (Mermaid):', event.detail.sectionId);
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            // Renderizza i diagrammi nella sezione inizialmente attiva (se presente)
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                // console.log('Initial active section for Mermaid:', initiallyActiveSection.id);
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        } else {
+            // console.warn("Mermaid.js non è caricato. I diagrammi non verranno renderizzati.");
+            document.querySelectorAll('.mermaid-container').forEach(container => {
+                 container.innerHTML = "<p style='color:var(--accent-primary);'>Mermaid.js non caricato. Impossibile visualizzare il diagramma.</p>";
+            });
+        }
+    });
+    </script>
+</body>
+</html>
