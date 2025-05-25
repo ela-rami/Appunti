@@ -361,7 +361,7 @@
                 </ul>
                  <p><strong>Funzionamento di <code>Max-Heapify(A, i)</code> (dettagli dalla Lezione 9):</strong></p>
                  <ol>
-                    <li>Trova il più grande tra <code>A[i]</code>, <code>A[LEFT(i)]</code> (se esiste e rientra in `heapsize`), e <code>A[RIGHT(i)]</code> (se esiste e rientra in `heapsize`). Sia `largest` l'indice di questo elemento.</li>
+                    <li>Trova il più grande tra <code>A[i]</code>, <code>A[LEFT(i)]</code> (se esiste e rientra in `heapsize`), e <code>A[RIGHT(i)]</code> (if exists and rientra in `heapsize`). Sia `largest` l'indice di questo elemento.</li>
                     <li>Se `largest` è diverso da `i`, significa che <code>A[i]</code> non è il massimo dei tre.</li>
                     <li>Allora, scambia <code>A[i]</code> con <code>A[largest]</code>.</li>
                     <li>Dopo lo scambio, l'elemento che era originariamente in <code>A[i]</code> (e ora si trova in <code>A[largest]</code>) potrebbe aver violato la proprietà di Max-Heap nel sottoalbero radicato in `largest`. Quindi, si richiama ricorsivamente <code>Max-Heapify(A, largest)</code>.</li>
@@ -611,35 +611,188 @@ Build-Max-Heap(A)
         </article>
         
         <article id="heapsort-completo" class="content-section">
-            <h2 class="section-title">6. Algoritmo HeapSort Completo e Sua Complessità</h2>
+            <h2 class="section-title">6. Algoritmo HeapSort Completo</h2>
             <div class="section-content">
-                <h3 class="subsection-title">Pseudocodice di <code>HeapSort(A)</code> (Ripetizione)</h3>
+                <p>HeapSort è un algoritmo di ordinamento che utilizza la struttura dati Max-Heap. È un algoritmo di ordinamento basato su confronti, efficiente e in-place (se implementato con attenzione).</p>
+                <p><strong>Idea Generale di HeapSort:</strong></p>
+                <ol>
+                    <li><strong>Costruire una Max-Heap:</strong> Dato un array di input \(A\), trasformarlo in una Max-Heap. Questa operazione è svolta da una procedura chiamata <code>Build-Max-Heap(A)</code>. Dopo questo passo, l'elemento più grande dell'array si troverà alla radice dell'heap (<code>A[1]</code>).</li>
+                    <li><strong>Fase di Ordinamento:</strong>
+                        <ul>
+                            <li>Ripetere per \(i\) da <code>A.length</code> decrescendo fino a 2:
+                                <ol>
+                                    <li><strong>Scambiare</strong> l'elemento alla radice <code>A[1]</code> (che è il massimo corrente nell'heap rimanente) con l'elemento <code>A[i]</code> (l'ultima posizione corrente dell'heap). Ora l'elemento massimo per questa iterazione è nella sua posizione finale corretta nell'array ordinato (alla fine della porzione ancora da ordinare).</li>
+                                    <li><strong>Ridurre la dimensione dell'heap:</strong> <code>A.heapsize ← A.heapsize - 1</code>. L'elemento <code>A[i]</code> (il massimo appena posizionato) non fa più parte dell'heap.</li>
+                                    <li><strong>Ripristinare la proprietà di Max-Heap:</strong> L'elemento che è stato spostato alla radice (l'ex <code>A[i]</code>) potrebbe violare la proprietà. Chiamare <code>Max-Heapify(A, 1)</code> sull'heap ridotto per ripristinare la proprietà.</li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+                <p>Al termine, l'array \(A\) sarà ordinato in modo non decrescente.</p>
+            </div>
+        </article>
+
+        <article id="heapsort-pseudo-esempio-correttezza" class="content-section">
+            <h2 class="subsection-title">6.1. Pseudocodice, Esempio e Correttezza di <code>HeapSort</code></h2>
+            <div class="section-content">
+                <h3 class="subsubsection-title">Pseudocodice di <code>HeapSort(A)</code></h3>
                 <pre><code class="language-pseudocode">
 HeapSort(A)
-  Build-Max-Heap(A)              // Costo: Θ(n)
+  Build-Max-Heap(A)              // Trasforma A in una Max-Heap
   for i ← A.length downto 2 do   // Ciclo eseguito n-1 volte
-    SWAP(A[1], A[i])             // Costo: Θ(1) per iterazione
-    A.heapsize ← A.heapsize - 1   // Costo: Θ(1) per iterazione
-    Max-Heapify(A, 1)            // Costo: O(log i) o O(log(A.heapsize attuale)) per iterazione
+    SWAP(A[1], A[i])             // Scambia la radice (elemento maggiore) con l'ultimo elemento dell'heap "attivo"
+    A.heapsize ← A.heapsize - 1  // Decrementa la dimensione logica dell'heap
+    Max-Heapify(A, 1)            // Ripristina la proprietà di Max-Heap a partire dalla radice
                 </code></pre>
+                <p><strong>Nota:</strong> Nello pseudo-codice, <code>A.heapsize</code> deve essere gestito correttamente. Inizialmente, <code>A.heapsize = A.length</code> dopo <code>Build-Max-Heap</code>. All'interno del ciclo <code>for</code>, <code>Max-Heapify</code> opera sulla porzione dell'array che costituisce l'heap corrente, la cui dimensione è data da <code>A.heapsize</code> (che viene decrementata).</p>
 
-                <h3 class="subsection-title">Complessità Complessiva di <code>HeapSort</code></h3>
-                <p>Analizziamo i costi:</p>
+                <h3 class="subsubsection-title">Esempio Dettagliato di <code>HeapSort</code></h3>
+                <p>Riprendiamo l'array risultante da <code>BuildHeap</code> nell'esempio precedente: <code>A = [10, 8, 9, 4, 2, 5, 1, 3]</code>.
+                La lunghezza <code>A.length</code> è 8.</p>
+                <p><strong>Stato Iniziale (dopo <code>BuildHeap</code>):</strong></p>
+                <div class="array-representation">
+                    <table>
+                        <thead><tr><th>Idx:</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>(size)</th></tr></thead>
+                        <tbody><tr><td>Val:</td><td class="highlight-heapify">10</td><td>8</td><td>9</td><td>4</td><td>2</td><td>5</td><td>1</td><td>3</td><td>8</td></tr></tbody>
+                    </table>
+                </div>
+                <p><strong>Ciclo <code>for</code> da <code>i = 8</code> `downto 2`:</strong></p>
+
+                <p><strong>Iterazione <code>i = 8</code>:</strong></p>
                 <ul>
-                    <li><strong><code>Build-Max-Heap(A)</code>:</strong> Come appena visto, ha un costo di \(\Theta(n)\).</li>
-                    <li><strong>Ciclo <code>for</code> (dalla riga 2 in poi):</strong>
+                    <li><code>SWAP(A[1], A[8])</code>: Scambia 10 (radice) con 3 (ultimo elemento).</li>
+                    <li>Array dopo SWAP: <code>[<span class="highlight-key">3</span>, 8, 9, 4, 2, 5, 1, <span class="highlight-key">10</span>]</code></li>
+                    <li><code>A.heapsize = 7</code>. L'elemento 10 è ora "fuori" dall'Heap.</li>
+                    <li><code>Max-Heapify(A, 1)</code>:
                         <ul>
-                            <li>Il ciclo viene eseguito \(n-1\) volte (per \(i\) che va da <code>A.length</code> fino a 2).</li>
-                            <li>Le operazioni di <code>SWAP</code> e decremento di <code>A.heapsize</code> all'interno del ciclo costano \(\Theta(1)\) per ogni iterazione.</li>
-                            <li>L'operazione dominante all'interno del ciclo è <code>Max-Heapify(A, 1)</code>. La chiamata a <code>Max-Heapify</code> avviene sulla radice (indice 1) di un heap la cui dimensione diminuisce ad ogni iterazione. La dimensione dell'heap su cui opera <code>Max-Heapify</code> è prima \(n-1\), poi \(n-2\), ..., fino a 1.</li>
-                            <li>Il costo di <code>Max-Heapify(A, 1)</code> su un heap di dimensione \(k\) è \(O(\log k)\).</li>
-                            <li>Quindi, il costo totale del lavoro svolto dal ciclo <code>for</code> è la somma dei costi di <code>Max-Heapify</code>:
-                                <div class="math-block">
-                                \( \sum_{k=1}^{n-1} O(\log k) \)
-                                </div>
-                                (dove \(k\) rappresenta la dimensione dell'heap su cui si opera in quell'iterazione).
-                            </li>
-                            <li>Questa somma è \(O(n \log n)\). (Si può dimostrare che \( \sum_{k=1}^{m} \log k \in \Theta(m \log m) \). Nel nostro caso, \(m = n-1\)).</li>
+                            <li>`Heapify(A,1)` (radice 3, figli 8 e 9). `largest` è 9. Scambia 3 con 9.</li>
+                            <li>Array: <code>[<span class="highlight-key">9</span>, 8, <span class="highlight-key">3</span>, 4, 2, 5, 1, 10]</code></li>
+                            <li>`Heapify(A,3)` (radice 3, figli 5 e 1). `largest` è 5. Scambia 3 con 5.</li>
+                            <li>Array: <code>[9, 8, <span class="highlight-key">5</span>, 4, 2, <span class="highlight-key">3</span>, 1, 10]</code> (Nota: 3 è ora in `A[6]`).</li>
+                            <li>`Heapify(A,6)` (radice 3). Nodo 3 è una foglia, non fa nulla.</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>Stato dopo <code>i=8</code>: <code>[<span class="highlight-heapify">9</span>, 8, 5, 4, 2, 3, 1, <span class="highlight-ordered">10</span>]</code> (Heapsize=7)</p>
+                <div class="array-representation">
+                    <table>
+                        <thead><tr><th>Idx:</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>(size)</th></tr></thead>
+                        <tbody><tr><td>Val:</td><td class="highlight-heapify">9</td><td>8</td><td>5</td><td>4</td><td>2</td><td>3</td><td>1</td><td class="highlight-ordered">10</td><td>7</td></tr></tbody>
+                    </table>
+                </div>
+
+                <p><strong>Iterazione <code>i = 7</code>:</strong></p>
+                <ul>
+                    <li><code>SWAP(A[1], A[7])</code>: Scambia 9 con 1.</li>
+                    <li>Array dopo SWAP: <code>[<span class="highlight-key">1</span>, 8, 5, 4, 2, 3, <span class="highlight-key">9</span>, 10]</code></li>
+                    <li><code>A.heapsize = 6</code>.</li>
+                    <li><code>Max-Heapify(A, 1)</code>:
+                        <ul>
+                            <li>`Heapify(A,1)` (radice 1, figli 8 e 5). `largest` è 8. Scambia 1 con 8.</li>
+                            <li>Array: <code>[<span class="highlight-key">8</span>, <span class="highlight-key">1</span>, 5, 4, 2, 3, 9, 10]</code></li>
+                            <li>`Heapify(A,2)` (radice 1, figli 4 and 2). `largest` è 4. Scambia 1 con 4.</li>
+                            <li>Array: <code>[8, <span class="highlight-key">4</span>, 5, <span class="highlight-key">1</span>, 2, 3, 9, 10]</code> (Nota: 1 è ora in `A[4]`).</li>
+                            <li>`Heapify(A,4)` (radice 1, figlio 3). `largest` è 3. Scambia 1 con 3.</li>
+                            <li>Array: <code>[8, 4, 5, <span class="highlight-key">3</span>, 2, <span class="highlight-key">1</span>, 9, 10]</code> (Nota: 1 è ora in `A[6]`).</li>
+                            <li>`Heapify(A,6)` (radice 1). Nodo 1 è una foglia, non fa nulla.</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>Stato dopo <code>i=7</code>: <code>[<span class="highlight-heapify">8</span>, 4, 5, 3, 2, 1, <span class="highlight-ordered">9</span>, <span class="highlight-ordered">10</span>]</code> (Heapsize=6)</p>
+                <div class="array-representation">
+                    <table>
+                        <thead><tr><th>Idx:</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>(size)</th></tr></thead>
+                        <tbody><tr><td>Val:</td><td class="highlight-heapify">8</td><td>4</td><td>5</td><td>3</td><td>2</td><td>1</td><td class="highlight-ordered">9</td><td class="highlight-ordered">10</td><td>6</td></tr></tbody>
+                    </table>
+                </div>
+
+                <p>... (Il processo continua in modo analogo, estraendo il massimo corrente e riposizionandolo alla fine della parte ordinata dell'array, mentre l'Heap si riduce e viene ripristinato).</p>
+
+                <p>Al termine del ciclo (quando `i` arriva a 1), l'intero array sarà completamente ordinato in modo crescente.</p>
+
+                <h3 class="subsubsection-title">Correttezza di <code>HeapSort</code></h3>
+                <p>La correttezza di <code>HeapSort</code> è garantita dal mantenimento dell'invariante di ciclo e dalla terminazione del ciclo.</p>
+                <p><strong>Invariante del Ciclo (`I`):</strong> (Vedere Sezione 2)</p>
+                <p>All'inizio di ogni iterazione `i` (del ciclo `for` di `HeapSort` da `A.length` a 2):</p>
+                <ol>
+                    <li>`A[1...A.heapsize]` (dove `A.heapsize = i-1`) è un Max-Heap.</li>
+                    <li>`A[i...A.length]` è la porzione dell'array che è già ordinata.</li>
+                    <li>`A[1...A.heapsize]` sono tutti minori o uguali a `A[i...A.length]`.</li>
+                </ol>
+
+                <p><strong>Dimostrazione per Induzione (su `i`, che decresce):</strong></p>
+                <ol>
+                    <li>
+                        <strong>Inizializzazione (Caso Base):</strong>
+                        <p>Il ciclo `for` inizia con `i = A.length`. Prima di entrare nel ciclo, <code>Build-Max-Heap(A)</code> è stato eseguito, trasformando `A[1...A.length]` in un Max-Heap.
+                        Le operazioni all'inizio del ciclo sono: `SWAP(A[1], A[A.length])`, poi `A.heapsize` viene decrementato a `A.length - 1`, e infine <code>Max-Heapify(A, 1)</code>.
+                        Dopo queste operazioni, l'invariante deve valere per `i = A.length - 1` (cioè all'inizio della *successiva* iterazione del ciclo `for` esterno).
+                        </p>
+                        <ul>
+                            <li><code>A[A.length]</code> contiene l'elemento massimo dell'array originale (dopo lo swap).</li>
+                            <li><code>A[1...A.length-1]</code> è un Max-Heap (dopo `Max-Heapify`).</li>
+                            <li>Tutti gli elementi in `A[1...A.length-1]` sono \(\le\) `A[A.length]`.</li>
+                        </ul>
+                        <p>Quindi, l'invariante è vero dopo la preparazione della prima iterazione del ciclo `for` di HeapSort.</p>
+                    </li>
+                    <li>
+                        <strong>Mantenimento (Passo Induttivo):</strong>
+                        <p>Assumiamo che l'invariante sia vero all'inizio dell'iterazione corrente `i` (Ipotesi Induttiva - HI). Cioè, `A[1...i]` è un Max-Heap, `A[i+1...A.length]` è ordinata, e `A[1...i]` \(\le\) `A[i+1...A.length]`.</p>
+                        <p>All'interno dell'iterazione, l'algoritmo esegue le seguenti operazioni:</p>
+                        <ul>
+                            <li><code>SWAP(A[1], A[i])</code>: L'elemento più grande dell'Heap `A[1...i]` (che è `A[1]`) viene scambiato con `A[i]`. `A[i]` ora contiene l'elemento massimo dell'Heap precedente.</li>
+                            <li><code>A.heapsize = A.heapsize - 1</code>: La dimensione dell'Heap attivo si riduce, escludendo `A[i]` (che ora è ordinato e nella sua posizione finale per questa iterazione).</li>
+                            <li><code>Max-Heapify(A, 1)</code>: Questa chiamata ripristina la proprietà di Max-Heap sul sottoalbero `A[1...A.heapsize]`. Le precondizioni sono soddisfatte perché `A[1]` ha un nuovo valore, ma i suoi figli (se l'Heap è abbastanza grande) facevano parte dell'Heap precedente e quindi i loro sottoalberi sono ancora Max-Heap.</li>
+                        </ul>
+                        <p>Al termine dell'iterazione `i` (che diventerà `i-1` nella prossima iterazione):</p>
+                        <ul>
+                            <li>Il nuovo `A[1...i-1]` (che è ora `A[1...A.heapsize]`) è un Max-Heap.</li>
+                            <li>La porzione `A[i...A.length]` (che include il nuovo elemento ordinato `A[i]`) è ancora ordinata e i suoi elementi sono maggiori o uguali a quelli nell'Heap.</li>
+                        </ul>
+                        <p>L'invariante è quindi mantenuto per l'inizio dell'iterazione successiva (`i-1`).</p>
+                    </li>
+                    <li>
+                        <strong>Terminazione:</strong>
+                        <p>Il ciclo `for` termina quando `i` diventa 1.
+                        A questo punto, `A.heapsize` sarà 1 (solo `A[1]` rimane nell'Heap).
+                        L'invariante ci dice che `A[1...1]` è un Max-Heap (vero) e `A[2...A.length]` è ordinato.
+                        Poiché `A[1]` è l'elemento più piccolo dell'array (per la proprietà di Max-Heap e per come sono stati spostati i maggiori), e la parte `A[2...A.length]` è ordinata e contiene elementi \(\ge\) `A[1]`, l'intero array `A[1...A.length]` risulta completamente ordinato.</p>
+                    </li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="heapsort-proprieta-complessita" class="content-section">
+            <h2 class="section-title">7. Proprietà e Complessità di <code>HeapSort</code></h2>
+            <div class="section-content">
+                <h3 class="subsection-title">Proprietà di <code>HeapSort</code></h3>
+                <ul>
+                    <li><strong>In-place:</strong>
+                        <p><strong>Sì.</strong> HeapSort è un algoritmo in-place. L'ordinamento avviene direttamente sull'array di input, senza richiedere una quantità significativa di spazio di memoria aggiuntivo. Lo spazio ausiliario è limitato a poche variabili scalari (per indici e swap) e lo stack di ricorsione di <code>Max-Heapify</code>, che ha una profondità massima \(O(\log n)\).</p>
+                        <p>Quindi, lo spazio è \(O(\log n)\).</p>
+                    </li>
+                    <li><strong>Stabile:</strong>
+                        <p><strong>No.</strong> HeapSort non è un algoritmo stabile. Non mantiene l'ordine relativo degli elementi con chiavi uguali. Le operazioni di <code>SWAP</code> (specialmente quelle che spostano l'elemento più grande dalla radice alla fine dell'Heap) e le riorganizzazioni interne operate da <code>Max-Heapify</code> possono alterare l'ordine relativo di elementi uguali.</p>
+                    </li>
+                    <li><strong>Adattivo:</strong>
+                        <p><strong>No.</strong> HeapSort non è un algoritmo adattivo. La sua complessità rimane \(\Theta(n \log n)\) anche se l'array è parzialmente o quasi completamente ordinato. Non trae vantaggio da un input pre-ordinato per migliorare le sue prestazioni.</p>
+                    </li>
+                    <li><strong>Online:</strong>
+                        <p><strong>No.</strong> HeapSort non è un algoritmo online, poiché richiede l'intero set di dati di input disponibile fin dall'inizio per costruire l'Heap iniziale.</p>
+                    </li>
+                </ul>
+
+                <h3 class="subsection-title">Complessità Complessiva di <code>HeapSort</code> (Ripetizione)</h3>
+                <p>Analizziamo i costi (come già visto in Sezione 6):</p>
+                <ul>
+                    <li><strong><code>Build-Max-Heap(A)</code>:</strong> Costo \(\Theta(n)\).</li>
+                    <li><strong>Ciclo <code>for</code> (Righe 2-5 dello pseudo-codice):</strong>
+                        <ul>
+                            <li>Il ciclo si esegue \(n-1\) volte.</li>
+                            <li>Le operazioni di <code>SWAP</code> e decremento di <code>A.heapsize</code> sono \(\Theta(1)\) per iterazione.</li>
+                            <li>La chiamata a <code>Max-Heapify(A, 1)</code> ha costo \(O(\log k)\) dove \(k\) è la dimensione corrente dell'Heap.</li>
+                            <li>Il costo totale del ciclo è \(\sum_{k=1}^{n-1} O(\log k) = O(n \log n)\).</li>
                         </ul>
                     </li>
                 </ul>
@@ -650,12 +803,11 @@ HeapSort(A)
                 <div class="math-block">
                 \( T(n) = \Theta(n) + O(n \log n) = O(n \log n) \)
                 </div>
-                <p>Poiché HeapSort è un algoritmo di ordinamento basato su confronti, e il limite inferiore teorico per tali algoritmi è \(\Omega(n \log n)\), concludiamo che HeapSort è <strong>asintoticamente ottimale</strong>.</p>
+                <p>Poiché HeapSort è un algoritmo di ordinamento basato su confronti, e il limite inferiore teorico per tali algoritmi è \(\Omega(n \log n)\), concludiamo che HeapSort è **asintoticamente ottimale**.</p>
                 <div class="math-block">
                 \( T(n) = \Theta(n \log n) \)
                 </div>
-                <p><strong>Complessità Spaziale:</strong> HeapSort è un algoritmo <strong>in-place</strong>, poiché (se <code>Max-Heapify</code> è implementato iterativamente o la ricorsione è ottimizzata) richiede solo una quantità costante \(\Theta(1)\) di spazio di memoria aggiuntivo oltre all'array di input.</p>
-                <p><em>La professoressa sottolinea che la dimostrazione della complessità di Build-Heap a O(N) è importante per capire che la costruzione iniziale non è il collo di bottiglia, ma lo è il ciclo di estrazioni successive.</em></p>
+                <p>La professoressa sottolinea che la dimostrazione della complessità di `Build-Max-Heap` a \(O(n)\) è importante per capire che la costruzione iniziale non è il collo di bottiglia, ma lo è il ciclo di estrazioni successive.</p>
             </div>
         </article>
 
