@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 11: HeapSort, QuickSort(Partition)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+
+        .array-representation table {
+            margin: 0 auto; /* Centra la tabella */
+            border-collapse: collapse;
+            font-family: var(--font-code);
+        }
+        .array-representation th, .array-representation td {
+            border: 1px solid var(--border-soft);
+            padding: 0.5em 0.75em;
+            min-width: 30px; /* Larghezza minima cella */
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .array-representation th { /* Indici */
+            background-color: var(--code-bg);
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .array-representation td { /* Valori */
+             background-color: var(--bg-card);
+             color: var(--text-primary);
+        }
+        .array-representation td.highlight-pivot {
+            background-color: var(--accent-primary) !important;
+            color: var(--bg-deep-space) !important;
+            font-weight: bold;
+            border: 2px solid var(--text-primary) !important;
+        }
+        .array-representation td.highlight-i {
+            border-bottom: 3px solid var(--accent-secondary);
+            font-style: italic;
+        }
+        .array-representation td.highlight-j {
+            border-top: 3px solid #f472b6; /* Rosa */
+            font-style: italic;
+        }
+        .array-representation td.highlight-swap {
+            background-color: rgba(236, 72, 153, 0.2) !important; /* Rosa chiaro */
+            color: #ec4899 !important;
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1); /* Viola chiaro trasparente */
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em;
+            margin: 1.5em 0;
+            border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        .error-box {
+            background-color: rgba(239, 68, 68, 0.1); /* Rosso chiaro trasparente */
+            border-left: 4px solid #ef4444; /* Rosso */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .error-box strong { color: #ef4444; }
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 5 nov 2020 (2).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 11: HeapSort, QuickSort(Partition)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../../ASD_home.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-quicksort" class="sidebar-link">1. Introduzione a QuickSort</a></li>
+            <li><a href="#quicksort-idea-generale" class="sidebar-link">2. Algoritmo QuickSort: Idea Generale</a></li>
+            <li><a href="#partition-procedura" class="sidebar-link">3. Procedura <code>Partition</code> (Versione di Lomuto)</a></li>
+            <li><a href="#partition-idea" class="sidebar-link">3.1. Idea della Procedura <code>Partition</code></a></li>
+            <li><a href="#partition-esempio" class="sidebar-link">3.2. Esempio Dettagliato di <code>Partition</code></a></li>
+            <li><a href="#partition-pseudo-correttezza-complessita" class="sidebar-link">3.3. Pseudocodice, Correttezza e Complessità di <code>Partition</code></a></li>
+            <li><a href="#quicksort-pseudo-correttezza" class="sidebar-link">4. Pseudocodice e Correttezza di <code>QuickSort</code></a></li>
+            <li><a href="#quicksort-complessita" class="sidebar-link">5. Analisi della Complessità di <code>QuickSort</code></a></li>
+            <li><a href="#complessita-caso-peggiore" class="sidebar-link">5.1. Caso Peggiore (\(\Theta(N^2)\))</a></li>
+            <li><a href="#complessita-caso-migliore" class="sidebar-link">5.2. Caso Migliore (\(\Theta(N \log N)\))</a></li>
+            <li><a href="#complessita-altri-casi" class="sidebar-link">5.3. Discussione: Altri Casi di Sbilanciamento</a></li>
+            <li><a href="#quicksort-proprieta" class="sidebar-link">6. Proprietà di QuickSort: In-Place e Stabilità</a></li>
+            <li><a href="#quicksort-in-pratica" class="sidebar-link">7. QuickSort in Pratica: Perché è Veloce?</a></li>
+            <li><a href="#randomized-quicksort" class="sidebar-link">8. Randomized QuickSort</a></li>
+            <li><a href="#median-of-three" class="sidebar-link">9. Ottimizzazione: Median-of-Three</a></li>
+            <li><a href="#quicksort-caso-medio" class="sidebar-link">10. QuickSort: Analisi del Caso Medio (Cenno)</a></li>
+            <li><a href="#esercizi-casa" class="sidebar-link">11. Esercizi e Riflessioni per Casa</a></li>
+            <li><a href="#conclusione-prossimi-argomenti" class="sidebar-link">12. Conclusione e Prossimi Argomenti</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-quicksort" class="content-section">
+            <h2 class="section-title">1. Introduzione a QuickSort</h2>
+            <div class="section-content">
+                <p>La lezione di oggi è dedicata all'algoritmo di ordinamento <strong>QuickSort</strong>. La professoressa inizia con un breve setup tecnico, assicurandosi che la condivisione dello schermo del tablet funzioni correttamente. Menziona che la lezione precedente (il 2 Novembre) ha trattato Heapsort e si è conclusa con l'analisi di complessità (caso migliore e peggiore) e le proprietà di in-place e stabilità.</p>
+                <p>QuickSort, nonostante il nome "veloce", presenta una complessità che la professoressa anticipa "non sarà sorprendente", suggerendo che non è sempre il più veloce in tutti i casi. Tuttavia, è un algoritmo fondamentale e molto interessante per diversi motivi:</p>
+                <ul>
+                    <li>È spesso molto efficiente in pratica.</li>
+                    <li>Introduce la procedura <strong><code>Partition</code></strong>, che ha applicazioni anche al di fuori dell'ordinamento stesso.</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Riferimento Appunti Prof:</strong> Per questa lezione, fare riferimento al file PDF "Nota 5 nov 2020 (2).pdf".
+                </div>
+            </div>
+        </article>
+
+        <article id="quicksort-idea-generale" class="content-section">
+            <h2 class="section-title">2. Algoritmo QuickSort: Idea Generale (Divide et Impera)</h2>
+            <div class="section-content">
+                <p>QuickSort è un algoritmo di ordinamento basato sulla tecnica del <strong>Divide et Impera</strong>. L'idea centrale è la seguente:</p>
+                <ol>
+                    <li>
+                        <strong>Divide (Partiziona):</strong>
+                        Scegli un elemento dall'array (o dalla porzione di array corrente) chiamato <strong>pivot</strong> (o perno).
+                        Riorganizza l'array (o la porzione) in modo che tutti gli elementi minori o uguali al pivot si trovino alla sua sinistra, e tutti gli elementi maggiori o uguali al pivot si trovino alla sua destra. Il pivot stesso si troverà così nella sua posizione finale corretta nell'array ordinato. Questa operazione è svolta dalla procedura <code>Partition</code>.
+                        <div class="mermaid-container">
+                            <pre class="mermaid">
+                            graph TD
+                                A["Array A[p...q]"] --> P["Scegli Pivot x in A[p...q]"];
+                                P --> R["Riorganizza A t.c. A[p...r-1] ≤ x ≤ A[r+1...q]<br/>Pivot x è in A[r]"];
+                                R --> S1["Sottoproblema 1: A[p...r-1]"];
+                                R --> S2["Sottoproblema 2: A[r+1...q]"];
+                            </pre>
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Impera (Ricorsione):</strong>
+                        Ordina ricorsivamente le due sottoparti (quella a sinistra del pivot e quella a destra del pivot) applicando QuickSort.
+                    </li>
+                    <li>
+                        <strong>Combina:</strong>
+                        Nessuna operazione di combinazione è necessaria, perché l'array viene ordinato "in loco" (<em>in-place</em>, nel senso che le partizioni sono ordinate e il pivot è già al suo posto). Una volta che le due sottoparti sono ordinate, l'intero array (o porzione) è ordinato.
+                    </li>
+                </ol>
+                <p><strong>Pseudocodice di base di QuickSort(A, p, q)</strong> (<code>p</code> è l'indice iniziale, <code>q</code> l'indice finale della porzione da ordinare):</p>
+                <pre><code class="language-pseudocode">
+QuickSort(A, p, q)
+  if p < q then  // Se ci sono almeno due elementi da ordinare
+    r ← Partition(A, p, q)  // Partiziona e ottieni l'indice finale del pivot
+    QuickSort(A, p, r - 1)  // Ordina la parte sinistra (escluso il pivot)
+    QuickSort(A, r + 1, q)  // Ordina la parte destra (escluso il pivot)
+                </code></pre>
+                <p>La professoressa illustra questo concetto a pagina 1 degli appunti PDF, mostrando un array, la scelta del pivot `x`, e le due chiamate ricorsive sulle partizioni sinistra (`≤ x`) e destra (`≥ x`).</p>
+            </div>
+        </article>
+
+        <article id="partition-procedura" class="content-section">
+            <h2 class="section-title">3. Procedura <code>Partition</code> (Versione di Lomuto)</h2>
+            <div class="section-content">
+                <p>La procedura <code>Partition</code> è il cuore di QuickSort. Esistono diverse varianti; quella presentata dalla professoressa è la <strong>partizione di Lomuto</strong>, che solitamente sceglie l'ultimo elemento della porzione corrente come pivot.</p>
+            </div>
+        </article>
+
+        <article id="partition-idea" class="content-section">
+            <h3 class="subsection-title">3.1. Idea della Procedura <code>Partition(A, p, q)</code></h3>
+            <div class="section-content">
+                <p><strong>Input:</strong> Un array (o vista di array) <code>A</code> e due indici <code>p</code> e <code>q</code> che delimitano la porzione da partizionare.</p>
+                <p><strong>Output:</strong> Un indice <code>r</code> tale che <code>A[r]</code> (il pivot) è nella sua posizione finale corretta, e l'array <code>A[p...q]</code> è stato riarrangiato in modo che:</p>
+                <ul>
+                    <li>Tutti gli elementi in <code>A[p...r-1]</code> sono minori o uguali a <code>A[r]</code>.</li>
+                    <li>Tutti gli elementi in <code>A[r+1...q]</code> sono maggiori o uguali a <code>A[r]</code>.</li>
+                </ul>
+                 <div class="note-box">
+                    <strong>Nota sulla gestione dei duplicati del pivot:</strong> La professoressa negli appunti (pagina 1, diagramma di <code>Partition</code>) usa "≤ X" e "≥ X". Questo implica che gli elementi uguali al pivot possono finire in entrambe le partizioni (o meglio, con l'algoritmo di Lomuto, quelli uguali al pivot a sinistra del pivot finale finiranno a sinistra, e il pivot stesso sarà l'unico con quel valore nella sua posizione finale se non ci sono altri uguali a destra). La descrizione più comune di Lomuto pone gli elementi <code>< pivot</code> a sinistra e <code>>= pivot</code> a destra (con il pivot scambiato alla fine). Per semplicità, seguiremo la logica che gli elementi <code><= pivot</code> vanno a sinistra del pivot finale.
+                </div>
+
+                <p><strong>Algoritmo di Partizione di Lomuto (Idea):</strong></p>
+                <ol>
+                    <li><strong>Scegli il pivot:</strong> <code>x = A[q]</code> (l'ultimo elemento della porzione).</li>
+                    <li><strong>Mantieni un indice <code>i</code>:</strong> Questo indice punta all'ultimo elemento della "zona sinistra" che contiene elementi <code>≤ x</code>. Inizialmente, <code>i</code> è posto a <code>p-1</code> (prima dell'inizio della porzione).</li>
+                    <li><strong>Scansiona con un indice <code>j</code>:</strong> Questo indice scorre da <code>p</code> fino a <code>q-1</code> (cioè tutti gli elementi tranne il pivot).</li>
+                    <li><strong>Per ogni elemento <code>A[j]</code> scansionato:</strong>
+                        <ul>
+                            <li>Se <code>A[j] ≤ x</code>:
+                                <ol>
+                                    <li>Incrementa <code>i</code> (per estendere la zona sinistra).</li>
+                                    <li>Scambia <code>A[i]</code> con <code>A[j]</code>. Questo sposta l'elemento <code>A[j]</code> (che è <code>≤ x</code>) nella zona sinistra, e sposta un elemento che era precedentemente in <code>A[i]</code> (e che quindi era <code>> x</code> o era la fine della zona <code>≤ x</code>) più a destra.</li>
+                                </ol>
+                            </li>
+                            <li>Se <code>A[j] > x</code>: Non fare nulla con <code>A[j]</code> per ora, semplicemente incrementa <code>j</code> per passare all'elemento successivo. Questo elemento rimane "temporaneamente" nella zona destra (elementi <code>> x</code>).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Posiziona il pivot:</strong> Dopo che il ciclo su <code>j</code> è terminato, tutti gli elementi da <code>A[p]</code> a <code>A[i]</code> sono <code>≤ x</code>, e tutti gli elementi da <code>A[i+1]</code> a <code>A[q-1]</code> sono <code>> x</code>.
+                    Scambia <code>A[i+1]</code> con <code>A[q]</code> (il pivot). Ora il pivot si trova in <code>A[i+1]</code>, e questa è la sua posizione finale corretta.</li>
+                    <li><strong>Restituisci <code>i+1</code></strong> (l'indice finale del pivot).</li>
+                </ol>
+                <p>La professoressa illustra questo mantenimento di zone con un disegno a pagina 1 degli appunti PDF.</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph LR
+                        subgraph "Invariante di Partition (Lomuto) all'inizio dell'iterazione j"
+                            P_Marker["p"] --- I_Marker["i"];
+                            I_Marker --- J_Minus_1_Marker["j-1"];
+                            J_Minus_1_Marker --- Q_Minus_1_Marker["q-1"];
+                            Q_Minus_1_Marker --- Q_Marker["q (pivot x)"];
+
+                            Zona1["A[p...i] (≤ x)"];
+                            Zona2["A[i+1...j-1] (> x)"];
+                            Zona3["A[j...q-1] (da esaminare)"];
+                            PivotVal["A[q] = x"];
+                            
+                            P_Marker -.-> Zona1;
+                            I_Marker -.-> Zona1;
+                            I_Marker -.-> Zona2;
+                            J_Minus_1_Marker -.-> Zona2;
+                            J_Minus_1_Marker -.-> Zona3;
+                            Q_Minus_1_Marker -.-> Zona3;
+                            Q_Marker -.-> PivotVal;
+                        end
+                    </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="partition-esempio" class="content-section">
+            <h3 class="subsection-title">3.2. Esempio Dettagliato di <code>Partition</code></h3>
+            <p>Consideriamo l'array <code>A = [11, 15, 3, 5, 20, 1, 8, 25, 3, 10]</code>. Vogliamo partizionare l'intero array, quindi <code>p=0</code> (assumendo indicizzazione da 0 come in molti linguaggi, o <code>p=1</code> se si segue il Cormen strettamente; la prof usa indici che partono da 1 ma poi fa riferimento a un `p-1`, il che è tipico di un'indicizzazione da 1 dove `p-1` sarebbe l'elemento "prima dell'inizio"). Per coerenza con lo pseudocodice che usa `p` come inizio, useremo `p=1` e `q=10` per questo esempio.</p>
+            <p><code>A = [_, 11, 15, 3, 5, 20, 1, 8, 25, 3, 10]</code> (ignoriamo A[0])</p>
+            <p><code>p=1, q=10</code>. Pivot <code>x = A[10] = 10</code>.</p>
+            <p>Inizialmente: <code>i = p-1 = 0</code>.</p>
+            <p>Ciclo <code>for j</code> da <code>p=1</code> a <code>q-1=9</code>:</p>
+            <div class="array-representation">
+            <p>Stato Iniziale: i=0, x=10</p>
+            <table>
+                <thead><tr><th>Idx:</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead>
+                <tbody><tr><td>Val:</td>
+                    <td>11</td><td>15</td><td>3</td><td>5</td><td>20</td><td>1</td><td>8</td><td>25</td><td>3</td><td class="highlight-pivot">10</td>
+                </tr></tbody>
+            </table>
+            </div>
+
+            <ol>
+                <li><strong>j=1, A[1]=11.</strong> <code>11 > 10</code>. Non si fa nulla allo swap. <code>i</code> rimane 0.
+                    <div class="array-representation"><p>(i=0)</p><table><tbody><tr><td>Val:</td><td class="highlight-j">11</td><td>15</td><td>3</td><td>5</td><td>20</td><td>1</td><td>8</td><td>25</td><td>3</td><td class="highlight-pivot">10</td></tr></tbody></table></div>
+                </li>
+                <li><strong>j=2, A[2]=15.</strong> <code>15 > 10</code>. Non si fa nulla allo swap. <code>i</code> rimane 0.
+                    <div class="array-representation"><p>(i=0)</p><table><tbody><tr><td>Val:</td><td>11</td><td class="highlight-j">15</td><td>3</td><td>5</td><td>20</td><td>1</td><td>8</td><td>25</td><td>3</td><td class="highlight-pivot">10</td></tr></tbody></table></div>
+                </li>
+                <li><strong>j=3, A[3]=3.</strong> <code>3 ≤ 10</code>.
+                    <ul><li>Incrementa <code>i</code>: <code>i = 0+1 = 1</code>.</li><li><code>SWAP(A[1], A[3])</code>. Scambia 11 con 3.</li></ul>
+                    <div class="array-representation"><p>(i=1)</p><table><tbody><tr><td>Val:</td><td class="highlight-swap highlight-i">3</td><td>15</td><td class="highlight-swap highlight-j">11</td><td>5</td><td>20</td><td>1</td><td>8</td><td>25</td><td>3</td><td class="highlight-pivot">10</td></tr></tbody></table></div>
+                </li>
+                <li><strong>j=4, A[4]=5.</strong> <code>5 ≤ 10</code>.
+                    <ul><li>Incrementa <code>i</code>: <code>i = 1+1 = 2</code>.</li><li><code>SWAP(A[2], A[4])</code>. Scambia 15 con 5.</li></ul>
+                    <div class="array-representation"><p>(i=2)</p><table><tbody><tr><td>Val:</td><td>3</td><td class="highlight-swap highlight-i">5</td><td>11</td><td class="highlight-swap highlight-j">15</td><td>20</td><td>1</td><td>8</td><td>25</td><td>3</td><td class="highlight-pivot">10</td></tr></tbody></table></div>
+                </li>
+                 <li><strong>j=5, A[5]=20.</strong> <code>20 > 10</code>. Non si fa nulla allo swap. <code>i</code> rimane 2.
+                    <div class="array-representation"><p>(i=2)</p><table><tbody><tr><td>Val:</td><td>3</td><td>5</td><td>11</td><td>15</td><td class="highlight-j">20</td><td>1</td><td>8</td><td>25</td><td>3</td><td class="highlight-pivot">10</td></tr></tbody></table></div>
+                </li>
+                <li><strong>j=6, A[6]=1.</strong> <code>1 ≤ 10</code>.
+                    <ul><li>Incrementa <code>i</code>: <code>i = 2+1 = 3</code>.</li><li><code>SWAP(A[3], A[6])</code>. Scambia 11 con 1.</li></ul>
+                    <div class="array-representation"><p>(i=3)</p><table><tbody><tr><td>Val:</td><td>3</td><td>5</td><td class="highlight-swap highlight-i">1</td><td>15</td><td>20</td><td class="highlight-swap highlight-j">11</td><td>8</td><td>25</td><td>3</td><td class="highlight-pivot">10</td></tr></tbody></table></div>
+                </li>
+                <li><strong>j=7, A[7]=8.</strong> <code>8 ≤ 10</code>.
+                    <ul><li>Incrementa <code>i</code>: <code>i = 3+1 = 4</code>.</li><li><code>SWAP(A[4], A[7])</code>. Scambia 15 con 8.</li></ul>
+                    <div class="array-representation"><p>(i=4)</p><table><tbody><tr><td>Val:</td><td>3</td><td>5</td><td>1</td><td class="highlight-swap highlight-i">8</td><td>20</td><td>11</td><td class="highlight-swap highlight-j">15</td><td>25</td><td>3</td><td class="highlight-pivot">10</td></tr></tbody></table></div>
+                </li>
+                <li><strong>j=8, A[8]=25.</strong> <code>25 > 10</code>. Non si fa nulla allo swap. <code>i</code> rimane 4.
+                    <div class="array-representation"><p>(i=4)</p><table><tbody><tr><td>Val:</td><td>3</td><td>5</td><td>1</td><td>8</td><td>20</td><td>11</td><td>15</td><td class="highlight-j">25</td><td>3</td><td class="highlight-pivot">10</td></tr></tbody></table></div>
+                </li>
+                <li><strong>j=9, A[9]=3.</strong> <code>3 ≤ 10</code>.
+                    <ul><li>Incrementa <code>i</code>: <code>i = 4+1 = 5</code>.</li><li><code>SWAP(A[5], A[9])</code>. Scambia 20 con 3.</li></ul>
+                    <div class="array-representation"><p>(i=5)</p><table><tbody><tr><td>Val:</td><td>3</td><td>5</td><td>1</td><td>8</td><td class="highlight-swap highlight-i">3</td><td>11</td><td>15</td><td>25</td><td class="highlight-swap highlight-j">20</td><td class="highlight-pivot">10</td></tr></tbody></table></div>
+                </li>
+            </ol>
+            <p>Fine del ciclo <code>for</code> (<code>j</code> ha raggiunto <code>q-1=9</code>). Ora <code>i=5</code>.</p>
+            <p><strong>Passo finale:</strong> Scambia <code>A[i+1]</code> (cioè <code>A[6]</code>) con <code>A[q]</code> (cioè <code>A[10]</code>, il pivot).</p>
+            <p><code>SWAP(A[6], A[10])</code>. Scambia 11 con 10.</p>
+            <p>Array dopo partizione (<code>r = i+1 = 6</code>):</p>
+            <div class="array-representation">
+            <p>Risultato: i=5, pivot in A[6]=10 (r=6)</p>
+            <table>
+                <thead><tr><th>Idx:</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead>
+                <tbody><tr><td>Val:</td><td>3</td><td>5</td><td>1</td><td>8</td><td>3</td><td class="highlight-pivot">10</td><td>15</td><td>25</td><td>20</td><td>11</td></tr></tbody>
+            </table>
+            </div>
+            <p>La parte sinistra (indici 1-5) è <code>[3, 5, 1, 8, 3]</code> (tutti <code>≤ 10</code>).</p>
+            <p>La parte destra (indici 7-10) è <code>[15, 25, 20, 11]</code> (tutti <code>> 10</code>, qui anche <code>≥ 10</code>).</p>
+            <p>La procedura restituisce <code>r = i+1 = 6</code>.</p>
+            <p>QuickSort verrà poi chiamato ricorsivamente su <code>A[1...5]</code> e <code>A[7...10]</code>.</p>
+        </article>
+
+        <article id="partition-pseudo-correttezza-complessita" class="content-section">
+            <h3 class="subsection-title">3.3. Pseudocodice, Correttezza e Complessità di <code>Partition</code></h3>
+            <div class="section-content">
+                <h4 class="subsubsection-title">Pseudocodice di <code>Partition(A, p, q)</code> (Lomuto)</h4>
+                 <p>(Corrisponde agli appunti della professoressa a pagina 5 del PDF "Nota 5 nov 2020 (2).pdf" e all'esempio svolto)</p>
+                <pre><code class="language-pseudocode">
+Partition(A, p, q)
+  x ← A[q]             // Scegli l'ultimo elemento come pivot
+  i ← p - 1            // Indice dell'ultimo elemento della zona "≤ x"
+
+  for j ← p to q - 1 do  // Esamina ogni elemento tranne il pivot
+    if A[j] ≤ x then
+      i ← i + 1          // Estendi la zona "≤ x"
+      SWAP(A[i], A[j])   // Sposta A[j] nella zona "≤ x"
+  
+  // Posiziona il pivot nella sua locazione finale
+  SWAP(A[i + 1], A[q]) 
+  return i + 1           // Restituisci l'indice del pivot
+                </code></pre>
+
+                <h4 class="subsubsection-title">Correttezza di <code>Partition</code></h4>
+                <p>La correttezza si basa sull'<strong>invariante di ciclo</strong> per il loop `for` (già descritto precedentemente).</p>
+                <p><strong>Invariante (all'inizio di ogni iterazione <code>j</code> del ciclo <code>for</code>):</strong></p>
+                <ol>
+                    <li>Per ogni indice <code>k</code> tale che <code>p ≤ k ≤ i</code>, si ha <code>A[k] ≤ x</code>. (Zona sinistra)</li>
+                    <li>Per ogni indice <code>k</code> tale che <code>i+1 ≤ k ≤ j-1</code>, si ha <code>A[k] > x</code>. (Zona destra intermedia)</li>
+                    <li><code>A[q] = x</code> (il pivot è ancora intatto alla fine).</li>
+                    <li>Gli elementi in <code>A[j...q-1]</code> sono ancora da esaminare.</li>
+                </ol>
+                <p><strong>Dimostrazione:</strong></p>
+                <ul>
+                    <li><strong>Inizializzazione (Prima dell'iterazione <code>j=p</code>):</strong>
+                        <ul>
+                            <li><code>i = p-1</code>.</li>
+                            <li>La regione <code>A[p...i]</code> (da <code>p</code> a <code>p-1</code>) è vuota, quindi la condizione 1 è banalmente vera.</li>
+                            <li>La regione <code>A[i+1...j-1]</code> (da <code>p</code> a <code>p-1</code>) è vuota, quindi la condizione 2 è banalmente vera.</li>
+                            <li>La condizione 3 è vera per scelta del pivot.</li>
+                        </ul>
+                        L'invariante è vero.
+                    </li>
+                    <li><strong>Mantenimento (Assumiamo vero per <code>j</code>, dimostriamo per <code>j+1</code>):</strong>
+                        <ul>
+                            <li><strong>Caso A: <code>A[j] ≤ x</code></strong>
+                                <ul>
+                                    <li><code>i</code> viene incrementato (<code>i_nuovo = i_vecchio + 1</code>).</li>
+                                    <li><code>SWAP(A[i_nuovo], A[j])</code>.
+                                        <ul>
+                                            <li><code>A[i_nuovo]</code> (che ora contiene il vecchio <code>A[j]</code>) è <code>≤ x</code>. Quindi la regione <code>A[p...i_nuovo]</code> soddisfa la condizione 1.</li>
+                                            <li>L'elemento che era in <code>A[i_nuovo]</code> (il vecchio <code>A[i_vecchio+1]</code>) e che per ipotesi induttiva era <code>> x</code>, è ora in <code>A[j]</code>.</li>
+                                        </ul>
+                                    </li>
+                                    <li>Quando <code>j</code> si incrementa a <code>j_nuovo</code>, la regione <code>A[i_nuovo+1...j_nuovo-1]</code> (che è la vecchia <code>A[i_vecchio+1...j_vecchio-1]</code> a cui si aggiunge <code>A[j_vecchio]</code>, che ora contiene un elemento <code>>x</code>) soddisfa la condizione 2.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Caso B: <code>A[j] > x</code></strong>
+                                <ul>
+                                    <li><code>i</code> non cambia.</li>
+                                    <li>Quando <code>j</code> si incrementa a <code>j_nuovo</code>, <code>A[j_vecchio]</code> (che è <code>>x</code>) viene incorporato nella regione <code>A[i+1...j_nuovo-1]</code>, che continua a soddisfare la condizione 2. La condizione 1 non è affetta.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        L'invariante è mantenuto.
+                    </li>
+                    <li><strong>Terminazione (Dopo il ciclo, quando <code>j=q</code>):</strong>
+                        <ul>
+                            <li>L'invariante afferma che <code>A[p...i]</code> contiene elementi <code>≤ x</code>.</li>
+                            <li>E <code>A[i+1...q-1]</code> contiene elementi <code>> x</code>.</li>
+                            <li>L'ultima operazione è <code>SWAP(A[i+1], A[q])</code>.
+                                <ul>
+                                    <li><code>A[i+1]</code> ora contiene <code>x</code> (il pivot).</li>
+                                    <li>L'elemento che era in <code>A[i+1]</code> (che era <code>>x</code>) è ora in <code>A[q]</code> (ma non ci interessa più, fa parte della zona destra).</li>
+                                </ul>
+                            </li>
+                            <li>Quindi, dopo lo swap:
+                                <ul>
+                                    <li><code>A[p...i] ≤ x = A[i+1]</code></li>
+                                    <li><code>A[i+2...q] ≥ x = A[i+1]</code> (perché la zona <code>A[i+2...q-1]</code> era <code>>x</code>, e <code>A[q]</code> (vecchio <code>A[i+1]</code>) era <code>>x</code>).</li>
+                                </ul>
+                            </li>
+                            <li>La procedura restituisce <code>i+1</code>, che è l'indice corretto del pivot.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4 class="subsubsection-title">Complessità di <code>Partition</code></h4>
+                <p>Il ciclo <code>for</code> viene eseguito <code>q - 1 - p + 1 = q - p</code> volte.
+                Se <code>N = q - p + 1</code> è il numero di elementi nella porzione <code>A[p...q]</code>, il ciclo esegue <code>N-1</code> iterazioni.
+                Ogni iterazione del ciclo (confronto, incremento di <code>i</code> opzionale, swap opzionale) costa \(\Theta(1)\).</p>
+                <p>Le operazioni fuori dal ciclo (assegnazione del pivot, inizializzazione di <code>i</code>, swap finale) costano \(\Theta(1)\).</p>
+                <p><strong>Complessità Totale di <code>Partition</code>: \(\Theta(N)\)</strong>, dove N è la dimensione della (sotto)porzione dell'array su cui opera.</p>
+            </div>
+        </article>
+
+        <article id="quicksort-pseudo-correttezza" class="content-section">
+            <h2 class="section-title">4. Pseudocodice e Correttezza di <code>QuickSort</code></h2>
+            <div class="section-content">
+                <h3 class="subsection-title">Pseudocodice di <code>QuickSort(A, p, q)</code> (Ripetizione)</h3>
+                <pre><code class="language-pseudocode">
+QuickSort(A, p, q)
+  if p < q then
+    r ← Partition(A, p, q)
+    QuickSort(A, p, r - 1)
+    QuickSort(A, r + 1, q)
+                </code></pre>
+
+                <h3 class="subsection-title">Correttezza di <code>QuickSort</code></h3>
+                <p>Si dimostra per induzione sulla dimensione <code>N = q - p + 1</code> della porzione di array da ordinare.</p>
+                <ul>
+                    <li><strong>Caso Base (<code>N ≤ 1</code>, cioè <code>p ≥ q</code>):</strong>
+                        Se la porzione ha 0 o 1 elemento, è già ordinata. Il test <code>p < q</code> fallisce, e l'algoritmo termina correttamente.
+                    </li>
+                    <li><strong>Passo Induttivo (Assumiamo che <code>QuickSort</code> sia corretto per tutte le porzioni di dimensione <code>< N</code>. Vogliamo dimostrarlo per <code>N > 1</code>):</strong>
+                        <ol>
+                            <li>Poiché <code>N > 1</code>, allora <code>p < q</code>.</li>
+                            <li>Viene chiamata <code>Partition(A, p, q)</code>. Per la correttezza di <code>Partition</code>, questa procedura:
+                                <ul>
+                                    <li>Termina.</li>
+                                    <li>Restituisce un indice <code>r</code> (con <code>p ≤ r ≤ q</code>).</li>
+                                    <li>Riorganizza <code>A[p...q]</code> tale che <code>A[k] ≤ A[r]</code> per <code>p ≤ k < r</code>, e <code>A[k] ≥ A[r]</code> per <code>r < k ≤ q</code>.</li>
+                                </ul>
+                            </li>
+                            <li>Vengono fatte due chiamate ricorsive:
+                                <ul>
+                                    <li><code>QuickSort(A, p, r-1)</code>: opera sulla porzione sinistra. La dimensione di questa porzione è <code>(r-1) - p + 1 = r - p</code>. Poiché <code>r ≤ q</code>, allora <code>r-p < q-p+1 = N</code>. Quindi <code>r-p ≤ N-1</code>.</li>
+                                    <li><code>QuickSort(A, r+1, q)</code>: opera sulla porzione destra. La dimensione di questa porzione è <code>q - (r+1) + 1 = q - r</code>. Poiché <code>r ≥ p</code>, allora <code>q-r < q-p+1 = N</code>. Quindi <code>q-r ≤ N-1</code>.</li>
+                                </ul>
+                                Entrambe le chiamate ricorsive operano su porzioni di dimensione strettamente minore di <code>N</code>.
+                            </li>
+                            <li>Per ipotesi induttiva, entrambe le chiamate ricorsive terminano e ordinano correttamente le rispettive sottoparti <code>A[p...r-1]</code> e <code>A[r+1...q]</code>.</li>
+                            <li>Poiché <code>A[p...r-1]</code> è ordinata, <code>A[r+1...q]</code> è ordinata, e tutti gli elementi in <code>A[p...r-1]</code> sono <code>≤ A[r]</code>, e tutti gli elementi in <code>A[r+1...q]</code> sono <code>≥ A[r]</code>, l'intera porzione <code>A[p...q]</code> risulta ordinata.</li>
+                            <li>L'algoritmo termina.</li>
+                        </ol>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="quicksort-complessita" class="content-section">
+            <h2 class="section-title">5. Analisi della Complessità di <code>QuickSort</code></h2>
+            <div class="section-content">
+                <p>La complessità di QuickSort dipende crucialmente da come la procedura <code>Partition</code> divide l'array. Sia <code>N = q - p + 1</code> la dimensione della porzione corrente.</p>
+                <p>L'equazione di ricorrenza per il tempo <code>T(N)</code> è:</p>
+                <div class="math-block">
+                \( T(N) = \begin{cases} \Theta(1) & \text{se } N \le 1 \\ T(M) + T(N-M-1) + \Theta(N) & \text{se } N > 1 \end{cases} \)
+                </div>
+                <p>Dove:</p>
+                <ul>
+                    <li><code>M</code> è la dimensione della partizione sinistra (<code>A[p...r-1]</code>), quindi <code>M = r - p</code>.</li>
+                    <li><code>N-M-1</code> è la dimensione della partizione destra (<code>A[r+1...q]</code>). (<code>-1</code> per escludere il pivot <code>A[r]</code>).</li>
+                    <li><code>\(\Theta(N)\)</code> è il costo di <code>Partition</code>.</li>
+                </ul>
+                <p>Il valore di <code>M</code> può variare da <code>0</code> (se il pivot è il più piccolo e <code>r=p</code>) a <code>N-1</code> (se il pivot è il più grande e <code>r=q</code>).</p>
+            </div>
+        </article>
+
+        <article id="complessita-caso-peggiore" class="content-section">
+            <h3 class="subsection-title">5.1. Caso Peggiore: Partizioni Sbilanciate (\(\Theta(N^2)\))</h3>
+            <div class="section-content">
+                <p>Il caso peggiore si verifica quando la procedura <code>Partition</code> produce costantemente una partizione molto sbilanciata. Questo accade se il pivot scelto è sempre l'elemento minimo o massimo della porzione corrente.</p>
+                <p><strong>Scenario:</strong> Supponiamo che <code>Partition</code> restituisca sempre <code>r=p</code> (pivot è il minimo) o <code>r=q</code> (pivot è il massimo).</p>
+                <ul>
+                    <li>Se <code>r=p</code>, allora <code>M=0</code>. La ricorrenza diventa: \(T(N) = T(0) + T(N-1) + \Theta(N)\).</li>
+                    <li>Se <code>r=q</code>, allora <code>M=N-1</code>. La ricorrenza diventa: \(T(N) = T(N-1) + T(0) + \Theta(N)\).</li>
+                </ul>
+                <p>In entrambi i casi, poiché \(T(0) = \Theta(1)\), la ricorrenza si semplifica a:</p>
+                <div class="math-block">
+                \( T(N) = T(N-1) + \Theta(N) \)
+                </div>
+                <p>Questa è una ricorrenza ben nota (simile a quella di Insertion Sort nel caso peggiore o Selection Sort). Svolgendola:</p>
+                <p>\( T(N) = \Theta(N) + T(N-1) \)</p>
+                <p>\( = \Theta(N) + \Theta(N-1) + T(N-2) \)</p>
+                <p>\( = \Theta(N) + \Theta(N-1) + \dots + \Theta(1) + T(0) \)</p>
+                <p>\( = \sum_{k=1}^{N} \Theta(k) = \Theta \left( \sum_{k=1}^{N} k \right) = \Theta \left( \frac{N(N+1)}{2} \right) = \Theta(N^2) \)</p>
+                <p><strong>Quando si verifica il caso peggiore?</strong></p>
+                <ul>
+                    <li>Se l'array è <strong>già ordinato</strong> e si sceglie sempre il primo o l'ultimo elemento come pivot (con la partizione di Lomuto che sceglie l'ultimo, un array già ordinato o inversamente ordinato porta al caso peggiore).</li>
+                    <li>Se l'array è <strong>ordinato al contrario</strong> (stessa situazione).</li>
+                </ul>
+                <p>Quindi, nel caso peggiore, QuickSort ha una complessità di \(\Theta(N^2)\).</p>
+            </div>
+        </article>
+
+        <article id="complessita-caso-migliore" class="content-section">
+            <h3 class="subsection-title">5.2. Caso Migliore: Partizioni Bilanciate (\(\Theta(N \log N)\))</h3>
+            <div class="section-content">
+                <p>Il caso migliore si verifica quando la procedura <code>Partition</code> divide l'array (o la porzione corrente) in due sottoparti di dimensione più possibile simile.</p>
+                <p><strong>Scenario:</strong> Supponiamo che <code>Partition</code> divida sempre l'array circa a metà, cioè <code>M \approx N/2</code>.</p>
+                <p>L'equazione di ricorrenza diventa:</p>
+                <div class="math-block">
+                \( T(N) = 2 \cdot T(N/2) + \Theta(N) \)
+                </div>
+                <p>Questa è la stessa equazione di ricorrenza di Merge Sort.</p>
+                <p>Possiamo risolverla usando il <strong>Master Theorem</strong>:</p>
+                <ul>
+                    <li>\(a = 2\) (numero di sottoproblemi)</li>
+                    <li>\(b = 2\) (fattore di riduzione della dimensione)</li>
+                    <li>\(f(N) = \Theta(N)\) (costo della divisione/combinazione)</li>
+                </ul>
+                <p>Calcoliamo \(N^{\log_b a} = N^{\log_2 2} = N^1 = N\).</p>
+                <p>Poiché \(f(N) = \Theta(N^{\log_b a})\) (cioè \(\Theta(N)\)), siamo nel <strong>Caso 2</strong> del Master Theorem.</p>
+                <p>La soluzione è \(T(N) = \Theta(N^{\log_b a} \log N) = \Theta(N \log N)\).</p>
+                <p>Quindi, nel caso migliore, QuickSort ha una complessità di \(\Theta(N \log N)\).</p>
+            </div>
+        </article>
+
+        <article id="complessita-altri-casi" class="content-section">
+            <h3 class="subsection-title">5.3. Discussione: Altri Casi di Sbilanciamento (ma non estremi)</h3>
+            <div class="section-content">
+                <p>La professoressa discute con uno studente (Roberto) cosa succede se la partizione non è perfettamente bilanciata, ma nemmeno massimamente sbilanciata.</p>
+                <ul>
+                    <li><strong>Split Proporzionale Costante (es. 1/100 vs 99/100):</strong>
+                        Se <code>Partition</code> divide l'array in una parte di dimensione, ad esempio, \(\alpha N\) e l'altra \((1-\alpha)N - 1\), dove \(\alpha\) è una costante (es. 1/100), la ricorrenza è:
+                        <div class="math-block">
+                        \( T(N) = T(\alpha N) + T((1-\alpha)N) + \Theta(N) \)
+                        </div>
+                        L'albero di ricorsione avrà ancora un'altezza logaritmica (\(O(\log N)\)), e il lavoro ad ogni livello sarà \(\Theta(N)\). La complessità totale rimane \(\Theta(N \log N)\).
+                        La professoressa fa l'esempio di 1/100 e 99/100: l'albero di ricorsione sarà sbilanciato ma la sua altezza sarà ancora logaritmica. Il percorso più lungo avrà profondità \(\log_{100/99} N\) e quello più corto \(\log_{100} N\). Il lavoro totale è sempre \(N \log N\).
+                    </li>
+                    <li><strong>Split con una parte di dimensione costante (es. N-k vs k, con k costante):</strong>
+                        Se una delle partizioni ha dimensione costante (es. `M = costante_piccola` o `M = N - costante_piccola`), la ricorrenza si comporta come nel caso peggiore:
+                        <div class="math-block">
+                        \( T(N) = T(N - \text{costante}) + \Theta(N) \)
+                        </div>
+                        Questo porta a una complessità di \(\Theta(N^2)\).
+                    </li>
+                </ul>
+                <p><strong>Conclusione:</strong> QuickSort è efficiente (\(N \log N\)) finché le partizioni sono "ragionevolmente" bilanciate (cioè, entrambe sono una frazione costante di N). Diventa quadratico se una partizione è di dimensione costante e l'altra è quasi N.</p>
+            </div>
+        </article>
+
+        <article id="quicksort-proprieta" class="content-section">
+            <h2 class="section-title">6. Proprietà di QuickSort: In-Place e Stabilità</h2>
+            <div class="section-content">
+                <h3 class="subsection-title">QuickSort è "In-Place"?</h3>
+                <p>Una procedura è "in-place" se ordina gli elementi direttamente nell'array di input, utilizzando al più una quantità costante di spazio di memoria aggiuntivo (o, a volte, \(O(\log N)\) spazio per lo stack di ricorsione è accettato come "quasi in-place").</p>
+                <ul>
+                    <li>La procedura <code>Partition</code> di Lomuto opera in-place (usa solo un numero costante di variabili ausiliarie per indici e per lo scambio).</li>
+                    <li>L'algoritmo <code>QuickSort</code> è ricorsivo. La profondità dello stack delle chiamate ricorsive dipende da come l'array viene partizionato:
+                        <ul>
+                            <li><strong>Caso Peggiore (partizioni massimamente sbilanciate):</strong> La profondità dello stack può arrivare a \(\Theta(N)\). In questo caso, lo spazio richiesto è \(\Theta(N)\), quindi non è in-place.</li>
+                            <li><strong>Caso Migliore (partizioni bilanciate):</strong> La profondità dello stack è \(\Theta(\log N)\). In questo caso, si considera spesso "quasi in-place" o in-place se si tollera uno stack logaritmico.</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p><strong>Ottimizzazione per lo Spazio dello Stack:</strong></p>
+                <p>Per garantire che lo spazio dello stack rimanga al più \(O(\log N)\) anche nel caso peggiore, si può modificare la ricorsione:</p>
+                <ol>
+                    <li>Dopo <code>Partition</code>, si identificano le due sottoparti.</li>
+                    <li>Si effettua la chiamata ricorsiva sulla <strong>sottoparte più piccola</strong>.</li>
+                    <li>Si modifica il ciclo (o si usa un "goto" concettuale) per iterare sulla <strong>sottoparte più grande</strong>, aggiornando gli indici <code>p</code> o <code>q</code>. Questa è una forma di "tail call optimization" manuale o trasformazione in iterazione.</li>
+                </ol>
+                <p>Con questa ottimizzazione, la profondità massima dello stack è limitata a \(O(\log N)\) perché la chiamata ricorsiva avviene sempre sulla parte che si riduce di almeno la metà rispetto al peggio (se una parte è piccola, l'altra è grande; la ricorsione sulla piccola garantisce profondità logaritmica). La professoressa accenna a questa tecnica.</p>
+
+                <h3 class="subsection-title">QuickSort è Stabile?</h3>
+                <p>Un algoritmo di ordinamento è <strong>stabile</strong> se elementi con la stessa chiave mantengono il loro ordine relativo originale nell'array ordinato.</p>
+                <p><strong>QuickSort, con la partizione di Lomuto (e molte altre partizioni comuni), NON è stabile.</strong></p>
+                <ul>
+                    <li>L'operazione di <code>SWAP</code> nella procedura <code>Partition</code> può scambiare elementi con chiavi uguali o alterare l'ordine di elementi che non sono il pivot ma che vengono spostati.</li>
+                    <li>In particolare, quando un elemento <code>A[j]</code> viene scambiato con <code>A[i]</code>, se ci sono altri elementi uguali ad <code>A[j]</code> tra <code>A[i+1]</code> e <code>A[j-1]</code>, il loro ordine relativo può cambiare. Anche elementi uguali al pivot possono essere spostati in modo non stabile.</li>
+                </ul>
+                <p>La professoressa conferma che la versione di <code>Partition</code> vista (Lomuto) non è stabile. Esistono varianti di <code>Partition</code> che tentano di essere stabili, ma sono generalmente più complesse o meno efficienti.</p>
+            </div>
+        </article>
+
+        <article id="quicksort-in-pratica" class="content-section">
+            <h2 class="section-title">7. QuickSort in Pratica: Perché è Veloce?</h2>
+            <div class="section-content">
+                <p>Nonostante QuickSort abbia un caso peggiore di \(\Theta(N^2)\) e non sia stabile, in pratica è uno degli algoritmi di ordinamento più veloci e ampiamente utilizzati. I motivi includono:</p>
+                <ul>
+                    <li><strong>Buona Performance nel Caso Medio:</strong> L'analisi del caso medio (che è più complessa) mostra una complessità di \(\Theta(N \log N)\) quando si usano strategie per evitare il caso peggiore (come la randomizzazione).</li>
+                    <li><strong>Costanti Moltiplicative Basse:</strong> Le operazioni interne del ciclo di <code>Partition</code> (confronti, incrementi di indici, scambi) sono molto semplici e veloci a livello di macchina.</li>
+                    <li><strong>Località di Riferimento (Cache-Friendly):</strong> QuickSort tende ad accedere agli elementi dell'array in modo sequenziale o con buona località spaziale durante la procedura <code>Partition</code>, il che sfrutta bene le gerarchie di memoria (cache) dei moderni processori. Questo è un vantaggio significativo rispetto ad algoritmi come Heapsort, che possono avere schemi di accesso più sparsi.</li>
+                    <li><strong>Efficienza degli Scambi:</strong> Rispetto a Merge Sort, che richiede la creazione e la copia di sotto-array (o una fusione complessa in-place), QuickSort opera principalmente tramite scambi all'interno dell'array originale.</li>
+                </ul>
+                <p>La professoressa menziona che algoritmi come MergeSort, pur avendo una complessità \(\Theta(N \log N)\) garantita, possono avere un overhead maggiore dovuto alla gestione della memoria per i sotto-array.</p>
+            </div>
+        </article>
+
+        <article id="randomized-quicksort" class="content-section">
+            <h2 class="section-title">8. Randomized QuickSort: Evitare il Caso Peggiore</h2>
+            <div class="section-content">
+                <p>Per mitigare il rischio del caso peggiore \(\Theta(N^2)\) (che si verifica, ad esempio, su input già ordinati o inversamente ordinati se il pivot è scelto in modo deterministico come il primo o l'ultimo elemento), si introduce la <strong>randomizzazione</strong>.</p>
+                <p><strong>Idea:</strong> Invece di scegliere sempre un pivot fisso (es. l'ultimo elemento), si sceglie il pivot in modo casuale o si randomizza l'input.</p>
+                <p><strong>Due Approcci Comuni:</strong></p>
+                <ol>
+                    <li>
+                        <strong>Shuffle Iniziale dell'Array:</strong>
+                        Prima di eseguire QuickSort (con una scelta deterministica del pivot, es. l'ultimo elemento), si mescola l'array di input in modo casuale. Questo rende la probabilità di incontrare un input "patologico" (che porta a partizioni sempre sbilanciate) molto bassa, indipendentemente dall'input originale.
+                    </li>
+                    <li>
+                        <strong>Scelta Casuale del Pivot (Randomized-Partition):</strong>
+                        All'interno della procedura <code>Partition</code>, prima di iniziare, si sceglie un indice casuale <code>k</code> tra <code>p</code> e <code>q</code>.
+                        Si scambia <code>A[k]</code> con <code>A[q]</code> (l'ultimo elemento).
+                        Poi si procede con la partizione di Lomuto standard, usando <code>A[q]</code> (che ora è l'elemento scelto casualmente) come pivot.
+                        <pre><code class="language-pseudocode">
+Randomized-Partition(A, p, q)
+  k ← RANDOM(p, q)   // Scegli un indice casuale tra p e q
+  SWAP(A[k], A[q])     // Sposta il pivot scelto casualmente all'ultima posizione
+  return Partition(A, p, q) // Esegui la partizione di Lomuto standard
+                        </code></pre>
+                        E <code>Randomized-QuickSort</code> diventa:
+                        <pre><code class="language-pseudocode">
+Randomized-QuickSort(A, p, q)
+  if p < q then
+    r ← Randomized-Partition(A, p, q)
+    Randomized-QuickSort(A, p, r - 1)
+    Randomized-QuickSort(A, r + 1, q)
+                        </code></pre>
+                    </li>
+                </ol>
+                <p><strong>Effetto della Randomizzazione:</strong></p>
+                <p>Con la randomizzazione, nessun input specifico può garantire il verificarsi del caso peggiore. La performance dipende dalla sequenza di scelte casuali dei pivot.</p>
+                <p>Si può dimostrare che il <strong>tempo di esecuzione atteso (Expected Running Time)</strong> di Randomized QuickSort è \(\Theta(N \log N)\).</p>
+                <p>Il caso peggiore \(\Theta(N^2)\) è ancora possibile, ma la sua probabilità di accadere diventa molto piccola per input di grandi dimensioni.</p>
+            </div>
+        </article>
+
+        <article id="median-of-three" class="content-section">
+            <h2 class="section-title">9. Ottimizzazione: Scelta del Pivot con "Median-of-Three"</h2>
+            <div class="section-content">
+                <p>Un'altra tecnica comune per migliorare la scelta del pivot (e quindi ridurre la probabilità di partizioni molto sbilanciate) è la strategia <strong>"Median-of-Three" (Mediana di Tre)</strong>.</p>
+                <p><strong>Idea:</strong></p>
+                <ol>
+                    <li>Si considerano tre elementi dalla porzione corrente dell'array. Scelte comuni sono:
+                        <ul>
+                            <li>L'elemento iniziale: <code>A[p]</code></li>
+                            <li>L'elemento centrale: <code>A[floor((p+q)/2)]</code></li>
+                            <li>L'elemento finale: <code>A[q]</code></li>
+                        </ul>
+                    </li>
+                    <li>Si calcola la <strong>mediana</strong> di questi tre valori.</li>
+                    <li>Si utilizza questa mediana come pivot. Tipicamente, la si scambia con <code>A[q]</code> e si procede con la partizione di Lomuto.</li>
+                </ol>
+                <p><strong>Vantaggi:</strong></p>
+                <ul>
+                    <li>Questa strategia tende a produrre pivot migliori (più vicini alla vera mediana della porzione) rispetto alla scelta di un singolo elemento fisso o completamente casuale.</li>
+                    <li>Evita il caso peggiore su input già ordinati o inversamente ordinati se i tre elementi scelti sono il primo, il mediano e l'ultimo.</li>
+                </ul>
+                <p>Molte implementazioni di QuickSort nelle librerie standard utilizzano varianti di questa tecnica, a volte combinata con la randomizzazione o con un passaggio a un altro algoritmo di ordinamento (come Insertion Sort) per sottoparti molto piccole (dove l'overhead di QuickSort non è più vantaggioso).</p>
+            </div>
+        </article>
+
+        <article id="quicksort-caso-medio" class="content-section">
+            <h2 class="section-title">10. QuickSort: Analisi del Caso Medio (Cenno)</h2>
+            <div class="section-content">
+                <p>L'analisi del caso medio per Randomized QuickSort è più complessa e non viene svolta in dettaglio nel corso. La professoressa accenna che richiede strumenti di analisi probabilistica, come l'uso di <strong>variabili casuali indicatrici</strong>.</p>
+                <p>L'idea è di calcolare il numero atteso di confronti. Si definisce una variabile casuale \(X_{ij}\) che vale 1 se l'i-esimo e il j-esimo elemento (nell'ordinamento finale) vengono confrontati durante l'algoritmo, e 0 altrimenti. Il numero totale di confronti è \(X = \sum_{i<j} X_{ij}\).</p>
+                <p>Il valore atteso di \(X\) è \(E[X] = \sum_{i<j} E[X_{ij}] = \sum_{i<j} P(\text{elemento i è confrontato con elemento j})\).</p>
+                <p>Si dimostra che la probabilità che l'i-esimo e il j-esimo elemento (in ordine di valore) vengano confrontati è \(2 / (j-i+1)\).</p>
+                <p>La somma di queste probabilità porta a un risultato di \(\Theta(N \log N)\) per il numero atteso di confronti.</p>
+                <div class="note-box">
+                    <strong>Esercizio Assegnato per Casa (Difficile/Teorico):</strong>
+                    <p>Dimostrare che il tempo di esecuzione atteso di Randomized QuickSort è \(\Theta(N \log N)\).</p>
+                    <strong>Svolgimento/Spiegazione (Idea, non una dimostrazione completa):</strong>
+                    <p>Questo è un risultato classico che si trova sui libri di testo (es. Cormen, Capitolo 7.4). La dimostrazione è non banale e si basa sull'analisi del numero atteso di confronti.
+                    Due elementi \(z_i\) e \(z_j\) (dove \(z_k\) è il k-esimo elemento più piccolo dell'array) vengono confrontati se e solo se il primo pivot scelto dall'insieme \(\{z_i, z_{i+1}, \dots, z_j\}\) è o \(z_i\) o \(z_j\). Se un pivot \(z_k\) con \(i < k < j\) viene scelto prima, \(z_i\) e \(z_j\) finiranno in partizioni diverse e non verranno mai confrontati.
+                    Poiché il pivot è scelto casualmente da questa "finestra" di \(j-i+1\) elementi, la probabilità che \(z_i\) o \(z_j\) siano il primo pivot scelto è \(2 / (j-i+1)\).
+                    Il numero atteso di confronti \(E[X]\) è dato da:
+                    \( E[X] = \sum_{i=1}^{N-1} \sum_{j=i+1}^{N} P(z_i \text{ è confrontato con } z_j) = \sum_{i=1}^{N-1} \sum_{j=i+1}^{N} \frac{2}{j-i+1} \)
+                    Questa doppia sommatoria si può risolvere e si dimostra essere \(O(N \log N)\). Poiché il limite inferiore è \(\Omega(N \log N)\), il caso medio è \(\Theta(N \log N)\).</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="esercizi-casa" class="content-section">
+            <h2 class="section-title">11. Esercizi e Riflessioni Assegnati per Casa</h2>
+            <div class="section-content">
+                <p>Oltre alla dimostrazione del caso medio di Randomized QuickSort, la professoressa lascia un altro esercizio pratico.</p>
+                <div class="note-box">
+                    <strong>Esercizio Assegnato per Casa (Implementativo/Ottimizzazione):</strong>
+                    <p>Scrivere una versione iterativa di QuickSort che garantisca una profondità dello stack al più \(O(\log N)\).</p>
+                    <strong>Svolgimento/Spiegazione (Idea):</strong>
+                    <p>Come accennato precedentemente (Sezione 6, In-Place), l'idea è di evitare la doppia ricorsione diretta. Invece:</p>
+                    <ol>
+                        <li>Mantenere esplicitamente uno stack (o una struttura simile) per memorizzare gli intervalli <code>(p, q)</code> delle sottoparti ancora da ordinare.</li>
+                        <li>Inizialmente, inserire l'intervallo originale <code>(1, N)</code> nello stack.</li>
+                        <li>Finché lo stack non è vuoto:
+                            <ol>
+                                <li>Estrai un intervallo <code>(p, q)</code> dallo stack.</li>
+                                <li>Se <code>p < q</code>:
+                                    <ol>
+                                        <li>Chiama <code>r = Partition(A, p, q)</code>.</li>
+                                        <li>Considera le due sottoparti: <code>(p, r-1)</code> e <code>(r+1, q)</code>.</li>
+                                        <li>Per garantire la profondità logaritmica dello stack, inserisci nello stack prima l'intervallo <strong>più grande</strong> e poi quello <strong>più piccolo</strong>. In questo modo, la prossima iterazione elaborerà l'intervallo più piccolo (simulando la chiamata ricorsiva sulla parte più piccola), mentre l'intervallo più grande attenderà nello stack.</li>
+                                        <li>Alternativamente, e forse più comune per l'ottimizzazione dello stack di ricorsione implicito, si fa la chiamata ricorsiva sulla parte più piccola e si itera sulla più grande modificando `p` o `q` e continuando il loop. Per una versione puramente iterativa con stack esplicito, l'ordine di inserimento nello stack (grande poi piccolo) è una strategia.</li>
+                                    </ol>
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
+                    <p>Un'implementazione più diretta della strategia "ricorri sulla parte più piccola, itera sulla più grande" è:</p>
+                    <pre><code class="language-pseudocode">
+IterativeQuickSort_OptimizedStack(A, p_orig, q_orig)
+  // Simula la ricorsione con un while e gestione manuale degli indici
+  p ← p_orig
+  q ← q_orig
+  while p < q do
+    r ← Partition(A, p, q) // o Randomized-Partition
+
+    // Decidi quale parte processare ricorsivamente (la più piccola)
+    // e quale iterativamente (la più grande)
+    if (r - p) < (q - r) then // La parte sinistra è più piccola
+      QuickSort_RecursiveCall_Helper(A, p, r - 1) // Simula chiamata ricorsiva
+      p ← r + 1 // Itera sulla parte destra
+    else // La parte destra è più piccola o uguale
+      QuickSort_RecursiveCall_Helper(A, r + 1, q) // Simula chiamata ricorsiva
+      q ← r - 1 // Itera sulla parte sinistra
+  // QuickSort_RecursiveCall_Helper sarebbe la stessa funzione QuickSort
+  // ma qui usata per illustrare che una parte va in "vera" ricorsione (o stack esplicito)
+  // mentre l'altra continua il loop.
+  // Una vera implementazione iterativa userebbe uno stack esplicito per
+  // entrambi i sottoproblemi, pushando prima il più grande.
+                    </code></pre>
+                    <p>La versione con stack esplicito è più robusta per una trasformazione puramente iterativa:</p>
+                     <pre><code class="language-pseudocode">
+IterativeQuickSort_WithStack(A)
+  STACK_INIT()
+  STACK_PUSH((1, A.length)) // Indici da 1 a N
+
+  while NOT STACK_EMPTY() do
+    (p, q) ← STACK_POP()
+    if p < q then
+      r ← Partition(A, p, q) // o Randomized-Partition
+
+      // Inserisci prima la parte più grande, poi la più piccola
+      // Così lo stack cresce al massimo log(N) perché si processa sempre la piccola
+      // o si bilancia lo stack.
+      // Per assicurare O(log N) stack depth:
+      // Processa la più piccola delle due partizioni e metti in coda la più grande.
+      // O meglio: metti in coda la più grande, poi la più piccola, così la piccola viene POPpata subito.
+
+      if (r - p) > (q - (r + 1)) then // Sinistra è più grande
+        STACK_PUSH((p, r - 1))
+        STACK_PUSH((r + 1, q)) // (Potrebbe essere vuota se r+1 > q)
+      else // Destra è più grande o uguale
+        STACK_PUSH((r + 1, q))
+        STACK_PUSH((p, r - 1)) // (Potrebbe essere vuota se p > r-1)
+    // Gestire i casi in cui le partizioni sono vuote (es. if p < r-1 e if r+1 < q)
+    // prima di fare STACK_PUSH.
+                    </code></pre>
+                     <p><strong>Correzione e Semplificazione dello Stack Iterativo (più standard):</strong></p>
+                     <p>L'obiettivo per limitare lo stack a \(O(\log N)\) quando si simula la ricorsione è processare (o mettere nello stack per essere processato subito dopo) il sottoproblema più piccolo e mettere l'altro "in attesa" (più in fondo nello stack o iterando su di esso).</p>
+                    <pre><code class="language-pseudocode">
+IterativeQuickSort_WithStack_Corrected(A)
+  STACK_INIT()
+  STACK_PUSH((1, A.length)) // Assumendo indicizzazione da 1
+
+  while NOT STACK_EMPTY() do
+    (p, q) ← STACK_POP()
+    
+    // Esegui Partition finché la partizione non è banale
+    // Questo while interno gestisce l'iterazione sulla parte grande
+    while p < q do
+      r ← Partition(A, p, q) // o Randomized-Partition
+
+      // Il sottoproblema (p, r-1) e (r+1, q)
+      // Metti nello stack il più grande dei due, itera sul più piccolo.
+      if (r - p) < (q - (r+1)) then // La parte sinistra (p, r-1) è più piccola
+        if p < r - 1 then // Se la parte sinistra non è vuota
+          STACK_PUSH((p, r - 1))
+        p ← r + 1 // Itera sulla parte destra
+      else // La parte destra (r+1, q) è più piccola o uguale
+        if r + 1 < q then // Se la parte destra non è vuota
+          STACK_PUSH((r + 1, q))
+        q ← r - 1 // Itera sulla parte sinistra
+    // Fine while interno (p < q)
+  // Fine while (STACK_EMPTY)
+                    </code></pre>
+                    <p>Questa versione gestisce l'iterazione sulla parte più grande e mette in uno stack esplicito la parte più piccola, garantendo che la dimensione dello stack esplicito sia \(O(\log N)\).</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="conclusione-prossimi-argomenti" class="content-section">
+            <h2 class="section-title">12. Conclusione e Prossimi Argomenti</h2>
+            <div class="section-content">
+                <p>La lezione su QuickSort fornisce una panoramica completa di uno degli algoritmi di ordinamento più importanti. La professoressa ha coperto:</p>
+                <ul>
+                    <li>L'idea di base del Divide et Impera.</li>
+                    <li>La procedura cruciale di <code>Partition</code> (versione di Lomuto), con esempio e dimostrazione di correttezza.</li>
+                    <li>L'analisi di complessità di QuickSort, evidenziando il caso migliore (\(\Theta(N \log N)\)) e il caso peggiore (\(\Theta(N^2)\)).</li>
+                    <li>Le proprietà di QuickSort (non stabile, non strettamente in-place senza ottimizzazioni per lo stack).</li>
+                    <li>Tecniche per migliorare le prestazioni e mitigare il caso peggiore, come la randomizzazione e il Median-of-Three.</li>
+                </ul>
+                <p><strong>Prossimo Argomento:</strong></p>
+                <p>La professoressa anticipa che nella lezione successiva si affronterà il <strong>Problema della Selezione</strong>. Questo problema consiste nel trovare il <em>k-esimo elemento più piccolo</em> (o più grande) in un insieme non ordinato di \(N\) elementi, in tempo atteso lineare (\(\Theta(N)\)). L'algoritmo per la selezione (spesso chiamato <code>Randomized-Select</code>) sfrutta idee molto simili alla procedura <code>Partition</code> di QuickSort.</p>
+                <p>La lezione termina con i saluti.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || ""; 
+                mermaidOriginalDefinitions.set(id, decodedContent.trim());
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
