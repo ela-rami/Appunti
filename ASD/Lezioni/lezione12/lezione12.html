@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lezione 12: QuickSort; Limitazioni inferiori alla complessità dell'ordinamento(Select)</title>
+    <title>Lezione 12: QuickSort; Limitazioni inferiori alla complessità dell'ordinamento</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
     <!-- MathJax per rendering formule LaTeX -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -107,6 +107,7 @@
         .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
         .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
         .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        .note-title { font-size: 1.05rem; color: var(--accent-secondary); margin-top: 1.2rem; margin-bottom: 0.6rem; font-weight: 600; }
 
 
         .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
@@ -195,6 +196,14 @@
             border-radius: var(--border-radius-small);
         }
         .note-box strong { color: var(--accent-secondary); }
+        .clarification-box { /* Nuovo stile per gli approfondimenti */
+            background-color: rgba(52, 211, 153, 0.08); /* Verde acqua chiaro trasparente */
+            border-left: 4px solid #34d399; /* Verde acqua */
+            padding: 1em;
+            margin: 1.5em 0;
+            border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
 
 
         footer {
@@ -248,7 +257,7 @@
     <div class="overlay"></div>
     <header>
         <button class="hamburger-menu" id="hamburger-btn">☰</button>
-        <h1>Lezione 12: QuickSort; Limitazioni inferiori alla complessità dell'ordinamento(Select)</h1>
+        <h1>Lezione 12: QuickSort; Limitazioni inferiori alla complessità dell'ordinamento</h1>
         <div></div>
     </header>
 
@@ -270,9 +279,9 @@
             <li><a href="#randomized-select-esempio" class="sidebar-link">6.3. Esempio di Esecuzione</a></li>
             <li><a href="#randomized-select-complessita" class="sidebar-link">6.4. Analisi della Complessità di Randomized-Select</a></li>
             <li><a href="#select-lineare-peggiore" class="sidebar-link">7. Algoritmo di Selezione Lineare nel Caso Peggiore (SELECT / Median-of-Medians)</a></li>
-            <li><a href="#select-idea" class="sidebar-link">7.1. Idea dell'Algoritmo</a></li>
+            <li><a href="#select-idea" class="sidebar-link">7.1. Passaggi dell'Algoritmo SELECT</a></li>
             <li><a href="#select-pivot-bonta" class="sidebar-link">7.2. Analisi della "Bontà" del Pivot (Mediana delle Mediane)</a></li>
-            <li><a href="#select-ricorrenza-complessita" class="sidebar-link">7.3. Equazione di Ricorrenza e Complessità</a></li>
+            <li><a href="#select-ricorrenza-complessita" class="sidebar-link">7.3. Equazione di Ricorrenza e Complessità di SELECT (Caso Peggiore)</a></li>
             <li><a href="#select-praticita" class="sidebar-link">7.4. Considerazioni Pratiche su SELECT</a></li>
             <li><a href="#conclusione-prossimi-argomenti" class="sidebar-link">8. Conclusione e Prossimi Argomenti</a></li>
         </ul>
@@ -282,28 +291,22 @@
         <article id="recap-quicksort-peggiore" class="content-section">
             <h2 class="section-title">1. Ripresa Analisi QuickSort: Dimostrazione Formale del Caso Peggiore</h2>
             <div class="section-content">
-                <p>La lezione inizia riprendendo l'analisi della complessità di QuickSort, concentrandosi sulla dimostrazione formale del caso peggiore.</p>
-                <p><strong>Equazione di Ricorrenza Generale per QuickSort:</strong></p>
+                <p>La lezione inizia con un breve saluto e la professoressa riprende immediatamente l'analisi della complessità di QuickSort, concentrandosi sulla dimostrazione formale del caso peggiore. Questo fa seguito alla discussione della lezione precedente (Lezione 11).</p>
+                <p><strong>Equazione di Ricorrenza Generale per QuickSort (Richiamo):</strong></p>
                 <div class="math-block">
                 \( T(n) = \begin{cases} \Theta(1) & \text{se } n \le 1 \\ T(m) + T(n-m-1) + \Theta(n) & \text{se } n > 1 \end{cases} \)
                 </div>
-                <p>dove \(0 \le m \le n-1\) è la dimensione della partizione sinistra dopo l'esecuzione di <code>Partition</code> (che costa \(\Theta(n)\)).</p>
-                <p>Per semplificare, la professoressa sostituisce le notazioni asintotiche con costanti:</p>
+                <p>dove \(0 \le m \le n-1\) è la dimensione della partizione sinistra dopo l'esecuzione di <code>Partition</code> (che costa \(\Theta(n)\)). Per la dimostrazione, le notazioni \(\Theta\) vengono sostituite da costanti specifiche:</p>
                 <div class="math-block">
                 \( T(n) = \begin{cases} a & \text{se } n \le 1 \\ T(m) + T(n-m-1) + b \cdot n & \text{se } n > 1 \end{cases} \)
                 </div>
-                <p><strong>Caso Peggiore: Partizione Massimamente Sbilanciata</strong></p>
-                <p>Si verifica quando \(m=0\) o \(m=n-1\). In entrambi gli scenari, l'equazione si riduce a:</p>
-                <div class="math-block">
-                \( T(n) = T(n-1) + b \cdot n \) (ignorando \(T(0)\) che è una costante)
-                </div>
-                <p>Avevamo già visto intuitivamente che questo porta a \(\Theta(n^2)\).</p>
                 
                 <h3 class="subsection-title">Dimostrazione Formale che \(T(n) \in O(n^2)\) per il Caso Peggiore (Metodo di Sostituzione)</h3>
+                <p>La professoressa guida passo-passo la dimostrazione, come riportato anche negli appunti PDF a pagina 1 e 2 ("Nota 9 nov 2020 (2).pdf").</p>
                 <p>Vogliamo dimostrare che \(T(n) \le c \cdot n^2\) per qualche costante \(c > 0\) e per \(n \ge n_0\).</p>
                 <p><strong>Passo Induttivo:</strong></p>
                 <p>Assumiamo (Ipotesi Induttiva - HI) che \(T(k) \le c \cdot k^2\) per ogni \(k < n\).</p>
-                <p>Per il caso peggiore, la complessità è data da:</p>
+                <p>Nel caso peggiore, il costo è massimizzato dalla scelta di \(m\) che porta alla partizione più sbilanciata:</p>
                 <div class="math-block">
                 \( T(n) = \max_{0 \le m \le n-1} \{ T(m) + T(n-m-1) + b \cdot n \} \)
                 </div>
@@ -311,146 +314,136 @@
                 <div class="math-block">
                 \( T(n) \le \max_{0 \le m \le n-1} \{ c \cdot m^2 + c \cdot (n-m-1)^2 + b \cdot n \} \)
                 </div>
-                <p>Per semplificare, assumiamo di poter scegliere una costante \(c\) tale che \(c \ge b\). Allora \(b \cdot n \le c \cdot n\). (Questa assunzione dovrà essere verificata alla fine).</p>
+                <p>Per procedere, si assume di poter scegliere una costante \(c\) tale che \(c \ge b\). Questo permette di scrivere \(b \cdot n \le c \cdot n\).</p>
                 <div class="math-block">
                 \( T(n) \le \max_{0 \le m \le n-1} \{ c \cdot m^2 + c \cdot (n-m-1)^2 + c \cdot n \} \)
                 </div>
                 <div class="math-block">
                 \( T(n) \le c \cdot \max_{0 \le m \le n-1} \{ m^2 + (n-m-1)^2 + n \} \)
                 </div>
-                <p>Consideriamo la funzione \(f(m) = m^2 + (n-m-1)^2 + n\). Questa è una parabola in \(m\) con concavità verso l'alto (il coefficiente di \(m^2\) è \(1+1=2 > 0\)). Il suo massimo nell'intervallo \([0, n-1]\) si troverà agli estremi.</p>
+                <p>Si analizza la funzione \(f(m) = m^2 + (n-m-1)^2 + n\). Essendo una parabola in \(m\) con concavità verso l'alto (coefficiente di \(m^2\) è \(2 > 0\)), il suo massimo nell'intervallo \([0, n-1]\) si raggiunge agli estremi:</p>
                 <ul>
-                    <li>Per \(m=0\): \(f(0) = 0^2 + (n-1)^2 + n = n^2 - 2n + 1 + n = n^2 - n + 1\).</li>
-                    <li>Per \(m=n-1\): \(f(n-1) = (n-1)^2 + (n-(n-1)-1)^2 + n = (n-1)^2 + 0^2 + n = n^2 - n + 1\).</li>
+                    <li>Per \(m=0\): \(f(0) = (n-1)^2 + n = n^2 - 2n + 1 + n = n^2 - n + 1\).</li>
+                    <li>Per \(m=n-1\): \(f(n-1) = (n-1)^2 + 0^2 + n = n^2 - n + 1\).</li>
                 </ul>
                 <p>Quindi, \(\max_{0 \le m \le n-1} \{ f(m) \} = n^2 - n + 1\).</p>
-                <p>Sostituendo nella disuguaglianza per \(T(n)\):</p>
+                <p>Sostituendo, otteniamo:</p>
                 <div class="math-block">
                 \( T(n) \le c \cdot (n^2 - n + 1) \)
                 </div>
-                <p>Vogliamo dimostrare che \(c \cdot (n^2 - n + 1) \le c \cdot n^2\) (perché questa è la nostra tesi \(T(n) \le c \cdot n^2\)).</p>
-                <p>\( c \cdot n^2 - c \cdot n + c \le c \cdot n^2 \)</p>
-                <p>\( -c \cdot n + c \le 0 \)</p>
-                <p>\( c \cdot (1 - n) \le 0 \)</p>
-                <p>Poiché abbiamo assunto \(c > 0\), questa disuguaglianza è vera se \(1 - n \le 0\), cioè se \(n \ge 1\).</p>
+                <p>Vogliamo che questa espressione sia \(\le c \cdot n^2\) (la nostra tesi):</p>
+                <p>\( c \cdot n^2 - c \cdot n + c \le c \cdot n^2 \implies -c \cdot n + c \le 0 \implies c \cdot (1 - n) \le 0 \)</p>
+                <p>Dato che \(c > 0\), la disuguaglianza è vera se \(1 - n \le 0\), ovvero \(n \ge 1\).</p>
 
                 <p><strong>Caso Base dell'Induzione:</strong></p>
-                <p>Per \(n=1\), \(T(1) = a\). Vogliamo dimostrare che \(a \le c \cdot 1^2\), cioè \(a \le c\).</p>
+                <p>Per \(n=1\), \(T(1) = a\). Si deve avere \(a \le c \cdot 1^2 \implies a \le c\).</p>
 
                 <p><strong>Condizioni sulla Costante \(c\):</strong></p>
-                <p>Perché la dimostrazione sia valida, dobbiamo poter scegliere una costante \(c\) che soddisfi:</p>
-                <ol>
-                    <li>\(c > 0\) (dalla definizione di \(O(\cdot)\)).</li>
-                    <li>\(c \ge b\) (dall'assunzione fatta per semplificare la maggiorazione).</li>
-                    <li>\(c \ge a\) (dal caso base).</li>
-                </ol>
-                <p>Possiamo quindi scegliere \(c = \max(a, b)\) (assumendo \(a, b > 0\)) o un valore leggermente più grande se necessario per coprire il \(\Theta(1)\) iniziale in modo stretto. La condizione \(n \ge 1\) per il passo induttivo è soddisfatta per tutti gli \(n\) rilevanti.</p>
-                <p><strong>Conclusione:</strong> Abbiamo dimostrato che \(T(n) \in O(n^2)\) nel caso peggiore. Poiché sappiamo che esistono input (es. array già ordinato con la partizione di Lomuto) che inducono questo comportamento, e quindi \(T(n) \in \Omega(n^2)\) per il caso peggiore, possiamo concludere che <strong>la complessità di QuickSort nel caso peggiore è \(\Theta(n^2)\)</strong>.</p>
+                <p>Affinché la dimostrazione sia valida, si deve poter scegliere una costante \(c\) che soddisfi \(c > 0\), \(c \ge b\), e \(c \ge a\). Una scelta possibile è \(c = \max(a, b)\) (assumendo \(a, b > 0\)). La condizione \(n \ge 1\) è valida per il dominio del problema.</p>
+                <p><strong>Conclusione:</strong> Viene confermato che \(T(n) \in O(n^2)\) nel caso peggiore. Poiché esistono input che provocano questo comportamento (e quindi \(T(n) \in \Omega(n^2)\)), la complessità di QuickSort nel caso peggiore è \(\Theta(n^2)\).</p>
             </div>
         </article>
 
         <article id="quicksort-caso-medio" class="content-section">
             <h2 class="section-title">2. Analisi del Caso Medio di QuickSort (\(\Theta(N \log N)\))</h2>
             <div class="section-content">
-                <p>Per analizzare il caso medio, si fanno delle assunzioni sulla distribuzione degli input o sulla scelta del pivot.</p>
-                <p><strong>Assunzione Chiave:</strong></p>
-                <p>Si assume che, dopo la procedura <code>Partition</code>, la dimensione \(m\) della prima sottoparte (elementi \(\le\) pivot) sia <strong>uniformemente distribuita</strong> nell'intervallo \([0, n-1]\). Cioè, ogni possibile valore di \(m\) (da 0 a \(n-1\)) ha probabilità \(1/n\) di verificarsi. Questa assunzione è ragionevole se il pivot è scelto casualmente (Randomized QuickSort) o se si mediano su tutte le possibili permutazioni dell'input.</p>
-                <p>Sia \(T_M(n)\) il tempo di esecuzione medio di QuickSort su \(n\) elementi.</p>
-                <p>L'equazione di ricorrenza per il caso medio diventa:</p>
-                <div class="math-block">
-                \( T_M(n) = \left( \frac{1}{n} \sum_{m=0}^{n-1} [T_M(m) + T_M(n-m-1)] \right) + \Theta(n) \)
+                <p>La professoressa passa all'analisi del caso medio, facendo riferimento agli appunti PDF pagina 3.</p>
+                <p><strong>Assunzione per il Caso Medio:</strong></p>
+                <p>Si assume che la dimensione \(m\) della partizione sinistra (elementi \(\le\) al pivot) dopo l'esecuzione di <code>Partition</code> sia <strong>uniformemente distribuita</strong> nell'intervallo \([0, n-1]\). Questo significa che ogni possibile valore di \(m\) ha probabilità \(1/n\).</p>
+                 <div class="note-box">
+                    <strong>Importanza dell'Assunzione:</strong> Questa assunzione è cruciale. È soddisfatta se, ad esempio, il pivot viene scelto in modo perfettamente casuale all'interno della porzione corrente, oppure se si considera la media su tutte le possibili permutazioni dell'array di input.
                 </div>
-                <p>Il termine \(\Theta(n)\) è il costo di <code>Partition</code>. La sommatoria calcola il valore atteso del costo ricorsivo, mediando su tutte le possibili dimensioni \(m\) della prima partizione.</p>
+                <p>L'equazione di ricorrenza per il tempo medio \(T_M(n)\) è:</p>
+                <div class="math-block">
+                \( T_M(n) = \left( \frac{1}{n} \sum_{m=0}^{n-1} [T_M(m) + T_M(n-m-1)] \right) + b \cdot n \)
+                </div>
+                <p>(dove \(\Theta(n)\) è stato sostituito da \(b \cdot n\)).</p>
                 
                 <h3 class="subsection-title">Semplificazione della Sommatoria</h3>
-                <p>Osserviamo la struttura della sommatoria: \(\sum_{m=0}^{n-1} [T_M(m) + T_M(n-m-1)]\).</p>
-                <p>Espandendola, vediamo che ogni termine \(T_M(k)\) (per \(0 \le k \le n-1\)) compare due volte:</p>
+                <p>La professoressa evidenzia che nella sommatoria \(\sum_{m=0}^{n-1} [T_M(m) + T_M(n-m-1)]\), ogni termine \(T_M(k)\) (per \(0 \le k \le n-1\)) appare esattamente due volte. Ad esempio:</p>
                 <ul>
-                    <li>Quando \(m=0\): \(T_M(0) + T_M(n-1)\)</li>
-                    <li>Quando \(m=1\): \(T_M(1) + T_M(n-2)\)</li>
-                    <li>...</li>
-                    <li>Quando \(m=n-2\): \(T_M(n-2) + T_M(1)\)</li>
-                    <li>Quando \(m=n-1\): \(T_M(n-1) + T_M(0)\)</li>
+                    <li>Per \(m=0\): \(T_M(0) + T_M(n-1)\)</li>
+                    <li>Per \(m=n-1\): \(T_M(n-1) + T_M(0)\)</li>
                 </ul>
-                <p>Quindi, la sommatoria è uguale a \(2 \sum_{m=0}^{n-1} T_M(m)\).</p>
-                <p>Sostituendo nell'equazione di ricorrenza e usando \(b \cdot n\) per \(\Theta(n)\):</p>
+                <p>Quindi, la sommatoria si semplifica a \(2 \sum_{m=0}^{n-1} T_M(m)\).</p>
+                <p>L'equazione di ricorrenza diventa:</p>
                 <div class="math-block">
                 \( T_M(n) = \frac{2}{n} \sum_{m=0}^{n-1} T_M(m) + b \cdot n \)
                 </div>
 
-                <h3 class="subsection-title">Risoluzione dell'Equazione di Ricorrenza (Cenno)</h3>
-                <p>La professoressa indica che la risoluzione di questa equazione di ricorrenza non è banale e di solito si fa per sostituzione, ipotizzando una soluzione del tipo \(T_M(k) \le c \cdot k \log k\).</p>
-                <p><strong>Passaggi Comuni per la Risoluzione (non svolti in dettaglio dalla prof, ma menzionati come tecniche standard):</strong></p>
-                <ol>
-                    <li>Moltiplicare entrambi i membri per \(n\): \( n T_M(n) = 2 \sum_{m=0}^{n-1} T_M(m) + b \cdot n^2 \).</li>
-                    <li>Scrivere la stessa equazione per \(n-1\): \( (n-1) T_M(n-1) = 2 \sum_{m=0}^{n-2} T_M(m) + b \cdot (n-1)^2 \).</li>
-                    <li>Sottrarre la seconda dalla prima per eliminare la sommatoria:
-                        <div class="math-block">
-                        \( n T_M(n) - (n-1) T_M(n-1) = 2 T_M(n-1) + b \cdot n^2 - b \cdot (n-1)^2 \)
-                        </div>
-                        \( n T_M(n) = (n+1) T_M(n-1) + b(2n-1) \) (circa \(2bn\))
-                    </li>
-                    <li>Dividere per \(n(n+1)\) per ottenere una forma telescopica (o quasi) e risolvere.</li>
-                </ol>
-                <p>La professoressa rimanda al libro di testo per la dimostrazione completa, che conferma la soluzione.</p>
+                <h3 class="subsection-title">Risoluzione dell'Equazione di Ricorrenza (Metodo di Sostituzione - Cenno)</h3>
+                <div class="clarification-box">
+                    <strong>Approfondimento (Non svolto in dettaglio dalla Prof.ssa a lezione): Metodo di Sostituzione per il Caso Medio</strong>
+                    <p>Per risolvere formalmente questa equazione, si ipotizza che \(T_M(k) \le c \cdot k \log k\) per \(k < n\). L'obiettivo è dimostrare che \(T_M(n) \le c \cdot n \log n\).</p>
+                    <p>I passaggi principali della dimostrazione (che la professoressa ha detto di saltare per brevità, rimandando al libro) includono:</p>
+                    <ol>
+                        <li>Sostituire l'ipotesi induttiva nella sommatoria.</li>
+                        <li>Manipolare la sommatoria \(\sum c \cdot m \log m\). Spesso si "spezza" la sommatoria o si usano maggiorazioni (es. \(\sum_{m=1}^{n-1} m \log m \le \int_1^n x \log x dx \)).</li>
+                        <li>Si arriva a dimostrare che, scegliendo opportunamente la costante \(c\) e gestendo i termini di ordine inferiore e i casi base, la disuguaglianza \(T_M(n) \le c \cdot n \log n\) è soddisfatta.</li>
+                    </ol>
+                    <p>Una tecnica alternativa comune per questo tipo di ricorrenze con sommatorie è moltiplicare l'equazione per \(n\), poi scrivere l'equazione per \((n-1)\) moltiplicata per \((n-1)\), e sottrarre le due per eliminare la sommatoria, ottenendo una ricorrenza più semplice da risolvere o da maggiorare.</p>
+                </div>
+                <p>La professoressa conclude affermando il risultato noto.</p>
                 <p><strong>Conclusione per il Caso Medio:</strong></p>
                 <div class="math-block">
                 \( T_M(n) = \Theta(n \log n) \)
                 </div>
-                <p>Questo risultato è molto importante: in media, o con randomizzazione, QuickSort è efficiente quanto MergeSort e Heapsort in termini di complessità asintotica.</p>
             </div>
         </article>
 
         <article id="quicksort-proprieta-ripasso" class="content-section">
             <h2 class="section-title">3. Proprietà di QuickSort (Breve Ripasso)</h2>
             <div class="section-content">
-                <p>La professoressa fa un rapido ripasso delle proprietà di QuickSort discusse nella lezione precedente:</p>
+                <p>La professoressa richiama brevemente le proprietà di QuickSort discusse nella lezione precedente:</p>
                 <ul>
-                    <li><strong>In-Place:</strong>
+                    <li><strong>In-Place:</strong> La procedura <code>Partition</code> (versione Lomuto) è in-place. Tuttavia, la natura ricorsiva di QuickSort utilizza lo stack di sistema.
                         <ul>
-                            <li>La procedura <code>Partition</code> di Lomuto è in-place.</li>
-                            <li>La ricorsione di QuickSort usa lo stack. Nel caso peggiore, la profondità è \(O(N)\). Nel caso migliore/medio, è \(O(\log N)\).</li>
-                            <li>Quindi, non è strettamente in-place (O(1) spazio ausiliario) a causa dello stack. Può essere resa tale (con stack \(O(\log N)\) nel caso peggiore) ottimizzando la ricorsione (ricorrendo sulla parte più piccola e iterando sulla più grande).</li>
+                            <li>Nel caso peggiore, lo stack può raggiungere profondità \(O(N)\).</li>
+                            <li>Nel caso migliore/medio, lo stack ha profondità \(O(\log N)\).</li>
+                            <li>Si era accennato all'ottimizzazione di ricorrere sulla parte più piccola e iterare sulla più grande per garantire uno stack \(O(\log N)\) anche nel caso peggiore.</li>
                         </ul>
+                        Quindi, non è strettamente \(O(1)\) spazio ausiliario a causa dello stack, ma è più efficiente spazialmente di MergeSort.
                     </li>
-                    <li><strong>Stabile:</strong>
-                        <ul>
-                            <li>QuickSort, con la partizione di Lomuto, <strong>non è stabile</strong>. Gli scambi possono alterare l'ordine relativo di elementi uguali.</li>
-                        </ul>
-                    </li>
+                    <li><strong>Stabile:</strong> QuickSort (con partizione di Lomuto) <strong>non è stabile</strong>. Gli scambi possono alterare l'ordine relativo di elementi con chiavi uguali.</li>
                 </ul>
+                 <div class="note-box">
+                    <strong>Esercizio per Casa (Ripreso implicitamente dalla lezione precedente):</strong>
+                    <p>La professoressa aveva lasciato come esercizio scrivere una versione iterativa di QuickSort che garantisca una profondità dello stack al più \(O(\log N)\). Vedi appunti Lezione 11 per i dettagli sulla soluzione.</p>
+                </div>
             </div>
         </article>
 
         <article id="domande-risposte-quicksort" class="content-section">
             <h2 class="section-title">4. Domande e Risposte su QuickSort</h2>
             <div class="section-content">
-                <p>La professoressa apre una sessione di domande e risposte su QuickSort.</p>
-                <p><strong>Domanda Studente:</strong> "Riguardo l'altezza dell'albero di ricorsione: nel caso peggiore (complessità \(\Theta(N^2)\)) l'altezza è \(N\), e nel caso migliore/medio (\(\Theta(N \log N)\)) l'altezza è \(\log N\). Ma il lavoro ad ogni livello dell'albero di ricorsione è sempre \(N\)?"</p>
-                <p><strong>Risposta Professoressa:</strong></p>
+                <p><strong>Interazione con Studente (Albero di Ricorsione e Lavoro per Livello):</strong></p>
+                <p>Uno studente chiede chiarimenti sulla relazione tra altezza dell'albero di ricorsione e lavoro per livello, specialmente nel caso peggiore di QuickSort.</p>
+                <p>La professoressa chiarisce:</p>
                 <ul>
-                    <li><strong>No, non è sempre \(N\) ad ogni livello nel caso peggiore.</strong>
+                    <li><strong>Caso Peggiore (es. partizione 0, N-1):</strong> L'albero di ricorsione è degenere (simile a una lista).
                         <ul>
-                            <li>Nel <strong>caso peggiore</strong> (es. albero di ricorsione degenere, "a pettine"), il primo livello di partizione costa \(\Theta(N)\). La chiamata ricorsiva successiva opera su \(N-1\) elementi e costa \(\Theta(N-1)\) per la sua partizione, e così via.
-                            La somma del lavoro è \(\Theta(N) + \Theta(N-1) + \Theta(N-2) + \dots + \Theta(1) = \Theta(N^2)\). Qui l'altezza è \(N\), ma il lavoro per livello decresce.</li>
+                            <li>Altezza: \(N\).</li>
+                            <li>Lavoro al livello 0 (radice): \(\Theta(N)\) (per <code>Partition</code> su \(N\) elementi).</li>
+                            <li>Lavoro al livello 1: \(\Theta(N-1)\) (per <code>Partition</code> su \(N-1\) elementi).</li>
+                            <li>...</li>
+                            <li>Lavoro al livello \(N-1\): \(\Theta(1)\).</li>
+                            <li>Lavoro totale: \(\sum_{k=1}^{N} \Theta(k) = \Theta(N^2)\).</li>
                         </ul>
                     </li>
-                    <li>Nel <strong>caso migliore/medio</strong> (es. albero di ricorsione bilanciato), l'altezza è \(\Theta(\log N)\).
+                    <li><strong>Caso Migliore/Medio (es. partizione N/2, N/2):</strong> L'albero di ricorsione è bilanciato.
                         <ul>
-                            <li>Al livello 0 (radice), la partizione costa \(\Theta(N)\).</li>
-                            <li>Al livello 1, ci sono due sottoproblemi di dimensione circa \(N/2\). La partizione per ciascuno costa \(\Theta(N/2)\). Il lavoro totale a questo livello è \(2 \cdot \Theta(N/2) = \Theta(N)\).</li>
-                            <li>In generale, ad ogni livello \(k\) dell'albero di ricorsione bilanciato, il lavoro totale per partizionare tutti i sottoproblemi a quel livello è \(\Theta(N)\).</li>
-                            <li>Poiché ci sono \(\Theta(\log N)\) livelli, il lavoro totale è \(\Theta(N) \cdot \Theta(\log N) = \Theta(N \log N)\).</li>
+                            <li>Altezza: \(\Theta(\log N)\).</li>
+                            <li>Lavoro ad ogni livello: \(\Theta(N)\) (es. al livello 1 ci sono 2 sottoproblemi di taglia N/2, quindi \(2 \cdot \Theta(N/2) = \Theta(N)\)).</li>
+                            <li>Lavoro totale: \(\Theta(\log N) \text{ livelli} \cdot \Theta(N) \text{ lavoro/livello} = \Theta(N \log N)\).</li>
                         </ul>
                     </li>
                 </ul>
-
-                <p><strong>Domanda Studente (implicita dalla discussione):</strong> "Se QuickSort ha un caso peggiore quadratico, perché si dice che è veloce o perché lo si usa?"</p>
-                <p><strong>Risposta Professoressa (ribadita):</strong></p>
+                <p><strong>Perché QuickSort è considerato "veloce" nonostante il caso \(N^2\)?</strong></p>
+                <p>La professoressa ribadisce i motivi già discussi:</p>
                 <ul>
-                    <li><strong>Prestazioni Medie Eccellenti:</strong> In media, specialmente con la randomizzazione (che rende il caso peggiore molto improbabile), QuickSort è \(\Theta(N \log N)\).</li>
-                    <li><strong>Basse Costanti Moltiplicative:</strong> Le operazioni interne di QuickSort (confronti e scambi in <code>Partition</code>) sono molto efficienti e tendono ad avere costanti "nascoste" nella notazione \(\Theta\) più piccole rispetto ad altri algoritmi \(\Theta(N \log N)\) come MergeSort (che ha l'overhead della copia/fusione di array) o Heapsort (che ha una struttura dati più complessa da mantenere).</li>
-                    <li><strong>Buona Località di Riferimento:</strong> <code>Partition</code> accede agli elementi dell'array in modo prevalentemente sequenziale, il che è favorevole per le prestazioni della cache della CPU.</li>
+                    <li>Le performance medie sono \(\Theta(N \log N)\), specialmente con la randomizzazione del pivot.</li>
+                    <li>Ha basse costanti moltiplicative nelle operazioni di base.</li>
+                    <li>Sfrutta bene la località di riferimento e le cache della CPU.</li>
                 </ul>
             </div>
         </article>
@@ -458,42 +451,46 @@
         <article id="problema-selezione-intro" class="content-section">
             <h2 class="section-title">5. Il Problema della Selezione (Selection Problem)</h2>
             <div class="section-content">
-                <p>La professoressa introduce un nuovo problema, strettamente correlato a QuickSort: il <strong>Problema della Selezione</strong> (o problema dell'i-esimo ordine statistico).</p>
+                <p>Viene introdotto formalmente il <strong>Problema della Selezione</strong> (o problema dell'i-esimo ordine statistico), argomento centrale della seconda parte della lezione e presente negli appunti PDF a partire da pagina 7.</p>
                 <p><strong>Definizione del Problema:</strong></p>
-                <p>Dato un insieme (o array) \(A\) di \(n\) numeri (non necessariamente distinti) e un intero \(i\) (con \(1 \le i \le n\)), trovare l'elemento \(x \in A\) che è il <strong>\(i\)-esimo elemento più piccolo</strong> di \(A\).
-                Cioè, se l'array \(A\) fosse ordinato, l'elemento cercato sarebbe quello in posizione \(i\).</p>
-                <p><strong>Casi Particolari:</strong></p>
+                <p>Dato un insieme (o array) \(A\) di \(n\) numeri (che possono avere duplicati) e un intero \(i\) (con \(1 \le i \le n\)), l'obiettivo è trovare l'elemento \(x \in A\) che è il <strong>\(i\)-esimo elemento più piccolo</strong> di \(A\).
+                In altre parole, se l'array \(A\) fosse ordinato in modo non decrescente, l'elemento cercato sarebbe quello che si troverebbe all'indice \(i\).</p>
+                <p><strong>Casi Particolari Notevoli:</strong></p>
                 <ul>
-                    <li>Se \(i=1\), si cerca il <strong>minimo</strong>.</li>
-                    <li>Se \(i=n\), si cerca il <strong>massimo</strong>.</li>
-                    <li>Se \(n\) è dispari e \(i = (n+1)/2\), si cerca la <strong>mediana</strong>.</li>
-                    <li>Se \(n\) è pari, si possono definire due mediane:
+                    <li>Se \(i=1\): si cerca il <strong>minimo</strong> dell'insieme.</li>
+                    <li>Se \(i=n\): si cerca il <strong>massimo</strong> dell'insieme.</li>
+                    <li>Se \(n\) è dispari e \(i = (n+1)/2\): si cerca la <strong>mediana</strong>.</li>
+                    <li>Se \(n\) è pari, ci sono due elementi mediani:
                         <ul>
-                            <li>Mediana inferiore: \(i = \lfloor (n+1)/2 \rfloor\)</li>
-                            <li>Mediana superiore: \(i = \lceil (n+1)/2 \rceil\) (o \(n/2 + 1\))</li>
+                            <li>Mediana inferiore: per \(i = \lfloor (n+1)/2 \rfloor\) (o \(n/2\)).</li>
+                            <li>Mediana superiore: per \(i = \lceil (n+1)/2 \rceil\) (o \(n/2 + 1\)).</li>
                         </ul>
-                    La professoressa di solito si riferisce alla mediana inferiore quando \(n\) è pari.
+                        (La professoressa di solito considera la mediana inferiore se non specificato diversamente).
                     </li>
                 </ul>
 
-                <h3 class="subsection-title">Soluzione Banale (Basata sull'Ordinamento)</h3>
-                <p>L'approccio più ovvio per risolvere il problema della selezione è:</p>
+                <h3 class="subsection-title">Soluzione Semplice (Basata sull'Ordinamento)</h3>
+                <p>Un modo immediato per risolvere il problema della selezione è:</p>
                 <ol>
-                    <li>Ordinare l'array \(A\). Questo richiede tempo \(\Theta(n \log n)\) usando un algoritmo efficiente come MergeSort o Heapsort.</li>
-                    <li>Restituire l'elemento che si trova in posizione \(i\) dell'array ordinato. Questo richiede tempo \(\Theta(1)\).</li>
+                    <li>Ordinare l'intero array \(A\). Questo richiede tempo \(\Theta(n \log n)\).</li>
+                    <li>Restituire l'elemento \(A[i]\) (assumendo indicizzazione appropriata). Questo è \(\Theta(1)\).</li>
                 </ol>
-                <p>La complessità totale di questa soluzione banale è \(\Theta(n \log n)\).</p>
+                <p>La complessità totale è \(\Theta(n \log n)\).</p>
 
-                <h3 class="subsection-title">Obiettivo: Algoritmo Più Efficiente</h3>
-                <p>La domanda è: possiamo fare di meglio? L'obiettivo è trovare un algoritmo per il problema della selezione che abbia una complessità temporale <strong>lineare</strong>, cioè \(\Theta(n)\).</p>
-                <p>Si cercherà prima un algoritmo randomizzato con tempo atteso lineare, e poi un algoritmo deterministico con tempo lineare nel caso peggiore.</p>
+                <h3 class="subsection-title">Obiettivo Migliorativo</h3>
+                <p>L'obiettivo è trovare algoritmi per il problema della selezione che siano più efficienti, in particolare che abbiano una complessità temporale <strong>lineare</strong> (\(\Theta(n)\)).</p>
+                <p>La professoressa anticipa che si esploreranno due approcci:</p>
+                <ol>
+                    <li>Un algoritmo randomizzato con tempo atteso lineare.</li>
+                    <li>Un algoritmo deterministico con tempo lineare nel caso peggiore.</li>
+                </ol>
             </div>
         </article>
 
         <article id="randomized-select" class="content-section">
             <h2 class="section-title">6. Algoritmo Randomized-Select (Selezione Randomizzata)</h2>
             <div class="section-content">
-                <p>L'algoritmo <code>Randomized-Select</code> sfrutta la stessa idea di base di <code>Randomized-QuickSort</code> e della procedura <code>Randomized-Partition</code>.</p>
+                <p>Questo algoritmo, presentato negli appunti PDF a pagina 8, sfrutta la procedura <code>Randomized-Partition</code> di QuickSort per risolvere il problema della selezione in tempo atteso lineare.</p>
             </div>
         </article>
 
@@ -502,283 +499,247 @@
             <div class="section-content">
                 <p>L'algoritmo cerca l'\(i\)-esimo elemento più piccolo nella porzione di array <code>A[p...q]</code>.</p>
                 <ol>
-                    <li><strong>Caso Base:</strong> Se la porzione contiene un solo elemento (cioè <code>p == q</code>), allora questo è l'elemento cercato (assumendo che `i` sia coerentemente 1 in questo caso). Restituisci <code>A[p]</code>.</li>
-                    <li><strong>Partiziona:</strong> Chiama <code>Randomized-Partition(A, p, q)</code> per partizionare l'array attorno a un pivot scelto casualmente. Sia <code>r</code> l'indice finale del pivot <code>A[r]</code>.</li>
-                    <li><strong>Determina il Rango del Pivot:</strong> Il pivot <code>A[r]</code> è ora al suo posto corretto rispetto alla porzione <code>A[p...q]</code>. Calcola il suo rango (o ordine statistico) <code>k</code> all'interno di questa porzione: <code>k = r - p + 1</code>. (Cioè, <code>A[r]</code> è il <code>k</code>-esimo elemento più piccolo in <code>A[p...q]</code>).</li>
+                    <li><strong>Caso Base:</strong> Se la porzione <code>A[p...q]</code> contiene un solo elemento (cioè <code>p == q</code>), allora questo elemento è necessariamente l'\(i\)-esimo (con \(i=1\) rispetto a questa sottoporzione). Restituisci <code>A[p]</code>.</li>
+                    <li><strong>Partiziona (Randomized):</strong> Esegui <code>r = Randomized-Partition(A, p, q)</code>. Questo sceglie un pivot casuale dalla porzione <code>A[p...q]</code>, lo usa per partizionare la porzione, e restituisce l'indice finale <code>r</code> del pivot.</li>
+                    <li><strong>Calcola il Rango del Pivot:</strong> Il pivot <code>A[r]</code> è ora al suo posto corretto nell'ordinamento relativo della porzione <code>A[p...q]</code>. Il suo rango (ordine statistico) all'interno di questa porzione è <code>k = r - p + 1</code>. (Significa che ci sono <code>k-1</code> elementi a sinistra di <code>A[r]</code> che sono \(\le A[r]\), e <code>A[r]</code> è il <code>k</code>-esimo).</li>
                     <li><strong>Confronta e Ricorri:</strong>
                         <ul>
-                            <li>Se <code>i == k</code>: Il pivot <code>A[r]</code> è esattamente l'\(i\)-esimo elemento più piccolo che stavamo cercando. Restituisci <code>A[r]</code>.</li>
-                            <li>Se <code>i < k</code>: L'\(i\)-esimo elemento più piccolo deve trovarsi nella parte sinistra dell'array partizionato, cioè in <code>A[p...r-1]</code>. Richiama ricorsivamente <code>Randomized-Select(A, p, r-1, i)</code>. (Il rango `i` rimane lo stesso perché stiamo cercando all'interno della prima parte).</li>
-                            <li>Se <code>i > k</code>: L'\(i\)-esimo elemento più piccolo deve trovarsi nella parte destra dell'array partizionato, cioè in <code>A[r+1...q]</code>. Tuttavia, poiché abbiamo "scartato" i primi <code>k</code> elementi (quelli in <code>A[p...r]</code>), ora stiamo cercando l'(<code>i-k</code>)-esimo elemento più piccolo all'interno della sottoporzione <code>A[r+1...q]</code>. Richiama ricorsivamente <code>Randomized-Select(A, r+1, q, i-k)</code>.</li>
+                            <li><strong>Se <code>i == k</code>:</strong> Il pivot <code>A[r]</code> è esattamente l'elemento che stiamo cercando (l'\(i\)-esimo più piccolo della porzione originale). Restituisci <code>A[r]</code>.</li>
+                            <li><strong>Se <code>i < k</code>:</strong> L'\(i\)-esimo elemento più piccolo deve trovarsi nella partizione sinistra <code>A[p...r-1]</code> (che contiene i primi <code>k-1</code> elementi della porzione originale, tutti \(\le A[r]\)). Richiama ricorsivamente <code>Randomized-Select(A, p, r-1, i)</code>. Il rango <code>i</code> non cambia perché stiamo cercando all'interno di un insieme che contiene i primi elementi.</li>
+                            <li><strong>Se <code>i > k</code>:</strong> L'\(i\)-esimo elemento più piccolo deve trovarsi nella partizione destra <code>A[r+1...q]</code>. Poiché abbiamo "scartato" i <code>k</code> elementi della partizione sinistra (inclusi il pivot), ora stiamo cercando l' (<code>i-k</code>)-esimo elemento più piccolo all'interno della nuova sottoporzione <code>A[r+1...q]</code>. Richiama ricorsivamente <code>Randomized-Select(A, r+1, q, i-k)</code>.</li>
                         </ul>
                     </li>
                 </ol>
-                <p>La differenza chiave rispetto a QuickSort è che <strong><code>Randomized-Select</code> fa una sola chiamata ricorsiva</strong>, non due. Questo è ciò che permette di ottenere potenzialmente una complessità lineare.</p>
+                <div class="note-box">
+                    <strong>Chiave dell'Efficienza:</strong> A differenza di QuickSort che fa due chiamate ricorsive, <code>Randomized-Select</code> ne fa <strong>una sola</strong>, sul lato dell'array dove si prevede di trovare l'elemento cercato.
+                </div>
             </div>
         </article>
 
         <article id="randomized-select-pseudo" class="content-section">
             <h3 class="subsection-title">6.2. Pseudocodice di Randomized-Select</h3>
-             <p>(Corrisponde agli appunti della professoressa a pagina 8 del PDF "Nota 9 nov 2020 (2).pdf")</p>
             <pre><code class="language-pseudocode">
 Randomized-Select(A, p, q, i)
-  // A: array, p: indice inizio, q: indice fine, i: i-esimo elemento da trovare (1 ≤ i ≤ q-p+1)
+  // A: array (o porzione di esso)
+  // p: indice iniziale della porzione corrente
+  // q: indice finale della porzione corrente
+  // i: si cerca l'i-esimo elemento più piccolo (1 ≤ i ≤ q-p+1)
   
   if p == q then
-    return A[p]
+    return A[p]  // Caso base: un solo elemento
   
-  r ← Randomized-Partition(A, p, q) // Partiziona A[p...q] e ottieni l'indice del pivot
-  k ← r - p + 1                    // Rango del pivot A[r] nella porzione A[p...q]
+  r ← Randomized-Partition(A, p, q) // Partiziona e ottieni l'indice del pivot
+  // Randomized-Partition sceglie un pivot casuale in A[p..q], lo scambia con A[q],
+  // poi esegue la partizione di Lomuto standard.
+  
+  k ← r - p + 1  // k è il rango del pivot A[r] all'interno di A[p...q]
+                 // (cioè, A[r] è il k-esimo elemento più piccolo in questa porzione)
   
   if i == k then
-    return A[r]                      // Il pivot è l'elemento cercato
+    return A[r]   // Il pivot è l'elemento cercato
   else if i < k then
-    return Randomized-Select(A, p, r - 1, i) // Cerca nella parte sinistra
+    // L'i-esimo elemento è nella parte sinistra (A[p...r-1])
+    return Randomized-Select(A, p, r - 1, i)
   else // i > k
-    return Randomized-Select(A, r + 1, q, i - k) // Cerca nella parte destra, aggiornando i
+    // L'i-esimo elemento è nella parte destra (A[r+1...q])
+    // Dobbiamo cercare l'(i-k)-esimo elemento in questa sottoporzione
+    return Randomized-Select(A, r + 1, q, i - k)
             </code></pre>
         </article>
 
         <article id="randomized-select-esempio" class="content-section">
             <h3 class="subsection-title">6.3. Esempio di Esecuzione di Randomized-Select</h3>
-            <p>Consideriamo l'array <code>A = [3, 2, 9, 0, 7, 5, 4, 8, 6, 1]</code>. Vogliamo trovare il <strong>7°-esimo</strong> elemento più piccolo (<code>i=7</code>).
-            Quindi, la chiamata iniziale è <code>Randomized-Select(A, 1, 10, 7)</code> (assumendo indicizzazione da 1).</p>
-            <p><strong>Esecuzione (ipotetica, poiché <code>Randomized-Partition</code> è casuale):</strong></p>
+            <p>La professoressa esegue un esempio (come negli appunti PDF pagina 8) per trovare il <strong>7°-esimo</strong> elemento più piccolo (<code>i=7</code>) nell'array <code>A = [3, 2, 9, 0, 7, 5, 4, 8, 6, 1]</code>.
+            (Assumiamo indicizzazione da 1, quindi <code>p=1, q=10</code>).</p>
+            <p><strong>Chiamata iniziale: Randomized-Select(A, 1, 10, 7)</strong></p>
             <ol>
-                <li><strong>Chiamata: Randomized-Select(A, 1, 10, 7)</strong>
-                    <ul>
-                        <li><code>p=1, q=10</code>. <code>p != q</code>.</li>
-                        <li>Supponiamo che <code>Randomized-Partition(A, 1, 10)</code> scelga come pivot <code>A[x]</code> e che dopo la partizione, <code>A[4] = 3</code> (il pivot finisce in posizione 4). Quindi <code>r=4</code>.</li>
-                        <li>L'array potrebbe essere (ad esempio): <code>[0, 1, 2, <span class="highlight-pivot">3</span>, 7, 5, 4, 8, 6, 9]</code></li>
-                        <li><code>k = r - p + 1 = 4 - 1 + 1 = 4</code>. (Il pivot 3 è il 4° elemento più piccolo in <code>A[1..10]</code>).</li>
-                        <li>Confrontiamo <code>i=7</code> con <code>k=4</code>. Poiché <code>i > k</code> (<code>7 > 4</code>), cerchiamo nella parte destra.</li>
-                        <li>Nuova chiamata: <code>Randomized-Select(A, r+1, q, i-k)</code> cioè <code>Randomized-Select(A, 5, 10, 7-4=3)</code>.
-                        Ora cerchiamo il 3° elemento più piccolo nella porzione <code>A[5..10] = [7, 5, 4, 8, 6, 9]</code>.</li>
-                    </ul>
+                <li>Supponiamo <code>Randomized-Partition(A, 1, 10)</code> scelga come pivot `A[1]=3` e lo metta in posizione `r=4`.
+                    L'array potrebbe diventare: `[0, 1, 2, <span class="highlight-pivot">3</span>, 7, 5, 4, 8, 6, 9]`.
+                    Il rango del pivot 3 è `k = 4 - 1 + 1 = 4`.
+                    Poiché `i=7 > k=4`, si cerca il `(7-4)=3`° elemento in `A[5...10] = [7, 5, 4, 8, 6, 9]`.
+                    Chiamata: <code>Randomized-Select(A, 5, 10, 3)</code>.
                 </li>
-                <li><strong>Chiamata: Randomized-Select(A, 5, 10, 3)</strong>
-                    <ul>
-                        <li><code>p=5, q=10</code>. <code>p != q</code>.</li>
-                        <li>Supponiamo che <code>Randomized-Partition(A, 5, 10)</code> partizioni la porzione <code>[7, 5, 4, 8, 6, 9]</code> e che il pivot scelto (diciamo 6) finisca in <code>A[8]</code> (indice globale, che è il 4° elemento della porzione <code>A[5..10]</code>). Quindi <code>r=8</code> (relativo alla chiamata, ma qui <code>r</code> è l'indice globale).</li>
-                        <li>L'array nella porzione <code>A[5..10]</code> potrebbe diventare: <code>[4, 5, ?, <span class="highlight-pivot">6</span>, ?, ?]</code> (es. <code>[4, 5, ?, 6, 7, 8, 9]</code>, supponendo che <code>A[8]</code> ora contenga 6). Esempio di A completo: <code>[0, 1, 2, 3, 4, 5, ?, <span class="highlight-pivot">6</span>, ?, ?]</code>
-                        Supponiamo, per l'esempio, che <code>A[5..10]</code> dopo la partizione (con pivot 6) sia: <code>[4, 5, <span class="highlight-pivot">6</span>, 7, 8, 9]</code>. Il pivot 6 è in <code>A[7]</code> (posizione globale). Quindi <code>r=7</code>.</li>
-                        <li><code>k = r - p + 1 = 7 - 5 + 1 = 3</code>. (Il pivot 6 è il 3° elemento più piccolo in <code>A[5..10]</code>).</li>
-                        <li>Confrontiamo <code>i=3</code> (passato alla chiamata) con <code>k=3</code>. Poiché <code>i == k</code>, il pivot <code>A[r] = A[7] = 6</code> è l'elemento cercato.</li>
-                        <li>Restituisci <code>A[7] = 6</code>.</li>
-                    </ul>
+                <li>Nella porzione `[7, 5, 4, 8, 6, 9]`, supponiamo <code>Randomized-Partition(A, 5, 10)</code> scelga `A[9]=6` come pivot (magari dopo uno swap iniziale) e lo metta in posizione `r=7` (globale).
+                    La porzione `A[5..10]` potrebbe diventare: `[4, 5, <span class="highlight-pivot">6</span>, 8, 7, 9]` (il pivot 6 è ora in A[7]).
+                    Il rango del pivot 6 nella porzione `A[5..10]` è `k = 7 - 5 + 1 = 3`.
+                    Poiché `i=3 == k=3`, il pivot `A[7]=6` è l'elemento cercato.
+                    L'algoritmo restituisce 6.
                 </li>
             </ol>
-            <p>Quindi, il 7° elemento più piccolo dell'array originale è 6.</p>
+             <div class="note-box">
+                <strong>Nota sull'esempio della Professoressa:</strong> L'esempio esatto dell'esecuzione dipende dalle scelte casuali del pivot. L'idea è che l'intervallo di ricerca si restringe ad ogni passo.
+            </div>
         </article>
 
         <article id="randomized-select-complessita" class="content-section">
             <h3 class="subsection-title">6.4. Analisi della Complessità di Randomized-Select</h3>
             <div class="section-content">
                 <p><strong>Caso Peggiore (\(\Theta(N^2)\)):</strong></p>
-                <p>Si verifica se <code>Randomized-Partition</code> sceglie costantemente un pivot "cattivo", che produce una partizione massimamente sbilanciata (es. il pivot è sempre il minimo o il massimo della porzione corrente). In questo scenario, la dimensione del problema si riduce solo di 1 ad ogni chiamata ricorsiva.</p>
-                <p>L'equazione di ricorrenza diventa:</p>
-                <div class="math-block">
-                \( T(N) = T(N-1) + \Theta(N) \)
-                </div>
-                <p>Questa si risolve a \(T(N) = \Theta(N^2)\).</p>
+                <p>Si verifica se <code>Randomized-Partition</code> sceglie costantemente il pivot in modo da creare una partizione massimamente sbilanciata (es. il pivot è sempre il minimo o il massimo della porzione corrente, e noi cerchiamo nella parte grande). La dimensione del problema si riduce solo di 1 ad ogni chiamata.</p>
+                <p>L'equazione di ricorrenza diventa: \( T(N) = T(N-1) + \Theta(N) \), che si risolve a \(T(N) = \Theta(N^2)\).</p>
 
                 <p><strong>Caso Migliore (\(\Theta(N)\)):</strong></p>
-                <p>Si verifica se <code>Randomized-Partition</code> sceglie costantemente un pivot "buono", che divide l'array circa a metà. La chiamata ricorsiva successiva avviene su una porzione di dimensione circa \(N/2\).</p>
-                <p>L'equazione di ricorrenza diventa:</p>
-                <div class="math-block">
-                \( T(N) = T(N/2) + \Theta(N) \)
+                <p>Si verifica se <code>Randomized-Partition</code> sceglie costantemente un pivot che divide l'array circa a metà (o comunque in modo proporzionale bilanciato). La chiamata ricorsiva successiva avviene su una porzione di dimensione circa \(N/2\).</p>
+                <p>L'equazione di ricorrenza diventa: \( T(N) = T(N/2) + \Theta(N) \).</p>
+                <div class="clarification-box">
+                    <strong>Approfondimento (Risoluzione con Master Theorem):</strong>
+                    <p>Per la ricorrenza \(T(N) = T(N/2) + \Theta(N)\):</p>
+                    <ul>
+                        <li>\(a = 1\) (numero di sottoproblemi ricorsivi)</li>
+                        <li>\(b = 2\) (fattore di riduzione della dimensione del sottoproblema)</li>
+                        <li>\(f(N) = \Theta(N)\) (costo del lavoro non ricorsivo, cioè <code>Partition</code>)</li>
+                    </ul>
+                    <p>Calcoliamo \(N^{\log_b a} = N^{\log_2 1} = N^0 = 1\).</p>
+                    <p>Confrontiamo \(f(N) = \Theta(N)\) con \(N^{\log_b a} = 1\).
+                    Poiché \(f(N) = N\) è polinomialmente più grande di \(N^0 = 1\) (cioè \(N = \Omega(N^{0+\epsilon})\) per \(\epsilon=1\)), siamo potenzialmente nel <strong>Caso 3</strong> del Master Theorem.</p>
+                    <p>Dobbiamo verificare la condizione di regolarità: \(a \cdot f(N/b) \le d \cdot f(N)\) per qualche costante \(d < 1\) e \(N\) abbastanza grande.</p>
+                    <p>\(1 \cdot (b' \cdot N/2) \le d \cdot (b' \cdot N)\), dove \(b' \cdot N\) rappresenta \(\Theta(N)\).</p>
+                    <p>\(N/2 \le d \cdot N \implies 1/2 \le d\).</p>
+                    <p>Poiché possiamo scegliere \(d\) tale che \(1/2 \le d < 1\) (es. \(d=3/4\)), la condizione di regolarità è soddisfatta.
+                    Quindi, per il Caso 3 del Master Theorem, la soluzione è \(T(N) = \Theta(f(N)) = \Theta(N)\).</p>
                 </div>
-                <p>Usando il <strong>Master Theorem</strong>:</p>
-                <ul>
-                    <li>\(a = 1\) (numero di sottoproblemi)</li>
-                    <li>\(b = 2\) (fattore di riduzione della dimensione)</li>
-                    <li>\(f(N) = \Theta(N)\) (costo di <code>Partition</code>)</li>
-                </ul>
-                <p>Calcoliamo \(N^{\log_b a} = N^{\log_2 1} = N^0 = 1\).</p>
-                <p>Confrontiamo \(f(N) = \Theta(N)\) con \(N^{\log_b a} = 1\). Poiché \(N = \Omega(N^{0+\epsilon})\) per \(\epsilon \le 1\) (es. \(\epsilon = 1\), quindi \(N = \Omega(N^1)\)), siamo nel <strong>Caso 3</strong> del Master Theorem.</p>
-                <p>Dobbiamo verificare la condizione di regolarità: \(a \cdot f(N/b) \le d \cdot f(N)\) per qualche costante \(d < 1\).</p>
-                <p>\(1 \cdot \Theta(N/2) \le d \cdot \Theta(N)\).</p>
-                <p>Sia \(f(N) = c_0 N\). Allora \(c_0 (N/2) \le d \cdot c_0 N\). Dividendo per \(c_0 N\), otteniamo \(1/2 \le d\).
-                Questa condizione richiede \(d < 1\). Possiamo scegliere, ad esempio, \(d = 1/2\) (o un valore tra \(1/2\) e \(1\)).
-                La condizione \(1/2 \le d < 1\) è soddisfatta (es. \(d = 3/4\)).</p>
-                <p>Quindi, per il Caso 3 del Master Theorem, la soluzione è \(T(N) = \Theta(f(N)) = \Theta(N)\).</p>
                 <p>Nel caso migliore, <code>Randomized-Select</code> ha complessità \(\Theta(N)\).</p>
 
                 <p><strong>Caso Medio (Tempo Atteso):</strong></p>
-                <p>L'analisi del caso medio per <code>Randomized-Select</code> è più complessa (simile a quella di Randomized QuickSort, ma più semplice perché c'sola una chiamata ricorsiva). Si può dimostrare che il <strong>tempo di esecuzione atteso di <code>Randomized-Select</code> è \(\Theta(N)\)</strong>.</p>
-                <p><strong>Intuizione:</strong> Anche se a volte la partizione è sbilanciata, in media la dimensione del problema si riduce di una frazione costante. Ad esempio, se il pivot cade nel "mezzo" (es. tra il 25° e il 75° percentile), la dimensione si riduce di almeno 1/4. La probabilità che questo accada è 1/2. Se il pivot cade male, la probabilità è comunque bilanciata. La somma dei lavori attesi forma una serie geometrica convergente moltiplicata per \(N\), portando a \(\Theta(N)\).</p>
+                <p>La professoressa afferma (senza una dimostrazione formale dettagliata, ma fornendo l'intuizione) che il <strong>tempo di esecuzione atteso di <code>Randomized-Select</code> è \(\Theta(N)\)</strong>.</p>
+                <p><strong>Intuizione (come spiegato dalla prof):</strong> Anche se a volte la partizione è sbilanciata, la scelta casuale del pivot fa sì che, in media, la dimensione del problema su cui si ricorre si riduca significativamente. Ci si aspetta che il pivot cada "abbastanza al centro" con buona probabilità. La probabilità che il pivot cada in una "buona" regione (es. non negli estremi) è costante. Questo porta a una riduzione geometrica attesa della dimensione del problema, e la somma del lavoro (che è lineare ad ogni "livello" atteso di ricorsione) converge a \(\Theta(N)\).</p>
+                 <div class="clarification-box">
+                    <strong>Approfondimento (Analisi del Caso Atteso più formale - Idea):</strong>
+                    <p>L'analisi formale è simile a quella del caso medio di QuickSort, ma più semplice perché c'è una sola chiamata ricorsiva. Si considera il valore atteso del lavoro. Se il pivot scelto garantisce che si scarti almeno una frazione costante \(\alpha > 0\) degli elementi (es. il pivot cade tra il \(10\%\) e il \(90\%\) percentile), la dimensione del problema per la chiamata ricorsiva è al più \((1-\alpha)N\). La probabilità che questo accada è costante. Sommando il lavoro atteso su tutti i possibili split, si ottiene una ricorrenza del tipo \(E[T(N)] \le E[T((1-\alpha)N)] + O(N)\) (semplificando molto), che porta a \(O(N)\).</p>
+                </div>
             </div>
         </article>
 
         <article id="select-lineare-peggiore" class="content-section">
             <h2 class="section-title">7. Algoritmo di Selezione Lineare nel Caso Peggiore (SELECT / Median-of-Medians)</h2>
             <div class="section-content">
-                <p>Esiste un algoritmo deterministico, spesso chiamato semplicemente <code>SELECT</code> o algoritmo della "Mediana delle Mediane", che garantisce una complessità di \(\Theta(N)\) <strong>anche nel caso peggiore</strong> per il problema della selezione. Fu sviluppato da Blum, Floyd, Pratt, Rivest e Tarjan (BFPRT).</p>
-                <p>L'idea chiave è trovare un pivot "buono" in tempo lineare, che garantisca che le partizioni risultanti non siano mai troppo sbilanciate.</p>
+                <p>Per ottenere una complessità \(\Theta(N)\) garantita anche nel <strong>caso peggiore</strong>, è necessario un algoritmo deterministico più sofisticato per la scelta del pivot. Questo algoritmo è noto come <code>SELECT</code> o "Median-of-Medians" (BFPRT algorithm).</p>
+                <p>L'idea è di trovare un pivot in tempo lineare che garantisca che la partizione risultante sia "abbastanza" bilanciata.</p>
             </div>
         </article>
 
         <article id="select-idea" class="content-section">
             <h3 class="subsection-title">7.1. Passaggi dell'Algoritmo SELECT(A, p, q, i)</h3>
-            <div class="section-content">
-                <ol>
-                    <li>
-                        <strong>Dividi in Gruppi di 5:</strong>
-                        <p>Dividi gli \(n = q-p+1\) elementi della porzione corrente <code>A[p...q]</code> in \(\lceil n/5 \rceil\) gruppi. Ogni gruppo ha 5 elementi, tranne possibilmente l'ultimo che potrebbe averne meno (da 1 a 4).
-                        Questa operazione richiede tempo \(\Theta(n)\) per scorrere l'array e formare i gruppi concettualmente.</p>
-                        <div class="array-representation">
-                            <p>Esempio divisione in gruppi di 5 (n=17):</p>
-                            <table><tbody>
-                                <tr><td>G1.1</td><td>G1.2</td><td>G1.3</td><td>G1.4</td><td>G1.5</td> <td>|</td> <td>G2.1</td><td>G2.2</td><td>G2.3</td><td>G2.4</td><td>G2.5</td> <td>|</td> <td>G3.1</td><td>G3.2</td><td>G3.3</td><td>G3.4</td><td>G3.5</td> <td>|</td> <td>G4.1</td><td>G4.2</td></tr>
-                            </tbody></table>
-                        </div>
-                    </li>
-                    <li>
-                        <strong>Trova la Mediana di Ciascun Gruppo:</strong>
-                        <p>Per ognuno dei \(\lceil n/5 \rceil\) gruppi, trova la sua mediana.
-                        Poiché ogni gruppo ha al massimo 5 elementi, trovare la mediana di un gruppo (ad esempio, ordinando il gruppetto con Insertion Sort) richiede tempo costante \(\Theta(1)\) per gruppo.
-                        Il numero di gruppi è \(\approx n/5\).
-                        Quindi, il costo totale per trovare tutte queste mediane è \(\lceil n/5 \rceil \cdot \Theta(1) = \Theta(n)\).</p>
-                        <div class="array-representation">
-                            <p>Mediane dei gruppi (evidenziate):</p>
-                             <table><tbody>
-                                <tr><td>x</td><td>x</td><td class="highlight-group-median">M1</td><td>x</td><td>x</td> <td>|</td> <td>x</td><td>x</td><td class="highlight-group-median">M2</td><td>x</td><td>x</td> <td>|</td> <td>x</td><td>x</td><td class="highlight-group-median">M3</td><td>x</td><td>x</td> <td>|</td> <td class="highlight-group-median">M4</td><td>x</td></tr>
-                            </tbody></table>
-                        </div>
-                    </li>
-                    <li>
-                        <strong>Trova la Mediana delle Mediane (Pivot \(x\)):</strong>
-                        <p>Raccogli tutte le \(\lceil n/5 \rceil\) mediane trovate al passo precedente in un nuovo (concettuale) array.
-                        Chiama ricorsivamente <code>SELECT</code> su questo array di mediane per trovare la <strong>loro</strong> mediana. Questa mediana delle mediane, \(x\), sarà usata come pivot per partizionare l'array originale.
-                        Il costo di questa chiamata ricorsiva è \(T(\lceil n/5 \rceil)\).</p>
-                    </li>
-                    <li>
-                        <strong>Partiziona l'Array Originale attorno al Pivot \(x\):</strong>
-                        <p>Usa una variante della procedura <code>Partition</code> (che può prendere un pivot specifico come input, invece di sceglierlo) per partizionare l'array originale <code>A[p...q]</code> attorno al pivot \(x\) trovato al passo 3. Sia <code>r</code> l'indice in cui si trova \(x\) dopo la partizione.
-                        Questa operazione di partizione costa \(\Theta(n)\).</p>
-                    </li>
-                    <li>
-                        <strong>Verifica il Rango e Ricorri (come in Randomized-Select):</strong>
-                        <p>Sia <code>k = r - p + 1</code> il rango del pivot \(x\) nella porzione <code>A[p...q]</code>.</p>
-                        <ul>
-                            <li>Se <code>i == k</code>, allora <code>A[r]</code> (cioè \(x\)) è l'elemento cercato. Restituisci \(x\).</li>
-                            <li>Se <code>i < k</code>, l'elemento cercato è nella parte sinistra. Richiama ricorsivamente <code>SELECT(A, p, r-1, i)</code>.</li>
-                            <li>Se <code>i > k</code>, l'elemento cercato è nella parte destra. Richiama ricorsivamente <code>SELECT(A, r+1, q, i-k)</code>.</li>
-                        </ul>
-                        Il costo di questa chiamata ricorsiva sarà su una porzione di dimensione al più \((7n/10) + \text{costante}\) (vedremo perché tra poco).
-                    </li>
-                </ol>
-            </div>
+            <p>(Riferimento: appunti PDF pagina 9)</p>
+            <ol>
+                <li>
+                    <strong>Dividi in Gruppi di 5:</strong>
+                    <p>Si divide la porzione di array <code>A[p...q]</code> (di \(n = q-p+1\) elementi) in \(\lceil n/5 \rceil\) gruppi. Ogni gruppo ha 5 elementi, tranne l'ultimo che potrebbe averne meno.
+                    Costo: \(\Theta(n)\) (per formare i gruppi).</p>
+                </li>
+                <li>
+                    <strong>Trova la Mediana di Ciascun Gruppo:</strong>
+                    <p>Per ognuno dei \(\lceil n/5 \rceil\) gruppi, si trova la sua mediana. Poiché ogni gruppo ha al massimo 5 elementi, la mediana di un gruppo può essere trovata in tempo costante (es. ordinando il piccolo gruppo con Insertion Sort e prendendo l'elemento centrale).
+                    Costo: \(\lceil n/5 \rceil \cdot \Theta(1) = \Theta(n)\).</p>
+                </li>
+                <li>
+                    <strong>Trova la Mediana delle Mediane (Pivot \(x\)):</strong>
+                    <p>Si raccolgono le \(\lceil n/5 \rceil\) mediane trovate al passo 2. Si chiama ricorsivamente <code>SELECT</code> su questo insieme di mediane per trovare la <strong>loro</strong> mediana. Chiamiamo questa "mediana delle mediane" \(x\). Questo \(x\) sarà il pivot per partizionare l'array originale.
+                    Costo: \(T(\lceil n/5 \rceil)\).</p>
+                </li>
+                <li>
+                    <strong>Partiziona l'Array Originale attorno al Pivot \(x\):</strong>
+                    <p>Si usa una procedura <code>Partition</code> modificata (che prende il pivot \(x\) come parametro invece di sceglierlo dall'array) per partizionare <code>A[p...q]</code> attorno a \(x\). Sia <code>r</code> l'indice finale di \(x\).
+                    Costo: \(\Theta(n)\).</p>
+                </li>
+                <li>
+                    <strong>Verifica il Rango e Ricorri (come in Randomized-Select):</strong>
+                    <p>Sia <code>k = r - p + 1</code> il rango del pivot \(x\) in <code>A[p...q]</code>.</p>
+                    <ul>
+                        <li>Se <code>i == k</code>, restituisci \(x\).</li>
+                        <li>Se <code>i < k</code>, richiama ricorsivamente <code>SELECT(A, p, r-1, i)</code>.</li>
+                        <li>Se <code>i > k</code>, richiama ricorsivamente <code>SELECT(A, r+1, q, i-k)</code>.</li>
+                    </ul>
+                    <p>Il costo di questa chiamata ricorsiva sarà su una porzione di dimensione al più \((7n/10) + \text{costante}\).</p>
+                </li>
+            </ol>
         </article>
 
         <article id="select-pivot-bonta" class="content-section">
             <h3 class="subsection-title">7.2. Analisi della "Bontà" del Pivot (Mediana delle Mediane)</h3>
             <div class="section-content">
-                <p>La chiave dell'efficienza nel caso peggiore di questo algoritmo risiede nella scelta del pivot \(x\) (la mediana delle mediane). Questo pivot garantisce che le partizioni non siano mai troppo sbilanciate.</p>
-                <p><strong>Argomentazione (illustrata a pagina 9 del PDF):</strong></p>
-                <p>Immaginiamo di aver ordinato ogni gruppetto di 5 elementi e di aver allineato questi gruppi, con le loro mediane (M1, M2, ...) al centro. La mediana delle mediane, \(x\), è la mediana di queste M_j.</p>
+                <p>La scelta della "mediana delle mediane dei gruppi di 5" come pivot \(x\) garantisce una buona partizione.</p>
+                <p><strong>Argomentazione (illustrata graficamente dalla professoressa, appunti PDF pagina 9):</strong></p>
+                <p>Si visualizzano i gruppi di 5 elementi ordinati verticalmente, con le loro mediane al centro. La mediana delle mediane \(x\) è la mediana di questa colonna centrale di mediane.</p>
                 <div class="mermaid-container">
                     <pre class="mermaid">
                     graph TD
-                        subgraph "Concetto Mediana delle Mediane"
+                        subgraph "Visualizzazione Mediana delle Mediane"
                             direction LR
-                            G1["Gruppo 1<br/>(ordinato)<br/>[e1,e2,M1,e3,e4]"]
-                            G2["Gruppo 2<br/>(ordinato)<br/>[f1,f2,M2,f3,f4]"]
-                            Gdots["..."]
-                            Gx["Gruppo X<br/>(ordinato)<br/>[g1,g2,Mx,g3,g4]<br/><b>Mediana delle Mediane x = Mx</b>"]
-                            Gdots2["..."]
-                            Gn_5["Gruppo n/5<br/>(ordinato)<br/>[h1,h2,Mn/5,h3,h4]"]
+                            MedianCol["Mediane dei Gruppi<br/>(ordinate tra loro)<br/>M1, M2, ..., Mx, ..., Mn/5"]
+                            X_Marker["x = Mx (Mediana delle Mediane)"]
+                            MedianCol --> X_Marker
                             
-                            M1 --> Mx; M2 --> Mx; Mn_5 --> Mx;
-                            style Gx fill:#60a5fa,stroke-width:2px,stroke:#fff
+                            subgraph "Gruppi le cui mediane sono ≤ x (circa (n/5)/2 gruppi)"
+                                G_le_x_1["[e, e, M_le_1, g, g] (M_le_1 ≤ x)"]
+                                G_le_x_dots["..."]
+                                G_le_x_k["[e, e, M_le_k, g, g] (M_le_k ≤ x)"]
+                                Note_le_x["Per ognuno, almeno 3 elementi sono ≤ x"]
+                            end
                             
-                            subgraph "Elementi ≤ x"
-                                direction TB
-                                M1 --> e1; M1 --> e2;
-                                M2 --> f1; M2 --> f2;
-                                Mx --> g1; Mx --> g2;
-                                Note1["Almeno 3 elem per (n/5)/2 gruppi sono ≤ x"]
+                             subgraph "Gruppi le cui mediane sono ≥ x (circa (n/5)/2 gruppi)"
+                                G_ge_x_1["[e, e, M_ge_1, g, g] (M_ge_1 ≥ x)"]
+                                G_ge_x_dots["..."]
+                                G_ge_x_k["[e, e, M_ge_k, g, g] (M_ge_k ≥ x)"]
+                                Note_ge_x["Per ognuno, almeno 3 elementi sono ≥ x"]
                             end
-                            subgraph "Elementi ≥ x"
-                                direction TB
-                                M_k_median["Mk ≥ x"] --> M_k_val1["val1 ≥ Mk"];
-                                M_k_median --- M_k_val2["val2 ≥ Mk"];
-                                Note2["Almeno 3 elem per (n/5)/2 gruppi sono ≥ x"]
-                            end
+                            X_Marker -.-> G_le_x_k
+                            X_Marker -.-> G_ge_x_1
                         end
                     </pre>
                 </div>
-                <p>Consideriamo gli elementi \(\le x\):</p>
                 <ul>
-                    <li>Poiché \(x\) è la mediana delle \(\lceil n/5 \rceil\) mediane dei gruppi, almeno la metà di queste mediane dei gruppi sono \(\le x\). Il numero di tali mediane è \(\approx \frac{1}{2} \cdot \frac{n}{5} = \frac{n}{10}\).</li>
-                    <li>Per ciascuno di questi \(\approx n/10\) gruppi la cui mediana è \(\le x\), ci sono almeno 3 elementi nel gruppo che sono \(\le\) alla mediana del gruppo (la mediana stessa e i due elementi più piccoli del gruppo). Quindi, questi 3 elementi sono anche \(\le x\).</li>
-                    <li>Questo ci dà un totale di almeno \(3 \cdot \frac{n}{10} = \frac{3n}{10}\) elementi dell'array originale che sono \(\le x\). (Ignoriamo per ora il gruppo che contiene \(x\) stesso e l'eventuale gruppo incompleto, per semplificare il lower bound).</li>
+                    <li>Almeno la metà delle \(\lceil n/5 \rceil\) mediane dei gruppi sono \(\le x\).
+                        Numero di tali gruppi \(\approx \frac{1}{2} \cdot \frac{n}{5} = \frac{n}{10}\).
+                        Ciascuno di questi gruppi contribuisce con almeno 3 elementi che sono \(\le x\) (la mediana del gruppo e i due elementi più piccoli del gruppo).
+                        Quindi, ci sono almeno \(3 \cdot \frac{n}{10} = \frac{3n}{10}\) elementi \(\le x\).
+                    </li>
+                    <li>Simmetricamente, almeno \(\frac{3n}{10}\) elementi sono \(\ge x\).</li>
                 </ul>
-                <p>Consideriamo gli elementi \(\ge x\):</p>
-                <ul>
-                    <li>Simmetricamente, almeno la metà delle mediane dei gruppi sono \(\ge x\).</li>
-                    <li>Per ciascuno di questi \(\approx n/10\) gruppi, ci sono almeno 3 elementi nel gruppo che sono \(\ge\) alla mediana del gruppo (la mediana stessa e i due elementi più grandi). Quindi, questi 3 elementi sono anche \(\ge x\).</li>
-                    <li>Questo ci dà un totale di almeno \(\frac{3n}{10}\) elementi dell'array originale che sono \(\ge x\).</li>
-                </ul>
-                <p><strong>Conclusione sulla Partizione:</strong></p>
-                <p>Se almeno \(\frac{3n}{10}\) elementi sono \(\le x\) e almeno \(\frac{3n}{10}\) elementi sono \(\ge x\), allora quando si partiziona attorno a \(x\):</p>
-                <ul>
-                    <li>La partizione sinistra (elementi \(\le x\), escluso \(x\)) conterrà al massimo \(n - \frac{3n}{10} = \frac{7n}{10}\) elementi.</li>
-                    <li>La partizione destra (elementi \(\ge x\), escluso \(x\)) conterrà al massimo \(n - \frac{3n}{10} = \frac{7n}{10}\) elementi.</li>
-                </ul>
-                <p>Quindi, la chiamata ricorsiva al passo 5 dell'algoritmo <code>SELECT</code> avverrà su una porzione di dimensione al più \(\approx \frac{7n}{10}\) (più precisamente, \(\frac{7n}{10} + 6\) per gestire gli arrotondamenti e i casi limite, ma asintoticamente è \(\frac{7n}{10}\)).</p>
+                <p>Questo implica che, dopo la partizione attorno a \(x\), la chiamata ricorsiva successiva (passo 5) avverrà su una porzione che contiene al massimo \(n - \frac{3n}{10} = \frac{7n}{10}\) elementi (più una piccola costante per gestire gli arrotondamenti e i casi limite, tipicamente \(7n/10 + 6\)).</p>
+                 <div class="note-box">
+                    <strong>Perché gruppi di 5?</strong> La scelta di gruppi di 5 è ottimale per questa analisi. Se si usassero gruppi di 3, il fattore di riduzione sarebbe \(2n/3\), e la ricorrenza \(T(n) \le T(n/3) + T(2n/3) + O(n)\) darebbe \(O(n \log n)\). Con gruppi di 7 o più, le costanti migliorano leggermente ma il lavoro per trovare le mediane dei gruppi aumenta (se non si usa ricorsione anche lì). Il 5 è il più piccolo numero dispari che garantisce la linearità.
+                </div>
             </div>
         </article>
 
         <article id="select-ricorrenza-complessita" class="content-section">
             <h3 class="subsection-title">7.3. Equazione di Ricorrenza e Complessità di SELECT (Caso Peggiore)</h3>
             <div class="section-content">
-                <p>Sia \(T(n)\) il tempo di esecuzione nel caso peggiore dell'algoritmo <code>SELECT</code> su \(n\) elementi.</p>
-                <p>L'equazione di ricorrenza è (considerando i costi dei 5 passi):</p>
-                <div class="math-block">
-                \( T(n) \le \underbrace{O(n)}_{\text{Passo 1 (dividi)}} + \underbrace{O(n)}_{\text{Passo 2 (mediane gruppi)}} + \underbrace{T(\lceil n/5 \rceil)}_{\text{Passo 3 (ricorsione su mediane)}} + \underbrace{O(n)}_{\text{Passo 4 (partition)}} + \underbrace{T(7n/10 + 6)}_{\text{Passo 5 (ricorsione su partizione)}} \)
-                </div>
-                <p>Combinando i termini lineari:</p>
+                <p>L'equazione di ricorrenza per il tempo di esecuzione \(T(n)\) nel caso peggiore di <code>SELECT</code> è:</p>
                 <div class="math-block">
                 \( T(n) \le T(\lceil n/5 \rceil) + T(7n/10 + 6) + O(n) \)
                 </div>
-                <p>Vogliamo dimostrare per sostituzione che \(T(n) \le c \cdot n\) per qualche costante \(c\).</p>
-                <p><strong>Ipotesi Induttiva:</strong> \(T(k) \le c \cdot k\) per \(k < n\).</p>
-                <p>Sostituendo nell'equazione (e usando \(a \cdot n\) per \(O(n)\)):</p>
+                <p>(dove \(O(n)\) raggruppa i costi lineari dei passi 1, 2, 4).</p>
+                <p>Si vuole dimostrare per sostituzione che \(T(n) \le c \cdot n\) per una costante \(c > 0\).</p>
+                <p><strong>Ipotesi Induttiva:</strong> \(T(k) \le c \cdot k\) per ogni \(k < n\).</p>
+                <p>Sostituendo nell'equazione (e usando \(a \cdot n\) per il termine \(O(n)\)):</p>
                 <p>\( T(n) \le c \cdot (\lceil n/5 \rceil) + c \cdot (7n/10 + 6) + a \cdot n \)</p>
-                <p>Possiamo maggiorare \(\lceil n/5 \rceil \le n/5 + 1\) (o semplicemente \(n/5\) per \(n\) grande, ma la professoressa usa \(n/5\) e assorbe le costanti).</p>
-                <p>\( T(n) \le c \cdot (n/5) + c \cdot (7n/10) + 6c + a \cdot n \)</p>
-                <p>\( T(n) \le c \cdot n \left( \frac{1}{5} + \frac{7}{10} \right) + 6c + a \cdot n \)</p>
-                <p>\( T(n) \le c \cdot n \left( \frac{2}{10} + \frac{7}{10} \right) + 6c + a \cdot n \)</p>
-                <p>\( T(n) \le c \cdot n \left( \frac{9}{10} \right) + a \cdot n + 6c \)</p>
-                <p>Vogliamo dimostrare che \(c \cdot n \left( \frac{9}{10} \right) + a \cdot n + 6c \le c \cdot n\).</p>
-                <p>\( a \cdot n + 6c \le c \cdot n - c \cdot n \left( \frac{9}{10} \right) \)</p>
-                <p>\( a \cdot n + 6c \le c \cdot n \left( 1 - \frac{9}{10} \right) \)</p>
-                <p>\( a \cdot n + 6c \le c \cdot n \left( \frac{1}{10} \right) \)</p>
-                <p>Questa disuguaglianza deve valere per \(n \ge n_0\). Riscriviamola come:</p>
-                <p>\( c \left( \frac{n}{10} - 6 \right) \ge a \cdot n \)</p>
-                <p>Perché questa sia vera, il termine \(\left( \frac{n}{10} - 6 \right)\) deve essere positivo, quindi \(\frac{n}{10} > 6 \Rightarrow n > 60\).
-                Se \(n > 60\) (ad esempio \(n_0 \approx 70-80\) per avere un margine), possiamo scegliere \(c\) tale che:</p>
-                <div class="math-block">
-                \( c \ge \frac{a \cdot n}{\frac{n}{10} - 6} = \frac{10 \cdot a \cdot n}{n - 60} \)
-                </div>
-                <p>Per \(n\) grande, il termine \(\frac{n}{n-60}\) tende a 1. Quindi, se \(n\) è abbastanza grande, possiamo scegliere \(c \ge 10a\) (ad esempio \(c = 20a\) per essere sicuri e coprire i casi base per \(n < n_0\)).</p>
-                <p><strong>Gestione dei Casi Base:</strong> Per valori di \(n < n_0\) (dove \(n_0\) è il valore per cui la disuguaglianza \(\frac{n}{10}-6 > 0\) e la scelta di \(c\) funzionano, es. \(n_0 \approx 80-140\) a seconda del libro), si può assumere che \(T(n)\) sia limitato da una costante (es. si usa un altro algoritmo come l'ordinamento e poi selezione). Si sceglie \(c\) abbastanza grande da coprire \(T(n) \le cn\) anche per questi piccoli \(n\).</p>
-                <p><strong>Conclusione per SELECT (Caso Peggiore):</strong></p>
-                <div class="math-block">
-                \( T(n) = \Theta(n) \)
-                </div>
+                <p>Usando \(\lceil n/5 \rceil \le n/5 + 1\):</p>
+                <p>\( T(n) \le c \cdot (n/5 + 1) + c \cdot (7n/10 + 6) + a \cdot n \)</p>
+                <p>\( T(n) \le c \cdot n/5 + c + 7cn/10 + 6c + a \cdot n \)</p>
+                <p>\( T(n) \le c \cdot n \left( \frac{1}{5} + \frac{7}{10} \right) + a \cdot n + 7c \)</p>
+                <p>\( T(n) \le c \cdot n \left( \frac{2+7}{10} \right) + a \cdot n + 7c \)</p>
+                <p>\( T(n) \le c \cdot n \left( \frac{9}{10} \right) + a \cdot n + 7c \)</p>
+                <p>Vogliamo che \(c \cdot n \left( \frac{9}{10} \right) + a \cdot n + 7c \le c \cdot n\).</p>
+                <p>\( a \cdot n + 7c \le c \cdot n - c \cdot n \left( \frac{9}{10} \right) \)</p>
+                <p>\( a \cdot n + 7c \le c \cdot n \left( \frac{1}{10} \right) \)</p>
+                <p>Riscriviamo come \(c \left( \frac{n}{10} - 7 \right) \ge a \cdot n\).</p>
+                <p>Questa disuguaglianza è vera se il termine \(\left( \frac{n}{10} - 7 \right)\) è positivo (cioè \(\frac{n}{10} > 7 \implies n > 70\)) e se \(c\) è scelta opportunamente.</p>
+                <p>Se \(n > 70\), possiamo scegliere \(c \ge \frac{a \cdot n}{\frac{n}{10} - 7} = \frac{10 \cdot a \cdot n}{n - 70}\).</p>
+                <p>Per \(n\) sufficientemente grande (es. \(n \ge 140\), allora \(n-70 \ge n/2\)), \(\frac{n}{n-70} \le 2\). Quindi, basta scegliere \(c \ge 20a\).
+                Bisogna poi gestire i casi base per \(n < n_0\) (dove \(n_0\) è il valore per cui la derivazione è valida, es. \(n_0 \approx 140\)) assicurandosi che \(T(n) \le cn\) valga anche per essi, il che si può fare scegliendo \(c\) abbastanza grande da coprire \(T(n_0)/n_0\).</p>
+                <p><strong>Conclusione per SELECT (Caso Peggiore):</strong> L'algoritmo ha una complessità temporale \(\Theta(n)\).</p>
             </div>
         </article>
 
         <article id="select-praticita" class="content-section">
             <h3 class="subsection-title">7.4. Considerazioni Pratiche sull'Algoritmo SELECT (Median-of-Medians)</h3>
             <div class="section-content">
-                <p>Nonostante l'algoritmo <code>SELECT</code> (Median-of-Medians) garantisca una complessità lineare \(\Theta(n)\) nel caso peggiore, in pratica:</p>
+                <p>La professoressa sottolinea che, sebbene l'algoritmo <code>SELECT</code> basato sulla mediana delle mediane sia teoricamente ottimale (\(\Theta(N)\) nel caso peggiore), in pratica:</p>
                 <ul>
-                    <li><strong>Costanti Moltiplicative Alte:</strong> Le costanti nascoste nella notazione \(\Theta(n)\) sono significativamente più grandi rispetto a quelle di <code>Randomized-Select</code> (nel suo caso medio). I vari passaggi (divisione in gruppi, calcolo mediane dei gruppi, chiamata ricorsiva sulle mediane, partizione) introducono un overhead considerevole.</li>
-                    <li><strong>Prestazioni Relative:</strong> Per valori di \(n\) non estremamente grandi, <code>Randomized-Select</code> (con il suo tempo atteso \(\Theta(n)\) e un caso peggiore \(\Theta(n^2)\) che è statisticamente improbabile) tende ad essere più veloce in pratica.</li>
-                    <li><strong>Utilità:</strong> L'algoritmo <code>SELECT</code> (Median-of-Medians) è importante teoricamente perché dimostra che la selezione può essere fatta in tempo lineare deterministico. Diventa preferibile quando una **garanzia stretta sul tempo di esecuzione nel caso peggiore** è cruciale, anche a costo di una performance media leggermente inferiore.</li>
+                    <li><strong>Ha costanti moltiplicative elevate.</strong> I vari passaggi (divisione in gruppi, trovare mediane dei gruppi, partizionare, più due chiamate ricorsive seppur su porzioni ridotte) lo rendono più lento di <code>Randomized-Select</code> per valori di \(N\) non eccessivamente grandi.</li>
+                    <li><code>Randomized-Select</code> è spesso preferito in pratica per la sua semplicità e le ottime prestazioni medie, a meno che non sia strettamente necessaria una garanzia sul caso peggiore.</li>
                 </ul>
             </div>
         </article>
@@ -786,18 +747,12 @@ Randomized-Select(A, p, q, i)
         <article id="conclusione-prossimi-argomenti" class="content-section">
             <h2 class="section-title">8. Conclusione e Prossimi Argomenti</h2>
             <div class="section-content">
-                <p>La lezione ha coperto in dettaglio l'analisi di QuickSort (caso peggiore e medio) e ha introdotto il problema della selezione, presentando due algoritmi:</p>
-                <ul>
-                    <li><code>Randomized-Select</code>: tempo atteso \(\Theta(n)\), caso peggiore \(\Theta(n^2)\).</li>
-                    <li><code>SELECT</code> (Median-of-Medians): tempo nel caso peggiore \(\Theta(n)\).</li>
-                </ul>
+                <p>La lezione ha fornito un'analisi approfondita del caso medio di QuickSort e ha introdotto il problema della selezione, presentando sia un algoritmo randomizzato efficiente in media (<code>Randomized-Select</code>) sia un algoritmo deterministico lineare nel caso peggiore (<code>SELECT</code>).</p>
                 <p><strong>Prossimo Argomento (Anticipato dalla Professoressa):</strong></p>
-                <p>Nella lezione successiva, si vedrà come utilizzare l'algoritmo <code>SELECT</code> (che trova il pivot mediano o quasi-mediano in tempo lineare) per costruire una versione di <strong>QuickSort che abbia una complessità di \(\Theta(n \log n)\) garantita anche nel caso peggiore</strong>. Questo algoritmo è talvolta chiamato "Worst-Case QuickSort" o "Median-of-Medians QuickSort".</p>
-                <p>L'idea sarà di usare <code>SELECT</code> per scegliere il pivot in <code>Partition</code>, garantendo così partizioni bilanciate.</p>
-                <p>La lezione termina con i saluti.</p>
+                <p>Nella lezione successiva, si esplorerà come utilizzare l'algoritmo <code>SELECT</code> (che trova un "buon" pivot in tempo lineare) per costruire una versione di <strong>QuickSort che abbia una complessità di \(\Theta(n \log n)\) garantita anche nel caso peggiore</strong>. Questo "Worst-Case QuickSort" combina la potenza di <code>Partition</code> con una scelta di pivot intelligente per evitare le partizioni estremamente sbilanciate.</p>
+                <p>La lezione si conclude con i saluti.</p>
             </div>
         </article>
-
     </main>
 
     <footer>
