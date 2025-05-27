@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 13: Selezione in tempo lineare</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css"> <!-- Assumendo che sia nella stessa struttura di cartelle -->
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        .note-title { font-size: 1.05rem; color: var(--accent-secondary); margin-top: 1.2rem; margin-bottom: 0.6rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+
+        .array-representation table {
+            margin: 0 auto; /* Centra la tabella */
+            border-collapse: collapse;
+            font-family: var(--font-code);
+        }
+        .array-representation th, .array-representation td {
+            border: 1px solid var(--border-soft);
+            padding: 0.5em 0.75em;
+            min-width: 30px; /* Larghezza minima cella */
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .array-representation th { /* Indici */
+            background-color: var(--code-bg);
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .array-representation td { /* Valori */
+             background-color: var(--bg-card);
+             color: var(--text-primary);
+        }
+        .array-representation td.highlight-pivot {
+            background-color: var(--accent-primary) !important;
+            color: var(--bg-deep-space) !important;
+            font-weight: bold;
+            border: 2px solid var(--text-primary) !important;
+        }
+        .array-representation td.highlight-group-median {
+            background-color: var(--accent-secondary) !important;
+            color: var(--bg-deep-space) !important;
+        }
+        .array-representation td.highlight-less-equal {
+            background-color: rgba(96, 165, 250, 0.2) !important; 
+        }
+        .array-representation td.highlight-greater-equal {
+            background-color: rgba(129, 140, 248, 0.2) !important; 
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box { /* Box per note generiche dalla lezione */
+            background-color: rgba(129, 140, 248, 0.1); 
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box { /* Per evidenziare gli esercizi per casa e le loro soluzioni */
+            background-color: rgba(250, 204, 21, 0.1); /* Giallo chiaro trasparente */
+            border-left: 4px solid #FACC15; /* Giallo */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .correction-box { /* Per evidenziare le correzioni alle spiegazioni della prof */
+            background-color: rgba(239, 68, 68, 0.1); /* Rosso chiaro trasparente */
+            border-left: 4px solid #EF4444; /* Rosso */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .correction-box strong { color: #EF4444; }
+
+        .clarification-box { /* Per evidenziare approfondimenti/chiarimenti aggiunti da me */
+            background-color: rgba(52, 211, 153, 0.08); /* Verde acqua chiaro trasparente */
+            border-left: 4px solid #34D399; /* Verde acqua */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 12 nov 2020 (2).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 13: Selezione in tempo lineare</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../../ASD_home.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-recap" class="sidebar-link">1. Introduzione e Recap Lezione Precedente</a></li>
+            <li><a href="#problema-selezione-def" class="sidebar-link">2. Il Problema della Selezione</a></li>
+            <li><a href="#select-naive-alg" class="sidebar-link">3. Algoritmo "Select Naive" (Basato su Partition)</a></li>
+            <li><a href="#select-naive-complessita" class="sidebar-link">3.1. Complessità di "Select Naive"</a></li>
+            <li><a href="#select-median-of-medians" class="sidebar-link">4. Algoritmo di Selezione Lineare O(N) (Median of Medians / BFPRT)</a></li>
+            <li><a href="#select-mom-idea" class="sidebar-link">4.1. Idea e Passaggi dell'Algoritmo</a></li>
+            <li><a href="#select-mom-pivot-bonta" class="sidebar-link">4.2. Analisi della "Bontà" del Pivot</a></li>
+            <li><a href="#select-mom-ricorrenza-complessita" class="sidebar-link">4.3. Equazione di Ricorrenza e Complessità</a></li>
+            <li><a href="#select-mom-proprieta" class="sidebar-link">4.4. Proprietà dell'Algoritmo SELECT</a></li>
+            <li><a href="#quicksort-ottimizzato" class="sidebar-link">5. QuickSort Ottimizzato (Worst-Case \(\Theta(N \log N)\))</a></li>
+            <li><a href="#quicksort-ott-idea" class="sidebar-link">5.1. Idea dell'Algoritmo Quicksort_ott</a></li>
+            <li><a href="#quicksort-ott-complessita" class="sidebar-link">5.2. Complessità di Quicksort_ott</a></li>
+            <li><a href="#esercizi-casa" class="sidebar-link">6. Esercizi Assegnati per Casa</a></li>
+            <li><a href="#esercizio-majority-candidate" class="sidebar-link">6.1. Esercizio: Majority Candidate</a></li>
+            <li><a href="#approfondimenti-correzioni" class="sidebar-link">7. Approfondimenti e Correzioni (Aggiunti)</a></li>
+            <li><a href="#conclusioni" class="sidebar-link">8. Conclusioni della Lezione</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-recap" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione e Recap Lezione Precedente</h2>
+            <div class="section-content">
+                <p>La professoressa inizia la lezione verificando che la registrazione e la condivisione degli appunti funzionino correttamente. (Minutaggio MP3: 00:00 - 00:20)</p>
+                <p>Si fa un breve riepilogo della lezione precedente, in cui si è parlato di:</p>
+                <ul>
+                    <li><strong>QuickSort:</strong> Analisi di complessità e correttezza. È stato evidenziato che, sebbene QuickSort sia efficiente in media (\(\Theta(N \log N)\)), il suo caso peggiore è \(\Theta(N^2)\) se il pivot viene scelto in modo sfortunato. (Minutaggio MP3: 00:53 - 01:17)</li>
+                    <li>Un algoritmo basato su scambi e confronti non può avere una complessità migliore di \(\Omega(N \log N)\) nel caso peggiore per l'ordinamento.</li>
+                    <li>Si era iniziato a discutere come migliorare QuickSort, e questo ha portato all'introduzione del <strong>problema della Selezione</strong>. (Minutaggio MP3: 01:18 - 01:33)</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Nota dalla Professoressa (sugli appunti):</strong> La professoressa menziona che alcuni calcoli semplici, fatti in precedenza e magari discussi con qualche studente, potrebbero non essere presenti negli appunti PDF attuali perché erano diretti. (Minutaggio MP3: 01:55 - 02:06)
+                </div>
+            </div>
+        </article>
+
+        <article id="problema-selezione-def" class="content-section">
+            <h2 class="section-title">2. Il Problema della Selezione</h2>
+            <div class="section-content">
+                <p><strong>Definizione:</strong> (Minutaggio MP3: 01:33 - 01:47)</p>
+                <p>Dato un array (o vettore) <code>A</code> di lunghezza <code>N</code> e un intero <code>i</code> (con \(1 \le i \le N\)), il problema della selezione consiste nel determinare l'elemento che si troverebbe in posizione <code>i</code> se l'array <code>A</code> fosse ordinato in modo non decrescente.</p>
+                <p><strong>Soluzione Base (non ottimale per questo contesto):</strong></p>
+                <p>Una soluzione ovvia è ordinare l'intero array <code>A</code> e poi prendere l'elemento <code>A[i]</code>. Questo ha una complessità di \(\Theta(N \log N)\) se si usa un algoritmo di ordinamento efficiente. (Minutaggio MP3: 01:47 - 02:12)</p>
+                <p>L'obiettivo della lezione è trovare un metodo più efficiente, idealmente \(\Theta(N)\), per risolvere il problema della selezione.</p>
+            </div>
+        </article>
+
+        <article id="select-naive-alg" class="content-section">
+            <h2 class="section-title">3. Algoritmo "Select Naive" (Basato su Partition)</h2>
+            <div class="section-content">
+                <p>Questo algoritmo sfrutta la procedura <code>Partition</code>, già vista in QuickSort. (Minutaggio MP3: 03:39 - 04:00)</p>
+                <p><strong>Idea dell'Algoritmo <code>Select-Naive(A, p, q, i)</code>:</strong></p>
+                <p>L'algoritmo cerca l'<code>i</code>-esimo elemento più piccolo nella porzione di array <code>A[p...q]</code>.</p>
+                <ol>
+                    <li><strong>Caso Base:</strong> Se <code>p == q</code> (la porzione ha un solo elemento), restituisci <code>A[p]</code>.</li>
+                    <li><strong>Partiziona:</strong> Esegui <code>r = Partition(A, p, q)</code>. Il pivot (originariamente <code>A[q]</code> o una sua variante) si trova ora in posizione <code>r</code>.</li>
+                    <li><strong>Calcola il Rango del Pivot:</strong> Il rango del pivot <code>A[r]</code> all'interno della porzione <code>A[p...q]</code> è <code>k = r - p + 1</code>.</li>
+                    <li><strong>Confronta e Ricorri:</strong>
+                        <ul>
+                            <li>Se <code>i == k</code>: Il pivot <code>A[r]</code> è l'elemento cercato. Restituiscilo. (Minutaggio MP3: 05:48 - 05:52)</li>
+                            <li>Se <code>i < k</code>: L'elemento cercato è nella partizione sinistra <code>A[p...r-1]</code>. Richiama ricorsivamente <code>Select-Naive(A, p, r-1, i)</code>. (Minutaggio MP3: 05:20 - 05:31)</li>
+                            <li>Se <code>i > k</code>: L'elemento cercato è nella partizione destra <code>A[r+1...q]</code>. Richiama ricorsivamente <code>Select-Naive(A, r+1, q, i-k)</code>. (Minutaggio MP3: 05:58 - 06:07)</li>
+                        </ul>
+                    </li>
+                </ol>
+                <pre><code class="language-pseudocode">
+// Pseudocodice Select Naive (dalla lezione, adattato per chiarezza)
+// Cerca l'i-esimo elemento più piccolo in A[p...q]
+
+Select-Naive(A, p, q, i_target) // i_target è il rango desiderato
+  if p == q then 
+    return A[p]
+
+  // r è l'indice del pivot DOPO la partizione (indice globale nell'array A)
+  r = Partition(A, p, q) 
+
+  // k è il rango del pivot A[r] all'interno della sottoporzione A[p...q]
+  // Se A[p...q] ha n' elementi, A[r] è il k-esimo di questi n' elementi.
+  k = r - p + 1 
+
+  if i_target == k then
+    return A[r]  // Trovato!
+  else if i_target < k then
+    // L'elemento cercato è nella parte sinistra A[p...r-1]
+    // Il suo rango (i_target) rimane lo stesso rispetto all'inizio di questa parte.
+    return Select-Naive(A, p, r-1, i_target)
+  else // i_target > k
+    // L'elemento cercato è nella parte destra A[r+1...q]
+    // Poiché abbiamo scartato k elementi (A[p...r]),
+    // il nuovo rango da cercare nella parte destra è i_target - k.
+    return Select-Naive(A, r+1, q, i_target - k)
+                </code></pre>
+                <div class="clarification-box">
+                    <strong>Chiarimento sull'Indice Ricorsivo (Aggiunto):</strong>
+                    <p>Quando si ricorre sulla parte destra (<code>i_target > k</code>), il nuovo rango da cercare è <code>i_target - k</code>. Ad esempio, se cerchiamo il 7° elemento (<code>i_target=7</code>) e il pivot si piazza al 4° posto (<code>k=4</code>) della porzione corrente, significa che i 4 elementi più piccoli (incluso il pivot) sono a sinistra o sono il pivot stesso. Nella parte destra, che inizia dopo questi 4 elementi, l'elemento che era originariamente il 7° diventerà il (7-4) = 3° elemento più piccolo <em>relativo</em> a quella parte destra.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="select-naive-complessita" class="content-section">
+            <h3 class="subsection-title">3.1. Complessità di "Select Naive"</h3>
+            <div class="section-content">
+                <p>La complessità dipende da come <code>Partition</code> divide l'array. (Minutaggio MP3: 06:07 - 06:52)</p>
+                <ul>
+                    <li><strong>Caso Peggiore (\(\Theta(N^2)\)):</strong> Se <code>Partition</code> produce sempre una partizione massimamente sbilanciata (es. un lato con 0 elementi e l'altro con N-1, e si ricorre sempre sul lato N-1). L'equazione di ricorrenza è \(T(N) = T(N-1) + \Theta(N)\), che si risolve a \(\Theta(N^2)\). Questo è analogo al caso peggiore di QuickSort.</li>
+                    <li><strong>Caso Migliore/Medio (\(\Theta(N)\)):</strong> Se <code>Partition</code> divide l'array circa a metà (o in una frazione costante). L'equazione di ricorrenza è \(T(N) = T(N/2) + \Theta(N)\) (o \(T(\alpha N) + \Theta(N)\) con \(\alpha < 1\)). Questa si risolve a \(\Theta(N)\) (per il Master Theorem, Caso 3, o srotolandola).</li>
+                </ul>
+                <p>Poiché "Select Naive" non garantisce \(\Theta(N)\) nel caso peggiore, si cerca un algoritmo migliore.</p>
+            </div>
+        </article>
+
+        <article id="select-median-of-medians" class="content-section">
+            <h2 class="section-title">4. Algoritmo di Selezione Lineare O(N) nel Caso Peggiore (Median of Medians / BFPRT)</h2>
+            <div class="section-content">
+                <p>L'obiettivo è trovare un pivot per <code>Partition</code> in tempo lineare, in modo che la partizione risultante sia sempre "sufficientemente" bilanciata. Questo porta all'algoritmo noto come SELECT o Median-of-Medians (dagli autori Blum, Floyd, Pratt, Rivest, Tarjan). (Minutaggio MP3: 08:18 - 08:45)</p>
+            </div>
+        </article>
+
+        <article id="select-mom-idea" class="content-section">
+            <h3 class="subsection-title">4.1. Idea e Passaggi dell'Algoritmo SELECT(A, p, q, i_target)</h3>
+            <p>(Minutaggio MP3: 08:45 - 09:50)</p>
+            <ol>
+                <li>
+                    <strong>Dividi in Gruppi di 5:</strong>
+                    <p>Dividi la porzione <code>A[p...q]</code> (di \(n = q-p+1\) elementi) in \(\lceil n/5 \rceil\) gruppi. Ogni gruppo ha 5 elementi, tranne l'ultimo che potrebbe averne meno (se \(n\) non è multiplo di 5).
+                    Costo: \(\Theta(n)\) (per attraversare e raggruppare concettualmente).</p>
+                    <div class="array-representation">
+                        <p>Esempio di divisione in gruppi (N elementi):</p>
+                        <table>
+                            <tbody>
+                                <tr><td>G<sub>1,1</sub></td><td>G<sub>1,2</sub></td><td>G<sub>1,3</sub></td><td>G<sub>1,4</sub></td><td>G<sub>1,5</sub></td>
+                                <td>...</td>
+                                <td>G<sub>k,1</sub></td><td>G<sub>k,2</sub></td><td>...</td><td>G<sub>k,m</sub></td></tr>
+                                <tr><td>Mediana<sub>1</sub></td><td></td><td></td><td></td><td></td>
+                                <td>...</td>
+                                <td>Mediana<sub>k</sub></td><td></td><td></td><td></td></tr>
+                            </tbody>
+                            <caption>k = ceil(N/5) gruppi. L'ultimo gruppo G<sub>k</sub> potrebbe avere m < 5 elementi.</caption>
+                        </table>
+                    </div>
+                </li>
+                <li>
+                    <strong>Trova la Mediana di Ciascun Gruppo:</strong>
+                    <p>Per ognuno dei \(\lceil n/5 \rceil\) gruppi, trova la sua mediana. Poiché ogni gruppo ha al massimo 5 elementi, la mediana di un gruppo si trova in tempo costante \(\Theta(1)\) (es. con pochi confronti o ordinando il piccolo gruppo).
+                    Costo totale di questa fase: \(\lceil n/5 \rceil \cdot \Theta(1) = \Theta(n)\).
+                    Colleziona queste \(\lceil n/5 \rceil\) mediane in un nuovo array ausiliario `B`.</p>
+                </li>
+                <li>
+                    <strong>Trova la Mediana delle Mediane (Pivot \(M\)):</strong>
+                    <p>Richiama ricorsivamente l'algoritmo <code>SELECT</code> sull'array `B` (che contiene le \(\lceil n/5 \rceil\) mediane) per trovare la <strong>loro</strong> mediana. Chiamiamo questa "mediana delle mediane" \(M\). Questo \(M\) sarà il pivot per partizionare l'array originale <code>A</code>.
+                    Costo: \(T(\lceil n/5 \rceil)\).</p>
+                </li>
+                <li>
+                    <strong>Partiziona l'Array Originale Attorno al Pivot \(M\):</strong>
+                    <p>Usa una procedura <code>Partition</code> (che accetta un pivot esplicito) per partizionare <code>A[p...q]</code> attorno a \(M\). Sia <code>r</code> l'indice finale di \(M\) in <code>A</code>.
+                    Costo: \(\Theta(n)\).</p>
+                </li>
+                <li>
+                    <strong>Verifica il Rango e Ricorri (come in Select-Naive):</strong>
+                    <p>Sia <code>k_pivot = r - p + 1</code> il rango del pivot \(M\) nella porzione <code>A[p...q]</code>.</p>
+                    <ul>
+                        <li>Se <code>i_target == k_pivot</code>, allora \(M\) è l'elemento cercato. Restituisci \(M\).</li>
+                        <li>Se <code>i_target < k_pivot</code>, richiama ricorsivamente <code>SELECT(A, p, r-1, i_target)</code>.</li>
+                        <li>Se <code>i_target > k_pivot</code>, richiama ricorsivamente <code>SELECT(A, r+1, q, i_target - k_pivot)</code>.</li>
+                    </ul>
+                    <p>La chiamata ricorsiva in questo passo avverrà su una porzione di dimensione al massimo \((7n/10) + \text{costante}\).</p>
+                </li>
+            </ol>
+        </article>
+
+        <article id="select-mom-pivot-bonta" class="content-section">
+            <h3 class="subsection-title">4.2. Analisi della "Bontà" del Pivot \(M\) (Mediana delle Mediane)</h3>
+            <div class="section-content">
+                <p>La scelta di \(M\) come pivot garantisce una buona partizione. (Minutaggio MP3: 09:50 - 11:30)</p>
+                <p>Consideriamo i \(\lceil n/5 \rceil\) gruppi. Immaginiamoli ordinati internamente e poi le loro mediane ordinate tra loro. \(M\) è la mediana di queste mediane.</p>
+                <div class="mermaid-container">
+                     <pre class="mermaid">
+                    graph TD
+                        subgraph "Visualizzazione per Analisi Bontà Pivot M"
+                            direction LR
+                            X_Pivot["Pivot M<br/>(Mediana delle Mediane)"]
+
+                            subgraph "Gruppi con mediane ≤ M"
+                                direction TB
+                                style G1 fill:#818cf820,stroke:#818cf8
+                                G1["Gruppo 1<br/>(mediana m1 ≤ M)<br/>[e, e, m1, g, g]"]
+                                Gdots1["..."]
+                                G_M["Gruppo di M<br/>(mediana M)<br/>[e, e, M, g, g]"]
+                                Note_le_M["Almeno 3 elementi ≤ M per ognuno<br/>di questi ~ (n/10) gruppi"]
+                            end
+                            
+                            subgraph "Gruppi con mediane ≥ M"
+                                direction TB
+                                style Gk fill:#818cf820,stroke:#818cf8
+                                G_M2["Gruppo di M<br/>(mediana M)<br/>[e, e, M, g, g]"]
+                                Gdots2["..."]
+                                Gk["Gruppo k<br/>(mediana mk ≥ M)<br/>[e, e, mk, g, g]"]
+                                Note_ge_M["Almeno 3 elementi ≥ M per ognuno<br/>di questi ~ (n/10) gruppi"]
+                            end
+                            X_Pivot -.-> Gruppi_le_M
+                            X_Pivot -.-> Gruppi_ge_M
+                        end
+                        linkStyle defaultinterpolate basis
+                    </pre>
+                    <p>Legenda: 'e' = elemento piccolo, 'm' = mediana del gruppo, 'g' = elemento grande del gruppo.</p>
+                </div>
+                <ul>
+                    <li>Almeno la metà dei \(\lceil n/5 \rceil\) gruppi hanno una mediana che è minore o uguale a \(M\). Questi sono circa \(\frac{1}{2} \cdot \frac{n}{5} = \frac{n}{10}\) gruppi.</li>
+                    <li>In ognuno di questi \(\approx n/10\) gruppi, ci sono almeno 3 elementi che sono \(\le\) alla mediana del gruppo (i due più piccoli e la mediana stessa), e quindi sono anche \(\le M\).</li>
+                    <li>Quindi, ci sono almeno \(3 \cdot (\frac{n}{10}) = \frac{3n}{10}\) elementi nell'array originale <code>A</code> che sono \(\le M\).</li>
+                    <li>Simmetricamente, ci sono almeno \(\frac{3n}{10}\) elementi in <code>A</code> che sono \(\ge M\).</li>
+                </ul>
+                <p>Questo implica che quando si partiziona <code>A</code> usando \(M\) come pivot, la chiamata ricorsiva (al passo 5) sarà su una porzione di dimensione al massimo \(n - \frac{3n}{10} = \frac{7n}{10}\) elementi (più un piccolo termine costante per gestire gli arrotondamenti e i casi base, che può essere espresso come \(7n/10 + 6\) per \(n\) abbastanza grande).</p>
+                 <div class="clarification-box">
+                    <strong>Approfondimento (Perché gruppi di 5 e non 3?) (Aggiunto):</strong>
+                    <p>Se si usassero gruppi di 3 elementi invece di 5:
+                    <ul>
+                        <li>Ci sarebbero \(n/3\) gruppi.</li>
+                        <li>Si troverebbe la mediana di ogni gruppo di 3 (costo \(\Theta(n)\)).</li>
+                        <li>Si troverebbe la mediana \(M\) di queste \(n/3\) mediane (costo \(T(n/3)\)).</li>
+                        <li>Analizzando la bontà del pivot \(M\): \(M\) sarebbe maggiore o uguale ad almeno la metà delle mediane dei gruppi di 3 (\(\approx n/6\) mediane). Ognuna di queste mediane è maggiore o uguale a 2 elementi nel suo gruppo di 3. Quindi \(M\) sarebbe \(\ge 2 \cdot (n/6) = n/3\) elementi.</li>
+                        <li>Simmetricamente, \(M\) sarebbe \(\le\) ad almeno \(n/3\) elementi.</li>
+                        <li>La ricorsione successiva sarebbe su al massimo \(n - n/3 = 2n/3\) elementi.</li>
+                        <li>L'equazione di ricorrenza diventerebbe \(T(n) \le T(n/3) + T(2n/3) + \Theta(n)\).</li>
+                        <li>In questo caso, \(1/3 + 2/3 = 1\). Questa ricorrenza (simile a quella di MergeSort o del caso medio di QuickSort senza una riduzione netta) si risolve a \(\Theta(N \log N)\), non \(\Theta(N)\).</li>
+                    </ul>
+                    Ecco perché il "5" è cruciale: è il più piccolo numero dispari che garantisce che la somma delle frazioni delle chiamate ricorsive (\(1/5 + 7/10 = 9/10\)) sia strettamente minore di 1, portando a una complessità lineare.
+                    </p>
+                </div>
+            </div>
+        </article>
+
+        <article id="select-mom-ricorrenza-complessita" class="content-section">
+            <h3 class="subsection-title">4.3. Equazione di Ricorrenza e Complessità di SELECT</h3>
+            <div class="section-content">
+                <p>L'equazione di ricorrenza per il tempo di esecuzione \(T(n)\) nel caso peggiore di <code>SELECT</code> è: (Minutaggio MP3: 11:30 - 11:41 e poi la dimostrazione più formale basata sugli appunti PDF non è stata fatta a voce ma menzionata)</p>
+                <div class="math-block">
+                \( T(n) \le T(\lceil n/5 \rceil) + T(7n/10 + 6) + \Theta(n) \)
+                </div>
+                <p>dove il termine \(\Theta(n)\) (che possiamo scrivere come \(a \cdot n\) per una costante \(a\)) rappresenta i costi dei passi 1 (divisione in gruppi), 2 (trovare mediane dei gruppi), e 4 (partizionamento).</p>
+                <p>Si vuole dimostrare per sostituzione che \(T(n) \le c \cdot n\) per qualche costante \(c > 0\).</p>
+                <p><strong>Ipotesi Induttiva (HI):</strong> Assumiamo che \(T(k) \le c \cdot k\) per ogni \(k < n\).</p>
+                <p>Sostituendo nell'equazione di ricorrenza:</p>
+                <p>\( T(n) \le c \cdot (\lceil n/5 \rceil) + c \cdot (7n/10 + 6) + a \cdot n \)</p>
+                <p>Poiché \(\lceil n/5 \rceil \le n/5 + 1\):</p>
+                <p>\( T(n) \le c \cdot (n/5 + 1) + c \cdot (7n/10 + 6) + a \cdot n \)</p>
+                <p>\( T(n) \le c \cdot n/5 + c + 7cn/10 + 6c + a \cdot n \)</p>
+                <p>\( T(n) \le cn(1/5 + 7/10) + an + 7c \)</p>
+                <p>\( T(n) \le cn(2/10 + 7/10) + an + 7c \)</p>
+                <p>\( T(n) \le cn(9/10) + an + 7c \)</p>
+                <p>Ora, vogliamo dimostrare che \(cn(9/10) + an + 7c \le cn\).</p>
+                <p>\( an + 7c \le cn - cn(9/10) \)</p>
+                <p>\( an + 7c \le cn(1 - 9/10) \)</p>
+                <p>\( an + 7c \le cn(1/10) \)</p>
+                <p>Raccogliendo \(c\):</p>
+                <p>\( c(n/10 - 7) \ge an \)</p>
+                <p>Affinché questa disuguaglianza sia valida e si possa trovare una \(c > 0\), il termine \((n/10 - 7)\) deve essere strettamente positivo. Quindi, \(n/10 - 7 > 0 \implies n/10 > 7 \implies n > 70\).</p>
+                <p>Se \(n > 70\), allora \((n/10 - 7) > 0\), e possiamo scegliere:</p>
+                <div class="math-block">
+                \( c \ge \frac{an}{n/10 - 7} = \frac{10an}{n - 70} \)
+                </div>
+                <p>Per \(n\) sufficientemente grande (ad esempio, se \(n \ge 140\), allora \(n-70 \ge n/2\)), abbiamo \(\frac{n}{n-70} \le \frac{n}{n/2} = 2\).
+                Quindi, la condizione diventa \(c \ge 10a \cdot 2 = 20a\).</p>
+                <p>È possibile scegliere una tale costante \(c\) (es. \(c = 20a\)) purché \(n\) sia abbastanza grande (es. \(n \ge n_0 = 140\)). Per i valori di \(n < n_0\), la complessità \(T(n)\) è limitata da una costante (caso base), e possiamo scegliere \(c\) abbastanza grande da coprire anche questi casi base, ovvero \(c \ge T(n)/n\) per \(1 \le n < n_0\).</p>
+                <p><strong>Conclusione:</strong> L'algoritmo SELECT ha una complessità temporale \(\Theta(N)\) nel caso peggiore.</p>
+            </div>
+        </article>
+
+        <article id="select-mom-proprieta" class="content-section">
+            <h3 class="subsection-title">4.4. Proprietà dell'Algoritmo SELECT (Median of Medians)</h3>
+            <div class="section-content">
+                 <p>(Minutaggio MP3: 12:00 - 12:12 circa, per le proprietà)</p>
+                <ul>
+                    <li><strong>Complessità Temporale:</strong> \(\Theta(N)\) nel caso peggiore.</li>
+                    <li><strong>Spazio Ausiliario:</strong> L'algoritmo <strong>non è in-place</strong>.
+                        <ul>
+                            <li>Richiede spazio per l'array `B` delle mediane dei gruppi, che ha dimensione \(\lceil n/5 \rceil = O(N)\).</li>
+                            <li>Lo stack di ricorsione ha profondità \(O(\log N)\).</li>
+                        </ul>
+                        Dominante è lo spazio \(O(N)\) per l'array `B`.
+                    </li>
+                    <li><strong>Stabilità:</strong> L'algoritmo <strong>non è stabile</strong>, a causa dell'uso della procedura <code>Partition</code>.</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Considerazioni Pratiche (dalla Prof.ssa):</strong> Sebbene SELECT (median of medians) sia \(\Theta(N)\) nel caso peggiore, ha costanti moltiplicative elevate. In pratica, per valori di N non "eccessivamente grandi", l'algoritmo <code>Randomized-Select</code> (che ha complessità *attesa* \(\Theta(N)\)) tende ad essere più veloce. SELECT garantisce però le prestazioni nel caso peggiore.
+                </div>
+            </div>
+        </article>
+
+        <article id="quicksort-ottimizzato" class="content-section">
+            <h2 class="section-title">5. QuickSort Ottimizzato (Worst-Case \(\Theta(N \log N)\))</h2>
+            <div class="section-content">
+                <p>Ora possiamo utilizzare l'algoritmo <code>SELECT</code> (con complessità \(\Theta(N)\) nel caso peggiore) per costruire una versione di QuickSort che garantisca una complessità \(\Theta(N \log N)\) anche nel caso peggiore. (Minutaggio MP3: 12:12 - 12:22)</p>
+            </div>
+        </article>
+
+        <article id="quicksort-ott-idea" class="content-section">
+            <h3 class="subsection-title">5.1. Idea dell'Algoritmo Quicksort_ott(A, p, q)</h3>
+            <div class="section-content">
+                <p>L'idea è di usare <code>SELECT</code> per trovare il mediano della porzione corrente dell'array e usare questo mediano come pivot per <code>Partition</code>.</p>
+                <ol>
+                    <li>Se <code>p < q</code>:
+                        <ol>
+                            <li><strong>Trova il Mediano:</strong> Calcola l'indice del mediano della porzione <code>A[p...q]</code>. Ad esempio, se la porzione ha \(n' = q-p+1\) elementi, il mediano si trova al rango \(i_{med} = \lfloor (n'+1)/2 \rfloor\) relativo a questa porzione.
+                            Chiama <code>mediano_valore = SELECT(A, p, q, i_{med})</code> per ottenere il valore del mediano. (Costo \(\Theta(N)\), dove \(N = q-p+1\)).</li>
+                            <li><strong>Partiziona Attorno al Mediano:</strong> Usa una procedura <code>Partition-Attorno-Valore(A, p, q, mediano_valore)</code> che partiziona <code>A[p...q]</code> usando <code>mediano_valore</code> come pivot. Questa procedura potrebbe dover prima trovare un'occorrenza di <code>mediano_valore</code>, scambiarla con <code>A[q]</code>, e poi chiamare la <code>Partition</code> di Lomuto. Sia <code>r</code> l'indice finale del pivot. (Costo \(\Theta(N)\)).</li>
+                            <li><strong>Chiamate Ricorsive:</strong>
+                                <ul>
+                                    <li><code>Quicksort_ott(A, p, r - 1)</code></li>
+                                    <li><code>Quicksort_ott(A, r + 1, q)</code></li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="quicksort-ott-complessita" class="content-section">
+            <h3 class="subsection-title">5.2. Complessità di Quicksort_ott</h3>
+            <div class="section-content">
+                <p>Sia \(N = q-p+1\) la dimensione della porzione corrente.</p>
+                <ul>
+                    <li>Il passo 1.a (trovare il mediano con <code>SELECT</code>) costa \(\Theta(N)\).</li>
+                    <li>Il passo 1.b (partizionare attorno al mediano) costa \(\Theta(N)\).</li>
+                    <li>Poiché il pivot scelto è il mediano, le due chiamate ricorsive (passo 1.c) avvengono su sottoproblemi di dimensione circa \(N/2\).</li>
+                </ul>
+                <p>L'equazione di ricorrenza per il tempo di esecuzione \(T(N)\) di <code>Quicksort_ott</code> è:</p>
+                <div class="math-block">
+                \( T(N) = 2 \cdot T(N/2) + \Theta(N) \)
+                </div>
+                <p>Questa è la classica ricorrenza di MergeSort e del caso migliore/medio di QuickSort, che si risolve (per il Master Theorem, Caso 2) a:</p>
+                <div class="math-block">
+                \( T(N) = \Theta(N \log N) \)
+                </div>
+                <p>Questa versione di QuickSort ha quindi una complessità \(\Theta(N \log N)\) <strong>garantita anche nel caso peggiore</strong>, perché la scelta del pivot (il mediano) assicura sempre partizioni bilanciate.</p>
+                <div class="note-box">
+                    <strong>Costo Pratico (dalla Prof.ssa):</strong> Nonostante la garanzia teorica, questo "Quicksort Ottimizzato" ha costanti moltiplicative più elevate rispetto al Randomized-QuickSort, a causa del costo \(\Theta(N)\) per trovare il mediano ad ogni passo di ricorsione. In pratica, Randomized-QuickSort è spesso preferito.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizi-casa" class="content-section">
+            <h2 class="section-title">6. Esercizi Assegnati per Casa</h2>
+            <div class="section-content">
+                <p>La professoressa ha concluso la parte teorica sugli algoritmi di selezione e sul QuickSort ottimizzato. Ha poi assegnato il seguente esercizio: (Minutaggio MP3: 12:22 - 12:49)</p>
+            </div>
+        </article>
+        
+        <article id="esercizio-majority-candidate" class="content-section">
+            <h3 class="subsection-title">6.1. Esercizio: Majority Candidate</h3>
+            <div class="section-content">
+                <p><strong>Testo del Problema:</strong></p>
+                <p>Dato un vettore (array) <code>A</code> di <code>N</code> elementi, determinare se esiste un elemento <code>x</code> che compare più di <code>N/2</code> volte (cioè, con frequenza strettamente maggiore della metà della dimensione dell'array). Se tale elemento esiste, restituirlo; altrimenti, indicare che non esiste (o restituire un valore speciale).</p>
+                <p><strong>Vincoli Richiesti dalla Professoressa:</strong></p>
+                <ul>
+                    <li>Complessità Temporale: \(\Theta(N)\)</li>
+                    <li>Complessità Spaziale: \(\Theta(1)\) (cioè, l'algoritmo deve essere <em>in-place</em> o usare una quantità costante di spazio ausiliario).</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Risoluzione Dettagliata (Aggiunta da AI): Algoritmo di Boyer-Moore (Voting Algorithm)</strong>
+                    <p>Questo problema è un classico e può essere risolto efficientemente con l'algoritmo di voto di Boyer-Moore, che soddisfa i vincoli richiesti.</p>
+                    <p><strong>Idea dell'Algoritmo:</strong> (Minutaggio MP3: 12:50 - 13:36, la professoressa inizia a descrivere l'idea generale)</p>
+                    <p>L'algoritmo si basa sull'idea che se un elemento è maggioritario, "sopravviverà" a un processo di eliminazione a coppie con elementi diversi. Immagina di far "combattere" gli elementi: se due elementi diversi si incontrano, si eliminano a vicenda; se due elementi uguali si incontrano, uno "rafforza" l'altro.</p>
+                    <p>Si articola in due fasi:</p>
+                    
+                    <p><strong>Fase 1: Trovare un candidato per l'elemento maggioritario.</strong></p>
+                    <ol>
+                        <li>Si inizializzano due variabili:
+                            <ul>
+                                <li><code>candidate</code>: per memorizzare il candidato corrente all'elemento maggioritario. Può essere inizializzato, ad esempio, con il primo elemento dell'array.</li>
+                                <li><code>count</code>: un contatore, inizializzato a 1 (se `candidate` è il primo elemento) o a 0.</li>
+                            </ul>
+                            La professoressa suggerisce di inizializzare `count = 0` e poi, nel ciclo, se `count == 0`, si prende l'elemento corrente come nuovo `candidate`.
+                        </li>
+                        <li>Si scorre l'array <code>A</code> da sinistra a destra (o dall'indice 0 a N-1):
+                            <ul>
+                                <li>Se <code>count == 0</code>:
+                                    <ul>
+                                        <li>Si imposta <code>candidate = A[i]</code> (l'elemento corrente dell'array diventa il nuovo candidato).</li>
+                                        <li>Si imposta <code>count = 1</code>.</li>
+                                    </ul>
+                                </li>
+                                <li>Altrimenti (se <code>count > 0</code>):
+                                    <ul>
+                                        <li>Se <code>A[i] == candidate</code>: si incrementa <code>count</code> (il candidato ha trovato un "alleato").</li>
+                                        <li>Se <code>A[i] != candidate</code>: si decrementa <code>count</code> (il candidato ha incontrato un "nemico" e si sono "annullati").</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Al termine di questa fase, se esiste un elemento maggioritario, esso <strong>deve</strong> essere il valore rimasto in <code>candidate</code>. Se non esiste un elemento maggioritario, <code>candidate</code> conterrà un valore qualsiasi dell'array, ma non è detto che sia significativo.</p>
+
+                    <p><strong>Fase 2: Verificare se il candidato è effettivamente l'elemento maggioritario.</strong></p>
+                    <p>Poiché la Fase 1 garantisce solo un *candidato*, è necessario verificare se questo candidato compare effettivamente più di N/2 volte. (Minutaggio MP3: 13:36 - 13:40)</p>
+                    <ol>
+                        <li>Si re-inizializza un contatore (chiamiamolo <code>verify_count</code>) a 0.</li>
+                        <li>Si scorre nuovamente l'intero array <code>A</code>.</li>
+                        <li>Per ogni elemento <code>A[j]</code> dell'array, se <code>A[j] == candidate</code> (il candidato trovato nella Fase 1), si incrementa <code>verify_count</code>.</li>
+                        <li>Dopo la scansione, se <code>verify_count > N/2</code>, allora <code>candidate</code> è l'elemento maggioritario e viene restituito.</li>
+                        <li>Altrimenti, si conclude che non esiste un elemento maggioritario nell'array.</li>
+                    </ol>
+
+                    <p><strong>Pseudocodice Completo:</strong></p>
+                    <pre><code class="language-pseudocode">
+Find-Majority-Element(A)
+  N = A.length
+  if N == 0 then
+    return "Array vuoto" // o un'eccezione
+
+  // Fase 1: Trova il candidato
+  candidate = A[0] // Inizializzazione alternativa: candidate = null, count = 0
+  count = 1      // Se si inizia con A[0], count parte da 1.
+
+  for i = 1 to N-1 do // Se si parte da A[0], il ciclo parte da 1
+    if A[i] == candidate then
+      count = count + 1
+    else
+      count = count - 1
+    
+    if count == 0 then
+      candidate = A[i] // Nuovo candidato
+      count = 1        // Se A[i] è l'ultimo elemento, questo diventerà il candidato.
+                       // È importante che se il ciclo finisce con count=0, 
+                       // l'ultimo A[i] che ha azzerato count diventi il candidato.
+                       // Una logica più robusta è:
+                       // if count == 0 then { candidate = A[i]; count = 1; }
+                       // else if A[i] == candidate then { count++; }
+                       // else { count--; }
+                       // (La versione della prof. nel file MP3 è corretta e più concisa)
+
+  // Fase 2: Verifica il candidato
+  verify_count = 0
+  for i = 0 to N-1 do
+    if A[i] == candidate then
+      verify_count = verify_count + 1
+      
+  if verify_count > N / 2 then
+    return candidate
+  else
+    return "Nessun elemento maggioritario" // o null, o un flag
+                    </code></pre>
+                    <div class="clarification-box">
+                        <strong>Nota sullo Pseudocodice della Fase 1 (Aggiunto):</strong>
+                        <p>La logica della Fase 1 descritta a voce dalla professoressa (e riportata nella mia analisi precedente della lezione) è:
+                        <pre><code class="language-pseudocode">
+// Logica Fase 1 (come da spiegazione orale della prof)
+candidate = null // o un valore fittizio non presente nell'array
+count = 0
+for i = 0 to N-1 do
+  if count == 0 then
+    candidate = A[i]
+    count = 1
+  else if A[i] == candidate then
+    count = count + 1
+  else // A[i] != candidate
+    count = count - 1
+                        </code></pre>
+                        Questa versione è più generale e gestisce anche il caso di array vuoto implicitamente (se N=0, il ciclo non parte, candidate rimane null).
+                        </p>
+                    </div>
+                    
+                    <p><strong>Correttezza (Intuizione):</strong> (Minutaggio MP3: 13:40 - 13:45)</p>
+                    <p>L'elemento maggioritario, chiamiamolo `m`, per definizione compare più della metà delle volte. Ogni volta che `m` "incontra" un elemento diverso da sé, entrambi vengono "eliminati" (il `count` del candidato `m` scende, o se un altro elemento era candidato, il suo `count` scende). Poiché ci sono più `m` che "non-`m`", `m` non può essere eliminato completamente. Alla fine della Fase 1, se un elemento maggioritario esiste, `candidate` deve contenerlo. La Fase 2 poi lo conferma.</p>
+
+                    <p><strong>Complessità:</strong></p>
+                    <ul>
+                        <li><strong>Tempo:</strong> La Fase 1 esegue una singola scansione dell'array (\(\Theta(N)\)). La Fase 2 esegue un'altra singola scansione dell'array (\(\Theta(N)\)). Il costo totale è \(\Theta(N) + \Theta(N) = \Theta(N)\).</li>
+                        <li><strong>Spazio:</strong> L'algoritmo utilizza solo un numero costante di variabili (<code>candidate</code>, <code>count</code>, <code>i</code>, <code>verify_count</code>). Quindi, la complessità spaziale è \(\Theta(1)\).</li>
+                    </ul>
+                    <p>L'algoritmo di Boyer-Moore soddisfa pienamente i vincoli richiesti.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="approfondimenti-correzioni" class="content-section">
+            <h2 class="section-title">7. Approfondimenti e Correzioni (Aggiunti dall'AI)</h2>
+            <div class="section-content">
+                <div class="clarification-box">
+                    <strong>Approfondimento: L'Osservazione \(T(N) = T(\alpha N) + T(\beta N) + \Theta(N)\)</strong>
+                    <p>Durante la lezione (Minutaggio MP3: 16:15 - 17:30 circa, riferendosi agli appunti PDF non forniti qui), la professoressa ha discusso un'osservazione importante per l'analisi di algoritmi divide et impera:</p>
+                    <p>Se un'equazione di ricorrenza è della forma:</p>
+                    <div class="math-block"> \( T(N) = T(\alpha N) + T(\beta N) + f(N) \) </div>
+                    <p>dove \(f(N) = \Theta(N)\), e le costanti \(\alpha > 0\), \(\beta > 0\) sono tali che \(\alpha + \beta < 1\), allora la soluzione della ricorrenza è \(T(N) = \Theta(N)\).</p>
+                    <p><strong>Dimostrazione per Induzione (Idea):</strong></p>
+                    <p>Vogliamo dimostrare \(T(N) \le cN\) per qualche costante \(c > 0\).</p>
+                    <p>Assumiamo (Ipotesi Induttiva) \(T(k) \le ck\) per \(k < N\).</p>
+                    <p>\( T(N) \le c(\alpha N) + c(\beta N) + bN \) (dove \(bN\) rappresenta \(\Theta(N)\))</p>
+                    <p>\( T(N) \le cN(\alpha + \beta) + bN \)</p>
+                    <p>Vogliamo che \(cN(\alpha + \beta) + bN \le cN\).</p>
+                    <p>\( bN \le cN - cN(\alpha + \beta) \)</p>
+                    <p>\( bN \le cN(1 - (\alpha + \beta)) \)</p>
+                    <p>\( b \le c(1 - (\alpha + \beta)) \)</p>
+                    <p>Poiché per ipotesi \(\alpha + \beta < 1\), allora \(1 - (\alpha + \beta)\) è una costante positiva. Chiamiamola \(\delta = 1 - (\alpha + \beta) > 0\).</p>
+                    <p>Quindi, \(b \le c\delta \implies c \ge b/\delta\).</p>
+                    <p>È possibile scegliere una tale costante \(c\), quindi l'ipotesi induttiva è verificata e \(T(N) = O(N)\). Poiché il lavoro è almeno \(\Omega(N)\) (per il termine \(f(N)\)), allora \(T(N) = \Theta(N)\).</p>
+                    <p>Questa osservazione è fondamentale per capire perché l'algoritmo SELECT (Median of Medians) ha complessità \(\Theta(N)\), dato che le sue chiamate ricorsive sono su \(N/5\) e \(7N/10\) elementi, e \(1/5 + 7/10 = 9/10 < 1\).</p>
+                </div>
+                 <div class="clarification-box">
+                    <strong>Chiarimento sull'Esempio di Boyer-Moore (Aggiunto):</strong>
+                    <p>Nell'esempio <code>A = [2, 2, 1, 1, 1, 2, 1]</code>:</p>
+                    <p>Fase 1 (versione della prof.ssa):</p>
+                    <ul>
+                        <li>count=0, candidate=null</li>
+                        <li>i=0, A[0]=2: count=0 -> candidate=2, count=1</li>
+                        <li>i=1, A[1]=2: A[1]==candidate -> count=2</li>
+                        <li>i=2, A[2]=1: A[2]!=candidate -> count=1</li>
+                        <li>i=3, A[3]=1: A[3]!=candidate -> count=0</li>
+                        <li>i=4, A[4]=1: count=0 -> candidate=1, count=1</li>
+                        <li>i=5, A[5]=2: A[5]!=candidate -> count=0</li>
+                        <li>i=6, A[6]=1: count=0 -> candidate=1, count=1</li>
+                    </ul>
+                    <p>Candidato finale della Fase 1 è 1. La Fase 2 conferma che 1 compare 4 volte, che è > 7/2.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="conclusioni" class="content-section">
+            <h2 class="section-title">8. Conclusioni della Lezione</h2>
+            <div class="section-content">
+                <p>In questa lezione abbiamo approfondito il problema della Selezione e come una sua soluzione efficiente possa portare a un QuickSort con prestazioni garantite nel caso peggiore.</p>
+                <ul>
+                    <li>L'algoritmo <strong>SELECT (Median of Medians)</strong> permette di trovare l'i-esimo elemento più piccolo in un array in tempo \(\Theta(N)\) nel caso peggiore, sebbene con costanti moltiplicative elevate e non essendo in-place.</li>
+                    <li>Utilizzando SELECT per scegliere il pivot (il mediano), <strong>QuickSort_ott</strong> ottiene una complessità \(\Theta(N \log N)\) garantita nel caso peggiore.</li>
+                    <li>È stato presentato l'<strong>algoritmo di Boyer-Moore</strong> per il problema del "Majority Candidate", che opera in tempo \(\Theta(N)\) e spazio \(\Theta(1)\).</li>
+                </ul>
+                <p>Comprendere questi algoritmi e le loro analisi di complessità è fondamentale per scegliere la strategia giusta in base ai requisiti specifici di un problema.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script> 
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || ""; 
+                mermaidOriginalDefinitions.set(id, decodedContent.trim());
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
