@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 15: Algoritmi di Ordinamento Lineare (Counting, Radix, Bucket Sort)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css"> <!-- Assumendo che sia nella stessa struttura di cartelle -->
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        .note-title { font-size: 1.05rem; color: var(--accent-secondary); margin-top: 1.2rem; margin-bottom: 0.6rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+
+        .array-representation table {
+            margin: 0 auto; /* Centra la tabella */
+            border-collapse: collapse;
+            font-family: var(--font-code);
+        }
+        .array-representation th, .array-representation td {
+            border: 1px solid var(--border-soft);
+            padding: 0.5em 0.75em;
+            min-width: 30px; /* Larghezza minima cella */
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .array-representation th { /* Indici */
+            background-color: var(--code-bg);
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .array-representation td { /* Valori */
+             background-color: var(--bg-card);
+             color: var(--text-primary);
+        }
+        .array-representation td.highlight-current {
+            border: 2px solid var(--accent-secondary) !important;
+            font-weight: bold;
+        }
+        .array-representation td.highlight-cell-C {
+            background-color: rgba(129, 140, 248, 0.2) !important; 
+        }
+         .array-representation td.highlight-cell-B {
+            background-color: rgba(96, 165, 250, 0.2) !important; 
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1); /* Viola chiaro trasparente */
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em;
+            margin: 1.5em 0;
+            border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box { /* Per evidenziare gli esercizi per casa e le loro soluzioni */
+            background-color: rgba(250, 204, 21, 0.1); /* Giallo chiaro trasparente */
+            border-left: 4px solid #FACC15; /* Giallo */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .correction-box { /* Per evidenziare le correzioni alle spiegazioni della prof */
+            background-color: rgba(239, 68, 68, 0.1); /* Rosso chiaro trasparente */
+            border-left: 4px solid #EF4444; /* Rosso */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .correction-box strong { color: #EF4444; }
+
+        .clarification-box { /* Per evidenziare approfondimenti/chiarimenti aggiunti da me */
+            background-color: rgba(52, 211, 153, 0.08); /* Verde acqua chiaro trasparente */
+            border-left: 4px solid #34D399; /* Verde acqua */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 19 nov 2020 (2).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 15: Algoritmi di Ordinamento Lineare (Counting, Radix, Bucket Sort)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../../ASD_home.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-ordinamento-lineare" class="sidebar-link">1. Introduzione: Oltre i Confronti</a></li>
+            <li><a href="#counting-sort" class="sidebar-link">2. Counting Sort</a></li>
+            <li><a href="#counting-sort-idea" class="sidebar-link">2.1. Idea e Ipotesi</a></li>
+            <li><a href="#counting-sort-passaggi" class="sidebar-link">2.2. Passaggi dell'Algoritmo</a></li>
+            <li><a href="#counting-sort-esempio" class="sidebar-link">2.3. Esempio di Counting Sort</a></li>
+            <li><a href="#counting-sort-pseudo" class="sidebar-link">2.4. Pseudocodice</a></li>
+            <li><a href="#counting-sort-complessita-proprieta" class="sidebar-link">2.5. Complessità e Proprietà</a></li>
+            <li><a href="#radix-sort" class="sidebar-link">3. Radix Sort</a></li>
+            <li><a href="#radix-sort-idea" class="sidebar-link">3.1. Idea e Ipotesi</a></li>
+            <li><a href="#radix-sort-passaggi" class="sidebar-link">3.2. Passaggi dell'Algoritmo (LSD)</a></li>
+            <li><a href="#radix-sort-esempio" class="sidebar-link">3.3. Esempio di Radix Sort</a></li>
+            <li><a href="#radix-sort-correttezza" class="sidebar-link">3.4. Correttezza (Importanza della Stabilità)</a></li>
+            <li><a href="#radix-sort-complessita" class="sidebar-link">3.5. Complessità</a></li>
+            <li><a href="#radix-sort-lsd-msd" class="sidebar-link">3.6. LSD vs MSD (Cenno)</a></li>
+            <li><a href="#bucket-sort" class="sidebar-link">4. Bucket Sort</a></li>
+            <li><a href="#bucket-sort-idea" class="sidebar-link">4.1. Idea e Ipotesi</a></li>
+            <li><a href="#bucket-sort-passaggi" class="sidebar-link">4.2. Passaggi dell'Algoritmo</a></li>
+            <li><a href="#bucket-sort-esempio" class="sidebar-link">4.3. Esempio di Bucket Sort</a></li>
+            <li><a href="#bucket-sort-complessita" class="sidebar-link">4.4. Complessità (Caso Atteso e Peggiore)</a></li>
+            <li><a href="#conclusioni-ordinamento-lineare" class="sidebar-link">5. Conclusioni sugli Ordinamenti Lineari</a></li>
+            <li><a href="#esercizi-casa" class="sidebar-link">6. Esercizi e Riflessioni per Casa</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-ordinamento-lineare" class="content-section">
+            <h2 class="section-title">1. Introduzione: Oltre gli Algoritmi Basati su Confronti</h2>
+            <div class="section-content">
+                <p>La professoressa inizia la lezione (00:07) introducendo una nuova categoria di algoritmi di ordinamento. Finora abbiamo visto algoritmi come Insertion Sort, Merge Sort, HeapSort e QuickSort, che sono tutti basati sul <strong>confronto</strong> tra elementi per determinarne l'ordine relativo.</p>
+                <p>È stato dimostrato (e richiamato) che qualsiasi algoritmo di ordinamento che si basa esclusivamente su confronti tra elementi ha un <strong>limite inferiore di complessità di \(\Omega(N \log N)\)</strong> nel caso peggiore per ordinare \(N\) elementi.</p>
+                <p>Tuttavia, la professoressa pone la domanda: è possibile fare di meglio? La risposta è sì, ma solo se si introducono <strong>ipotesi aggiuntive sulla natura dell'input</strong>. Se non possiamo più basarci solo sui confronti, dobbiamo sfruttare altre proprietà dei dati da ordinare.</p>
+                <p>Gli algoritmi che vedremo oggi mirano a una complessità <strong>lineare</strong> (\(\Theta(N)\)) sotto queste specifiche ipotesi.</p>
+                <div class="note-box">
+                    <strong>Riferimento Appunti Prof:</strong> La professoressa indica di fare riferimento agli appunti PDF "Nota 19 nov 2020 (2).pdf".
+                </div>
+            </div>
+        </article>
+
+        <article id="counting-sort" class="content-section">
+            <h2 class="section-title">2. Counting Sort</h2>
+            <div class="section-content">
+                <p>Il primo algoritmo di ordinamento lineare presentato è il <strong>Counting Sort</strong> (00:32).</p>
+            </div>
+        </article>
+
+        <article id="counting-sort-idea" class="content-section">
+            <h3 class="subsection-title">2.1. Idea e Ipotesi Fondamentali</h3>
+            <div class="section-content">
+                <p><strong>Idea Principale (01:00):</strong> Counting Sort funziona contando il numero di occorrenze di ciascun elemento distintivo nell'array di input. Successivamente, utilizza queste informazioni sui conteggi per determinare direttamente le posizioni degli elementi nell'array ordinato di output.</p>
+                <p><strong>Ipotesi Cruciale (07:00):</strong></p>
+                <p>Gli elementi da ordinare devono essere <strong>interi</strong> compresi in un intervallo relativamente piccolo e noto: da 0 a \(K\) (inclusi), dove \(K\) è un intero.
+                Se gli elementi fossero, ad esempio, da \(M\) a \(M+K\), si potrebbero traslare per ricondursi al caso 0 a \(K\).</p>
+                <div class="clarification-box">
+                    <strong>Approfondimento (Aggiunto): Gestione Range Diversi da 0 a K</strong>
+                    <p>Se gli interi da ordinare sono in un range \([min\_val, max\_val]\), possiamo comunque usare Counting Sort.
+                    Il valore \(K\) dell'algoritmo diventerebbe \(max\_val - min\_val\).
+                    L'array dei conteggi `C` avrebbe dimensione \(K+1\).
+                    Quando si accede a `C`, si userebbe l'indice `A[j] - min_val`.
+                    Quando si costruisce l'array ordinato `B`, al valore letto da `C` andrebbe sommato `min_val` per ottenere il valore effettivo.
+                    La complessità rimarrebbe \(\Theta(N+K)\) dove \(K = max\_val - min\_val\).</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="counting-sort-passaggi" class="content-section">
+            <h3 class="subsection-title">2.2. Passaggi dell'Algoritmo Counting Sort</h3>
+            <div class="section-content">
+                <p>L'algoritmo procede come segue (spiegato dalla prof. tra 01:00 e 06:16, e illustrato negli appunti PDF a pagina 1-2):</p>
+                <p>Siano:</p>
+                <ul>
+                    <li><code>A</code>: l'array di input di <code>N</code> elementi da ordinare.</li>
+                    <li><code>B</code>: l'array di output ordinato, della stessa dimensione di <code>A</code>.</li>
+                    <li><code>C</code>: un array ausiliario dei conteggi, di dimensione <code>K+1</code> (dove K è il valore massimo in A).</li>
+                </ul>
+                <p><strong>Passaggi:</strong></p>
+                <ol>
+                    <li>
+                        <strong>Inizializzazione dell'Array dei Conteggi <code>C</code> (01:20):</strong>
+                        <p>Si crea l'array <code>C</code> di dimensione <code>K+1</code>. Ogni elemento <code>C[j]</code> (per <code>j</code> da 0 a <code>K</code>) viene inizializzato a 0.
+                        Costo: \(\Theta(K)\).</p>
+                        <div class="array-representation">
+                            <p>Array C (dim. K+1) dopo inizializzazione:</p>
+                            <table>
+                                <thead><tr><th>Idx:</th><th>0</th><th>1</th><th>2</th><th>...</th><th>K</th></tr></thead>
+                                <tbody><tr><td>Val:</td><td>0</td><td>0</td><td>0</td><td>...</td><td>0</td></tr></tbody>
+                            </table>
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Conteggio delle Occorrenze (01:40):</strong>
+                        <p>Si scorre l'array di input <code>A</code>. Per ogni elemento <code>A[j]</code> incontrato, si incrementa il contatore corrispondente in <code>C</code>. Cioè, <code>C[A[j]] = C[A[j]] + 1</code>.
+                        Al termine di questo passo, <code>C[x]</code> conterrà il numero di volte che il valore <code>x</code> compare in <code>A</code>.
+                        Costo: \(\Theta(N)\) (per scorrere A).</p>
+                        <div class="array-representation">
+                            <p>Array C dopo conteggio occorrenze (esempio):</p>
+                            <table>
+                                <thead><tr><th>Idx (Valore in A):</th><th>0</th><th>1</th><th>2</th><th>3</th><th>...</th></tr></thead>
+                                <tbody><tr><td>Conteggio:</td><td>1</td><td>2</td><td>4</td><td>1</td><td>...</td></tr></tbody>
+                            </table>
+                            <p>(Significa che '0' compare 1 volta, '1' compare 2 volte, '2' compare 4 volte, ecc.)</p>
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Calcolo delle Posizioni Finali (Somma Cumulativa) (02:22):</strong>
+                        <p>Si modifica l'array <code>C</code> in modo che ogni <code>C[j]</code> contenga il numero di elementi nell'input <code>A</code> che sono <strong>minori o uguali</strong> a <code>j</code>.
+                        Questo si ottiene scorrendo <code>C</code> da <code>j=1</code> a <code>K</code> e aggiornando <code>C[j] = C[j] + C[j-1]</code>.
+                        Ora, <code>C[x]</code> rappresenta l'indice (o la posizione finale +1, a seconda dell'indicizzazione) a cui l'<em>ultimo</em> elemento di valore <code>x</code> dovrebbe essere collocato nell'array ordinato <code>B</code>.
+                        Costo: \(\Theta(K)\) (per scorrere C).</p>
+                        <div class="array-representation">
+                            <p>Array C dopo somma cumulativa (esempio da prima):</p>
+                             <table>
+                                <thead><tr><th>Idx (Valore):</th><th>0</th><th>1</th><th>2</th><th>3</th><th>...</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Conteggio Originale:</td><td>1</td><td>2</td><td>4</td><td>1</td><td>...</td></tr>
+                                    <tr><td>Valore Cumulativo:</td><td>1</td><td>1+2=3</td><td>3+4=7</td><td>7+1=8</td><td>...</td></tr>
+                                </tbody>
+                            </table>
+                             <p>(Significa che ci sono 1 elemento <=0, 3 elementi <=1, 7 elementi <=2, 8 elementi <=3, ecc.)<br>
+                             (Quindi, l'ultimo '0' andrà in B[1], l'ultimo '1' in B[3], l'ultimo '2' in B[7], l'ultimo '3' in B[8] - se B è 1-indexed)</p>
+                        </div>
+                         <div class="clarification-box">
+                             <strong>Approfondimento (Aggiunto): Perché C[x] indica la posizione finale?</strong>
+                             <p>Dopo la somma cumulativa, <code>C[x]</code> ci dice quanti elementi in `A` sono minori o uguali a `x`. Se abbiamo, ad esempio, <code>C[5]=12</code>, significa che ci sono 12 elementi in `A` che sono \(\le 5\). Se stiamo usando un array di output `B` 1-indexed, l'ultimo degli elementi con valore 5 dovrà finire in posizione <code>B[12]</code>. Le posizioni da 1 a <code>C[4]</code> (se <code>C[4]</code> è, ad esempio, 9) saranno occupate da elementi \(\le 4\). Quindi, gli elementi con valore 5 occuperanno le posizioni da <code>B[C[4]+1]</code> a <code>B[C[5]]</code>.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Costruzione dell'Array Ordinato <code>B</code> (04:00):</strong>
+                        <p>Si scorre l'array di input <code>A</code> <strong>dall'ultimo elemento al primo</strong> (cioè, per <code>j</code> da <code>A.length</code> decrescendo fino a 1). Questa scansione a ritroso è fondamentale per garantire la <strong>stabilità</strong> dell'algoritmo.</p>
+                        <p>Per ogni elemento <code>A[j]</code>:</p>
+                        <ul>
+                            <li>L'elemento <code>A[j]</code> viene posizionato nell'array di output <code>B</code> all'indice dato da <code>C[A[j]]</code>. Cioè, <code>B[C[A[j]]] = A[j]</code>.</li>
+                            <li>Il valore <code>C[A[j]]</code> viene decrementato di 1: <code>C[A[j]] = C[A[j]] - 1</code>. Questo è necessario per assicurare che, se ci sono più occorrenze dello stesso valore <code>A[j]</code>, vengano collocate in posizioni adiacenti e corrette in <code>B</code>, mantenendo il loro ordine relativo originale (stabilità).</li>
+                        </ul>
+                        <p>Costo: \(\Theta(N)\) (per scorrere A).</p>
+                    </li>
+                </ol>
+                <p>Al termine, l'array <code>B</code> conterrà gli elementi di <code>A</code> ordinati in modo non decrescente.</p>
+            </div>
+        </article>
+
+        <article id="counting-sort-esempio" class="content-section">
+            <h3 class="subsection-title">2.3. Esempio di Esecuzione di Counting Sort</h3>
+            <p>La professoressa svolge un esempio (appunti PDF pagina 1-2, tra 01:00 e 06:16).</p>
+            <p>Sia <code>A = [3, 3, 2, 1, 0, 3, 2, 2, 2, 3, 1]</code>. Qui <code>N=11</code>.
+            Il valore massimo K è 3 (elementi da 0 a 3).</p>
+            <p><strong>1. Inizializzazione di C (dimensione K+1 = 4):</strong></p>
+            <div class="array-representation">
+            <table><thead><tr><th>Idx (C):</th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead>
+            <tbody><tr><td>Val:</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div>
+
+            <p><strong>2. Conteggio Occorrenze in A:</strong></p>
+            <ul>
+                <li>A[11]=1 -> C[1]++ (C[1]=1)</li>
+                <li>A[10]=3 -> C[3]++ (C[3]=1)</li>
+                <li>A[9]=2  -> C[2]++ (C[2]=1)</li>
+                <li>A[8]=2  -> C[2]++ (C[2]=2)</li>
+                <li>A[7]=2  -> C[2]++ (C[2]=3)</li>
+                <li>A[6]=3  -> C[3]++ (C[3]=2)</li>
+                <li>A[5]=0  -> C[0]++ (C[0]=1)</li>
+                <li>A[4]=1  -> C[1]++ (C[1]=2)</li>
+                <li>A[3]=2  -> C[2]++ (C[2]=4)</li>
+                <li>A[2]=3  -> C[3]++ (C[3]=3)</li>
+                <li>A[1]=3  -> C[3]++ (C[3]=4)</li>
+            </ul>
+            <p>Array C dopo conteggio:</p>
+            <div class="array-representation">
+            <table><thead><tr><th>Idx (C):</th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead>
+            <tbody><tr><td>Val:</td><td>1</td><td>2</td><td>4</td><td>4</td></tr></tbody></table></div>
+
+            <p><strong>3. Calcolo Somma Cumulativa in C:</strong></p>
+            <ul>
+                <li>C[0] rimane 1.</li>
+                <li>C[1] = C[1] + C[0] = 2 + 1 = 3.</li>
+                <li>C[2] = C[2] + C[1] = 4 + 3 = 7.</li>
+                <li>C[3] = C[3] + C[2] = 4 + 7 = 11.</li>
+            </ul>
+            <p>Array C dopo somma cumulativa:</p>
+            <div class="array-representation">
+            <table><thead><tr><th>Idx (C):</th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead>
+            <tbody><tr><td>Val:</td><td>1</td><td>3</td><td>7</td><td>11</td></tr></tbody></table></div>
+
+            <p><strong>4. Costruzione dell'Array Ordinato B (scansione di A a ritroso):</strong></p>
+            <p>Array B (dimensione N=11) inizialmente vuoto o non definito.</p>
+            <ol>
+                <li><code>j=11</code>, <code>A[11]=1</code>. <code>C[1]=3</code>. Pongo <code>B[3] = A[11] = 1</code>. Decremento <code>C[1]</code> a 2.
+                    <div class="array-representation"><p>B: [_, _, 1, _, _, _, _, _, _, _, _]     C: [1, 2, 7, 11]</p></div>
+                </li>
+                <li><code>j=10</code>, <code>A[10]=3</code>. <code>C[3]=11</code>. Pongo <code>B[11] = A[10] = 3</code>. Decremento <code>C[3]</code> a 10.
+                    <div class="array-representation"><p>B: [_, _, 1, _, _, _, _, _, _, _, 3]     C: [1, 2, 7, 10]</p></div>
+                </li>
+                 <li><code>j=9</code>, <code>A[9]=2</code>. <code>C[2]=7</code>. Pongo <code>B[7] = A[9] = 2</code>. Decremento <code>C[2]</code> a 6.
+                    <div class="array-representation"><p>B: [_, _, 1, _, _, _, 2, _, _, _, 3]     C: [1, 2, 6, 10]</p></div>
+                </li>
+                <li><code>j=8</code>, <code>A[8]=2</code>. <code>C[2]=6</code>. Pongo <code>B[6] = A[8] = 2</code>. Decremento <code>C[2]</code> a 5.</li>
+                <li><code>j=7</code>, <code>A[7]=2</code>. <code>C[2]=5</code>. Pongo <code>B[5] = A[7] = 2</code>. Decremento <code>C[2]</code> a 4.</li>
+                <li><code>j=6</code>, <code>A[6]=3</code>. <code>C[3]=10</code>. Pongo <code>B[10] = A[6] = 3</code>. Decremento <code>C[3]</code> a 9.</li>
+                <li><code>j=5</code>, <code>A[5]=0</code>. <code>C[0]=1</code>. Pongo <code>B[1] = A[5] = 0</code>. Decremento <code>C[0]</code> a 0.</li>
+                <li><code>j=4</code>, <code>A[4]=1</code>. <code>C[1]=2</code>. Pongo <code>B[2] = A[4] = 1</code>. Decremento <code>C[1]</code> a 1.</li>
+                <li><code>j=3</code>, <code>A[3]=2</code>. <code>C[2]=4</code>. Pongo <code>B[4] = A[3] = 2</code>. Decremento <code>C[2]</code> a 3.</li>
+                <li><code>j=2</code>, <code>A[2]=3</code>. <code>C[3]=9</code>. Pongo <code>B[9] = A[2] = 3</code>. Decremento <code>C[3]</code> a 8.</li>
+                <li><code>j=1</code>, <code>A[1]=3</code>. <code>C[3]=8</code>. Pongo <code>B[8] = A[1] = 3</code>. Decremento <code>C[3]</code> a 7.</li>
+            </ol>
+            <p>Array B finale ordinato:</p>
+            <div class="array-representation">
+            <table><thead><tr><th>Idx (B):</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th></tr></thead>
+            <tbody><tr><td>Val:</td><td>0</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td><td>3</td><td>3</td><td>3</td><td>3</td></tr></tbody></table></div>
+        </article>
+
+        <article id="counting-sort-pseudo" class="content-section">
+            <h3 class="subsection-title">2.4. Pseudocodice di Counting Sort</h3>
+            <pre><code class="language-pseudocode">
+Counting-Sort(A, B, K)
+  // A: array di input (elementi da 0 a K)
+  // B: array di output (stessa dimensione di A)
+  // K: valore massimo in A
+  
+  // C: array ausiliario per i conteggi
+  let C[0...K] be a new array
+
+  // 1. Inizializza C a zero
+  for i = 0 to K do
+    C[i] = 0
+  
+  // 2. Conta le occorrenze di ogni elemento in A
+  for j = 1 to A.length do // Assumendo A 1-indexed
+    C[A[j]] = C[A[j]] + 1
+  // Ora C[i] contiene il numero di elementi uguali a i
+  
+  // 3. Modifica C per contenere il numero di elementi minori o uguali a i
+  for i = 1 to K do
+    C[i] = C[i] + C[i-1]
+  // Ora C[i] contiene la posizione finale (1-indexed) dell'ultimo elemento con valore i
+  
+  // 4. Costruisci l'array ordinato B
+  for j = A.length downto 1 do // Scansiona A a ritroso per stabilità
+    B[C[A[j]]] = A[j]
+    C[A[j]] = C[A[j]] - 1
+            </code></pre>
+            <div class="clarification-box">
+                <strong>Nota sull'Indicizzazione (Aggiunto):</strong>
+                <p>Nello pseudocodice sopra, ho assunto che l'array di input `A` e l'array di output `B` siano 1-indexed (indici da 1 a `A.length`), mentre l'array dei conteggi `C` è 0-indexed (indici da 0 a `K`) per mappare direttamente i valori degli elementi di `A` agli indici di `C`. Se `A` e `B` fossero 0-indexed (da 0 a `A.length-1`), gli accessi andrebbero leggermente modificati (es. `for j = 0 to A.length-1`, e `B[C[A[j]]-1] = A[j]` se `C` continua a rappresentare posizioni 1-indexed, oppure si adatta anche `C`). La logica di base rimane la stessa.</p>
+            </div>
+        </article>
+
+        <article id="counting-sort-complessita-proprieta" class="content-section">
+            <h3 class="subsection-title">2.5. Complessità e Proprietà di Counting Sort</h3>
+            <div class="section-content">
+                <p><strong>Complessità Temporale:</strong></p>
+                <ul>
+                    <li>Passo 1 (Inizializzazione C): \(\Theta(K)\)</li>
+                    <li>Passo 2 (Conteggio occorrenze): \(\Theta(N)\)</li>
+                    <li>Passo 3 (Somma cumulativa): \(\Theta(K)\)</li>
+                    <li>Passo 4 (Costruzione B): \(\Theta(N)\)</li>
+                </ul>
+                <p>Complessità totale: \(\Theta(N+K)\).</p>
+                <p>Se \(K = O(N)\) (cioè, il range dei valori non è significativamente più grande del numero di elementi), allora la complessità diventa \(\Theta(N)\).</p>
+                <p><strong>Complessità Spaziale:</strong></p>
+                <p>Counting Sort richiede spazio ausiliario per:</p>
+                <ul>
+                    <li>L'array dei conteggi <code>C</code> di dimensione \(K+1\).</li>
+                    <li>L'array di output <code>B</code> di dimensione \(N\).</li>
+                </ul>
+                <p>Se consideriamo <code>B</code> come lo spazio di output richiesto, lo spazio ausiliario aggiuntivo è \(\Theta(K)\). Se \(K=O(N)\), lo spazio è \(\Theta(N)\). Counting Sort <strong>non è un algoritmo in-place</strong>.</p>
+                <p><strong>Proprietà di Stabilità (05:05):</strong></p>
+                <p>Counting Sort, implementato come descritto (con la scansione a ritroso nel passo 4), è un <strong>algoritmo stabile</strong>. Elementi con lo stesso valore in <code>A</code> mantengono il loro ordine relativo in <code>B</code>. Questo perché quando si incontrano elementi uguali durante la scansione a ritroso di <code>A</code>, l'elemento che compare prima in <code>A</code> (cioè più a destra) viene collocato in <code>B</code> in una posizione più a destra (indice <code>C[valore]</code> maggiore), e poi <code>C[valore]</code> viene decrementato. L'elemento uguale che compare dopo in <code>A</code> (più a sinistra) verrà collocato in <code>B</code> in una posizione più a sinistra (indice <code>C[valore]</code> ora più piccolo).</p>
+            </div>
+        </article>
+
+        <article id="radix-sort" class="content-section">
+            <h2 class="section-title">3. Radix Sort</h2>
+            <div class="section-content">
+                <p>Radix Sort è un altro algoritmo di ordinamento che può raggiungere complessità lineare sotto certe ipotesi (06:16).</p>
+            </div>
+        </article>
+        
+        <article id="radix-sort-idea" class="content-section">
+            <h3 class="subsection-title">3.1. Idea e Ipotesi</h3>
+            <div class="section-content">
+                <p><strong>Idea Principale (06:35):</strong> Radix Sort ordina i numeri (o stringhe) processando le cifre (o caratteri) individualmente. La versione più comune, e quella spiegata, è **LSD Radix Sort** (Least Significant Digit first), che ordina gli elementi in base alla cifra meno significativa, poi in base alla successiva cifra meno significativa, e così via, fino alla cifra più significativa.</p>
+                <p><strong>Ipotesi (07:00):</strong></p>
+                <ul>
+                    <li>Gli input sono numeri (o più in generale, elementi le cui chiavi possono essere viste come sequenze di "cifre").</li>
+                    <li>Tutti i numeri hanno al più <strong><code>d</code> cifre</strong>. Se hanno meno di <code>d</code> cifre, si possono "paddare" con zeri iniziali.</li>
+                    <li>Ogni cifra appartiene a un intervallo con <strong><code>K</code> valori possibili</strong> (es. 0-9 per cifre decimali, quindi K=10; 0-1 per cifre binarie, K=2).</li>
+                </ul>
+                <p><strong>Algoritmo di Ordinamento Stabile Ausiliario (07:40):</strong> Radix Sort richiede un algoritmo di ordinamento ausiliario che sia <strong>stabile</strong>. Counting Sort è una scelta naturale e efficiente per questo, dato che le singole cifre hanno tipicamente un range K piccolo.</p>
+            </div>
+        </article>
+
+        <article id="radix-sort-passaggi" class="content-section">
+            <h3 class="subsection-title">3.2. Passaggi dell'Algoritmo Radix Sort (LSD)</h3>
+            <div class="section-content">
+                <pre><code class="language-pseudocode">
+Radix-Sort(A, d)
+  // A: array di input
+  // d: numero massimo di cifre negli elementi di A
+  
+  for j = 1 to d do  // Itera dalla cifra meno significativa (j=1) alla più significativa (j=d)
+    // Ordina l'array A in base alla j-esima cifra (da destra)
+    // usando un algoritmo di ordinamento STABILE (es. Counting Sort sulla cifra j)
+    Usa-Ordinamento-Stabile(A, cifra j) 
+                </code></pre>
+                <p>La professoressa sottolinea (07:30) che si parte dalla cifra meno significativa (a destra) e si procede verso sinistra.</p>
+            </div>
+        </article>
+
+        <article id="radix-sort-esempio" class="content-section">
+            <h3 class="subsection-title">3.3. Esempio di Radix Sort</h3>
+            <p>La professoressa esegue un esempio (appunti PDF pagina 2-3, da 07:30).</p>
+            <p>Array <code>A</code> iniziale (numeri di 3 cifre, d=3):</p>
+            <p><code>[108, 095, 085, 082, 003]</code> (003 aggiunto per l'esempio, nella lezione si ferma prima)</p>
+            <p><strong>Passo 1: Ordinamento sulla 1° cifra (meno significativa - unità)</strong></p>
+            <p>Cifre delle unità: 8, 5, 5, 2, 3.</p>
+            <p>Ordinando stabilmente A in base a queste cifre (usando Counting Sort):</p>
+            <p><code>A</code> diventa: <code>[082 (da 2), 003 (da 3), 095 (da 5, prima occorrenza), 085 (da 5, seconda occorrenza), 108 (da 8)]</code></p>
+            <div class="array-representation">
+                <p>Dopo ordinamento su unità:</p>
+                <table><tbody><tr>
+                    <td>08<u>2</u></td><td>00<u>3</u></td><td>09<u>5</u></td><td>08<u>5</u></td><td>10<u>8</u></td>
+                </tr></tbody></table>
+            </div>
+
+            <p><strong>Passo 2: Ordinamento sulla 2° cifra (decine)</strong></p>
+            <p>Considerando l'array <code>[082, 003, 095, 085, 108]</code>.</p>
+            <p>Cifre delle decine: 8 (da 082), 0 (da 003), 9 (da 095), 8 (da 085), 0 (da 108).</p>
+            <p>Ordinando stabilmente A in base a queste cifre:</p>
+            <ul>
+                <li>003 (decina 0, prima occorrenza di 0 nelle decine)</li>
+                <li>108 (decina 0, seconda occorrenza di 0 nelle decine)</li>
+                <li>082 (decina 8, prima occorrenza di 8 nelle decine)</li>
+                <li>085 (decina 8, seconda occorrenza di 8 nelle decine)</li>
+                <li>095 (decina 9)</li>
+            </ul>
+            <p><code>A</code> diventa: <code>[003, 108, 082, 085, 095]</code></p>
+             <div class="array-representation">
+                <p>Dopo ordinamento su decine:</p>
+                <table><tbody><tr>
+                    <td>0<u>0</u>3</td><td>1<u>0</u>8</td><td>0<u>8</u>2</td><td>0<u>8</u>5</td><td>0<u>9</u>5</td>
+                </tr></tbody></table>
+            </div>
+
+            <p><strong>Passo 3: Ordinamento sulla 3° cifra (più significativa - centinaia)</strong></p>
+            <p>Considerando l'array <code>[003, 108, 082, 085, 095]</code>.</p>
+            <p>Cifre delle centinaia: 0 (da 003), 1 (da 108), 0 (da 082), 0 (da 085), 0 (da 095).</p>
+            <p>Ordinando stabilmente A in base a queste cifre:</p>
+            <ul>
+                <li>003 (centinaio 0, prima occorrenza)</li>
+                <li>082 (centinaio 0, seconda occorrenza, mantenendo ordine relativo con 085 e 095)</li>
+                <li>085 (centinaio 0, terza occorrenza)</li>
+                <li>095 (centinaio 0, quarta occorrenza)</li>
+                <li>108 (centinaio 1)</li>
+            </ul>
+            <p><code>A</code> diventa: <code>[003, 082, 085, 095, 108]</code>. L'array è ora ordinato.</p>
+            <div class="array-representation">
+                <p>Dopo ordinamento su centinaia (Array finale ordinato):</p>
+                <table><tbody><tr>
+                    <td><u>0</u>03</td><td><u>0</u>82</td><td><u>0</u>85</td><td><u>0</u>95</td><td><u>1</u>08</td>
+                </tr></tbody></table>
+            </div>
+        </article>
+        
+        <article id="radix-sort-correttezza" class="content-section">
+            <h3 class="subsection-title">3.4. Correttezza di Radix Sort (Importanza della Stabilità)</h3>
+            <div class="section-content">
+                <p>La correttezza di Radix Sort (LSD) si dimostra per <strong>induzione sul numero di cifre <code>j</code></strong> per cui l'array è stato ordinato.</p>
+                <p><strong>Invariante di Ciclo:</strong> All'inizio dell'iterazione <code>j</code> (o dopo che l'ordinamento sulla (j-1)-esima cifra è stato completato), l'array <code>A</code> è ordinato rispetto alle <code>j-1</code> cifre meno significative.</p>
+                <ul>
+                    <li><strong>Caso Base (j=1):</strong> Prima del primo passo, l'array è ordinato rispetto a 0 cifre (banalmente vero). Dopo aver ordinato sulla 1° cifra (la meno significativa), l'array è ordinato rispetto a quella cifra.</li>
+                    <li><strong>Passo Induttivo:</strong> Assumiamo che l'array sia ordinato rispetto alle <code>j-1</code> cifre meno significative. Ora ordiniamo l'array in base alla <code>j</code>-esima cifra usando un algoritmo stabile.
+                        <ul>
+                            <li>Consideriamo due numeri <code>a</code> e <code>b</code>.
+                                <ul>
+                                    <li>Se la <code>j</code>-esima cifra di <code>a</code> è minore della <code>j</code>-esima cifra di <code>b</code>, allora <code>a</code> precederà <code>b</code> dopo l'ordinamento sulla <code>j</code>-esima cifra, indipendentemente dalle cifre meno significative (questo è corretto).</li>
+                                    <li>Se la <code>j</code>-esima cifra di <code>a</code> è maggiore della <code>j</code>-esima cifra di <code>b</code>, allora <code>b</code> precederà <code>a</code> (corretto).</li>
+                                    <li><strong>Se la <code>j</code>-esima cifra di <code>a</code> è uguale alla <code>j</code>-esima cifra di <code>b</code>:</strong> Qui entra in gioco la stabilità. Poiché l'algoritmo di ordinamento sulla <code>j</code>-esima cifra è stabile, l'ordine relativo tra <code>a</code> e <code>b</code> (che era determinato dalle <code>j-1</code> cifre meno significative, per ipotesi induttiva) viene <strong>preservato</strong>. Quindi, se <code>a</code> veniva prima di <code>b</code> (perché le sue prime <code>j-1</code> cifre formavano un numero più piccolo), continuerà a venire prima.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>Dopo <code>d</code> passaggi, l'array sarà ordinato rispetto a tutte le <code>d</code> cifre, e quindi completamente ordinato.</p>
+                 <div class="note-box">
+                    <strong>Crucialità della Stabilità:</strong> Se l'algoritmo di ordinamento intermedio non fosse stabile, l'ordine corretto stabilito dalle cifre meno significative potrebbe essere distrutto quando si ordinano cifre più significative uguali, portando a un risultato finale errato.
+                </div>
+            </div>
+        </article>
+
+        <article id="radix-sort-complessita" class="content-section">
+            <h3 class="subsection-title">3.5. Complessità di Radix Sort</h3>
+            <div class="section-content">
+                <p>Siano:</p>
+                <ul>
+                    <li><code>N</code>: numero di elementi da ordinare.</li>
+                    <li><code>d</code>: numero massimo di cifre per elemento.</li>
+                    <li><code>K</code>: numero di valori possibili per ogni cifra (es. K=10 per cifre decimali, K=256 per byte).</li>
+                </ul>
+                <p>Se si usa Counting Sort per ordinare su ogni cifra (che ha K valori possibili), il costo di un passaggio di Counting Sort è \(\Theta(N+K)\).</p>
+                <p>Ci sono <code>d</code> passaggi (uno per ogni cifra).</p>
+                <p>Complessità totale di Radix Sort: \(\Theta(d \cdot (N+K))\).</p>
+                <p><strong>Quando Radix Sort è Lineare in N? (08:30)</strong></p>
+                <ul>
+                    <li>Se <code>d</code> è una costante (cioè il numero di cifre non dipende da N) e se <code>K</code> è dell'ordine di <code>N</code> (cioè \(K = O(N)\)) o costante, allora la complessità diventa \(\Theta(1 \cdot (N+N)) = \Theta(N)\) o \(\Theta(1 \cdot (N+1)) = \Theta(N)\).</li>
+                    <li>Esempio: ordinare numeri interi di 32 bit (\(d \approx 4\) se si usano byte come "cifre", \(K=256\)). Se \(N\) è grande, \(N+K \approx N\), e la complessità è \(\Theta(d \cdot N)\), che è \(\Theta(N)\) se \(d\) è costante.</li>
+                </ul>
+                <p>La professoressa discute (09:00) come la scelta di `d` e `K` (o la base `b` se le cifre sono in base `b`) sia importante. Se i numeri sono nell'intervallo da 0 a \(N^c - 1\) (per una costante c), allora \(d = \Theta(\log_b N^c) = \Theta(c \log_b N)\). Se si sceglie \(b=N\), allora \(d = \Theta(1)\) e \(K=N\), quindi \(\Theta(1(N+N)) = \Theta(N)\). Se si sceglie \(b=\text{costante}\) (es. 10), allora \(d=\Theta(\log N)\) e \(K=\text{costante}\), quindi \(\Theta(\log N (N+1)) = \Theta(N \log N)\).</p>
+                <p>La scelta ottimale della base per Radix Sort, quando si ordinano interi, è spesso correlata a N (es. \(b=N\)) per ottenere una complessità teorica lineare, ma in pratica si usano basi più piccole come potenze di 2 per efficienza con le operazioni a bit.</p>
+            </div>
+        </article>
+
+        <article id="radix-sort-lsd-msd" class="content-section">
+            <h3 class="subsection-title">3.6. LSD (Least Significant Digit) vs MSD (Most Significant Digit) Radix Sort (Cenno)</h3>
+            <div class="section-content">
+                <p>La versione di Radix Sort discussa è <strong>LSD Radix Sort</strong> (si parte dalla cifra meno significativa).</p>
+                <p>Esiste anche <strong>MSD Radix Sort</strong> (si parte dalla cifra più significativa):</p>
+                <ul>
+                    <li>Si ordina prima in base alla cifra più significativa. Questo crea dei "bucket" di numeri che hanno la stessa prima cifra.</li>
+                    <li>Poi si ordina ricorsivamente ogni bucket in base alla seconda cifra più significativa, e così via.</li>
+                    <li>MSD Radix Sort <strong>non richiede</strong> che l'algoritmo di ordinamento intermedio sia stabile.</li>
+                    <li>È concettualmente più simile a QuickSort (divide in bucket, poi ordina i bucket).</li>
+                    <li>Può essere più complesso da implementare efficientemente.</li>
+                </ul>
+                <p>La professoressa ha menzionato (08:00) che la versione LSD è quella standard e più semplice da implementare correttamente con Counting Sort.</p>
+            </div>
+        </article>
+
+        <article id="bucket-sort" class="content-section">
+            <h2 class="section-title">4. Bucket Sort (Ordinamento a Secchielli)</h2>
+            <div class="section-content">
+                <p>Bucket Sort è un altro algoritmo di ordinamento che può avere prestazioni lineari sotto certe ipotesi (09:05).</p>
+            </div>
+        </article>
+
+        <article id="bucket-sort-idea" class="content-section">
+            <h3 class="subsection-title">4.1. Idea e Ipotesi</h3>
+            <div class="section-content">
+                <p><strong>Idea Principale (09:08):</strong></p>
+                <ol>
+                    <li>Dividere l'intervallo di valori dei dati di input (tipicamente l'intervallo [0, 1)) in <code>N</code> sottointervalli di uguale ampiezza, chiamati "bucket" (secchielli).</li>
+                    <li>Distribuire gli <code>N</code> elementi dell'array di input nei rispettivi bucket.</li>
+                    <li>Ordinare gli elementi all'interno di ciascun bucket individualmente (spesso con un algoritmo semplice come Insertion Sort, dato che ci si aspetta che ogni bucket contenga pochi elementi).</li>
+                    <li>Concatenare gli elementi dei bucket ordinati (dal primo all'ultimo bucket) per produrre l'array finale ordinato.</li>
+                </ol>
+                <p><strong>Ipotesi Fondamentale (09:30):</strong></p>
+                <p>Bucket Sort funziona bene (cioè, ha una complessità attesa lineare) se gli elementi dell'array di input sono <strong>estratti da una distribuzione di probabilità uniforme e indipendente</strong> sull'intervallo [0, 1).
+                Questa ipotesi implica che ci si aspetta che gli elementi si distribuiscano in modo approssimativamente uniforme tra i bucket, con pochi elementi per bucket.</p>
+                <div class="clarification-box">
+                    <strong>Approfondimento (Aggiunto): Cosa significa "Uniformemente e Indipendentemente Distribuiti"?</strong>
+                    <ul>
+                        <li><strong>Uniformemente:</strong> Ogni sottointervallo di [0,1) di una certa lunghezza ha la stessa probabilità di contenere un elemento. Non ci sono "zone calde" dove gli elementi si concentrano di più.</li>
+                        <li><strong>Indipendentemente:</strong> Il valore di un elemento non influenza il valore di un altro elemento.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="bucket-sort-passaggi" class="content-section">
+            <h3 class="subsection-title">4.2. Passaggi dell'Algoritmo Bucket Sort</h3>
+            <div class="section-content">
+                <p>Sia <code>A</code> l'array di input di <code>N</code> elementi, con valori in \([0, 1)\).</p>
+                <ol>
+                    <li>
+                        <strong>Creazione dei Bucket (09:50):</strong>
+                        <p>Creare un array <code>B</code> di <code>N</code> liste concatenate (i bucket), inizialmente vuote. <code>B[j]</code> rappresenterà il j-esimo bucket.
+                        Costo: \(\Theta(N)\) (per creare N liste vuote).</p>
+                    </li>
+                    <li>
+                        <strong>Distribuzione degli Elementi nei Bucket (10:00):</strong>
+                        <p>Per ogni elemento <code>A[i]</code> nell'array di input:</p>
+                        <ul>
+                            <li>Calcolare l'indice del bucket in cui <code>A[i]</code> deve essere inserito: <code>indice_bucket = floor(N * A[i])</code>.
+                            (Poiché \(0 \le A[i] < 1\), allora \(0 \le N \cdot A[i] < N\), quindi <code>floor(N * A[i])</code> darà un indice da 0 a N-1).</li>
+                            <li>Inserire <code>A[i]</code> nella lista concatenata <code>B[indice_bucket]</code>. L'inserimento in testa a una lista concatenata è \(\Theta(1)\).</li>
+                        </ul>
+                        <p>Costo totale: \(\Theta(N)\) (per scorrere A e fare N inserimenti \(\Theta(1)\)).</p>
+                    </li>
+                    <li>
+                        <strong>Ordinamento dei Singoli Bucket (10:30):</strong>
+                        <p>Per ogni bucket <code>B[j]</code> (per <code>j</code> da 0 a N-1):</p>
+                        <ul>
+                            <li>Ordinare la lista concatenata <code>B[j]</code> utilizzando un algoritmo di ordinamento efficiente per piccole liste, come <strong>Insertion Sort</strong>.</li>
+                        </ul>
+                        <p>Il costo di questo passo dipende da quanti elementi finiscono in ciascun bucket. Vedremo l'analisi del caso atteso.</p>
+                    </li>
+                    <li>
+                        <strong>Concatenazione dei Bucket Ordinati (10:45):</strong>
+                        <p>Scorrere l'array dei bucket <code>B</code> da <code>B[0]</code> a <code>B[N-1]</code>. Per ogni bucket, prendere gli elementi (ora ordinati al suo interno) e accodarli sequenzialmente nell'array di output finale (o direttamente in <code>A</code> se si vuole tentare un in-place approssimativo, anche se più complesso).
+                        Costo: \(\Theta(N)\) (per scorrere tutti gli elementi una volta).</p>
+                    </li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="bucket-sort-esempio" class="content-section">
+            <h3 class="subsection-title">4.3. Esempio di Bucket Sort</h3>
+            <p>La professoressa illustra un esempio (appunti PDF pagina 4, da 09:50).</p>
+            <p>Sia <code>A = [0.3, 0.1, 0.8, 0.5, 0.78]</code>. Qui <code>N=5</code>.
+            Creiamo 5 bucket (liste), B[0]...B[4].</p>
+            <p><strong>Distribuzione:</strong></p>
+            <ul>
+                <li>A[0]=0.3: indice = floor(5 * 0.3) = floor(1.5) = 1. Inserisci 0.3 in B[1].</li>
+                <li>A[1]=0.1: indice = floor(5 * 0.1) = floor(0.5) = 0. Inserisci 0.1 in B[0].</li>
+                <li>A[2]=0.8: indice = floor(5 * 0.8) = floor(4.0) = 4. Inserisci 0.8 in B[4].</li>
+                <li>A[3]=0.5: indice = floor(5 * 0.5) = floor(2.5) = 2. Inserisci 0.5 in B[2].</li>
+                <li>A[4]=0.78: indice = floor(5 * 0.78) = floor(3.9) = 3. Inserisci 0.78 in B[3].</li>
+            </ul>
+            <p>Stato dei Bucket dopo distribuzione:</p>
+            <ul>
+                <li>B[0]: [0.1]</li>
+                <li>B[1]: [0.3]</li>
+                <li>B[2]: [0.5]</li>
+                <li>B[3]: [0.78]</li>
+                <li>B[4]: [0.8]</li>
+            </ul>
+            <p>(In questo esempio fortunato, ogni bucket ha al più un elemento).</p>
+            <p><strong>Ordinamento Bucket:</strong> Ogni bucket è già ordinato (o l'ordinamento è banale).</p>
+            <p><strong>Concatenazione:</strong> [0.1, 0.3, 0.5, 0.78, 0.8]. L'array è ordinato.</p>
+            <div class="mermaid-container">
+                <pre class="mermaid">
+                graph TD
+                    subgraph "Bucket Sort Esempio (A=[0.3, 0.1, 0.8, 0.5, 0.78], N=5)"
+                        Input("A = [0.3, 0.1, 0.8, 0.5, 0.78]") --> Distr["Distribuzione nei Bucket"];
+                        
+                        subgraph "Bucket (Liste)"
+                            B0["B[0]: [0, 0.2)"] --> L0["[0.1]"];
+                            B1["B[1]: [0.2, 0.4)"] --> L1["[0.3]"];
+                            B2["B[2]: [0.4, 0.6)"] --> L2["[0.5]"];
+                            B3["B[3]: [0.6, 0.8)"] --> L3["[0.78]"];
+                            B4["B[4]: [0.8, 1.0)"] --> L4["[0.8]"];
+                        end
+                        Distr --> B0; Distr --> B1; Distr --> B2; Distr --> B3; Distr --> B4;
+                        
+                        L0 --> SortB["Ordina ogni Bucket (già ordinati qui)"];
+                        L1 --> SortB; L2 --> SortB; L3 --> SortB; L4 --> SortB;
+                        
+                        SortB --> Concat["Concatena i Bucket"];
+                        Concat --> Output("Output: [0.1, 0.3, 0.5, 0.78, 0.8]");
+                    end
+                </pre>
+            </div>
+        </article>
+
+        <article id="bucket-sort-complessita" class="content-section">
+            <h3 class="subsection-title">4.4. Complessità di Bucket Sort</h3>
+            <div class="section-content">
+                <p><strong>Caso Atteso (con input uniformemente distribuito) (10:50):</strong></p>
+                <p>Sia \(n_j\) il numero di elementi nel bucket \(B[j]\).</p>
+                <ul>
+                    <li>Passi 1, 2, 4 (creazione, distribuzione, concatenazione): \(\Theta(N)\) totali.</li>
+                    <li>Passo 3 (ordinamento bucket): Il costo per ordinare il bucket \(B[j]\) con Insertion Sort è \(O(n_j^2)\).
+                    Il costo totale atteso per il passo 3 è \(E\left[\sum_{j=0}^{N-1} O(n_j^2)\right]\).</li>
+                    <li>Si può dimostrare (analisi probabilistica non svolta in dettaglio) che se gli input sono uniformemente distribuiti, \(E\left[\sum_{j=0}^{N-1} n_j^2\right] = \Theta(N)\).
+                    L'intuizione è che \(n_j\) è piccolo per la maggior parte dei bucket. Il valore atteso di \(n_j\) è 1. \(E[n_j^2] = E[n_j]^2 + Var(n_j)\). Per la distribuzione uniforme, la varianza è piccola e la somma dei quadrati rimane lineare.</li>
+                </ul>
+                <p>Quindi, la <strong>complessità totale attesa di Bucket Sort è \(\Theta(N)\)</strong>.</p>
+                <p><strong>Caso Peggiore (11:30):</strong></p>
+                <p>Se tutti gli \(N\) elementi di input cadono nello stesso bucket (es. sono tutti molto vicini tra loro o l'ipotesi di uniformità non vale), allora:</p>
+                <ul>
+                    <li>Un solo bucket conterrà \(N\) elementi.</li>
+                    <li>Ordinare quel bucket con Insertion Sort costerà \(\Theta(N^2)\).</li>
+                    <li>Gli altri passi rimangono \(\Theta(N)\).</li>
+                </ul>
+                <p>Quindi, la <strong>complessità nel caso peggiore di Bucket Sort è \(\Theta(N^2)\)</strong>.</p>
+                <div class="note-box">
+                    <strong>Come gestire il caso peggiore:</strong> Se si teme il caso peggiore, si può usare un algoritmo di ordinamento \(\Theta(N \log N)\) (come Merge Sort o HeapSort) per ordinare i bucket che diventano troppo grandi, invece di Insertion Sort. Questo porterebbe la complessità del caso peggiore a \(\Theta(N \log N)\) mantenendo il \(\Theta(N)\) atteso.
+                </div>
+            </div>
+        </article>
+        
+        <article id="conclusioni-ordinamento-lineare" class="content-section">
+            <h2 class="section-title">5. Conclusioni sugli Algoritmi di Ordinamento Lineare</h2>
+            <div class="section-content">
+                <p>La professoressa conclude riassumendo (12:20):</p>
+                <ul>
+                    <li><strong>Counting Sort:</strong> \(\Theta(N+K)\). Lineare se \(K=O(N)\). Stabile. Non in-place. Richiede interi in un range limitato.</li>
+                    <li><strong>Radix Sort:</strong> \(\Theta(d(N+K))\). Lineare se \(d\) è costante e \(K=O(N)\) (o costante). Stabile (se usa un algoritmo stabile internamente). Non in-place. Richiede numeri con un numero fisso di cifre (o paddabili).</li>
+                    <li><strong>Bucket Sort:</strong> \(\Theta(N)\) nel caso atteso (con input uniformemente distribuiti). \(\Theta(N^2)\) nel caso peggiore (se si usa Insertion Sort per i bucket). Tipicamente non stabile (dipende dall'ordinamento dei bucket e dall'inserimento). Richiede input da una distribuzione nota (tipicamente uniforme su [0,1)).</li>
+                </ul>
+                <p>Questi algoritmi superano il limite \(\Omega(N \log N)\) perché non si basano solo su confronti, ma sfruttano informazioni sulla struttura o distribuzione dei dati (valori interi in un range, numero di cifre, distribuzione uniforme).</p>
+            </div>
+        </article>
+
+        <article id="esercizi-casa" class="content-section">
+            <h2 class="section-title">6. Esercizi e Riflessioni per Casa</h2>
+            <div class="section-content">
+                <p>La professoressa non ha assegnato esplicitamente esercizi per casa in questa lezione, ma ha posto delle domande di riflessione implicite durante la spiegazione, come:</p>
+                <ul>
+                    <li>Come cambierebbe Counting Sort se il range degli interi fosse \([M, M+K]\) invece di \([0, K]\)? (Vedi box di approfondimento aggiunto).</li>
+                    <li>Cosa succederebbe a Radix Sort se si usasse un algoritmo di ordinamento non stabile per le cifre? (Porta a un risultato errato).</li>
+                    <li>Come si potrebbe rendere Bucket Sort \(\Theta(N \log N)\) nel caso peggiore? (Usando un algoritmo di ordinamento efficiente per i bucket grandi).</li>
+                </ul>
+                <div class="exercise-box">
+                    <strong>Esercizio Suggerito (Aggiunto): Implementazione di Counting Sort per Caratteri</strong>
+                    <p><strong>Testo:</strong> Scrivere una procedura <code>CountingSortChars(A, B)</code> che ordina un array <code>A</code> di caratteri (es. lettere minuscole 'a'-'z') e mette il risultato in <code>B</code>, utilizzando Counting Sort. Assumere che i caratteri possano essere mappati a interi (es. 'a'=0, 'b'=1, ..., 'z'=25).</p>
+                    <p><strong>Svolgimento (Idea):</strong></p>
+                    <ol>
+                        <li>Determinare il valore di K. Se sono solo lettere minuscole, K=25 (per indici 0-25).</li>
+                        <li>L'array dei conteggi `C` avrà dimensione 26.</li>
+                        <li>Nel passo di conteggio occorrenze, per un carattere `char_A` in `A`, si incrementerà `C[valore_intero(char_A)]`.</li>
+                        <li>Nel passo di costruzione di `B`, quando si posiziona `char_A`, lo si mette in `B[C[valore_intero(char_A)]]`.</li>
+                    </ol>
+                    <pre><code class="language-pseudocode">
+CountingSortChars(A, B) // A, B array di caratteri, K=25 (per 'a' to 'z')
+  let C[0...25] be a new array
+
+  for i = 0 to 25 do
+    C[i] = 0
+  
+  for j = 0 to A.length-1 do // Assumendo A 0-indexed
+    // char_to_int converte 'a'->0, 'b'->1, ...
+    C[char_to_int(A[j])] = C[char_to_int(A[j])] + 1
+  
+  for i = 1 to 25 do
+    C[i] = C[i] + C[i-1]
+  
+  for j = A.length-1 downto 0 do // Scansiona A a ritroso
+    // int_to_char converte 0->'a', 1->'b', ... (non serve per B, A[j] è già char)
+    // C[valore] dà la posizione 1-indexed, quindi B è 0-indexed
+    B[C[char_to_int(A[j])] - 1] = A[j] 
+    C[char_to_int(A[j])] = C[char_to_int(A[j])] - 1
+                    </code></pre>
+                </div>
+                <div class="exercise-box">
+                    <strong>Esercizio Suggerito (Aggiunto): Quando Radix Sort è meglio di Counting Sort?</strong>
+                     <p><strong>Testo:</strong> Considera di dover ordinare N interi. Se sai che il valore massimo K è molto grande, ad esempio \(K \approx N^3\), ma sai anche che i numeri sono rappresentati con un numero di cifre \(d = \Theta(\log N)\) in una certa base B (dove B è piccolo, es. B=10 o B=256). Quale algoritmo tra Counting Sort e Radix Sort (usando Counting Sort per le cifre) sarebbe asintoticamente migliore?</p>
+                    <p><strong>Svolgimento (Idea):</strong></p>
+                    <ul>
+                        <li><strong>Counting Sort:</strong> Complessità \(\Theta(N+K)\). Se \(K \approx N^3\), allora \(\Theta(N+N^3) = \Theta(N^3)\).</li>
+                        <li><strong>Radix Sort:</strong> Complessità \(\Theta(d(N+B))\).
+                            <ul>
+                                <li>\(d = \Theta(\log N)\).</li>
+                                <li>Se B è una costante piccola (es. 10 o 256), allora \(N+B \approx N\).</li>
+                                <li>La complessità di Radix Sort diventa \(\Theta(\log N \cdot N) = \Theta(N \log N)\).</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <p>In questo scenario, Radix Sort con \(\Theta(N \log N)\) è asintoticamente molto migliore di Counting Sort con \(\Theta(N^3)\).</p>
+                </div>
+
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script> <!-- Assumendo che sia nella stessa struttura di cartelle -->
+    <script>
+    // Stessa logica di Mermaid.js da lezioni precedenti per il rendering
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || ""; 
+                mermaidOriginalDefinitions.set(id, decodedContent.trim());
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
