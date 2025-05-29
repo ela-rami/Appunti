@@ -391,11 +391,15 @@
                             Tm_1["Slot m-1"]
                         end
                         
-                        k1 -- "h(k1)" --> T1;
-                        k2 -- "h(k2)" --> Tm_1;
-                        k3 -- "h(k3)" --> T1; // Collisione! k1 e k3 mappano allo stesso slot
+                        k1 --"h(k1)"--> T1
+                        k2 --"h(k2)"--> Tm_1
+                        k3 --"h(k3)"--> T1
+                        
+                        classDef collision fill:#ef4444,stroke:#dc2626,color:#fff
+                        class T1 collision
                     </pre>
                 </div>
+                <p><em>Nota: k1 e k3 mappano entrambi allo Slot 1, causando una collisione (evidenziata in rosso).</em></p>
             </div>
         </article>
 
