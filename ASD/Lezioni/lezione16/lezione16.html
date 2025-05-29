@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lezione 16: Tabelle di Hash (Chaining, Open Addressing)</title>
+    <title>Lezione 16: Bucket Sort (Conclusione); Tabelle di Hash (Chaining)</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
     <!-- MathJax per rendering formule LaTeX -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <!-- Mermaid.js per diagrammi -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    <link rel="stylesheet" href="../../assets/css/common.css"> <!-- Assumendo che sia nella stessa struttura di cartelle -->
+    <link rel="stylesheet" href="../../assets/css/common.css">
 
     <style>
         /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
@@ -157,24 +157,15 @@
              background-color: var(--bg-card);
              color: var(--text-primary);
         }
-         .array-representation td.highlight-key {
-            background-color: var(--accent-secondary) !important;
-            color: var(--bg-deep-space) !important;
+        .array-representation td.highlight-current {
+            border: 2px solid var(--accent-secondary) !important;
             font-weight: bold;
         }
-         .array-representation td.highlight-probe {
-            border: 2px solid var(--accent-primary) !important;
-            font-style: italic;
+        .array-representation td.highlight-cell-C {
+            background-color: rgba(129, 140, 248, 0.2) !important; 
         }
-        .array-representation td.highlight-occupied {
-            background-color: rgba(239, 68, 68, 0.15) !important; /* Rosso chiaro */
-        }
-        .array-representation td.highlight-empty {
-            background-color: rgba(52, 211, 153, 0.1) !important; /* Verde chiaro */
-        }
-        .array-representation td.highlight-deleted {
-            background-color: rgba(107, 114, 128, 0.2) !important; /* Grigio */
-            text-decoration: line-through;
+         .array-representation td.highlight-cell-B {
+            background-color: rgba(96, 165, 250, 0.2) !important; 
         }
 
 
@@ -273,7 +264,7 @@
     <div class="overlay"></div>
     <header>
         <button class="hamburger-menu" id="hamburger-btn">☰</button>
-        <h1>Lezione 16: Tabelle di Hash (Chaining, Open Addressing)</h1>
+        <h1>Lezione 16: Bucket Sort (Conclusione); Tabelle di Hash (Chaining)</h1>
         <div></div>
     </header>
 
@@ -284,556 +275,395 @@
         </div>
         <h2>Indice Argomenti</h2>
         <ul>
-            <li><a href="#intro-tabelle-hash" class="sidebar-link">1. Introduzione alle Tabelle di Hash</a></li>
-            <li><a href="#indirizzamento-diretto" class="sidebar-link">1.1. Indirizzamento Diretto e sue Limitazioni</a></li>
-            <li><a href="#funzione-hash" class="sidebar-link">2. Funzione di Hash</a></li>
-            <li><a href="#proprieta-buona-hash" class="sidebar-link">2.1. Proprietà di una Buona Funzione di Hash</a></li>
-            <li><a href="#collisioni-hash" class="sidebar-link">3. Il Problema delle Collisioni</a></li>
-            <li><a href="#hash-chaining" class="sidebar-link">4. Risoluzione delle Collisioni: Chaining (Concatenamento)</a></li>
-            <li><a href="#chaining-operazioni" class="sidebar-link">4.1. Operazioni con Chaining (Inserimento, Ricerca, Cancellazione)</a></li>
-            <li><a href="#chaining-complessita" class="sidebar-link">4.2. Analisi della Complessità con Chaining (Fattore di Carico \(\alpha\))</a></li>
-            <li><a href="#hashing-uniforme-semplice" class="sidebar-link">4.3. Ipotesi di Hashing Uniforme Semplice</a></li>
-            <li><a href="#chaining-corollario" class="sidebar-link">4.4. Corollario: Costo Atteso \(\Theta(1)\) con Chaining</a></li>
-            <li><a href="#hash-open-addressing" class="sidebar-link">5. Risoluzione delle Collisioni: Open Addressing (Indirizzamento Aperto)</a></li>
-            <li><a href="#open-addressing-idea" class="sidebar-link">5.1. Idea Generale e Funzione di Scansione</a></li>
-            <li><a href="#open-addressing-inserimento" class="sidebar-link">5.2. Inserimento con Open Addressing</a></li>
-            <li><a href="#open-addressing-ricerca" class="sidebar-link">5.3. Ricerca con Open Addressing</a></li>
-            <li><a href="#open-addressing-cancellazione" class="sidebar-link">5.4. Cancellazione con Open Addressing (Problematica)</a></li>
-            <li><a href="#tecniche-scansione-open-addressing" class="sidebar-link">6. Tecniche di Scansione per Open Addressing</a></li>
-            <li><a href="#linear-probing" class="sidebar-link">6.1. Linear Probing (Scansione Lineare)</a></li>
-            <li><a href="#quadratic-probing" class="sidebar-link">6.2. Quadratic Probing (Scansione Quadratica)</a></li>
-            <li><a href="#double-hashing" class="sidebar-link">6.3. Double Hashing (Hashing Doppio)</a></li>
-            <li><a href="#open-addressing-complessita" class="sidebar-link">7. Analisi della Complessità con Open Addressing</a></li>
-            <li><a href="#conclusioni-tabelle-hash" class="sidebar-link">8. Conclusioni sulle Tabelle di Hash</a></li>
-            <li><a href="#esercizi-riflessioni" class="sidebar-link">9. Esercizi e Riflessioni per Casa</a></li>
+            <li><a href="#intro-setup" class="sidebar-link">1. Introduzione e Setup Tecnico</a></li>
+            <li><a href="#bucket-sort-recap" class="sidebar-link">2. Bucket Sort: Ripresa e Approfondimenti</a></li>
+            <li><a href="#bucket-sort-complessita" class="sidebar-link">2.1. Analisi della Complessità (Caso Atteso e Peggiore)</a></li>
+            <li><a href="#bucket-sort-indice" class="sidebar-link">2.2. Dettaglio sul Calcolo dell'Indice del Bucket</a></li>
+            <li><a href="#bucket-sort-proprieta" class="sidebar-link">2.3. Proprietà di Bucket Sort (Stabilità, In-place)</a></li>
+            <li><a href="#tabelle-hash-intro" class="sidebar-link">3. Tabelle di Hash: Ripasso e Obiettivi</a></li>
+            <li><a href="#tabelle-hash-definizioni" class="sidebar-link">3.1. Definizioni Chiave</a></li>
+            <li><a href="#hash-chaining" class="sidebar-link">4. Hashing con Concatenamento (Chaining)</a></li>
+            <li><a href="#hash-chaining-struttura" class="sidebar-link">4.1. Struttura: Array di Liste Concatenate</a></li>
+            <li><a href="#hash-chaining-operazioni" class="sidebar-link">4.2. Operazioni: Inserimento, Ricerca, Cancellazione</a></li>
+            <li><a href="#hash-chaining-esempio" class="sidebar-link">4.3. Esempio Pratico</a></li>
+            <li><a href="#hash-chaining-analisi" class="sidebar-link">4.4. Analisi delle Prestazioni di Chaining</a></li>
+            <li><a href="#hash-chaining-fattore-carico" class="sidebar-link">4.4.1. Fattore di Carico (α)</a></li>
+            <li><a href="#hash-chaining-suha" class="sidebar-link">4.4.2. Ipotesi di Hashing Uniforme Semplice (SUHA)</a></li>
+            <li><a href="#hash-chaining-costo-negativo" class="sidebar-link">4.4.3. Costo Atteso della Ricerca (Esito Negativo)</a></li>
+            <li><a href="#hash-chaining-costo-positivo" class="sidebar-link">4.4.4. Costo Atteso della Ricerca (Esito Positivo)</a></li>
+            <li><a href="#hash-chaining-corollario" class="sidebar-link">4.4.5. Corollario: Complessità Θ(1) se M = Θ(N)</a></li>
+            <li><a href="#hash-chaining-peggiore" class="sidebar-link">4.4.6. Caso Peggiore</a></li>
+            <li><a href="#open-addressing-cenno" class="sidebar-link">5. Cenno all'Open Addressing</a></li>
+            <li><a href="#esercizi-suggeriti" class="sidebar-link">6. Esercizi Suggeriti (Aggiunti dall'AI)</a></li>
+            <li><a href="#conclusioni" class="sidebar-link">7. Conclusioni</a></li>
         </ul>
     </nav>
 
     <main>
-        <article id="intro-tabelle-hash" class="content-section">
-            <h2 class="section-title">1. Introduzione alle Tabelle di Hash</h2>
+        <article id="intro-setup" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione e Setup Tecnico</h2>
             <div class="section-content">
-                <p>La professoressa inizia (00:06) introducendo le <strong>Tabelle di Hash</strong> come una struttura dati progettata per implementare in modo efficiente le operazioni di un dizionario: inserimento, cancellazione e ricerca di elementi. L'obiettivo è ottenere queste operazioni in tempo medio costante, \(\Theta(1)\).</p>
-                <p>Si fa riferimento a un <strong>universo U</strong> di possibili chiavi, che può essere molto grande (es. tutte le possibili stringhe, tutti i possibili numeri interi rappresentabili). Noi siamo interessati a gestire un <strong>sottoinsieme K</strong> di queste chiavi, dove la cardinalità di K (indicata con \(n = |K|\)) è tipicamente molto più piccola della cardinalità di U (\(n \ll |U|\)).</p>
-                <p>La tabella di hash stessa, \(T\), avrà una dimensione \(m\) (numero di "slot" o "celle"). Idealmente, vorremmo che \(m\) fosse proporzionale a \(n\) (\(m = \Theta(n)\)), e non a \(|U|\).</p>
-                <div class="mermaid-container">
-                    <pre class="mermaid">
-                    graph TD
-                        U["Universo U (molto grande)"]
-                        subgraph "Tabella di Hash T (dimensione m)"
-                            direction LR
-                            T0["Slot 0"]
-                            T1["Slot 1"]
-                            Tdots["..."]
-                            Tm_1["Slot m-1"]
-                        end
-                        K_set["Insieme K di chiavi attuali<br/>(n = |K| elementi)"]
-                        
-                        K_set -- "Mappate da h(chiave)" --> T
-                        U -.-> K_set
-                    </pre>
+                <p>La lezione inizia con la professoressa che sistema il tablet per la condivisione dello schermo e si assicura che la registrazione sia attiva. Fa riferimento agli appunti "Nota 23 nov 2020 (2).pdf".</p>
+                <p>La professoressa ricorda che nella lezione precedente si è parlato di algoritmi di ordinamento in tempo lineare, introducendo Counting Sort, Radix Sort e iniziando a parlare di Bucket Sort, che verrà concluso oggi.</p>
+            </div>
+        </article>
+
+        <article id="bucket-sort-recap" class="content-section">
+            <h2 class="section-title">2. Bucket Sort: Ripresa e Approfondimenti</h2>
+            <div class="section-content">
+                <p>Si riprende l'algoritmo Bucket Sort, continuando la discussione iniziata nella lezione precedente (Lezione 15).</p>
+                <h3 class="subsection-title">2.1. Recap Idea Generale e Ipotesi</h3>
+                <div class="section-content">
+                    <p><strong>Idea di Bucket Sort:</strong></p>
+                    <ol>
+                        <li>Dividere l'intervallo di input (tipicamente [0,1)) in N sottointervalli (bucket).</li>
+                        <li>Distribuire gli N elementi di input nei bucket corrispondenti.</li>
+                        <li>Ordinare ciascun bucket (es. con Insertion Sort).</li>
+                        <li>Concatenare i bucket ordinati.</li>
+                    </ol>
+                    <p><strong>Ipotesi Fondamentale:</strong> Gli elementi di input sono distribuiti uniformemente e indipendentemente nell'intervallo [0,1).</p>
                 </div>
             </div>
         </article>
 
-        <article id="indirizzamento-diretto" class="content-section">
-            <h3 class="subsection-title">1.1. Indirizzamento Diretto e sue Limitazioni</h3>
+        <article id="bucket-sort-complessita" class="content-section">
+            <h3 class="subsection-title">2.1. Analisi della Complessità (Caso Atteso e Peggiore)</h3>
             <div class="section-content">
-                <p>La professoressa introduce (01:04) il concetto di <strong>indirizzamento diretto</strong> come un caso ideale ma spesso impraticabile.</p>
-                <p>Se le chiavi dell'universo U fossero interi piccoli e distinti (es. da 0 a M-1, con M non troppo grande), potremmo usare un array T di dimensione M. Per un elemento con chiave \(k\), lo memorizzeremmo direttamente in \(T[k]\).</p>
+                <p>La professoressa ricapitola l'analisi della complessità, già introdotta precedentemente.</p>
+                <p><strong>Caso Atteso (sotto ipotesi di distribuzione uniforme):</strong> \(\Theta(N)\)</p>
                 <ul>
-                    <li><strong>Ricerca(k):</strong> Controlla \(T[k]\). Costo \(\Theta(1)\).</li>
-                    <li><strong>Inserimento(x con chiave k):</strong> Metti x in \(T[k]\). Costo \(\Theta(1)\).</li>
-                    <li><strong>Cancellazione(x con chiave k):</strong> Rimuovi x da \(T[k]\) (es. mettendo un marcatore speciale). Costo \(\Theta(1)\).</li>
+                    <li>La creazione dei bucket, la distribuzione degli elementi e la concatenazione costano \(\Theta(N)\).</li>
+                    <li>Il passo cruciale è l'ordinamento dei singoli bucket. Se gli elementi sono distribuiti uniformemente, ci si aspetta che ogni bucket \(B[j]\) contenga un numero \(n_j\) di elementi che è piccolo (costante in media).</li>
+                    <li>Ordinare un bucket con \(n_j\) elementi usando Insertion Sort costa \(O(n_j^2)\).</li>
+                    <li>Il costo atteso totale per ordinare tutti i bucket, \(E[\sum O(n_j^2)]\), si dimostra essere \(\Theta(N)\). L'intuizione è che \(E[n_j^2]\) è costante (circa 2 meno qualcosa che tende a 0 per N grande).</li>
                 </ul>
-                <p><strong>Problemi dell'Indirizzamento Diretto (01:57):</strong></p>
-                <ol>
-                    <li>
-                        <strong>Universo U troppo grande:</strong> Se U è vasto (es. stringhe, interi a 64 bit), creare un array T di dimensione \(|U|\) è impraticabile per lo spazio richiesto. Ad esempio, se le chiavi sono numeri di matricola degli studenti dell'Università di Udine, l'universo delle possibili matricole è enorme, ma gli studenti attivi (insieme K) sono molti meno.
-                        La professoressa fa l'esempio di \(|K| \approx 200\) studenti di ASD ma \(|U|\) (tutti gli studenti di UniUD, o tutte le possibili matricole) è molto più grande (es. 10000-60000).
-                    </li>
-                    <li>
-                        <strong>Chiavi non intere:</strong> Se le chiavi non sono interi (es. stringhe), non possono essere usate direttamente come indici di un array.
-                    </li>
-                </ol>
-                <p>Le tabelle di hash cercano di superare questi problemi.</p>
+                <p><strong>Caso Peggiore:</strong> \(\Theta(N^2)\)</p>
+                <ul>
+                    <li>Se tutti gli N elementi finiscono in un unico bucket (a causa di una distribuzione non uniforme o di dati "patologici"), ordinare quel bucket con Insertion Sort costerà \(\Theta(N^2)\).</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Importanza dell'Ipotesi Uniforme:</strong> La performance lineare attesa dipende criticamente dall'uniformità della distribuzione dell'input.
+                </div>
             </div>
         </article>
 
-        <article id="funzione-hash" class="content-section">
-            <h2 class="section-title">2. La Funzione di Hash (02:48)</h2>
+        <article id="bucket-sort-indice" class="content-section">
+            <h3 class="subsection-title">2.2. Dettaglio sul Calcolo dell'Indice del Bucket</h3>
             <div class="section-content">
-                <p>L'idea centrale delle tabelle di hash è usare una <strong>funzione di hash \(h\)</strong>. Questa funzione mappa le chiavi dall'universo U agli indici della tabella T (che ha dimensione \(m\)).</p>
+                <p>La professoressa dedica del tempo a chiarire come si determina in quale bucket finisce un elemento e come questo si relaziona alla dimensione dell'array e all'intervallo di input. Questo punto era stato toccato anche nella lezione precedente ma viene qui approfondito con un esempio.</p>
+                <p>Dato un array <code>A</code> di <code>N</code> elementi nell'intervallo \([0,1)\), si creano <code>N</code> bucket, indicizzati da <code>0</code> a <code>N-1</code>.</p>
+                <p>L'elemento <code>A[k]</code> (dove \(0 \le A[k] < 1\)) viene inserito nel bucket di indice:</p>
                 <div class="math-block">
-                \( h: U \rightarrow \{0, 1, \dots, m-1\} \)
+                \( \text{indice\_bucket} = \lfloor N \cdot A[k] \rfloor \)
                 </div>
-                <p>Per un elemento con chiave \(k\), la sua posizione "ideale" nella tabella di hash T è data da \(h(k)\). Si dice che l'elemento \(k\) "fa hash" alla cella (o slot) \(h(k)\).</p>
-                <p>La dimensione della tabella \(m\) è tipicamente molto più piccola di \(|U|\).</p>
-                <div class="mermaid-container">
-                    <pre class="mermaid">
-                    graph LR
-                        subgraph "Universo U"
-                            k1["chiave k1"]
-                            k2["chiave k2"]
-                            k3["chiave k3"]
-                            k_dots["..."]
-                            kN["chiave kN"]
-                        end
-                        
-                        subgraph "Funzione Hash h"
-                            HF["h(chiave)"]
-                        end
-
-                        subgraph "Tabella T (dimensione m)"
-                            T0["Slot 0"]
-                            T1["Slot 1"]
-                            Tdots["..."]
-                            Tm_1["Slot m-1"]
-                        end
-                        
-                        k1 --"h(k1)"--> T1
-                        k2 --"h(k2)"--> Tm_1
-                        k3 --"h(k3)"--> T1
-                        
-                        classDef collision fill:#ef4444,stroke:#dc2626,color:#fff
-                        class T1 collision
-                    </pre>
-                </div>
-                <p><em>Nota: k1 e k3 mappano entrambi allo Slot 1, causando una collisione (evidenziata in rosso).</em></p>
+                <p><strong>Esempio Illustrativo (ripreso e modificato dalla prof.):</strong></p>
+                <p>Si consideri l'array <code>A = [0.3, 0.1, 0.8, 0.5, 0.88]</code>. Qui <code>N=5</code>.</p>
+                <p>I bucket sono B[0], B[1], B[2], B[3], B[4].</p>
+                <ul>
+                    <li>0.3: \(\lfloor 5 \cdot 0.3 \rfloor = \lfloor 1.5 \rfloor = 1\). Va in B[1].</li>
+                    <li>0.1: \(\lfloor 5 \cdot 0.1 \rfloor = \lfloor 0.5 \rfloor = 0\). Va in B[0].</li>
+                    <li>0.8: \(\lfloor 5 \cdot 0.8 \rfloor = \lfloor 4.0 \rfloor = 4\). Va in B[4].</li>
+                    <li>0.5: \(\lfloor 5 \cdot 0.5 \rfloor = \lfloor 2.5 \rfloor = 2\). Va in B[2].</li>
+                    <li>0.88: \(\lfloor 5 \cdot 0.88 \rfloor = \lfloor 4.4 \rfloor = 4\). Va in B[4] (collisione con 0.8).</li>
+                </ul>
+                <p>Bucket dopo la distribuzione:</p>
+                <ul>
+                    <li>B[0]: [0.1]</li>
+                    <li>B[1]: [0.3]</li>
+                    <li>B[2]: [0.5]</li>
+                    <li>B[3]: [] (vuoto)</li>
+                    <li>B[4]: [0.8, 0.88] (o [0.88, 0.8] a seconda dell'ordine di inserimento)</li>
+                </ul>
+                <p>Dopo l'ordinamento dei bucket (B[4] diventa [0.8, 0.88]), e la concatenazione, si ottiene:
+                <code>[0.1, 0.3, 0.5, 0.8, 0.88]</code>.</p>
+            </div>
+        </article>
+        
+        <article id="bucket-sort-proprieta" class="content-section">
+            <h3 class="subsection-title">2.3. Proprietà di Bucket Sort</h3>
+            <div class="section-content">
+                <ul>
+                    <li><strong>Stabilità:</strong> Dipende dall'algoritmo di ordinamento usato per i singoli bucket. Se si usa un algoritmo stabile come Insertion Sort per ordinare i bucket, e se gli elementi vengono inseriti nei bucket in modo da preservare l'ordine (es. accodandoli, o se le liste sono gestite stabilmente), allora Bucket Sort può essere stabile. Se, come spesso accade, si inserisce in testa alla lista del bucket e poi si ordina, la stabilità dipende dalla stabilità dell'algoritmo di ordinamento del bucket. La professoressa non si sofferma su questo dettaglio.</li>
+                    <li><strong>In-place:</strong> Generalmente Bucket Sort <strong>non è in-place</strong> perché richiede spazio aggiuntivo per le liste concatenate che formano i bucket. Lo spazio può essere \(\Theta(N)\) nel caso peggiore se tutti gli elementi vanno in una lista o se le liste sono implementate in modo da richiedere memoria proporzionale agli elementi.</li>
+                </ul>
             </div>
         </article>
 
-        <article id="proprieta-buona-hash" class="content-section">
-            <h3 class="subsection-title">2.1. Proprietà di una Buona Funzione di Hash (03:20)</h3>
+        <article id="tabelle-hash-intro" class="content-section">
+            <h2 class="section-title">3. Tabelle di Hash: Ripasso e Obiettivi</h2>
             <div class="section-content">
-                <p>Una buona funzione di hash dovrebbe idealmente:</p>
-                <ol>
-                    <li><strong>Essere veloce da calcolare:</strong> Il calcolo di \(h(k)\) dovrebbe essere efficiente, tipicamente in tempo proporzionale alla lunghezza della chiave (es. \(O(\text{lunghezza chiave})\) se la chiave è una stringa, o \(O(1)\) se la chiave è un intero e la funzione è semplice).</li>
-                    <li><strong>Distribuire le chiavi uniformemente:</strong> Le chiavi dovrebbero essere mappate agli \(m\) slot della tabella in modo il più possibile uniforme e "casuale". Questo aiuta a minimizzare le collisioni. L'ideale è che ogni chiave abbia uguale probabilità \(1/m\) di finire in uno qualsiasi degli \(m\) slot, indipendentemente da dove finiscono le altre chiavi. Questa è l'<strong>ipotesi di hashing uniforme semplice</strong>.</li>
-                </ol>
-                <p>La professoressa sottolinea che trovare una funzione di hash perfetta che non generi mai collisioni e distribuisca perfettamente le chiavi è molto difficile (o impossibile se \(|K| > m\)), specialmente senza conoscere a priori l'insieme K delle chiavi che verranno effettivamente inserite.</p>
-                 <div class="clarification-box">
-                    <strong>Approfondimento (Aggiunto): Esempi Comuni di Funzioni di Hash</strong>
-                    <ul>
-                        <li><strong>Metodo della Divisione:</strong> \(h(k) = k \pmod m\).
-                            <ul>
-                                <li>\(m\) dovrebbe essere scelto con cura (es. un numero primo non troppo vicino a potenze di 2 o 10 per evitare pattern nei dati).</li>
-                            </ul>
-                        </li>
-                        <li><strong>Metodo della Moltiplicazione:</strong> \(h(k) = \lfloor m \cdot (kA - \lfloor kA \rfloor) \rfloor\), dove \(A\) è una costante \(0 < A < 1\) (es. \((\sqrt{5}-1)/2 \approx 0.618\)).</li>
-                        <li><strong>Hashing Universale:</strong> Si sceglie una funzione di hash a caso da una famiglia di funzioni con buone proprietà di distribuzione media, per rendere difficile per un avversario trovare un insieme di chiavi che causino molte collisioni.</li>
-                    </ul>
-                    <p>La scelta della funzione di hash dipende molto dalla natura delle chiavi (interi, stringhe, oggetti complessi) e dalla dimensione della tabella.</p>
-                </div>
+                <p>La professoressa introduce (o meglio, riprende) l'argomento delle Tabelle di Hash come una struttura dati progettata per supportare in modo efficiente le operazioni di un **dizionario**: ricerca, inserimento e cancellazione di elementi.</p>
+                <p><strong>Obiettivo:</strong> Idealmente, si vorrebbe che queste operazioni avessero un costo \(\Theta(1)\) nel caso medio.</p>
+                <p>Si richiamano le limitazioni delle strutture dati più semplici:</p>
+                <ul>
+                    <li><strong>Array (Indirizzamento Diretto):</strong> Ricerca in \(\Theta(1)\) se le chiavi sono interi in un range piccolo. Problemi: spreco di spazio se l'universo delle chiavi è grande ma poche chiavi sono usate; non gestisce chiavi non intere direttamente.</li>
+                    <li><strong>Liste Concatenate:</strong> Spazio efficiente (\(\Theta(N)\)), ma ricerca/inserimento/cancellazione in \(\Theta(N)\) nel caso peggiore/medio.</li>
+                </ul>
+                <p>Le tabelle di hash cercano di combinare i vantaggi: efficienza temporale degli array e efficienza spaziale delle liste (per il numero di elementi effettivamente memorizzati).</p>
             </div>
         </article>
 
-        <article id="collisioni-hash" class="content-section">
-            <h2 class="section-title">3. Il Problema delle Collisioni (03:07)</h2>
+        <article id="tabelle-hash-definizioni" class="content-section">
+            <h3 class="subsection-title">3.1. Definizioni Chiave (Richiamo)</h3>
             <div class="section-content">
-                <p>Poiché la dimensione della tabella \(m\) è solitamente minore della dimensione dell'universo \(U\) (e spesso anche minore del numero di chiavi \(n\) che si vogliono inserire, o comunque non molto più grande), è inevitabile che due o più chiavi diverse \(k_1, k_2 \in U\) (con \(k_1 \neq k_2\)) vengano mappate dalla funzione di hash \(h\) allo stesso slot della tabella. Cioè, \(h(k_1) = h(k_2)\).</p>
-                <p>Questo fenomeno è chiamato <strong>collisione</strong>.</p>
-                <p>Le tabelle di hash devono avere una strategia per gestire le collisioni. Esistono due approcci principali.</p>
+                <ul>
+                    <li><strong>Universo (U):</strong> L'insieme di tutte le possibili chiavi.</li>
+                    <li><strong>Insieme delle Chiavi Memorizzate (K):</strong> Il sottoinsieme di U attualmente presente nella tabella. |K| = N.</li>
+                    <li><strong>Tabella di Hash (T):</strong> Un array di M slot (posizioni), T[0...M-1].</li>
+                    <li><strong>Funzione di Hash (h):</strong> Una funzione \(h: U \rightarrow \{0, 1, \dots, M-1\}\) che mappa una chiave a un indice della tabella.</li>
+                    <li><strong>Collisione:</strong> Si verifica quando due chiavi distinte \(k_1 \neq k_2\) vengono mappate dalla funzione di hash allo stesso slot: \(h(k_1) = h(k_2)\). Le collisioni sono inevitabili se |U| > M.</li>
+                </ul>
             </div>
         </article>
 
         <article id="hash-chaining" class="content-section">
-            <h2 class="section-title">4. Risoluzione delle Collisioni: Chaining (Concatenamento) (04:00)</h2>
+            <h2 class="section-title">4. Hashing con Concatenamento (Chaining)</h2>
             <div class="section-content">
-                <p>Con il metodo del chaining (o concatenamento, o liste di trabocco), ogni slot \(T[j]\) della tabella di hash non contiene direttamente un elemento, ma punta all'<strong>inizio di una lista concatenata</strong>. Tutti gli elementi le cui chiavi fanno hash allo slot \(j\) (cioè, \(h(k)=j\)) vengono inseriti in questa lista \(T[j]\).</p>
+                <p>Il primo metodo di risoluzione delle collisioni analizzato è il **concatenamento (chaining)**.</p>
+            </div>
+        </article>
+        
+        <article id="hash-chaining-struttura" class="content-section">
+            <h3 class="subsection-title">4.1. Struttura: Array di Liste Concatenate</h3>
+            <div class="section-content">
+                <p>Con il chaining, ogni slot <code>T[j]</code> della tabella di hash non contiene direttamente un elemento, ma un <strong>puntatore alla testa di una lista concatenata</strong>.</p>
+                <p>Tutti gli elementi le cui chiavi vengono mappate all'indice <code>j</code> (cioè, \(h(\text{chiave}) = j\)) sono inseriti in questa lista <code>T[j]</code>.</p>
                 <div class="mermaid-container">
                     <pre class="mermaid">
                     graph TD
-                        subgraph "Tabella di Hash T (Array di Liste)"
-                            T0["Slot 0"] --> L0["Lista per h(k)=0: k_a → k_b → NULL"];
-                            T1["Slot 1"] --> L1["Lista per h(k)=1: k_c → NULL"];
-                            Tdots["..."] --> Ldots["..."];
-                            Tm_1["Slot m-1"] --> Lm_1["Lista per h(k)=m-1: k_d → k_e → k_f → NULL"];
+                        subgraph Tabella T - Array di M slot
+                            T0["T[0]"] --> L0["Lista per slot 0<br/>(e.g., k1, k4, ...)"];
+                            T1["T[1]"] --> L1["Lista per slot 1<br/>(e.g., k2, ...)"];
+                            Tdots["..."];
+                            TM1["T[M-1]"] --> LM1["Lista per slot M-1<br/>(e.g., k3, k5, ...)"];
                         end
+                        k1["Elem con chiave k1<br/>h(k1)=0"] --> k4["Elem con chiave k4<br/>h(k4)=0"];
+                        k2["Elem con chiave k2<br/>h(k2)=1"];
+                        k3["Elem con chiave k3<br/>h(k3)=M-1"] --> k5["Elem con chiave k5<br/>h(k5)=M-1"];
+
+                        L0 -.-> k1;
+                        L1 -.-> k2;
+                        LM1 -.-> k3;
                     </pre>
                 </div>
             </div>
         </article>
-        
-        <article id="chaining-operazioni" class="content-section">
-            <h3 class="subsection-title">4.1. Operazioni con Chaining</h3>
+
+        <article id="hash-chaining-operazioni" class="content-section">
+            <h3 class="subsection-title">4.2. Operazioni</h3>
             <div class="section-content">
-                <p><strong>Inserimento (<code>Chained-Hash-Insert(T, x)</code>) (04:30):</strong></p>
-                <ol>
-                    <li>Calcola lo slot \(j = h(\text{x.key})\).</li>
-                    <li>Inserisci l'elemento \(x\) in testa alla lista concatenata \(T[j]\).</li>
-                </ol>
-                <p>Costo: \(\Theta(1)\) nel caso peggiore, assumendo che l'inserimento in testa a una lista sia \(\Theta(1)\) e il calcolo di \(h(\text{x.key})\) sia efficiente.</p>
-
-                <p><strong>Ricerca (<code>Chained-Hash-Search(T, k)</code>) (04:51):</strong></p>
-                <ol>
-                    <li>Calcola lo slot \(j = h(k)\).</li>
-                    <li>Scansiona la lista concatenata \(T[j]\) alla ricerca di un elemento con chiave \(k\).</li>
-                </ol>
-                <p>Costo: Proporzionale alla lunghezza della lista \(T[j]\) in cui la chiave \(k\) dovrebbe trovarsi. Nel caso peggiore, tutti gli \(n\) elementi potrebbero finire nella stessa lista, portando a un costo di \(\Theta(n)\) (più il tempo per calcolare l'hash).</p>
-
-                <p><strong>Cancellazione (<code>Chained-Hash-Delete(T, x)</code>) (05:10):</strong></p>
-                <ol>
-                    <li>Calcola lo slot \(j = h(\text{x.key})\).</li>
-                    <li>Cerca l'elemento \(x\) (o un elemento con la stessa chiave, a seconda di come è definito \(x\)) nella lista \(T[j]\).</li>
-                    <li>Se trovato, rimuovilo dalla lista (operazione standard di cancellazione da lista concatenata, che richiede il puntatore all'elemento precedente se si usa una lista singolarmente concatenata).</li>
-                </ol>
-                <p>Costo: Simile alla ricerca. Se si ha già un puntatore all'elemento da cancellare (e la lista è doppiamente concatenata), la rimozione è \(\Theta(1)\). Altrimenti, il costo è dominato dalla ricerca nella lista, \(\Theta(\text{lunghezza lista})\).</p>
+                <ul>
+                    <li><strong>Inserimento (<code>Chained-Hash-Insert(T, x)</code>):</strong>
+                        <ol>
+                            <li>Calcola l'indice \(j = h(x.key)\).</li>
+                            <li>Inserisci l'elemento \(x\) <strong>in testa</strong> alla lista concatenata puntata da <code>T[j]</code>.</li>
+                        </ol>
+                        Costo: \(\Theta(1)\) (assumendo che il calcolo di \(h(x.key)\) sia \(\Theta(1)\) e l'inserimento in testa a una lista sia \(\Theta(1)\)). Non si controllano duplicati in questa versione base.
+                    </li>
+                    <li><strong>Ricerca (<code>Chained-Hash-Search(T, k_val)</code>):</strong>
+                        <ol>
+                            <li>Calcola l'indice \(j = h(k_val)\).</li>
+                            <li>Scorri la lista concatenata puntata da <code>T[j]</code> cercando un elemento \(x\) tale che \(x.key == k_val\).</li>
+                        </ol>
+                        Costo: Dipende dalla lunghezza della lista <code>T[j]</code>.
+                    </li>
+                    <li><strong>Cancellazione (<code>Chained-Hash-Delete(T, x)</code>):</strong>
+                        <ol>
+                            <li>Calcola l'indice \(j = h(x.key)\).</li>
+                            <li>Cerca l'elemento \(x\) nella lista <code>T[j]</code> (come nella ricerca).</li>
+                            <li>Se trovato, rimuovilo dalla lista (richiede tipicamente una lista doppiamente concatenata o di tenere traccia del predecessore per una lista singolarmente concatenata per una rimozione efficiente).</li>
+                        </ol>
+                        Costo: Dipende dalla lunghezza della lista <code>T[j]</code>.
+                    </li>
+                </ul>
             </div>
         </article>
 
-        <article id="chaining-complessita" class="content-section">
-            <h3 class="subsection-title">4.2. Analisi della Complessità con Chaining (Fattore di Carico \(\alpha\))</h3>
+        <article id="hash-chaining-esempio" class="content-section">
+            <h3 class="subsection-title">4.3. Esempio Pratico (Comuni Italiani)</h3>
             <div class="section-content">
-                <p>La performance delle operazioni di ricerca e cancellazione dipende dalla lunghezza delle liste.</p>
-                <p>Si definisce il <strong>fattore di carico (load factor) \(\alpha\)</strong> della tabella di hash T come:</p>
+                <p>La professoressa usa l'esempio dei comuni italiani (già visto in Lezione 15 per Bucket Sort, ma qui applicato alle tabelle di hash).</p>
+                <ul>
+                    <li><strong>Universo U:</strong> Tutti i comuni italiani (circa 7903).</li>
+                    <li><strong>Insieme K (chiavi memorizzate):</strong> Un sottoinsieme di questi, ad esempio i comuni con più di N_covid casi di COVID in una settimana. Supponiamo |K| = N = 100 (valore dell'esempio).</li>
+                    <li><strong>Tabella T:</strong> Dimensione M. Nell'esempio, si ipotizza M = 21 (una per ogni lettera dell'alfabeto italiano usata come iniziale).</li>
+                    <li><strong>Funzione di Hash h:</strong> <code>h(nome_comune) = indice_corrispondente_all_iniziale_del_nome</code>.
+                        (Es. "Ancona" \(\rightarrow\) A \(\rightarrow\) slot 0; "Bologna" \(\rightarrow\) B \(\rightarrow\) slot 1, ecc.).</li>
+                </ul>
+                <p>Se si inseriscono "Ancona", "Arezzo", "Asti":</p>
+                <ul>
+                    <li><code>h("Ancona")</code> \(\rightarrow\) slot 0. T[0] punterà a [Ancona].</li>
+                    <li><code>h("Arezzo")</code> \(\rightarrow\) slot 0. T[0] punterà a [Arezzo, Ancona] (Arezzo inserito in testa).</li>
+                    <li><code>h("Asti")</code> \(\rightarrow\) slot 0. T[0] punterà a [Asti, Arezzo, Ancona].</li>
+                </ul>
+                <p>Tutti e tre collidono e finiscono nella stessa lista concatenata. Se cerco "Avellino", calcolo <code>h("Avellino")</code> \(\rightarrow\) slot 0 e scorro la lista [Asti, Arezzo, Ancona] per vedere se "Avellino" è presente.</p>
+                <div class="note-box">
+                    <strong>Funzione di Hash Semplice vs. Buona:</strong> Questa funzione di hash basata sull'iniziale non è ideale perché le iniziali non sono distribuite uniformemente, portando a liste lunghe per alcune lettere e liste vuote per altre. Una buona funzione di hash dovrebbe distribuire le chiavi il più uniformemente possibile tra gli M slot.
+                </div>
+            </div>
+        </article>
+        
+        <article id="hash-chaining-analisi" class="content-section">
+            <h3 class="subsection-title">4.4. Analisi delle Prestazioni di Hashing con Concatenamento</h3>
+            <div class="section-content">
+            </div>
+        </article>
+
+        <article id="hash-chaining-fattore-carico" class="content-section">
+            <h4 class="subsubsection-title">4.4.1. Fattore di Carico (Load Factor) \(\alpha\)</h4>
+            <div class="section-content">
+                <p>Il fattore di carico \(\alpha\) per una tabella di hash con chaining è definito come:</p>
                 <div class="math-block">
-                \( \alpha = \frac{n}{m} \)
+                \( \alpha = \frac{N}{M} \)
                 </div>
                 <p>dove:</p>
                 <ul>
-                    <li>\(n\): numero di elementi memorizzati nella tabella.</li>
-                    <li>\(m\): numero di slot (liste) nella tabella.</li>
+                    <li>\(N\) è il numero di elementi memorizzati nella tabella.</li>
+                    <li>\(M\) è il numero di slot (o liste) nella tabella.</li>
                 </ul>
-                <p>\(\alpha\) rappresenta la <strong>lunghezza media attesa di una lista</strong>, assumendo una buona distribuzione delle chiavi da parte della funzione di hash.</p>
-                <p><strong>Costo Atteso (Caso Medio):</strong></p>
-                <ul>
-                    <li><strong>Ricerca con Successo (elemento presente):</strong> Il costo atteso è \(\Theta(1 + \alpha)\).
-                        <ul>
-                            <li>\(\Theta(1)\) per calcolare l'hash e accedere allo slot.</li>
-                            <li>\(\Theta(\alpha/2)\) in media per scorrere metà della lista (se l'elemento è uniformemente distribuito tra quelli che collidono in quel bucket).</li>
-                        </ul>
+                <p>\(\alpha\) rappresenta la **lunghezza media attesa** di una lista concatenata, se le chiavi sono distribuite uniformemente.</p>
+                <p>È importante notare che con il chaining, \(\alpha\) può essere minore, uguale o anche <strong>maggiore di 1</strong>. Se \(\alpha > 1\), significa che in media ci sono più elementi che slot, quindi alcune liste saranno necessariamente più lunghe di 1.</p>
+            </div>
+        </article>
+
+        <article id="hash-chaining-suha" class="content-section">
+            <h4 class="subsubsection-title">4.4.2. Ipotesi di Hashing Uniforme Semplice (SUHA - Simple Uniform Hashing Assumption)</h4>
+            <div class="section-content">
+                <p>Per analizzare il caso medio, si fa l'Ipotesi di Hashing Uniforme Semplice (SUHA):</p>
+                <ol>
+                    <li><strong>Uniformità:</strong> Ogni chiave \(k \in U\) ha la stessa probabilità \(1/M\) di essere mappata a uno qualsiasi degli \(M\) slot della tabella, indipendentemente dalle altre chiavi.
+                    <div class="math-block"> \( P(h(k_{data}) = j) = \frac{1}{M} \quad \forall j \in \{0, \dots, M-1\} \) </div>
                     </li>
-                    <li><strong>Ricerca senza Successo (elemento non presente):</strong> Il costo atteso è \(\Theta(1 + \alpha)\).
-                        <ul>
-                            <li>\(\Theta(1)\) per calcolare l'hash e accedere allo slot.</li>
-                            <li>\(\Theta(\alpha)\) in media per scorrere l'intera lista (se le chiavi sono ben distribuite, la lunghezza media di una lista è \(\alpha\)).</li>
-                        </ul>
-                    </li>
-                </ul>
-                <p><strong>Se \(n = O(m)\)</strong> (cioè, il numero di elementi è al più proporzionale al numero di slot, quindi \(\alpha = O(1)\) o \(\alpha \le \text{costante}\)), allora il costo atteso delle operazioni di ricerca (e cancellazione, se la ricerca domina) diventa \(\Theta(1 + O(1)) = \Theta(1)\).</p>
-                 <div class="clarification-box">
-                    <strong>Approfondimento (Aggiunto): Trade-off Spazio/Tempo</strong>
-                    <p>C'è un trade-off tra lo spazio usato dalla tabella (\(m\)) e il tempo delle operazioni (influenzato da \(\alpha = n/m\)).</p>
-                    <ul>
-                        <li>Se \(m\) è molto grande (vicino a \(n\)), \(\alpha \approx 1\), le liste sono corte, e le operazioni sono veloci. Ma si usa più spazio.</li>
-                        <li>Se \(m\) è piccolo rispetto a \(n\), \(\alpha\) è grande, le liste sono lunghe, e le operazioni diventano più lente (tendendo a \(\Theta(n)\) se \(m=1\)). Ma si usa meno spazio.</li>
-                    </ul>
-                    <p>Una scelta comune è mantenere \(m \approx n\), quindi \(\alpha \approx 1\).</p>
+                    <li><strong>Indipendenza (implicita nella prima parte per chiavi diverse):</strong> La scelta dello slot per una chiave non influenza la scelta dello slot per un'altra chiave.</li>
+                </ol>
+                <p>Sotto questa ipotesi, la lunghezza attesa di una lista <code>T[j]</code> è \(E[\text{length}(T[j])] = \alpha = N/M\).</p>
+            </div>
+        </article>
+
+        <article id="hash-chaining-costo-negativo" class="content-section">
+            <h4 class="subsubsection-title">4.4.3. Costo Atteso della Ricerca con Esito Negativo</h4>
+            <div class="section-content">
+                <p>Consideriamo una ricerca di una chiave \(k_{search}\) che <strong>non è presente</strong> nella tabella.</p>
+                <ol>
+                    <li>Calcolare \(j = h(k_{search})\). Costo \(\Theta(1)\) (assumendo h efficiente).</li>
+                    <li>Scorrere l'intera lista <code>T[j]</code> per verificare che \(k_{search}\) non ci sia. La lunghezza attesa di questa lista è \(\alpha\).</li>
+                </ol>
+                <p>Il tempo totale atteso per una ricerca con esito negativo è: \(\Theta(1 + \alpha)\).</p>
+                <p>Questo costo è anche il costo atteso di un'operazione di <strong>inserimento</strong> (<code>Chained-Hash-Insert</code>), se prima di inserire si volesse verificare che l'elemento non sia già presente (per evitare duplicati). L'inserimento in sé è \(\Theta(1)\), ma la ricerca preliminare dominerebbe.</p>
+            </div>
+        </article>
+
+        <article id="hash-chaining-costo-positivo" class="content-section">
+            <h4 class="subsubsection-title">4.4.4. Costo Atteso della Ricerca con Esito Positivo</h4>
+            <div class="section-content">
+                <p>Consideriamo una ricerca di una chiave \(x.key\) che <strong>è presente</strong> nella tabella. Assumiamo che ogni elemento memorizzato abbia la stessa probabilità di essere cercato.</p>
+                <p>L'elemento \(x\) si trova in una qualche lista <code>T[h(x.key)]</code>. Il costo per trovarlo dipende da quanti elementi lo precedono in quella lista.</p>
+                <p>La professoressa spiega (con un'analisi più dettagliata negli appunti PDF pagina 3, che coinvolge il momento dell'inserimento di x) che il numero atteso di elementi esaminati nella lista, prima di trovare \(x\) (incluso \(x\) stesso), quando \(x\) è stato inserito per \(i\)-esimo nella tabella (e quindi \(N=i\) al momento del suo inserimento) è \(1 + (i-1)/M\).
+                Facendo la media su tutti gli \(N\) elementi inseriti (sommando questo costo per \(i\) da 1 a \(N\) e dividendo per \(N\)):</p>
+                <div class="math-block">
+                \( \frac{1}{N} \sum_{i=1}^{N} \left( 1 + \frac{i-1}{M} \right) = 1 + \frac{1}{NM} \sum_{i=0}^{N-1} i = 1 + \frac{1}{NM} \frac{(N-1)N}{2} = 1 + \frac{N-1}{2M} \)
+                </div>
+                <p>Poiché \((N-1)/(2M) \approx N/(2M) = \alpha/2\), il costo atteso per una ricerca con esito positivo è:
+                \(\Theta(1 + \alpha/2) = \Theta(1 + \alpha)\).</p>
+                <div class="correction-box">
+                    <strong>Correzione e Discussione della Professoressa (dall'audio):</strong>
+                    <p>Inizialmente, la professoressa aveva derivato \(\Theta(1 + \alpha/2)\). Tuttavia, dopo una pausa e riflessione (e forse un suggerimento da parte di uno studente o una verifica), ha corretto questa analisi.
+                    La professoressa chiarisce che il costo atteso della ricerca con esito positivo, quando si fa la media su tutti gli elementi presenti e si assume che l'elemento cercato sia uno qualsiasi di questi con uguale probabilità, risulta essere anch'esso \(\Theta(1 + \alpha)\), non \(\Theta(1 + \alpha/2)\).
+                    L'argomentazione più semplice è che per trovare l'elemento \(x\), si deve scorrere in media metà della lista in cui si trova (se \(x\) è lì), più il calcolo dell'hash. La lunghezza attesa della lista è \(\alpha\). Quindi, il costo è dominato dal \(\Theta(\alpha)\) per scorrere la lista. Il termine "1" è per l'accesso iniziale e il calcolo dell'hash.
+                    <br><strong>Il libro (CLRS) riporta \(\Theta(1+\alpha)\) per entrambi i casi (esito positivo e negativo).</strong>
+                    La derivazione \(\alpha/2\) considera l'elemento \(x\) escluso dal calcolo del numero di elementi che lo precedono, ma la scansione include \(x\). La sostanza è che la dipendenza è da \(\alpha\).
+                    </p>
                 </div>
             </div>
         </article>
 
-        <article id="hashing-uniforme-semplice" class="content-section">
-            <h3 class="subsection-title">4.3. Ipotesi di Hashing Uniforme Semplice (Simple Uniform Hashing Assumption) (06:28)</h3>
+        <article id="hash-chaining-corollario" class="content-section">
+            <h4 class="subsubsection-title">4.4.5. Corollario: Complessità \(\Theta(1)\) se M = \(\Theta(N)\)</h4>
             <div class="section-content">
-                <p>Perché l'analisi del costo atteso \(\Theta(1+\alpha)\) sia valida, si fa un'ipotesi sulla qualità della funzione di hash, chiamata <strong>ipotesi di hashing uniforme semplice</strong>:</p>
-                <p><strong>Ogni elemento \(k\) (estratto casualmente dall'universo U) ha uguale probabilità \(1/m\) di fare hash in uno qualsiasi degli \(m\) slot della tabella, indipendentemente da dove gli altri elementi hanno fatto hash.</strong></p>
-                <p>Questa è un'ipotesi forte e idealizzata. In pratica, si cercano funzioni di hash che approssimino bene questo comportamento per gli insiemi di chiavi tipici dell'applicazione.</p>
-                <p>Se questa ipotesi vale:</p>
-                <ul>
-                    <li>La lunghezza attesa di una lista \(T[j]\) è \(E[\text{length}(T[j])] = \alpha = n/m\).</li>
-                </ul>
-            </div>
-        </article>
-
-        <article id="chaining-corollario" class="content-section">
-            <h3 class="subsection-title">4.4. Corollario: Costo Atteso \(\Theta(1)\) con Chaining (07:00)</h3>
-            <div class="section-content">
-                <p><strong>Teorema/Corollario (basato sull'ipotesi di hashing uniforme semplice):</strong></p>
-                <p>In una tabella di hash con chaining in cui le collisioni sono risolte con liste concatenate, se il numero di slot \(m\) è almeno proporzionale al numero di elementi \(n\) (cioè, \(m = \Omega(n)\), il che implica che il fattore di carico \(\alpha = n/m = O(1)\)), allora un inserimento, una ricerca (con o senza successo) e una cancellazione possono essere eseguite in <strong>tempo atteso \(\Theta(1)\)</strong>.</p>
-                <ul>
-                    <li>Inserimento: è sempre \(\Theta(1)\) (caso peggiore).</li>
-                    <li>Ricerca/Cancellazione: \(\Theta(1+\alpha)\) atteso. Se \(\alpha=O(1)\), allora \(\Theta(1)\) atteso.</li>
-                </ul>
-                <p>Questo è il risultato desiderato: operazioni di dizionario in tempo costante medio.</p>
+                <p>Se la dimensione della tabella di hash \(M\) è scelta in modo tale da essere proporzionale al numero di elementi \(N\) che ci si aspetta di memorizzare (cioè, \(M = \Theta(N)\)), allora il fattore di carico \(\alpha = N/M = N/\Theta(N)\) diventa una costante \(\Theta(1)\).</p>
+                <p>In questo caso, il costo atteso di tutte le operazioni (inserimento, ricerca con esito positivo, ricerca con esito negativo, cancellazione) diventa:</p>
+                <div class="math-block">
+                \( \Theta(1 + \Theta(1)) = \Theta(1) \)
+                </div>
+                <p>Questo è il risultato desiderato: operazioni in tempo costante nel caso medio, a patto di mantenere la tabella non troppo piena (cioè \(\alpha\) non troppo grande) e di avere una buona funzione di hash che rispetti la SUHA.</p>
             </div>
         </article>
         
-        <article id="hash-open-addressing" class="content-section">
-            <h2 class="section-title">5. Risoluzione delle Collisioni: Open Addressing (Indirizzamento Aperto) (09:00)</h2>
+        <article id="hash-chaining-peggiore" class="content-section">
+            <h4 class="subsubsection-title">4.4.6. Caso Peggiore</h4>
             <div class="section-content">
-                <p>L'indirizzamento aperto è un'alternativa al chaining per risolvere le collisioni. L'idea fondamentale è che **tutti gli elementi vengono memorizzati direttamente all'interno della tabella di hash T stessa**. Non ci sono liste concatenate esterne.</p>
-                <p>Questo implica che il numero di elementi \(n\) che possono essere memorizzati è al massimo \(m\) (la dimensione della tabella), quindi il fattore di carico \(\alpha = n/m \le 1\) deve sempre valere.</p>
+                <p>Nel caso peggiore, tutte le \(N\) chiavi memorizzate potrebbero collidere nello stesso slot \(j\).
+                In questa situazione, la lista <code>T[j]</code> conterrà tutti gli \(N\) elementi.
+                Le operazioni di ricerca e cancellazione (che richiedono di scorrere questa lista) avranno un costo di \(\Theta(N)\).</p>
+                <p>L'inserimento rimane \(\Theta(1)\) se si inserisce in testa senza controllare duplicati.</p>
             </div>
         </article>
 
-        <article id="open-addressing-idea" class="content-section">
-            <h3 class="subsection-title">5.1. Idea Generale e Funzione di Scansione</h3>
+        <article id="open-addressing-cenno" class="content-section">
+            <h2 class="section-title">5. Cenno all'Open Addressing (Indirizzamento Aperto)</h2>
             <div class="section-content">
-                <p>Quando si inserisce un elemento con chiave \(k\), si calcola \(h(k)\). Se la cella \(T[h(k)]\) è già occupata (collisione), si cerca un'altra cella libera nella tabella seguendo una <strong>sequenza di scansione (probe sequence)</strong>.</p>
-                <p>La funzione di hash viene modificata per dipendere non solo dalla chiave \(k\), ma anche dal numero del tentativo di scansione \(j\) (con \(j=0, 1, 2, \dots, m-1\)):</p>
-                <div class="math-block">
-                \( h: U \times \{0, 1, \dots, m-1\} \rightarrow \{0, 1, \dots, m-1\} \)
-                </div>
-                <p>Per una data chiave \(k\), la sequenza di scansione è la permutazione \(\langle h(k,0), h(k,1), \dots, h(k,m-1) \rangle\) degli indici da 0 a \(m-1\). Si esamina la tabella in quest'ordine finché non si trova una cella libera (per l'inserimento) o l'elemento cercato (per la ricerca/cancellazione) o una cella vuota (per ricerca senza successo).</p>
-                <p>La tabella di hash \(T\) ora può contenere elementi o un valore speciale `NIL` (o `EMPTY`) per indicare una cella vuota.</p>
-            </div>
-        </article>
-
-        <article id="open-addressing-inserimento" class="content-section">
-            <h3 class="subsection-title">5.2. Inserimento con Open Addressing (<code>Hash-Insert(T, k)</code>) (10:05)</h3>
-            <pre><code class="language-pseudocode">
-Hash-Insert(T, k) // T è la tabella, k è la chiave da inserire
-  i = 0 // Tentativo di scansione
-  repeat
-    j = h(k, i) // Calcola l'indice per il tentativo i-esimo
-    if T[j] == NIL or T[j] == DELETED then // DELETED sarà spiegato per la cancellazione
-      T[j] = k // Inserisci la chiave
-      return j // Restituisci lo slot di inserimento
-    else
-      i = i + 1 // Prossimo tentativo
-  until i == m // Abbiamo provato tutti gli m slot
-  error "Hash table overflow" // Tabella piena, nessun posto trovato
-            </code></pre>
-            <p>La professoressa sottolinea che la sequenza di scansione \(h(k,0), \dots, h(k,m-1)\) deve essere una permutazione degli indici della tabella, altrimenti si potrebbero non esaminare tutti gli slot.</p>
-        </article>
-        
-        <article id="open-addressing-ricerca" class="content-section">
-            <h3 class="subsection-title">5.3. Ricerca con Open Addressing (<code>Hash-Search(T, k)</code>) (10:37)</h3>
-            <pre><code class="language-pseudocode">
-Hash-Search(T, k)
-  i = 0
-  repeat
-    j = h(k, i)
-    if T[j] == k then // Elemento trovato
-      return j
-    i = i + 1
-  until T[j] == NIL or i == m // Cella vuota (elemento non c'è) o tabella esaminata
-  return NIL // Elemento non trovato
-            </code></pre>
-            <p>La ricerca segue la stessa sequenza di scansione dell'inserimento. Si ferma se trova l'elemento o se incontra una cella `NIL` (perché se l'elemento fosse stato inserito, avrebbe occupato quella cella `NIL` o una successiva nella sequenza).</p>
-        </article>
-
-        <article id="open-addressing-cancellazione" class="content-section">
-            <h3 class="subsection-title">5.4. Cancellazione con Open Addressing (Problematica) (10:56)</h3>
-            <div class="section-content">
-                <p>La cancellazione con indirizzamento aperto è più complicata. Non si può semplicemente marcare una cella come `NIL` dopo aver rimosso un elemento.</p>
-                <p><strong>Problema:</strong> Se si marca una cella come `NIL`, una successiva operazione di <code>Hash-Search</code> per un elemento che era stato inserito *dopo* una collisione in quella cella potrebbe fermarsi prematuramente alla cella `NIL` e concludere erroneamente che l'elemento non esista.</p>
-                <p><strong>Soluzione:</strong> Introdurre un marcatore speciale <strong><code>DELETED</code></strong>.</p>
+                <p>La professoressa menziona brevemente che il chaining non è l'unico modo per gestire le collisioni. Un'altra famiglia di tecniche è l'**indirizzamento aperto (open addressing)**.</p>
+                <p><strong>Idea (molto generale):</strong> Con l'open addressing, tutti gli elementi sono memorizzati **direttamente all'interno della tabella di hash stessa** (non in liste esterne).</p>
+                <p>Quando avviene una collisione (cioè, si tenta di inserire un elemento in uno slot già occupato), si utilizzano delle **sequenze di ispezione (probe sequences)** per trovare uno slot alternativo libero nella tabella.</p>
+                <p>Esempi di tecniche di open addressing (solo nominate dalla professoressa, non spiegate in dettaglio):</p>
                 <ul>
-                    <li>Quando un elemento viene cancellato, la sua cella viene marcata come <code>DELETED</code> invece che <code>NIL</code>.</li>
-                    <li><code>Hash-Insert</code> può inserire un nuovo elemento in una cella marcata <code>DELETED</code> (trattandola come se fosse libera).</li>
-                    <li><code>Hash-Search</code> deve continuare la scansione se incontra una cella <code>DELETED</code> (non può fermarsi lì).</li>
+                    <li>Ispezione Lineare (Linear Probing)</li>
+                    <li>Ispezione Quadratica (Quadratic Probing)</li>
+                    <li>Hashing Doppio (Double Hashing)</li>
                 </ul>
-                <p><strong>Svantaggio di <code>DELETED</code>:</strong> Le celle marcate <code>DELETED</code> contribuiscono al "riempimento" della tabella e possono peggiorare i tempi di ricerca, anche se non contengono elementi attivi. Se ci sono troppe celle <code>DELETED</code>, potrebbe essere necessario un "rehashing" della tabella.</p>
-                <div class="clarification-box">
-                    <strong>Approfondimento (Aggiunto): Pseudocodice per Hash-Delete</strong>
-                    <pre><code class="language-pseudocode">
-Hash-Delete(T, k)
-  i = 0
-  repeat
-    j = h(k, i)
-    if T[j] == k then
-      T[j] = DELETED // Marca come cancellato
-      return // Elemento "cancellato"
-    i = i + 1
-  until T[j] == NIL or i == m 
-  // Se T[j] == NIL, l'elemento non c'era, nessuna azione.
-  // Se i == m e non trovato, l'elemento non c'era.
-                    </code></pre>
-                </div>
+                <p>Con l'open addressing, il fattore di carico \(\alpha = N/M\) deve essere necessariamente \(\le 1\) (la tabella non può contenere più elementi dei suoi slot).</p>
+                <p>La professoressa conclude dicendo che l'open addressing verrà probabilmente trattato in una lezione successiva.</p>
             </div>
         </article>
 
-        <article id="tecniche-scansione-open-addressing" class="content-section">
-            <h2 class="section-title">6. Tecniche di Scansione per Open Addressing (11:35)</h2>
-            <p>La scelta della funzione di scansione \(h(k,i)\) è cruciale per le prestazioni dell'indirizzamento aperto. Idealmente, dovrebbe evitare il <strong>clustering</strong> (raggruppamento di elementi occupati, che peggiora i tempi di ricerca e inserimento).</p>
-            <p>Tre tecniche comuni sono:</p>
-        </article>
-
-        <article id="linear-probing" class="content-section">
-            <h3 class="subsection-title">6.1. Linear Probing (Scansione Lineare)</h3>
+        <article id="esercizi-suggeriti" class="content-section">
+            <h2 class="section-title">6. Esercizi Suggeriti (Aggiunti dall'AI)</h2>
             <div class="section-content">
-                <p>La funzione di scansione è: \(h(k, i) = (h'(k) + i) \pmod m\), dove \(h'(k)\) è una funzione di hash ausiliaria (la funzione di hash iniziale).</p>
-                <p>Si prova prima la cella \(h'(k)\), poi \(h'(k)+1\), \(h'(k)+2\), e così via (modulo \(m\)).</p>
-                <p><strong>Problema: Clustering Primario (Ammassamento Primario) (12:02).</strong>
-                Sequenze lunghe di celle occupate tendono a crescere ulteriormente, perché una collisione con un qualsiasi elemento di una sequenza occupata porta a provare la cella successiva, allungando la sequenza. Questo degrada le prestazioni.</p>
-                <div class="array-representation">
-                    <p>Esempio di Clustering Primario con Linear Probing (m=10, h'(k)=k mod 10):</p>
-                    <p>Inserisci: 5, 15, 25, 6</p>
-                    <table><thead><tr><th>Idx:</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr></thead><tbody>
-                    <tr><td>Iniz:</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    <tr><td>+5:</td><td></td><td></td><td></td><td></td><td></td><td class="highlight-key">5</td><td></td><td></td><td></td><td></td></tr>
-                    <tr><td>+15 (h'=5, coll.):</td><td></td><td></td><td></td><td></td><td></td><td>5</td><td class="highlight-key">15</td><td></td><td></td><td></td></tr>
-                    <tr><td>+25 (h'=5, coll.):</td><td></td><td></td><td></td><td></td><td></td><td>5</td><td>15</td><td class="highlight-key">25</td><td></td><td></td></tr>
-                    <tr><td>+6 (h'=6, coll.):</td><td></td><td></td><td></td><td></td><td></td><td>5</td><td>15</td><td>25</td><td class="highlight-key">6</td><td></td></tr>
-                    </tbody></table>
-                    <p>Si forma un blocco [5, 15, 25, 6].</p>
-                </div>
-            </div>
-        </article>
-
-        <article id="quadratic-probing" class="content-section">
-            <h3 class="subsection-title">6.2. Quadratic Probing (Scansione Quadratica) (12:33)</h3>
-            <div class="section-content">
-                <p>La funzione di scansione è: \(h(k, i) = (h'(k) + c_1 i + c_2 i^2) \pmod m\), dove \(h'(k)\) è una funzione di hash ausiliaria, e \(c_1, c_2\) sono costanti ausiliarie (con \(c_2 \neq 0\)).</p>
-                <p>La sequenza di posizioni provate è più "sparsa" rispetto alla scansione lineare.</p>
-                <p><strong>Problema: Clustering Secondario (Ammassamento Secondario) (12:55).</strong>
-                Se due chiavi \(k_1\) e \(k_2\) hanno lo stesso valore di hash iniziale (\(h'(k_1) = h'(k_2)\)), allora esploreranno la stessa identica sequenza di scansione. Questo è meno grave del clustering primario, ma può comunque portare a un aumento dei tempi di ricerca.</p>
-                <p>È importante scegliere \(m\) (dimensione tabella) e le costanti \(c_1, c_2\) in modo che vengano esplorati tutti gli slot prima di ripetere una posizione.</p>
-            </div>
-        </article>
-
-        <article id="double-hashing" class="content-section">
-            <h3 class="subsection-title">6.3. Double Hashing (Hashing Doppio) (13:10)</h3>
-            <div class="section-content">
-                <p>È una delle tecniche di open addressing più efficaci per ridurre il clustering.</p>
-                <p>La funzione di scansione è: \(h(k, i) = (h_1(k) + i \cdot h_2(k)) \pmod m\), dove \(h_1(k)\) e \(h_2(k)\) sono due funzioni di hash ausiliarie diverse.</p>
-                <ul>
-                    <li>\(h_1(k)\) fornisce la posizione iniziale.</li>
-                    <li>\(h_2(k)\) fornisce l'offset (il "salto") da aggiungere ad ogni tentativo successivo.</li>
-                </ul>
-                <p><strong>Vantaggio:</strong> Chiavi diverse che collidono inizialmente (cioè, \(h_1(k_1) = h_1(k_2)\)) probabilmente esploreranno sequenze di scansione diverse perché i valori di \(h_2(k_1)\) e \(h_2(k_2)\) saranno probabilmente diversi.</p>
-                <p><strong>Requisiti per \(h_2(k)\):</strong></p>
-                <ul>
-                    <li>\(h_2(k)\) non deve mai restituire 0.</li>
-                    <li>\(h_2(k)\) dovrebbe essere relativamente primo con \(m\) (cioè, \(\text{MCD}(h_2(k), m) = 1\)) per garantire che tutti gli slot della tabella vengano esplorati. Un modo comune è scegliere \(m\) come numero primo e fare in modo che \(1 \le h_2(k) < m\).</li>
-                </ul>
-                <p>La professoressa menziona scelte comuni per \(h_1\) e \(h_2\):</p>
-                <ul>
-                    <li>\(h_1(k) = k \pmod m\)</li>
-                    <li>\(h_2(k) = 1 + (k \pmod{m-1})\) (se \(m\) è primo, \(m-1\) è coprimo con \(m\), e l'aggiunta di 1 evita che \(h_2(k)\) sia 0).</li>
-                </ul>
-            </div>
-        </article>
-
-        <article id="open-addressing-complessita" class="content-section">
-            <h2 class="section-title">7. Analisi della Complessità con Open Addressing (14:25)</h2>
-            <div class="section-content">
-                <p>L'analisi delle prestazioni dell'open addressing si basa sull'ipotesi di <strong>hashing uniforme</strong> (non "semplice uniforme", ma uniforme nel senso che ogni sequenza di scansione è ugualmente probabile per ogni chiave).</p>
-                <p>Il costo (numero atteso di sonde/accessi alla tabella) dipende dal <strong>fattore di carico \(\alpha = n/m\)</strong>, che deve essere \(\le 1\).</p>
-                <p><strong>Teorema (senza dimostrazione in aula):</strong></p>
-                <p>Assumendo hashing uniforme, il numero atteso di accessi alla tabella (sonde) in una tabella con indirizzamento aperto per un'operazione di inserimento (o una ricerca senza successo) è al più:</p>
-                <div class="math-block">
-                \( \frac{1}{1-\alpha} \)
-                </div>
-                <p>E per una ricerca con successo è al più:</p>
-                 <div class="math-block">
-                \( \frac{1}{\alpha} \ln \left( \frac{1}{1-\alpha} \right) \)
-                </div>
-                <p>(La professoressa ha anche menzionato la formula \( \frac{1}{\alpha} \log \frac{1}{1-\alpha} \) o \( \frac{1}{\alpha} \sum_{i=0}^{k-1} \frac{1}{m-i} \), che portano a risultati simili).</p>
-
-                <p><strong>Implicazioni:</strong></p>
-                <ul>
-                    <li>Se \(\alpha\) è una costante piccola (es. \(\alpha=0.5\), tabella piena a metà), allora \(1/(1-\alpha)\) è una costante (es. 2). Il costo atteso è \(\Theta(1)\).</li>
-                    <li>Se \(\alpha\) si avvicina a 1 (tabella quasi piena), allora \(1/(1-\alpha)\) diventa molto grande. Le prestazioni degradano significativamente.</li>
-                </ul>
-                <p>La professoressa conclude (15:40) che, finché la tabella non è troppo piena (\(\alpha\) non troppo vicino a 1), l'open addressing offre buone prestazioni medie. Tuttavia, il chaining è generalmente più robusto a fattori di carico elevati (\(\alpha\) può anche essere \(>1\) con il chaining).</p>
-            </div>
-        </article>
-
-        <article id="conclusioni-tabelle-hash" class="content-section">
-            <h2 class="section-title">8. Conclusioni sulle Tabelle di Hash</h2>
-            <div class="section-content">
-                <p>Le tabelle di hash sono una struttura dati estremamente potente per implementare dizionari con operazioni medie in tempo costante \(\Theta(1)\).</p>
-                <p>La scelta tra chaining e open addressing dipende da vari fattori:</p>
-                <ul>
-                    <li><strong>Chaining:</strong>
-                        <ul>
-                            <li>Più semplice da implementare (specialmente la cancellazione).</li>
-                            <li>Performance più graceful al crescere del fattore di carico \(\alpha\) (può superare 1).</li>
-                            <li>Richiede spazio aggiuntivo per i puntatori delle liste.</li>
-                        </ul>
-                    </li>
-                    <li><strong>Open Addressing:</strong>
-                        <ul>
-                            <li>Non richiede puntatori, può essere più efficiente per lo spazio (se la tabella non è troppo vuota) e per la località di cache (se le sonde sono vicine).</li>
-                            <li>La cancellazione è più complessa (richiede il marcatore <code>DELETED</code>).</li>
-                            <li>Le performance degradano rapidamente quando \(\alpha\) si avvicina a 1.</li>
-                            <li>La scelta della tecnica di scansione è critica per evitare clustering.</li>
-                        </ul>
-                    </li>
-                </ul>
-                <p>La professoressa menziona che la funzione di hash è fondamentale e che esistono molte tecniche (divisione, moltiplicazione, hashing universale) per progettarne di buone.</p>
-            </div>
-        </article>
-
-        <article id="esercizi-riflessioni" class="content-section">
-            <h2 class="section-title">9. Esercizi e Riflessioni per Casa</h2>
-            <div class="section-content">
-                <p>La professoressa non ha assegnato esplicitamente esercizi numerati per casa in questa lezione, ma ha posto le basi per comprendere le prestazioni e le problematiche delle tabelle di hash. Alcune riflessioni che uno studente potrebbe fare sono:</p>
-                <ul>
-                    <li>Come si comporterebbe il chaining se tutte le chiavi facessero hash allo stesso slot? (Diventerebbe una ricerca lineare su una singola lista di N elementi).</li>
-                    <li>Come si sceglie \(m\) (dimensione della tabella) in pratica? (Spesso un numero primo per migliorare le proprietà delle funzioni di hash basate sulla divisione).</li>
-                    <li>Cosa succede se si usa una cattiva funzione \(h_2(k)\) nel double hashing (es. una che restituisce spesso 0 o valori non coprimi con m)? (La sequenza di scansione potrebbe non coprire tutti gli slot).</li>
-                </ul>
+                <p>La professoressa non ha assegnato esercizi specifici in questa lezione, ma i concetti si prestano ai seguenti esercizi di riflessione e implementazione.</p>
                 <div class="exercise-box">
-                    <strong>Esercizio Suggerito (Aggiunto): Confronto Inserimenti Chaining vs Linear Probing</strong>
-                    <p><strong>Testo:</strong> Considera una tabella di hash di dimensione \(m=7\). Inserisci le seguenti chiavi (che sono già i valori di hash, cioè \(h'(k)=k\)): 5, 12, 19, 6, 20.</p>
-                    <ol>
-                        <li>Mostra lo stato della tabella dopo ogni inserimento usando <strong>Chaining</strong>.</li>
-                        <li>Mostra lo stato della tabella dopo ogni inserimento usando <strong>Open Addressing con Linear Probing</strong>, dove la funzione di scansione è \(h(k, i) = (k + i) \pmod 7\).</li>
-                    </ol>
-                    <p><strong>Svolgimento (Idea):</strong></p>
-                    <p><strong>1. Chaining (m=7):</strong></p>
-                    <p><code>h(chiave) = chiave mod 7</code> (per determinare lo slot iniziale)</p>
+                    <strong>Esercizio 1 (Teorico): Impatto di una Cattiva Funzione di Hash</strong>
+                    <p><strong>Testo:</strong> Supponi di avere una tabella di hash di dimensione \(M=100\) e di dover inserire \(N=50\) chiavi. La tua funzione di hash, sfortunatamente, mappa tutte le 50 chiavi sempre allo slot <code>T[10]</code>. Se usi l'hashing con concatenamento, qual è il costo di una ricerca (sia con esito positivo che negativo) e di un inserimento in questo scenario?</p>
+                    <p><strong>Soluzione (Idea):</strong></p>
                     <ul>
-                        <li>Inserisci 5: \(5 \pmod 7 = 5\). T[5] -> [5]</li>
-                        <li>Inserisci 12: \(12 \pmod 7 = 5\). T[5] -> [12, 5]</li>
-                        <li>Inserisci 19: \(19 \pmod 7 = 5\). T[5] -> [19, 12, 5]</li>
-                        <li>Inserisci 6: \(6 \pmod 7 = 6\). T[6] -> [6]</li>
-                        <li>Inserisci 20: \(20 \pmod 7 = 6\). T[6] -> [20, 6]</li>
+                        <li>Tutti i 50 elementi finiranno nella lista concatenata puntata da <code>T[10]</code>. Le altre 99 liste saranno vuote.</li>
+                        <li><strong>Ricerca con esito positivo:</strong> Per trovare un elemento, nel caso peggiore dovrai scorrere quasi tutta la lista di 50 elementi. In media (se l'elemento cercato è uno qualsiasi dei 50 con uguale probabilità), scorrerai circa 25 elementi. Il costo è \(\Theta(N)\) (in questo caso \(\Theta(50)\)).</li>
+                        <li><strong>Ricerca con esito negativo:</strong> Se cerchi una chiave che mappa a <code>T[10]</code> ma non è presente, devi scorrere tutta la lista di 50 elementi. Costo \(\Theta(N)\). Se cerchi una chiave che mappa a un altro slot (es. <code>T[0]</code>), il costo è \(\Theta(1)\) perché la lista è vuota. Ma nel caso peggiore di ricerca negativa (l'elemento non c'è ma mappa allo slot affollato), è \(\Theta(N)\).</li>
+                        <li><strong>Inserimento:</strong> Se si inserisce in testa, il costo è sempre \(\Theta(1)\).</li>
                     </ul>
-                    <p>Tabella Finale (Chaining):</p>
-                    <p>T[0]: NULL<br>
-                       T[1]: NULL<br>
-                       T[2]: NULL<br>
-                       T[3]: NULL<br>
-                       T[4]: NULL<br>
-                       T[5]: -> 19 -> 12 -> 5 -> NULL<br>
-                       T[6]: -> 20 -> 6 -> NULL</p>
-
-                    <p><strong>2. Open Addressing con Linear Probing (m=7):</strong></p>
-                    <p>\(h(k, i) = (k + i) \pmod 7\). Inizialmente la tabella è piena di NIL.</p>
-                    <p>Array T (dimensione 7): [NIL, NIL, NIL, NIL, NIL, NIL, NIL]</p>
-                    <ul>
-                        <li><strong>Inserisci 5:</strong>
-                            <ul>
-                                <li>i=0: \(h(5,0) = (5+0)\pmod 7 = 5\). T[5] è NIL. T[5]=5.</li>
-                                <li>T: [NIL,NIL,NIL,NIL,NIL, 5, NIL]</li>
-                            </ul>
-                        </li>
-                        <li><strong>Inserisci 12:</strong>
-                            <ul>
-                                <li>i=0: \(h(12,0) = (12+0)\pmod 7 = 5\). T[5] è 5 (occupato).</li>
-                                <li>i=1: \(h(12,1) = (12+1)\pmod 7 = 13\pmod 7 = 6\). T[6] è NIL. T[6]=12.</li>
-                                <li>T: [NIL,NIL,NIL,NIL,NIL, 5, 12]</li>
-                            </ul>
-                        </li>
-                        <li><strong>Inserisci 19:</strong>
-                            <ul>
-                                <li>i=0: \(h(19,0) = (19+0)\pmod 7 = 5\). T[5] è 5 (occupato).</li>
-                                <li>i=1: \(h(19,1) = (19+1)\pmod 7 = 20\pmod 7 = 6\). T[6] è 12 (occupato).</li>
-                                <li>i=2: \(h(19,2) = (19+2)\pmod 7 = 21\pmod 7 = 0\). T[0] è NIL. T[0]=19.</li>
-                                <li>T: [19, NIL,NIL,NIL,NIL, 5, 12]</li>
-                            </ul>
-                        </li>
-                        <li><strong>Inserisci 6:</strong>
-                            <ul>
-                                <li>i=0: \(h(6,0) = (6+0)\pmod 7 = 6\). T[6] è 12 (occupato).</li>
-                                <li>i=1: \(h(6,1) = (6+1)\pmod 7 = 0\). T[0] è 19 (occupato).</li>
-                                <li>i=2: \(h(6,2) = (6+2)\pmod 7 = 8\pmod 7 = 1\). T[1] è NIL. T[1]=6.</li>
-                                <li>T: [19, 6, NIL,NIL,NIL, 5, 12]</li>
-                            </ul>
-                        </li>
-                        <li><strong>Inserisci 20:</strong>
-                            <ul>
-                                <li>i=0: \(h(20,0) = (20+0)\pmod 7 = 6\). T[6] è 12 (occupato).</li>
-                                <li>i=1: \(h(20,1) = (20+1)\pmod 7 = 0\). T[0] è 19 (occupato).</li>
-                                <li>i=2: \(h(20,2) = (20+2)\pmod 7 = 1\). T[1] è 6 (occupato).</li>
-                                <li>i=3: \(h(20,3) = (20+3)\pmod 7 = 23\pmod 7 = 2\). T[2] è NIL. T[2]=20.</li>
-                                <li>T: [19, 6, 20, NIL,NIL, 5, 12]</li>
-                            </ul>
-                        </li>
-                    </ul>
-                     <p>Tabella Finale (Linear Probing):</p>
-                     <div class="array-representation">
-                        <table><thead><tr><th>Idx:</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr></thead>
-                        <tbody><tr><td>Val:</td><td>19</td><td>6</td><td>20</td><td>NIL</td><td>NIL</td><td>5</td><td>12</td></tr></tbody></table>
-                    </div>
-                    <p>Questo esempio evidenzia il clustering primario: il blocco [5, 12] ha costretto 19 e 6 a "saltare" più avanti.</p>
+                    <p>Questo illustra il caso peggiore del chaining.</p>
                 </div>
+                <div class="exercise-box">
+                    <strong>Esercizio 2 (Implementativo): Semplice Tabella di Hash con Chaining</strong>
+                    <p><strong>Testo:</strong> Implementa una semplice tabella di hash per stringhe che usa il chaining.
+                    La funzione di hash può essere: somma dei valori ASCII dei caratteri della stringa, modulo M (dimensione della tabella).
+                    Implementa le funzioni <code>insert(key, value)</code>, <code>search(key)</code> (restituisce il valore o null), e <code>delete(key)</code>.</p>
+                    <p><strong>Svolgimento (Idea):</strong></p>
+                    <ol>
+                        <li>Definisci una struttura per i nodi della lista concatenata (es. <code>{ key: string, value: any, next: Node | null }</code>).</li>
+                        <li>La tabella di hash sarà un array di questi nodi (o null se la lista è vuota).</li>
+                        <li>Implementa la funzione di hash.</li>
+                        <li><strong>Insert:</strong> Calcola l'hash, accedi alla lista corretta, crea un nuovo nodo e inseriscilo in testa. Gestisci il caso in cui la chiave esista già (aggiorna il valore o segnala errore, a seconda delle specifiche).</li>
+                        <li><strong>Search:</strong> Calcola l'hash, scorri la lista confrontando le chiavi.</li>
+                        <li><strong>Delete:</strong> Calcola l'hash, scorri la lista per trovare il nodo, e poi rimuovilo (gestendo il caso del primo nodo e dei nodi intermedi).</li>
+                    </ol>
+                </div>
+            </div>
+        </article>
+
+        <article id="conclusioni" class="content-section">
+            <h2 class="section-title">7. Conclusioni</h2>
+            <div class="section-content">
+                <p>La lezione ha concluso l'analisi di Bucket Sort, evidenziando come la sua efficienza lineare attesa dipenda crucialmente dall'ipotesi di distribuzione uniforme dell'input.</p>
+                <p>Successivamente, è stata presentata (o ripassata) la struttura dati Tabelle di Hash, con un focus sulla tecnica di risoluzione delle collisioni tramite **concatenamento (chaining)**.</p>
+                <p><strong>Punti Chiave sulle Tabelle di Hash con Chaining:</strong></p>
+                <ul>
+                    <li>Permettono di gestire le collisioni inserendo elementi che mappano allo stesso slot in una lista concatenata.</li>
+                    <li>Le operazioni di inserimento, ricerca e cancellazione hanno un costo atteso di \(\Theta(1 + \alpha)\), dove \(\alpha\) è il fattore di carico \(N/M\).</li>
+                    <li>Se la dimensione della tabella \(M\) è proporzionale al numero di elementi \(N\), allora \(\alpha = \Theta(1)\), e le operazioni hanno costo atteso \(\Theta(1)\).</li>
+                    <li>Il caso peggiore rimane \(\Theta(N)\) per ricerca e cancellazione, se tutte le chiavi collidono.</li>
+                    <li>L'efficienza dipende fortemente dalla qualità della funzione di hash e dalla sua capacità di distribuire le chiavi uniformemente (SUHA).</li>
+                </ul>
+                <p>È stato fatto un breve cenno all'indirizzamento aperto come alternativa al chaining, che verrà probabilmente approfondito in futuro.</p>
             </div>
         </article>
 
@@ -843,9 +673,8 @@ Hash-Delete(T, k)
         <p>© 2023 Appunti Corso Algoritmi</p>
     </footer>
 
-    <script src="../../assets/js/common.js"></script> <!-- Assumendo che sia nella stessa struttura di cartelle -->
+    <script src="../../assets/js/common.js"></script>
     <script>
-    // Stessa logica di Mermaid.js da lezioni precedenti per il rendering
     document.addEventListener('DOMContentLoaded', function () {
         if (typeof mermaid !== 'undefined') {
             mermaid.initialize({
