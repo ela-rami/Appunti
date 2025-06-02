@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 1: Introduzione alle Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/Reti_common.css">
+</head>
+<body>
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 1: Introduzione alle Reti di Calcolatori</h1>
+        <div></div> <!-- Placeholder per bilanciare il titolo se necessario -->
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <!-- Il bottone "Appunti Prof (PDF)" non è presente per Reti -->
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#benvenuto-e-contesto" class="sidebar-link">1. Benvenuto e Contesto del Corso</a></li>
+            <li><a href="#organizzazione-e-logistica" class="sidebar-link">2. Organizzazione e Logistica</a></li>
+            <li><a href="#importanza-dello-studente" class="sidebar-link">3. L'Importanza dello Studente</a></li>
+            <li><a href="#comunicazione-conoscenza" class="sidebar-link">4. Tempo e Spazio per la Conoscenza</a></li>
+            <li><a href="#configurazione-tecnica-lezione" class="sidebar-link">5. Configurazione Tecnica della Lezione</a></li>
+            <li><a href="#annuncio-servizi-studenti" class="sidebar-link">6. Annuncio Servizi Studenti (Manuela Croatto)</a></li>
+            <li><a href="#materiale-didattico-online" class="sidebar-link">7. Materiale Didattico Online</a></li>
+            <li><a href="#definizione-rete-calcolatori" class="sidebar-link">8. Cos'è una Rete di Calcolatori?</a></li>
+            <li><a href="#architettura-singolo-computer" class="sidebar-link">9. Distinzione: Architettura di un Singolo Computer</a></li>
+            <li><a href="#esempio-rete-telefonica" class="sidebar-link">10. Esempio Storico: La Rete Telefonica (POTS)</a></li>
+            <li><a href="#caratteristiche-chiave-reti" class="sidebar-link">11. Caratteristiche Chiave delle Reti</a></li>
+            <li><a href="#approccio-stratificato-layering" class="sidebar-link">12. L'Approccio Stratificato (Layering)</a></li>
+            <li><a href="#requisiti-e-progettazione" class="sidebar-link">13. Requisiti e Progettazione delle Reti</a></li>
+            <li><a href="#libri-di-testo" class="sidebar-link">14. Libri di Testo Consigliati</a></li>
+            <li><a href="#lezione-online-supplementare" class="sidebar-link">15. Pianificazione Lezione Online Supplementare</a></li>
+            <li><a href="#conclusioni-e-prospettive" class="sidebar-link">16. Conclusioni e Prospettive del Corso</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="benvenuto-e-contesto" class="content-section active-section">
+            <h2 class="section-title">1. Benvenuto e Contesto del Corso</h2>
+            <div class="section-content">
+                <p>Il professore inizia la lezione salutando gli studenti e presentandosi come il docente di <strong>Reti di Calcolatori</strong> (00:00-00:06). Sottolinea che molti studenti presenti sono del terzo anno, anche se alcuni potrebbero essere di anni successivi.</p>
+                <p>Esprime un certo disorientamento nel non riconoscere molti volti, probabilmente a causa del lungo periodo di lezioni a distanza (00:09-00:11). Introduce brevemente se stesso e il fatto che, sebbene molti non lo conoscano, lui "conosce" gli studenti come comunità universitaria (00:17-00:19).</p>
+                <p>Viene evidenziato il ritorno alle lezioni in presenza dopo un lungo periodo ("siamo stati lontani per tanto tempo", "l'ultima volta che ho fatto lezione in presenza era metà gennaio") dovuto a "cause di forza maggiore" (00:46-00:52), un chiaro riferimento alle restrizioni pandemiche. Il professore esprime la sua contentezza nel rivedere gli studenti fisicamente (01:37).</p>
+            </div>
+        </article>
+
+        <article id="organizzazione-e-logistica" class="content-section">
+            <h2 class="section-title">2. Organizzazione e Logistica Iniziale</h2>
+            <div class="section-content">
+                <p>Il professore accenna ad alcune difficoltà iniziali, come la registrazione della lezione che non partiva correttamente e problemi con la condivisione dello schermo del tablet, che userà per scrivere appunti durante la lezione (00:58-02:00).</p>
+                <p><strong>Piattaforma E-learning:</strong> Viene menzionato che il materiale del corso, come le slide, sarà caricato sulla piattaforma e-learning dell'università (03:30-03:35). Il professore preferisce questa piattaforma a Teams per il caricamento dei materiali poiché i server sono gestiti internamente, garantendo maggiore controllo e affidabilità (03:45-03:53).</p>
+            </div>
+        </article>
+
+        <article id="importanza-dello-studente" class="content-section">
+            <h2 class="section-title">3. L'Importanza dello Studente nell'Università</h2>
+            <div class="section-content">
+                <p>Il professore sottolinea che gli studenti sono una <strong>componente fondamentale dell'università</strong> (00:28-00:30). L'università è fatta di studenti e docenti; senza una di queste due componenti, l'università non esisterebbe (00:31-00:41).</p>
+                <p>Riconosce che il periodo di didattica a distanza è stato uno sforzo per tutti, ma che ora si ritorna a una modalità più diretta e, si spera, efficace (00:53-00:58).</p>
+            </div>
+        </article>
+
+        <article id="comunicazione-conoscenza" class="content-section">
+            <h2 class="section-title">4. Tempo e Spazio per la Conoscenza</h2>
+            <div class="section-content">
+                <p>Il professore introduce una riflessione filosofica sull'importanza del "tempo" e dello "spazio" per la trasmissione e la crescita della conoscenza (01:00-01:10). Sottolinea che la conoscenza, per essere diffusa e comunicata efficacemente, ha bisogno del suo tempo e del suo spazio dedicati (01:11-01:18). Questi due concetti sono intrinsecamente collegati (01:19-01:24).</p>
+                <p>Con il ritorno alle lezioni in presenza, "finalmente il tempo è tornato e lo spazio è questo qua" (01:28-01:32), accogliendo gli studenti di nuovo "a casa" nell'ambiente universitario (01:35-01:36).</p>
+            </div>
+        </article>
+
+        <article id="configurazione-tecnica-lezione" class="content-section">
+            <h2 class="section-title">5. Configurazione Tecnica della Lezione</h2>
+            <div class="section-content">
+                <p>Durante la lezione, il professore deve gestire alcuni aspetti tecnici:</p>
+                <ul>
+                    <li><strong>Condivisione Schermo:</strong> Inizialmente ci sono problemi a condividere lo schermo del tablet (01:59-02:03). Viene risolto condividendo l'intero desktop (02:03-02:11, 02:23-02:26).</li>
+                    <li><strong>Audio per Remoto:</strong> Si assicura che gli studenti in remoto sentano correttamente (02:48-02:51).</li>
+                    <li><strong>Gestione Chat:</strong> Chiede a qualcuno in aula di tenere d'occhio la chat per eventuali domande dagli studenti remoti (03:00-03:05).</li>
+                    <li><strong>Visualizzazione Slide:</strong> Verifica che le slide siano visibili a tutti, sia in aula che in remoto (03:05-03:09, problema risolto 03:24-03:26).</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Curiosità:</strong> Il professore menziona che è abituato a camminare mentre fa lezione (02:43-02:45).
+                </div>
+            </div>
+        </article>
+        
+        <article id="annuncio-servizi-studenti" class="content-section">
+            <h2 class="section-title">6. Annuncio dei Servizi Studenti (Manuela Croatto)</h2>
+            <div class="section-content">
+                <p>Manuela Croatto, responsabile dei servizi per gli studenti, interviene brevemente per fornire alcune informazioni utili (02:52-03:29):</p>
+                <ul>
+                    <li><strong>Informazioni Online:</strong> Tutte le informazioni aggiornate (orari, materiale, ecc.) sono sempre disponibili sul sito dell'università, specificamente sulla homepage dell'ateneo per l'anno accademico 2020/21 (03:02-03:10).</li>
+                    <li><strong>Gruppo Facebook:</strong> Esiste un gruppo Facebook "Help" dove gli studenti possono iscriversi e chiedere informazioni (03:11-03:15).</li>
+                    <li><strong>Banchetti Tutor e Igienizzante:</strong> Fuori dalle aule ci sono banchetti con i tutor, dove gli studenti possono anche ritirare un igienizzante messo a disposizione dall'università per tutti gli studenti (03:19-03:24). L'invito è a portarlo sempre con sé per igienizzare il posto a sedere, anche se gli spazi vengono già sanificati due volte al giorno (03:25-03:37). "La prudenza non è mai troppa" (03:37-03:39).</li>
+                    <li><strong>App Immuni:</strong> Viene caldamente consigliato, sebbene non obbligatorio, di scaricare e utilizzare l'app Immuni per il tracciamento dei contatti COVID-19. L'app permette di sapere se si è stati in un'aula con un caso positivo e di avvisare tempestivamente (03:40-03:52). Il professore stesso commenta che è uno strumento utile e prezioso (03:54-04:04).</li>
+                </ul>
+                <p>Manuela Croatto conclude augurando un buon anno accademico (04:08-04:10).</p>
+                 <div class="note-box">
+                    <strong>Nota:</strong> Il riferimento all'app Immuni e alle procedure di igienizzazione contestualizza la lezione al periodo della pandemia COVID-19.
+                </div>
+            </div>
+        </article>
+        
+        <article id="materiale-didattico-online" class="content-section">
+            <h2 class="section-title">7. Caricamento Materiale Didattico</h2>
+            <div class="section-content">
+                <p>Il professore risponde a una domanda di uno studente (03:30-03:32) riguardo a dove verranno caricate le slide. Conferma che le slide saranno caricate sulla piattaforma <strong>e-learning</strong> dell'università (03:33-03:35).</p>
+                <p>Spiega la preferenza per e-learning rispetto a Teams per due motivi (03:39-03:53):</p>
+                <ol>
+                    <li>Su e-learning ci sono già tutte le altre informazioni e materiali storici.</li>
+                    <li>E-learning è ospitato sui server dell'università (macchine proprie), mentre Teams è un servizio Microsoft, e il professore preferisce avere il controllo diretto sui materiali caricati.</li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="definizione-rete-calcolatori" class="content-section">
+            <h2 class="section-title">8. Cos'è una Rete di Calcolatori? Introduzione e Concetti Fondamentali</h2>
+            <div class="section-content">
+                <p>Il professore inizia la parte didattica del corso chiedendo "Cos'è una rete di calcolatori?" (04:00-04:06).</p>
+                <p>Una rete di calcolatori è un insieme di <strong>nodi</strong> (calcolatori, dispositivi) che sono <strong>interconnessi</strong> tra loro. Questa interconnessione permette lo <strong>scambio di informazioni</strong> (04:07-04:14).</p>
+                <p><strong>Componenti Essenziali di una Rete:</strong></p>
+                <ul>
+                    <li><strong>Nodi (o Host, End System, Terminali):</strong> Sono i dispositivi che generano, inviano, ricevono o elaborano dati (es. computer, server, smartphone, stampanti di rete, sensori IoT). (07:41-07:45)</li>
+                    <li><strong>Link di Comunicazione (o Canali):</strong> Sono i mezzi fisici o logici che collegano i nodi e permettono la trasmissione dei dati. Possono essere:
+                        <ul>
+                            <li><strong>Fisici:</strong> Cavi (rame, fibra ottica), onde radio (Wi-Fi, cellulare).</li>
+                            <li><strong>Logici:</strong> Il percorso che i dati seguono attraverso più link fisici e nodi intermedi.</li>
+                        </ul>
+                        (07:45-07:49)
+                    </li>
+                    <li><strong>Dispositivi Intermedi (o Nodi di Commutazione):</strong> Dispositivi come switch, router, che non sono destinazioni finali dei dati ma servono a instradare e inoltrare i pacchetti di dati verso la loro destinazione corretta. (07:49-07:54)</li>
+                </ul>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD
+                        A["Computer A (Nodo)"] ---|Link1| Switch1["Switch (Nodo Intermedio)"];
+                        B["Computer B (Nodo)"] ---|Link2| Switch1;
+                        C["Server (Nodo)"] ---|Link3| Router1["Router (Nodo Intermedio)"];
+                        Switch1 ---|Link4| Router1;
+                        Router1 ---|Link_Internet| Internet("(Internet - Altre Reti)");
+                        
+                        subgraph "Concetto di Rete Semplice"
+                            A; B; C; Switch1; Router1;
+                        end
+                    </pre>
+                </div>
+                <p><strong>Scopo di una Rete:</strong></p>
+                <p>Le reti esistono per permettere (04:14-04:22):</p>
+                <ul>
+                    <li><strong>Condivisione di Risorse:</strong>
+                        <ul>
+                            <li><strong>Hardware:</strong> Es. stampanti, dischi di storage.</li>
+                            <li><strong>Software/Dati:</strong> Es. database, file, applicazioni.</li>
+                        </ul>
+                        (07:55-08:02)
+                    </li>
+                    <li><strong>Comunicazione:</strong> Tra utenti o processi (es. email, messaggistica, videoconferenza). (08:02-08:04)</li>
+                    <li><strong>Accesso Remoto:</strong> A risorse e servizi non locali.</li>
+                    <li><strong>Affidabilità e Disponibilità:</strong> Replicando dati o servizi su più nodi.</li>
+                    <li><strong>Scalabilità:</strong> Possibilità di far crescere la rete aggiungendo nodi e link.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="architettura-singolo-computer" class="content-section">
+            <h2 class="section-title">9. Distinzione: Architettura di un Singolo Computer vs. Rete</h2>
+            <div class="section-content">
+                <p>Il professore chiarisce che l'architettura interna di un singolo calcolatore (come l'architettura di Von Neumann con CPU, memoria, bus di sistema, periferiche I/O) <strong>non è considerata una rete di calcolatori</strong> nel contesto del corso (04:31-04:35).</p>
+                <p>Sebbene i componenti interni comunichino tra loro, mancano di un attributo fondamentale dei nodi di una rete: l'<strong>indipendenza funzionale</strong>. Se si stacca la CPU dalla memoria in un computer, nessuno dei due può funzionare autonomamente per lo scopo per cui sono stati progettati. I componenti sono strettamente dipendenti (04:35-04:40).</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Singolo Computer (Arch. Von Neumann)"
+                            CPU["CPU"] <--> Memoria["Memoria RAM"];
+                            CPU <--> IO["Controller I/O"];
+                            IO <--> Periferiche["Tastiera, Mouse, Disco"];
+                            Memoria --- Bus["Bus di Sistema"];
+                            CPU --- Bus;
+                            IO --- Bus;
+                            Note1["Componenti interdipendenti.<br/>Non è una rete nel senso del corso."];
+                        end
+
+                        subgraph "Rete di Calcolatori"
+                            PC1["PC 1 (Nodo Indipendente)"] --- Link["Link di Comunicazione"] --- PC2["PC 2 (Nodo Indipendente)"];
+                            PC2 --- Link2 --- Server1["Server (Nodo Indipendente)"];
+                            Note2["Nodi con capacità di funzionamento autonomo<br/>che comunicano per scopi condivisi."];
+                        end
+                    </pre>
+                </div>
+                <p>In una rete, invece, ogni calcolatore (nodo) è tipicamente una macchina con una sua autonomia funzionale che può operare anche se disconnessa dalla rete (sebbene con funzionalità ridotte). La rete aggiunge la capacità di comunicare e condividere (04:40-04:46).</p>
+            </div>
+        </article>
+
+        <article id="esempio-rete-telefonica" class="content-section">
+            <h2 class="section-title">10. Esempio Storico: La Rete Telefonica (POTS - Plain Old Telephone Service)</h2>
+            <div class="section-content">
+                <p>Un esempio classico di rete, che predata le reti di calcolatori come le conosciamo, è la <strong>rete telefonica tradizionale</strong> (04:46-04:52).</p>
+                <ul>
+                    <li><strong>Nodi Terminali:</strong> Gli apparecchi telefonici.</li>
+                    <li><strong>Nodi Intermedi:</strong> Le centrali telefoniche (switch).</li>
+                    <li><strong>Link:</strong> I cavi telefonici (doppino in rame).</li>
+                </ul>
+                <p>Caratteristiche della rete telefonica tradizionale (commutazione di circuito):</p>
+                <ul>
+                    <li><strong>Connessione Dedicata:</strong> Quando si effettua una chiamata, viene stabilito un circuito fisico (o una porzione di banda dedicata) tra i due interlocutori per tutta la durata della chiamata. Questo circuito non è condiviso con altri durante la conversazione (04:52-05:04).</li>
+                    <li><strong>Qualità Garantita (per la voce):</strong> La banda dedicata assicura una certa qualità del servizio per la trasmissione vocale.</li>
+                    <li><strong>Inefficienza per Dati Sporadici:</strong> Se il circuito dedicato non viene utilizzato attivamente (es. silenzi durante una conversazione, o trasmissione dati "a raffica"), la risorsa rimane allocata e sprecata (05:04-05:11).</li>
+                </ul>
+                <div class="mermaid-container">
+                     <pre class="mermaid">
+                        graph TD
+                            TelA["Telefono A"] --- Central1["Centrale Locale 1"];
+                            TelB["Telefono B"] --- Central1;
+                            TelC["Telefono C"] --- Central2["Centrale Locale 2"];
+                            TelD["Telefono D"] --- Central2;
+                            Central1 --- Trunk["Linea Interurbana (Trunk)"] --- Central2;
+
+                            subgraph "Chiamata A -> C (Circuito Dedicato)"
+                                style TelA fill:#60a5fa,stroke:#fff
+                                style Link_A_C1 stroke:#60a5fa,stroke-width:4px
+                                style Central1_Active fill:#60a5fa,stroke:#fff
+                                style Link_C1_T stroke:#60a5fa,stroke-width:4px
+                                style Trunk_Active fill:#60a5fa,stroke:#fff
+                                style Link_T_C2 stroke:#60a5fa,stroke-width:4px
+                                style Central2_Active fill:#60a5fa,stroke:#fff
+                                style Link_C2_C stroke:#60a5fa,stroke-width:4px
+                                style TelC fill:#60a5fa,stroke:#fff
+                                TelA -- "Circuito A-C" --> Central1_Active;
+                                Central1_Active -- "Circuito A-C" --> Trunk_Active;
+                                Trunk_Active -- "Circuito A-C" --> Central2_Active;
+                                Central2_Active -- "Circuito A-C" --> TelC;
+                            end
+                    </pre>
+                </div>
+                <p>Le reti di calcolatori moderne, come Internet, utilizzano prevalentemente la <strong>commutazione di pacchetto</strong>, che è più efficiente per il traffico dati "bursty" (a raffica), ma questo verrà approfondito in seguito (05:11-05:16).</p>
+            </div>
+        </article>
+
+        <article id="caratteristiche-chiave-reti" class="content-section">
+            <h2 class="section-title">11. Caratteristiche Chiave e Obiettivi delle Reti di Calcolatori</h2>
+            <div class="section-content">
+                <p>Il professore inizia a delineare cosa si aspetta da una rete di calcolatori (05:16-05:22).</p>
+                <p><strong>1. Collegare Nodi Terminali (Host):</strong> La funzione primaria è permettere la comunicazione tra sistemi finali, che possono essere molto eterogenei (computer, server, dispositivi mobili, sensori, ecc.).</p>
+                <p><strong>2. Trasferimento di Dati (Pacchetti):</strong> La comunicazione avviene tipicamente attraverso lo scambio di "pacchetti" di dati. Un'applicazione genera dati, che vengono suddivisi in pacchetti, inviati attraverso la rete, e poi riassemblati a destinazione (05:22-05:30).</p>
+                <p><strong>3. Servizi alle Applicazioni:</strong> La rete deve fornire una piattaforma (un'infrastruttura di comunicazione) su cui le applicazioni distribuite possono essere eseguite. Esempi di applicazioni di rete (05:30-05:46):</p>
+                <ul>
+                    <li>World Wide Web (WWW)</li>
+                    <li>Streaming video (es. YouTube)</li>
+                    <li>Messaggistica istantanea (es. WhatsApp)</li>
+                    <li>Social network</li>
+                    <li>Videogiochi online</li>
+                    <li>Telefonia su IP (VoIP)</li>
+                    <li>E-commerce</li>
+                    <li>Condivisione di file (File Sharing)</li>
+                    <li>Posta elettronica (Email)</li>
+                </ul>
+                <p>Le applicazioni hanno esigenze diverse (05:46-05:56):</p>
+                <ul>
+                    <li><strong>Email:</strong> Non richiede consegna istantanea, ma affidabilità (il messaggio deve arrivare).</li>
+                    <li><strong>Navigazione Web:</strong> Richiede tempi di risposta rapidi.</li>
+                    <li><strong>Streaming Video/Audio, Videoconferenza:</strong> Sensibili al ritardo (delay) e alla variazione del ritardo (jitter), richiedono una certa larghezza di banda minima. La perdita di qualche pacchetto potrebbe essere tollerabile.</li>
+                    <li><strong>Gaming Online:</strong> Estremamente sensibile al ritardo.</li>
+                </ul>
+                <p>La rete deve quindi offrire un "servizio di comunicazione" alle applicazioni (05:56-06:00).</p>
+                <p><strong>4. Multiplexing (Condivisione delle Risorse):</strong> Poiché i link di comunicazione e i dispositivi intermedi sono risorse costose, devono essere condivise tra più utenti e applicazioni contemporaneamente. Il multiplexing è la tecnica che permette questa condivisione (06:01-06:09).</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph LR
+                        App1["Applicazione 1 (Dati A1)"] --> MUX;
+                        App2["Applicazione 2 (Dati A2)"] --> MUX;
+                        AppN["Applicazione N (Dati AN)"] --> MUX;
+                        MUX["Multiplexer (Rete)"] --> LinkCondiviso["Link Condiviso"];
+                        LinkCondiviso --> DEMUX["Demultiplexer (Rete)"];
+                        DEMUX --> Dest1["Destinatario Dati A1"];
+                        DEMUX --> Dest2["Destinatario Dati A2"];
+                        DEMUX --> DestN["Destinatario Dati AN"];
+
+                        style App1 fill:#818cf8,stroke:#fff;
+                        style App2 fill:#818cf8,stroke:#fff;
+                        style AppN fill:#818cf8,stroke:#fff;
+                        style MUX fill:#60a5fa,stroke:#fff;
+                        style LinkCondiviso fill:#a78bfa,stroke:#fff;
+                        style DEMUX fill:#60a5fa,stroke:#fff;
+                    </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="approccio-stratificato-layering" class="content-section">
+            <h2 class="section-title">12. L'Approccio Stratificato (Layering) alla Progettazione delle Reti</h2>
+            <div class="section-content">
+                <p>Le reti di calcolatori sono sistemi complessi. Per gestire questa complessità, la loro progettazione e implementazione si basano su un <strong>approccio stratificato (a livelli o layers)</strong> (06:09-06:21).</p>
+                <p><strong>Idea del Layering:</strong></p>
+                <ul>
+                    <li>Ogni livello (layer) fornisce un insieme specifico di servizi al livello superiore.</li>
+                    <li>Ogni livello utilizza i servizi del livello inferiore per realizzare i propri.</li>
+                    <li>L'interazione tra livelli adiacenti avviene attraverso interfacce ben definite.</li>
+                    <li>A un dato livello su un nodo sorgente, si ha una comunicazione "logica" (peer-to-peer) con lo stesso livello sul nodo destinazione, utilizzando un protocollo specifico per quel livello.</li>
+                </ul>
+                <p>Questo approccio modulare (06:21-06:28):</p>
+                <ul>
+                    <li>Semplifica la progettazione e la gestione.</li>
+                    <li>Permette di modificare l'implementazione di un livello senza influenzare gli altri (purché l'interfaccia rimanga la stessa).</li>
+                    <li>Favorisce la standardizzazione.</li>
+                </ul>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Host A"
+                            AppA["Applicazione (Livello 7)"] -- "Servizio" --> PresA["Presentazione (Livello 6)"]
+                            PresA -- "Servizio" --> SessA["Sessione (Livello 5)"]
+                            SessA -- "Servizio" --> TransA["Trasporto (Livello 4)"]
+                            TransA -- "Servizio" --> NetA["Rete (Livello 3)"]
+                            NetA -- "Servizio" --> DataLA["Data Link (Livello 2)"]
+                            DataLA -- "Servizio" --> PhyA["Fisico (Livello 1)"]
+                        end
+
+                        subgraph "Host B"
+                            AppB["Applicazione (Livello 7)"] -- "Servizio" --> PresB["Presentazione (Livello 6)"]
+                            PresB -- "Servizio" --> SessB["Sessione (Livello 5)"]
+                            SessB -- "Servizio" --> TransB["Trasporto (Livello 4)"]
+                            TransB -- "Servizio" --> NetB["Rete (Livello 3)"]
+                            NetB -- "Servizio" --> DataLB["Data Link (Livello 2)"]
+                            DataLB -- "Servizio" --> PhyB["Fisico (Livello 1)"]
+                        end
+                        
+                        AppA <-.->|Protocollo L7| AppB
+                        PresA <-.->|Protocollo L6| PresB
+                        SessA <-.->|Protocollo L5| SessB
+                        TransA <-.->|Protocollo L4| TransB
+                        NetA <-.->|Protocollo L3| NetB
+                        DataLA <-.->|Protocollo L2| DataLB
+                        PhyA ---|Mezzo Fisico| PhyB
+
+                        subgraph "Nodi Intermedi (Router/Switch)"
+                            NetI["Rete (L3)"]
+                            DataLI["Data Link (L2)"]
+                            PhyI["Fisico (L1)"]
+                            NetI --> DataLI --> PhyI
+                        end
+                        NetA --- NetI; NetI --- NetB;
+                        DataLA --- DataLI; DataLI --- DataLB;
+                         PhyA --- PhyI; PhyI --- PhyB;
+
+                        style AppA fill:#818cf8,stroke:#fff
+                        style AppB fill:#818cf8,stroke:#fff
+                        style TransA fill:#60a5fa,stroke:#fff
+                        style TransB fill:#60a5fa,stroke:#fff
+                        style NetA fill:#a78bfa,stroke:#fff
+                        style NetB fill:#a78bfa,stroke:#fff
+                        style NetI fill:#a78bfa,stroke:#fff
+                    </pre>
+                    <p class="caption" style="color: var(--text-secondary); font-size: 0.9em;">Modello OSI (concettuale) che illustra la comunicazione stratificata. Internet usa un modello TCP/IP più snello.</p>
+                </div>
+                <p>Il professore menziona che il modello ISO/OSI è un riferimento teorico con 7 livelli, ma Internet si basa su un modello TCP/IP più pratico, tipicamente con 4 o 5 livelli (06:29-06:37).</p>
+                <p>Il corso si concentrerà sull'analisi dei livelli dal basso verso l'alto (bottom-up), partendo dal livello fisico per capire le problematiche di trasmissione, fino ai livelli superiori (06:37-06:41).</p>
+            </div>
+        </article>
+
+        <article id="requisiti-e-progettazione" class="content-section">
+            <h2 class="section-title">13. Requisiti e Progettazione delle Reti: Diverse Prospettive</h2>
+            <div class="section-content">
+                <p>La progettazione e l'implementazione di una rete devono tenere conto di diversi requisiti, che variano a seconda della prospettiva (06:41-06:48):</p>
+                <ul>
+                    <li><strong>Prospettiva dell'Applicazione/Programmatore di Applicazioni:</strong>
+                        <ul>
+                            <li>Servizi richiesti (es. consegna affidabile, limiti di ritardo, banda minima).</li>
+                            <li>Interfaccia di programmazione (API, es. socket) per accedere ai servizi di rete.</li>
+                        </ul>
+                        (06:48-07:03)
+                    </li>
+                    <li><strong>Prospettiva del Progettista della Rete (Network Designer):</strong>
+                        <ul>
+                            <li>Come costruire una rete efficiente in termini di costi, scalabile, gestibile.</li>
+                            <li>Come garantire la qualità del servizio (QoS) richiesta dalle applicazioni.</li>
+                            <li>Come instradare i pacchetti.</li>
+                            <li>Come condividere le risorse (multiplexing).</li>
+                        </ul>
+                        (07:03-07:14)
+                    </li>
+                    <li><strong>Prospettiva del Fornitore di Servizi di Rete (Network Provider/Operator):</strong>
+                        <ul>
+                            <li>Gestione della rete (configurazione, monitoraggio, manutenzione, fault tolerance).</li>
+                            <li>Sicurezza, tariffazione, aspetti amministrativi.</li>
+                        </ul>
+                        (07:14-07:21)
+                    </li>
+                </ul>
+                <p>La rete deve essere <strong>flessibile</strong> per supportare una vasta gamma di applicazioni, anche quelle non previste al momento della sua progettazione iniziale (07:21-07:28). Internet è un esempio lampante di questa flessibilità.</p>
+                <p><strong>Architettura di Rete e Protocolli:</strong></p>
+                <p>L'architettura di rete definisce come i componenti sono organizzati e interagiscono. I <strong>protocolli</strong> sono insiemi di regole e convenzioni che governano la comunicazione tra entità (livelli o nodi) in una rete. Definiscono il formato dei messaggi, l'ordine di scambio, le azioni da intraprendere in risposta ai messaggi ricevuti o ad eventi (07:28-07:40).</p>
+            </div>
+        </article>
+
+        <article id="libri-di-testo" class="content-section">
+            <h2 class="section-title">14. Libri di Testo Consigliati</h2>
+            <div class="section-content">
+                <p>Il professore discute i libri di testo per il corso (08:30-09:00):</p>
+                <ul>
+                    <li><strong>Testo Principale Consigliato: "Computer Networks: A Systems Approach" di Peterson & Davie.</strong> Il professore lo considera ben fatto e segue un approccio sistemistico. È disponibile anche in italiano ("Reti di Calcolatori: Un approccio top-down basato su Internet" - <em>Nota: il titolo italiano menzionato dal prof sembra un mix con il Kurose & Ross, il Peterson & Davie tradotto è "Reti di Calcolatori: Un approccio sistematico"</em>).</li>
+                    <li><strong>Alternativa: "Computer Networking: A Top-Down Approach" di Kurose & Ross.</strong> Molto popolare, adotta un approccio top-down (parte dalle applicazioni e scende).</li>
+                    <li><strong>Classico: "Computer Networks" di Andrew S. Tanenbaum.</strong> Un testo storico e molto completo, ma forse più denso per un primo corso.</li>
+                </ul>
+                <p>Il professore seguirà più da vicino il Peterson & Davie, ma incoraggia a consultare anche gli altri per prospettive diverse. Sottolinea che i concetti fondamentali sono gli stessi in tutti i buoni libri di reti.</p>
+            </div>
+        </article>
+        
+        <article id="lezione-online-supplementare" class="content-section">
+            <h2 class="section-title">15. Pianificazione Lezione Online Supplementare</h2>
+            <div class="section-content">
+                <p>Il professore spiega che, avendo solo due slot di lezione in presenza a settimana (per un totale di 4 ore nominali, ma effettive 3), sarà necessaria una <strong>terza ora di lezione</strong> da svolgersi online in modalità asincrona o sincrona, per coprire adeguatamente il programma da 9 CFU (09:00-09:16).</p>
+                <p>Propone di trovare uno slot che vada bene alla maggioranza per una lezione sincrona online, altrimenti la registrerà e la renderà disponibile asincronamente.</p>
+                <p>Dopo una breve discussione con gli studenti presenti e la verifica degli orari, si individua provvisoriamente il <strong>Giovedì dalle 15:45</strong> (o 15:30, "quarto d'ora accademico") come possibile slot per la lezione online (09:17-09:30).</p>
+                <div class="note-box">
+                    <strong>Dettaglio Orario Finale:</strong> La discussione sull'orario si è poi spostata e, come si evince dalla successiva sintesi della lezione di ASD, per quel corso è stato fissato il Giovedì alle 15:45. È probabile che anche per Reti si sia arrivati a una soluzione simile o che la decisione sia stata rimandata. La trascrizione audio fornita per Reti si interrompe prima di una conclusione definitiva sull'orario.
+                </div>
+            </div>
+        </article>
+
+        <article id="conclusioni-e-prospettive" class="content-section">
+            <h2 class="section-title">16. Conclusioni e Prospettive del Corso</h2>
+            <div class="section-content">
+                <p>Questa prima lezione ha gettato le basi definendo cosa sia una rete di calcolatori, il suo scopo e le principali problematiche e prospettive che verranno affrontate nel corso.</p>
+                <p>Il professore ha evidenziato l'importanza della condivisione delle risorse, della comunicazione tra applicazioni eterogenee e della gestione della complessità attraverso un approccio stratificato.</p>
+                <p>Il corso esplorerà i vari livelli dell'architettura di rete, i protocolli che li governano e le tecnologie utilizzate per implementare le reti moderne, con un focus sui principi fondamentali che ne guidano la progettazione e l'evoluzione.</p>
+                 <div class="clarification-box">
+                    <strong>Considerazioni Finali (Aggiunte):</strong>
+                    <p>Il professore ha posto l'accento sulla natura <strong>generale e flessibile</strong> che una rete di calcolatori deve possedere per adattarsi a una vasta gamma di applicazioni presenti e future. Questo si contrappone a reti storiche o specializzate (come la rete telefonica originaria) progettate per un singolo scopo.</p>
+                    <p>La discussione sui diversi "ruoli" (application programmer, network designer, network provider) serve a introdurre i molteplici trade-off e requisiti che devono essere bilanciati nella progettazione di reti complesse e performanti.</p>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© Elias Mathias Ramirez - Appunti Corso Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/Reti_common.js"></script>
+    <script>
+    // Logica specifica per Mermaid.js (o altri script specifici per questa pagina, se necessari)
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark', // o 'default', 'forest', 'neutral'
+                darkMode: true, // se il tema supporta una variante scura
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: { // Esempio di personalizzazione per tema 'dark' o 'default'
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(), // Usato per alcuni sfondi di cluster
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(), // Usato per alcuni sfondi di cluster
+                    // Note: altri colori come nodeBkg, nodeBorder, clusterBkg, clusterBorder
+                    // potrebbero essere necessari a seconda della complessità del diagramma
+                    // e del tema base di Mermaid.
+                    fontSize: '14px', // Dimensione font del diagramma
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), // Sfondo dei nodi se il tema lo usa
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || ""; 
+                mermaidOriginalDefinitions.set(id, decodedContent.trim());
+                diag.innerHTML = ''; // Pulisci il contenuto originale
+                diag.style.visibility = 'hidden'; // Nascondi finché non renderizzato
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    // console.warn("Nessuna definizione originale per Mermaid ID:", diagramId);
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; // Assicurati che sia vuoto prima di renderizzare
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    // console.error("Errore rendering Mermaid per ID:", diagramId, "\nErrore:", e, "\nDefinizione:", diagramDefinition);
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
