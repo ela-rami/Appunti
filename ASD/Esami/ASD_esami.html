@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Algoritmi e Strutture Dati - Appunti</title>
+    <title>Esami - Algoritmi e Strutture Dati</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -41,7 +41,7 @@
             display: flex;
             align-items: center;
         }
-        .back-link {
+        .back-link { /* For the header back arrow */
             color: var(--accent-secondary);
             text-decoration: none;
             font-size: 1.8rem;
@@ -76,10 +76,11 @@
             border-bottom: 1px solid var(--border-soft);
             padding-bottom: 0.5rem;
         }
+        /* Styles for navigation buttons */
         .nav-button {
             display: inline-block;
             padding: 0.8rem 1.5rem;
-            margin: 0.5rem;
+            margin-top: 1rem; /* Added margin for spacing */
             background-color: var(--accent-primary);
             color: var(--bg-deep-space);
             text-decoration: none;
@@ -92,19 +93,11 @@
             background-color: var(--accent-secondary);
             transform: translateY(-2px);
         }
-        .button-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap; 
-            gap: 1rem; 
-            padding: 1rem 0; 
-        }
         footer {
             text-align: center;
             padding: 2rem 0;
             color: var(--text-secondary);
-            margin-top: auto; 
+            margin-top: auto; /* Pushes footer to bottom */
             font-size: 0.9rem;
         }
         @media (max-width: 768px) {
@@ -118,22 +111,20 @@
 </head>
 <body>
     <header class="page-header">
-        <a href="../index.html" class="back-link" title="Torna alla Home">←</a> 
-        <h1>Algoritmi e Strutture Dati</h1>
+        <a href="../ASD_home.html" class="back-link" title="Torna alla Home">←</a>
+        <h1>Esami - Algoritmi e Strutture Dati</h1>
     </header>
-
     <div class="container">
         <main>
             <section class="content-category">
-                <h2>Menu Principale</h2>
-                <div class="button-container">
-                    <a href="Lezioni/ASD_lezioni.html" class="nav-button">Lezioni</a>
-                    <a href="Esami/ASD_esami.html" class="nav-button">Esami</a>
+                <h2>Esami</h2>
+                <p style="text-align: center; padding: 2rem 0; color: var(--text-secondary);">Nessun esame disponibile al momento.</p>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="../ASD_home.html" class="nav-button">Torna alla Home</a>
                 </div>
             </section>
         </main>
     </div>
-
     <footer>
         <p>Appunti di Algoritmi e Strutture Dati.</p>
     </footer>
