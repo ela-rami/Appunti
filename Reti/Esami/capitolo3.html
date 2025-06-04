@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capitolo 3: Tecnologie di Accesso alla Rete (LAN/Wireless)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="assets/common.css">
+</head>
+<body data-pdf-path="percorso/al/tuo/pdf_prof_del_Capitolo3_se_esistente.pdf"> <!-- Placeholder per eventuale PDF del capitolo -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Capitolo 3: Tecnologie di Accesso alla Rete (LAN/Wireless)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="index.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice dei Capitoli</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF Cap.3)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#ethernet-introduzione" class="sidebar-link">1. Ethernet (IEEE 802.3): La Rete Cablata</a></li>
+            <li><a href="#csma-cd" class="sidebar-link">1.1. CSMA/CD: Accesso al Mezzo e Collisioni</a></li>
+            <li><a href="#ethernet-frame-format" class="sidebar-link">1.2. Formato del Frame Ethernet</a></li>
+            <li><a href="#ethernet-varianti" class="sidebar-link">1.3. Varianti Ethernet e Velocità</a></li>
+            <li><a href="#wi-fi-introduzione" class="sidebar-link">2. Wi-Fi (IEEE 802.11): La Rete Wireless</a></li>
+            <li><a href="#csma-ca" class="sidebar-link">2.1. CSMA/CA: Evitare le Collisioni</a></li>
+            <li><a href="#hidden-exposed-node" class="sidebar-link">2.2. Problemi Hidden e Exposed Node</a></li>
+            <li><a href="#intervalli-tempi-wi-fi" class="sidebar-link">2.3. Intervalli di Tempo (SIFS, PIFS, DIFS)</a></li>
+            <li><a href="#wi-fi-frame-format" class="sidebar-link">2.4. Formato dei Frame Wi-Fi (RTS, CTS, ACK)</a></li>
+            <li><a href="#wi-fi-efficienza" class="sidebar-link">2.5. Efficienza della Trasmissione Wi-Fi</a></li>
+            <li><a href="#bluetooth-introduzione" class="sidebar-link">3. Bluetooth (IEEE 802.15): Reti PAN</a></li>
+            <li><a href="#bluetooth-piconet-tmd" class="sidebar-link">3.1. Piconet e TDM (Time Division Multiplexing)</a></li>
+            <li><a href="#bluetooth-frame-calcoli" class="sidebar-link">3.2. Formato del Frame Bluetooth e Calcoli di Capacità</a></li>
+            <li><a href="#switch-bridge-introduzione" class="sidebar-link">4. Switch e Bridge: Interconnessione di LAN</a></li>
+            <li><a href="#autoapprendimento-switch" class="sidebar-link">4.1. Autoapprendimento (Learning Bridges)</a></li>
+            <li><a href="#spanning-tree" class="sidebar-link">4.2. Rapid Spanning Tree Protocol (RSTP)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="ethernet-introduzione" class="content-section active-section">
+            <h2 class="section-title">1. Ethernet (IEEE 802.3): La Rete Cablata</h2>
+            <div class="section-content">
+                <p><strong>Ethernet (IEEE 802.3)</strong> è la tecnologia di rete locale (LAN) cablata più diffusa e longeva. Originariamente sviluppata per canali condivisi, ha evoluto verso architetture basate su switch e connessioni punto-punto. Il suo meccanismo di accesso al mezzo è il **CSMA/CD**.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Ethernet-IEEE 802.3", "Frame ethernet", "trasmissione UNICAST/BROADCAST/MULTICAST" (Pagine 30-34 del PDF completo).
+                </div>
+
+                <h3>CSMA/CD: Carrier Sense, Multiple Access, Collision Detection</h3>
+                <p>CSMA/CD (Carrier Sense Multiple Access with Collision Detection) è il protocollo di accesso al mezzo utilizzato dalle reti Ethernet. Il suo obiettivo è permettere a più stazioni di condividere lo stesso mezzo trasmissivo, rilevando ed evitando collisioni.</p>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>Il CSMA/CD è un argomento fondamentale di Ethernet, quasi sempre presente in domande che richiedono di descrivere il suo funzionamento o di calcolare tempi specifici legati alle collisioni e al backoff.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** D (Domanda 4 - lunghezza minima frame, legata al CSMA/CD)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** I (Domanda 4 - calcolo tempo medio di attesa dopo collisione)</li>
+                        <li>**15-07-2024:** D (Domanda 4 - verifica CRC, ma riguarda la sequenza di bit)</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** D (Domanda 4 - probabilità successo collisione)</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="csma-cd">Funzionamento del CSMA/CD</h4>
+                <ol>
+                    <li><strong>Carrier Sense (Ascolto del Mezzo):</strong> Prima di trasmettere, una stazione "ascolta" il mezzo per verificare se è libero (<strong>IDLE</strong>) o occupato (<strong>BUSY</strong>). Se il mezzo è occupato, attende un intervallo minimo (IPG - InterPacket Gap) e poi riprova.</li>
+                    <li><strong>Multiple Access (Accesso Multiplo):</strong> Se il mezzo è libero, la stazione può iniziare a trasmettere. Più stazioni possono tentare di accedere al mezzo contemporaneamente.</li>
+                    <li><strong>Collision Detection (Rilevamento Collisioni):</strong> Durante la trasmissione, la stazione continua ad ascoltare il mezzo. Se rileva che il segnale sul mezzo è diverso da quello che sta trasmettendo, significa che si è verificata una **collisione** con un altro segnale.</li>
+                    <li><strong>Gestione della Collisione:</strong>
+                        <ul>
+                            <li>Se una collisione viene rilevata, la stazione interrompe immediatamente la trasmissione.</li>
+                            <li>Invia un segnale di <strong>jamming</strong> (32 bit) per notificare a tutte le altre stazioni della collisione.</li>
+                            <li>Entrambe le stazioni che hanno colliso (e altre che hanno tentato) ritentano la trasmissione dopo un intervallo di tempo casuale, determinato dal meccanismo di **Exponential Backoff**.</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD
+                        A[Stazione A] -- Traffico --> C[Canale Condiviso];
+                        B[Stazione B] -- Traffico --> C;
+                        C -- Ascolta --> A;
+                        C -- Ascolta --> B;
+
+                        subgraph "Processo CSMA/CD"
+                            Sense["Carrier Sense: Canale Libero?"] -- Si --> Transmit["Trasmissione"];
+                            Sense -- No --> Defer["Defer (Attesa IPG)"];
+                            Transmit -- Collisione --> Jam["Jamming Signal"];
+                            Jam --> Backoff["Exponential Backoff"];
+                            Backoff --> Sense;
+                            Transmit -- OK --> Fine["Fine Trasmissione"];
+                        end
+                        Transmit --> CollisionDetect["Collision Detection (durante Tx)"];
+                        CollisionDetect -- Si --> Jam;
+                    </pre>
+                </div>
+
+                <h4 class="subsubsection-title">Exponential Backoff</h4>
+                <p>Dopo l'n-esima collisione consecutiva per lo stesso frame, una stazione attende un tempo \(k \cdot \text{SlotTime}\), dove \(k\) è un numero casuale scelto dall'intervallo \([0, 2^n - 1]\). L'intervallo di scelta di \(k\) raddoppia ad ogni collisione, aumentando la probabilità di evitare collisioni future.</p>
+                <ul>
+                    <li>**SlotTime:** Tempo minimo di attesa (es. 51.2 µs per 10 Mbps Ethernet).</li>
+                    <li>**IPG (InterPacket Gap):** Un breve intervallo di tempo (9.6 µs per 10/100 Mbps Ethernet) che deve essere atteso dopo che il mezzo torna IDLE prima di una nuova trasmissione.</li>
+                    <li>Il tempo di attesa totale dopo una collisione è \( \text{IPG} + k \cdot \text{SlotTime} \).</li>
+                </ul>
+
+                <h4 class="subsubsection-title">Lunghezza Minima del Frame Ethernet</h4>
+                <p>È fondamentale che un frame sia sufficientemente lungo da permettere al trasmettitore di rilevare una collisione prima di finire di trasmettere. Se un frame è troppo corto, potrebbe essere inviato completamente prima che il segnale di collisione (da un host lontano) raggiunga il trasmettitore. Il tempo massimo per cui una collisione può verificarsi e essere rilevata è il **2 * Tempo di Propagazione Max** (tempo di andata e ritorno del segnale sul segmento più lungo).</p>
+                <p>Per 10 Mbps Ethernet, questo tempo è di circa 51.2 µs (il SlotTime). Per trasmettere un frame in 51.2 µs con 10 Mbps, sono necessari 512 bit (64 byte).</p>
+                <p>Se il payload di un frame è minore di 46 byte, viene aggiunto del **padding** per raggiungere la lunghezza minima del frame (64 byte).</p>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 15-06-2023, Domanda 4):</strong>
+                    <p>Assumiamo che si voglia implementare la Ethernet classica a 10 Mbps, su un unico cavo lungo 2000 m in cui il segnale si propaga a \(2 \cdot 10^8\) m/s, senza ripetitori o altro dispositivi intermedi. Qual è la lunghezza minima, in bit, che un pacchetto deve avere?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**Calcolo del Tempo di Propagazione Massimo:**
+                            Lunghezza cavo = 2000 m.
+                            Velocità propagazione = \(2 \cdot 10^8 \text{ m/s}\).
+                            Tempo di propagazione (andata) = \(\frac{2000 \text{ m}}{2 \cdot 10^8 \text{ m/s}} = 10^{-5} \text{ s} = 10 \text{ µs}\).
+                        </li>
+                        <li>**Calcolo del Tempo di Round Trip (RTT) Massimo:**
+                            Per rilevare una collisione, il segnale deve percorrere il cavo due volte (andata e ritorno).
+                            RTT max = \(2 \times \text{Tempo di propagazione (andata)} = 2 \times 10 \text{ µs} = 20 \text{ µs}\).
+                            Questo è il tempo massimo entro cui una collisione può verificarsi e deve essere rilevata dal trasmettitore.
+                        </li>
+                        <li>**Calcolo della Lunghezza Minima del Frame:**
+                            Bitrate = 10 Mbps = \(10 \times 10^6 \text{ bit/s}\).
+                            Lunghezza minima frame = RTT max \(\times\) Bitrate = \(20 \times 10^{-6} \text{ s} \times 10 \times 10^6 \text{ bit/s} = 200 \text{ bit}\).
+                        </li>
+                    </ol>
+                    <p><strong>Risposta:</strong> La lunghezza minima che un pacchetto deve avere è 200 bit.</p>
+                </div>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 19-02-2024, Domanda 4):</strong>
+                    <p>In una rete Ethernet classica (quella con CSMA/CD su mezzo condiviso), una stazione sta cercando di trasmettere un frame, ma ha rilevato collisione per la seconda volta. Ricordando che IPG = 9.6 µs e lo slot time è di 51.2 µs, qual è il tempo medio di attesa prima che la stazione tenti il reinvio del pacchetto?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**Identificare il numero di collisione:** È la seconda volta che rileva collisione. Quindi, siamo all'n-esima collisione con \(n = 2\).</li>
+                        <li>**Calcolo dell'intervallo di scelta per \(k\):**
+                            Il valore \(k\) viene scelto casualmente tra \([0, 2^n - 1]\). Per \(n=2\), l'intervallo è \([0, 2^2 - 1] = [0, 3]\). Quindi \(k\) può essere 0, 1, 2, o 3.
+                        </li>
+                        <li>**Calcolo del tempo medio di attesa:**
+                            Il tempo di attesa è \( \text{IPG} + k \cdot \text{SlotTime} \).
+                            Il tempo medio di attesa è \( \text{IPG} + \text{Media di k} \cdot \text{SlotTime} \).
+                            Media di \(k\) = \(\frac{0+1+2+3}{4} = \frac{6}{4} = 1.5\).
+                            Tempo medio di attesa = \(9.6 \text{ µs} + 1.5 \times 51.2 \text{ µs}\)
+                            Tempo medio di attesa = \(9.6 \text{ µs} + 76.8 \text{ µs} = 86.4 \text{ µs}\).
+                        </li>
+                    </ol>
+                    <p><strong>Risposta:</strong> Il tempo medio di attesa è 86.4 µs.</p>
+                </div>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 17-06-2024, Domanda 4):</strong>
+                    <p>Due stazioni Ethernet A e B classiche (quelle su cavo coassiale) hanno appena rilevato una collisione, e quindi ritentano la comunicazione. Nel frattempo, una terza stazione C tenta la trasmissione di un frame, per la prima volta. (a) Qual è la probabilità che la trasmissione abbia successo? (b) In tal caso, quale stazione riesce a trasmettere?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**(a) Probabilità di successo:**
+                            *   Stazioni A e B hanno rilevato una collisione. Sono alla loro prima collisione, quindi \(n=1\). Devono scegliere \(k\) tra \([0, 2^1-1] = [0, 1]\). La probabilità di scegliere \(k=0\) è 0.5, e di scegliere \(k=1\) è 0.5.
+                            *   Stazione C tenta la trasmissione per la prima volta. Non ha ancora rilevato collisioni, quindi non applica backoff e tenta di trasmettere immediatamente se il canale è libero.
+                            *   Affinché la trasmissione di C abbia successo, A e B devono **entrambe** scegliere di attendere *almeno uno SlotTime* (cioè \(k=1\)). Se A o B scelgono \(k=0\), trasmetteranno immediatamente dopo IPG, collidendo con C.
+                            *   La probabilità che A scelga \(k=1\) è 0.5.
+                            *   La probabilità che B scelga \(k=1\) è 0.5.
+                            *   La probabilità che A e B scelgano entrambe \(k=1\) (eventi indipendenti) è \(0.5 \times 0.5 = 0.25\).
+                            *   In questo scenario (A e B attendono), C trova il canale libero e trasmette.
+                            *   Quindi, la probabilità che la trasmissione abbia successo è 0.25.
+                        </li>
+                        <li>**(b) Quale stazione riesce a trasmettere?**
+                            *   Se la trasmissione ha successo (cioè A e B attendono), la stazione C è quella che riesce a trasmettere.
+                        </li>
+                    </ol>
+                    <p><strong>Risposta:</strong> (a) La probabilità di successo è 0.25. (b) La stazione C riesce a trasmettere.</p>
+                </div>
+
+                <h3>Formato del Frame Ethernet</h3>
+                <p>Il frame Ethernet è una struttura dati standardizzata che incapsula i dati dei livelli superiori (es. pacchetti IP) per la trasmissione sul mezzo fisico.</p>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>Le domande sul formato del frame Ethernet appaiono frequentemente, spesso in contesti di calcolo dell'overhead o per identificare le funzioni dei campi principali.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 2 - calcolo dimensione frame con preambolo, intestazione, CRC)</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** D (Domanda 4 - lunghezza minima frame)</li>
+                        <li>**29-01-2024:** D (Domanda 4 - tempo per frame con payload massimo, include overhead)</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="ethernet-frame-format">Struttura del Frame Ethernet</h4>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph LR
+                        P[Preamble<br/>(7 Bytes)] --> SFD[SFD<br/>(1 Byte)];
+                        SFD --> MAC_Dest[MAC Dest.<br/>(6 Bytes)];
+                        MAC_Dest --> MAC_Src[MAC Src.<br/>(6 Bytes)];
+                        MAC_Src --> Type_Len[Type/Length<br/>(2 Bytes)];
+                        Type_Len --> Payload[Payload<br/>(46-1500 Bytes)];
+                        Payload --> CRC[CRC-32<br/>(4 Bytes)];
+
+                        style P fill:#60a5fa,stroke:#60a5fa,stroke-width:1px;
+                        style SFD fill:#818cf8,stroke:#818cf8,stroke-width:1px;
+                        style MAC_Dest fill:#34D399,stroke:#34D399,stroke-width:1px;
+                        style MAC_Src fill:#FACC15,stroke:#FACC15,stroke-width:1px;
+                        style Type_Len fill:#EF4444,stroke:#EF4444,stroke-width:1px;
+                        style Payload fill:#9ca3af,stroke:#9ca3af,stroke-width:1px;
+                        style CRC fill:#60a5fa,stroke:#60a5fa,stroke-width:1px;
+                    </pre>
+                </div>
+                <ul>
+                    <li><strong>Preamble (7 byte):</strong> Sequenza di bit (01010101...) per la sincronizzazione del ricevitore.</li>
+                    <li><strong>SFD (Start Frame Delimiter) (1 byte):</strong> Sequenza 10101011, che segnala l'inizio del frame effettivo.</li>
+                    <li><strong>MAC Destinazione (6 byte):</strong> Indirizzo MAC del ricevitore.</li>
+                    <li><strong>MAC Sorgente (6 byte):</strong> Indirizzo MAC del mittente.
+                        <div class="note-box">
+                            <strong>Indirizzo MAC:</strong> Indirizzo univoco a livello hardware di una scheda di rete, fissato in ROM.
+                        </div>
+                    </li>
+                    <li><strong>Type/Length (2 byte):</strong> Indica il tipo di protocollo del livello superiore (es. IP) o la lunghezza del payload.</li>
+                    <li><strong>Payload (46-1500 byte):</strong> Contiene i dati veri e propri (PDU del livello superiore). Se il payload è minore di 46 byte, viene aggiunto **padding** per raggiungere la lunghezza minima del frame (64 byte totale).</li>
+                    <li><strong>CRC-32 (4 byte):</strong> Per il rilevamento di errori.</li>
+                </ul>
+                <p><strong>Overhead del Frame:</strong> Preamble + SFD + MAC Dest + MAC Src + Type/Length + CRC-32 = \(7+1+6+6+2+4 = 26\) byte.</p>
+
+                <h4>Tipologie di Trasmissione su Ethernet</h4>
+                <ul>
+                    <li>**Unicast:** Il frame è indirizzato a un singolo indirizzo MAC specifico. Viene ricevuto da tutti i dispositivi, ma accettato solo dal destinatario.</li>
+                    <li>**Broadcast:** Il frame è indirizzato a tutti gli host sulla rete (indirizzo MAC di destinazione composto da tutti '1': FF:FF:FF:FF:FF:FF). Viene accettato da tutti.</li>
+                    <li>**Multicast:** Il frame è indirizzato a un gruppo specifico di host (indirizzo MAC di destinazione con il primo bit a '1'). Viene accettato solo dai membri del gruppo.</li>
+                </ul>
+
+                <h3>Varianti Ethernet e Velocità</h3>
+                <p>Ethernet si è evoluta con diverse specifiche, offrendo diverse velocità e tipologie di cablaggio.</p>
+
+                <h4>Frequenza negli Esami: Bassa</h4>
+                <p>Le domande sulle specifiche varianti di Ethernet (es. 10base5, 100baseT) sono meno frequenti, ma è utile conoscere le differenze principali.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** D (Domanda 4 - Gigabit Ethernet)</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="ethernet-varianti">Principali Varianti</h4>
+                <ul>
+                    <li>**10base5 (Thick Ethernet):** 10 Mbps, cavo coassiale spesso (max 500m), topologia a bus. Usa codifica Manchester.</li>
+                    <li>**10base2 (Thin Ethernet):** 10 Mbps, cavo coassiale sottile (max 200m), topologia a bus. Usa codifica Manchester.</li>
+                    <li>**10baseT (Twisted Pair Ethernet):** 10 Mbps, cavo doppino intrecciato (max 100m), topologia a stella (con hub o switch). Usa codifica MLT-3 e 4B/5B.</li>
+                    <li>**100BASE-TX (Fast Ethernet):** 100 Mbps, cavo doppino intrecciato.</li>
+                    <li>**1000BASE-T (Gigabit Ethernet):** 1 Gbps, cavo doppino intrecciato.</li>
+                    <li>**10GBASE-T:** 10 Gbps, cavo doppino intrecciato.</li>
+                </ul>
+                <p>La trasmissione dei segnali su cavo può essere influenzata dal **Velocity Factor**, che indica la velocità di propagazione nel mezzo rispetto a quella della luce nel vuoto.</p>
+
+            </div>
+        </article>
+
+        <article id="wi-fi-introduzione" class="content-section">
+            <h2 class="section-title">2. Wi-Fi (IEEE 802.11): La Rete Wireless</h2>
+            <div class="section-content">
+                <p>Il **Wi-Fi (IEEE 802.11)** è lo standard per le reti locali wireless (WLAN). A differenza di Ethernet, le reti Wi-Fi utilizzano segnali radio e un mezzo condiviso che non confina il segnale (l'aria), portando a sfide specifiche nella gestione delle collisioni.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Connessioni wireless (802.11)", "Frame WI-FI" (Pagine 36-42 del PDF completo).
+                </div>
+
+                <h3>CSMA/CA: Evitare le Collisioni</h3>
+                <p>Nelle reti wireless, la rilevazione delle collisioni (`Collision Detection`) è difficile o impossibile (una stazione non può trasmettere e ascoltare contemporaneamente con un unico transceiver in modo efficace). Per questo, Wi-Fi utilizza **CSMA/CA (Carrier Sense Multiple Access with Collision Avoidance)**, che cerca di evitare le collisioni piuttosto che rilevarle.</p>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>Il CSMA/CA, insieme ai problemi Hidden/Exposed Node e al meccanismo RTS/CTS, è un argomento centrale del Wi-Fi e compare molto frequentemente.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** D (Domanda 5 - funzionamento CSMA/CA e runt frame)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** D (Domanda 5 - SIFS e gestione versioni protocollo)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="csma-ca">Principi del CSMA/CA</h4>
+                <ol>
+                    <li><strong>Carrier Sense:</strong> La stazione ascolta il mezzo prima di trasmettere. Se è occupato, attende.</li>
+                    <li><strong>Collision Avoidance:</strong>
+                        <ul>
+                            <li>**Meccanismo RTS/CTS (Request to Send/Clear to Send):** Questo è il cuore del CSMA/CA per evitare collisioni.
+                                <ol>
+                                    <li>Il mittente invia un frame **RTS** (Request to Send) al ricevitore, specificando la durata della trasmissione.</li>
+                                    <li>Il ricevitore risponde con un frame **CTS** (Clear to Send), confermando la possibilità di ricevere e indicando la durata.</li>
+                                    <li>Tutti i nodi che "sentono" l'RTS o il CTS aggiornano il loro **NAV (Network Allocation Vector)**, un timer che indica per quanto tempo il mezzo sarà occupato, e si astengono dal trasmettere.</li>
+                                    <li>Solo dopo aver ricevuto il CTS, il mittente invia il frame DATA effettivo.</li>
+                                    <li>Il ricevitore invia un **ACK** per confermare la ricezione del DATA.</li>
+                                </ol>
+                            </li>
+                            <li><strong>Exponential Backoff:</strong> Simile a Ethernet, in caso di mancata ricezione di CTS o ACK, la stazione applica un backoff esponenziale per ritentare.</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>Problemi di Rete Wireless: Hidden e Exposed Node</h3>
+                <p>Questi problemi derivano dalla natura del mezzo wireless e dalle limitazioni del Carrier Sense.</p>
+
+                <h4>Frequenza negli Esami: Media</h4>
+                <p>I problemi Hidden e Exposed Node sono abbastanza ricorrenti, spesso richiesti come parte della spiegazione del CSMA/CA o come scenari di rete.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** D (Domanda 18)</li>
+                        <li>**Appello Y:** D (Domanda 10)</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="hidden-exposed-node">Hidden Node Problem</h4>
+                <p>Si verifica quando due stazioni (es. A e C) sono visibili al ricevitore (B), ma non si "vedono" tra loro (sono fuori portata reciproca). Se A e C trasmettono contemporaneamente a B, collidono a B, ma non rilevano la collisione perché non si sentono a vicenda.</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD
+                        A[A] --- B[B];
+                        C[C] --- B;
+                        A -.- C;
+                        style A fill:#FACC15,stroke:#FACC15;
+                        style C fill:#34D399,stroke:#34D399;
+                        style B fill:#60a5fa,stroke:#60a5fa;
+                        linkStyle 2 stroke-dasharray: 5 5;
+                    </pre>
+                </div>
+                <p><strong>Soluzione con RTS/CTS:</strong> Se A invia RTS a B, C non lo sente. Se B invia CTS a A, C lo sente e aggiorna il suo NAV, astenendosi dal trasmettere. Questo risolve il problema.</p>
+
+                <h4 class="subsubsection-title">Exposed Node Problem</h4>
+                <p>Si verifica quando una stazione (B) sta trasmettendo a un'altra (A), e una terza stazione (C) che è vicina a B (la sente) ma non ad A, vorrebbe trasmettere a un quarto nodo (D) che è lontano da A e B. C non trasmette perché sente B, ma in realtà potrebbe farlo senza causare interferenze.</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD
+                        A[A] --- B[B];
+                        B --- C[C];
+                        C --- D[D];
+                        A -.- D;
+                        style A fill:#FACC15,stroke:#FACC15;
+                        style B fill:#60a5fa,stroke:#60a5fa;
+                        style C fill:#34D399,stroke:#34D399;
+                        style D fill:#818cf8,stroke:#818cf8;
+                        linkStyle 3 stroke-dasharray: 5 5;
+                    </pre>
+                </div>
+                <p><strong>Soluzione con RTS/CTS:</strong> Se A invia RTS a B, e B invia CTS ad A, C sentirà il CTS. C non sa che B sta trasmettendo solo ad A e che una trasmissione di C a D non interferirebbe. C aggiorna il NAV e si astiene. Il problema non è risolto perfettamente dal RTS/CTS in questo caso, anzi, lo aggrava impedendo una trasmissione valida.</p>
+
+                <h3>Intervalli di Tempo in Wi-Fi</h3>
+                <p>Il CSMA/CA di Wi-Fi definisce diversi intervalli di tempo di attesa tra i frame per gestire la priorità e la sequenza delle trasmissioni.</p>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>La conoscenza degli intervalli SIFS, PIFS, DIFS e della loro gerarchia è spesso richiesta, a volte in contesti di configurazione o calcolo dell'efficienza.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** D (Domanda 5 - SIFS e gestione versioni protocollo)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** D (Domanda 5 - SIFS e gestione versioni protocollo)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="intervalli-tempi-wi-fi">Definizioni</h4>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD
+                        TxA[Stazione A: Trasmissione Frame] --> SIFS[SIFS];
+                        SIFS --> RxB[Ricevitore B: Invia ACK/CTS];
+                        RxB --> PIFS[PIFS];
+                        PIFS --> AP[Access Point: Inizia nuova Tx];
+                        AP --> DIFS[DIFS];
+                        DIFS --> OtherStations[Altre Stazioni: Iniziano nuova Tx];
+
+                        style SIFS fill:#FACC15,stroke:#FACC15;
+                        style PIFS fill:#34D399,stroke:#34D399;
+                        style DIFS fill:#818cf8,stroke:#818cf8;
+                    </pre>
+                </div>
+                <ul>
+                    <li>**SIFS (Short InterFrame Space):** L'intervallo di tempo più breve. Usato per le risposte immediate all'interno della stessa "transazione" (es. DATA-ACK, RTS-CTS). È il tempo che il ricevitore attende per processare il frame ricevuto e inviare la sua risposta.</li>
+                    <li>**PIFS (Point InterFrame Space):** Più lungo di SIFS. Usato dagli Access Point (AP) per avere priorità nell'accesso al mezzo (es. per inviare un RTS o un Beacon frame). `PIFS = SIFS + SlotTime`.</li>
+                    <li>**DIFS (Distributed InterFrame Space):** L'intervallo più lungo. Usato dalle stazioni normali per iniziare una nuova trasmissione quando il mezzo è libero. `DIFS = SIFS + 2 * SlotTime`.</li>
+                </ul>
+                <p><strong>Gerarchia di Priorità:</strong> \(\text{SIFS} < \text{PIFS} < \text{DIFS}\). Questa gerarchia assicura che le risposte immediate (ACK, CTS) abbiano priorità sulle nuove trasmissioni degli AP, e queste ultime sulle nuove trasmissioni delle stazioni ordinarie.</p>
+                <p><strong>Gestione di Stazioni con Diverse Versioni del Protocollo:</strong> Se ci sono stazioni con diverse versioni del protocollo (es. 802.11b e 802.11g) nella stessa cella, è necessario scegliere i valori di DIFS e PIFS più grandi (quelli della versione più "lenta" o "vecchia") per garantire che tutte le stazioni possano coesistere e non ci siano interruzioni nella comunicazione.</p>
+
+                <h3>Formato dei Frame Wi-Fi e Calcoli di Efficienza</h3>
+                <p>Oltre ai frame DATA, Wi-Fi utilizza diversi frame di controllo di dimensione fissa, che contribuiscono all'overhead complessivo.</p>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>Le domande sul formato dei frame di controllo Wi-Fi e i calcoli di efficienza/tempo di trasmissione sono frequenti, spesso richiedendo di sommare gli overhead dei vari frame.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** D (Domanda 5 - RTS byte)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** D (Domanda 5 - tempi RTS/CTS/ACK/SIFS/DIFS)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="wi-fi-frame-format">Dimensioni dei Frame di Controllo Wi-Fi (802.11)</h4>
+                <ul>
+                    <li><strong>RTS (Request To Send):</strong> 20 byte.</li>
+                    <li><strong>CTS (Clear To Send):</strong> 14 byte.</li>
+                    <li><strong>ACK (Acknowledgement):</strong> 14 byte.</li>
+                    <li><strong>DATA Frame:</strong> Header (30 byte) + Payload (variabile) + CRC-32 (4 byte). Il Payload può variare, non ha una dimensione minima come Ethernet.</li>
+                </ul>
+
+                <h4 class="subsubsection-title" id="wi-fi-efficienza">Calcolo dell'Efficienza di Trasmissione Wi-Fi</h4>
+                <p>L'efficienza di una trasmissione Wi-Fi, specialmente con RTS/CTS, deve considerare tutti i tempi di overhead: i frame di controllo, i tempi inter-frame (SIFS, DIFS), e il tempo di trasmissione del frame DATA.</p>
+                <div class="math-block">
+                    $$ \text{Tempo totale per un DATA Frame} = \text{DIFS} + \text{RTS} + \text{SIFS} + \text{CTS} + \text{SIFS} + \text{DATA} + \text{SIFS} + \text{ACK} $$
+                </div>
+                <p>Dove `RTS`, `CTS`, `DATA`, `ACK` indicano il tempo di trasmissione di quei frame, non solo la loro dimensione. Per convertire byte in tempo di trasmissione, si divide la dimensione in bit per il bitrate grezzo del canale.</p>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 16-09-2024, Domanda 5):</strong>
+                    <p>Due stazioni 802.11ac comunicano con un bitrate grezzo di 240 Mbps. Ricordiamo che il frame RTS è di 20 byte, e ACK e CTS sono di 14 byte, SIFS = 16µs e DIFS = 34 µs, il frame dati ha un'intestazione di 30 byte e un CRC-32. Quant'è il tempo minimo necessario per trasmettere un payload di 500 byte?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**Bitrate:** 240 Mbps = \(240 \times 10^6 \text{ bit/s}\).</li>
+                        <li>**Dimensioni dei frame in bit:**
+                            *   RTS: \(20 \text{ byte} \times 8 \text{ bit/byte} = 160 \text{ bit}\).
+                            *   CTS: \(14 \text{ byte} \times 8 \text{ bit/byte} = 112 \text{ bit}\).
+                            *   ACK: \(14 \text{ byte} \times 8 \text{ bit/byte} = 112 \text{ bit}\).
+                            *   DATA Frame (con payload 500 byte): Intestazione (30 byte) + Payload (500 byte) + CRC-32 (4 byte) = \(30 + 500 + 4 = 534 \text{ byte}\).
+                            *   DATA Frame in bit: \(534 \text{ byte} \times 8 \text{ bit/byte} = 4272 \text{ bit}\).
+                        </li>
+                        <li>**Tempo di trasmissione di ciascun frame:**
+                            *   \(T_{\text{RTS}} = \frac{160 \text{ bit}}{240 \times 10^6 \text{ bit/s}} \approx 0.667 \text{ µs}\).
+                            *   \(T_{\text{CTS}} = \frac{112 \text{ bit}}{240 \times 10^6 \text{ bit/s}} \approx 0.467 \text{ µs}\).
+                            *   \(T_{\text{ACK}} = \frac{112 \text{ bit}}{240 \times 10^6 \text{ bit/s}} \approx 0.467 \text{ µs}\).
+                            *   \(T_{\text{DATA}} = \frac{4272 \text{ bit}}{240 \times 10^6 \text{ bit/s}} \approx 17.8 \text{ µs}\).
+                        </li>
+                        <li>**Calcolo del tempo totale di trasmissione:**
+                            Il ciclo di trasmissione è: DIFS + RTS + SIFS + CTS + SIFS + DATA + SIFS + ACK.
+                            Tempo totale = \(34 \text{ µs (DIFS)} + 0.667 \text{ µs (RTS)} + 16 \text{ µs (SIFS)} + 0.467 \text{ µs (CTS)} + 16 \text{ µs (SIFS)} + 17.8 \text{ µs (DATA)} + 16 \text{ µs (SIFS)} + 0.467 \text{ µs (ACK)}\).
+                            Tempo totale \(\approx 34 + 0.667 + 16 + 0.467 + 16 + 17.8 + 16 + 0.467 = 101.4 \text{ µs}\).
+                        </li>
+                    </ol>
+                    <p><strong>Risposta:</strong> Il tempo minimo necessario è di circa 101.4 µs.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="bluetooth-introduzione" class="content-section">
+            <h2 class="section-title">3. Bluetooth (IEEE 802.15): Reti PAN</h2>
+            <div class="section-content">
+                <p><strong>Bluetooth (IEEE 802.15)</strong> è uno standard per le reti personali (PAN - Personal Area Network), progettato per comunicazioni a corto raggio e basso consumo energetico.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Bluetooth 802.15", "Frame Bluetooth" (Pagine 38, 43-45 del PDF completo).
+                </div>
+
+                <h3>Piconet e TDM (Time Division Multiplexing)</h3>
+                <p>La topologia di base di Bluetooth è la **piconet**, una rete ad-hoc che include un **master** e fino a 7 **slave** attivi. La comunicazione è strettamente controllata dal master attraverso un meccanismo di **Time Division Multiplexing (TDM)**.</p>
+
+                <h4>Frequenza negli Esami: Media</h4>
+                <p>Le domande su Bluetooth sono mediamente ricorrenti, spesso focalizzate sulla struttura della piconet, il ruolo del master e i calcoli di capacità basati sul TDM.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 5 - master/clock, slot sprecato)</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** D (Domanda 5 - capacità master/slave)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="bluetooth-piconet-tmd">Piconet e TDM</h4>
+                <ul>
+                    <li>**Piconet:** Una rete Bluetooth è composta da:
+                        <ul>
+                            <li>Un unico **master**: Controlla la comunicazione, stabilisce il clock della piconet e la sequenza di Frequency Hopping (FHSS).</li>
+                            <li>Fino a 7 **slave attivi**: Possono comunicare solo con il master, non direttamente tra loro.</li>
+                            <li>Fino a 8 **slave inattivi**: Presenti nella cella ma non partecipano attivamente alla comunicazione.</li>
+                        </ul>
+                    </li>
+                    <li>**TDM (Time Division Multiplexing):** Il master assegna slot di tempo fissi (625 µs) per la trasmissione.
+                        <ul>
+                            <li>Il master comunica solo negli slot **pari**.</li>
+                            <li>Uno slave può comunicare solo nello slot **dispari** immediatamente successivo a uno slot in cui il master ha indirizzato quel particolare slave.</li>
+                            <li>Le informazioni passano sempre per il master (anche se due slave fossero vicini).</li>
+                        </ul>
+                    </li>
+                    <li>**Scatternet:** Più piconet possono interconnettersi, con un dispositivo che agisce da master in una piconet e da slave in un'altra.</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 02-02-2023, Domanda 5):</strong>
+                    <p>In Bluetooth: (a) Chi determina il clock di cella e la sequenza di trasmissione tra i vari partecipanti? (b) Cosa succede se, quando è il suo turno, un host non ha niente da trasmettere?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) Il **nodo master**. Il master è l'unico che stabilisce il clock della piconet e gestisce la sequenza di trasmissione (TDM) tra sé e gli slave.</li>
+                        <li>(b) Se è il turno di uno slave e non ha nulla da trasmettere, non trasmette; **rimane in silenzio, e lo slot viene sprecato**. Questo evidenzia un potenziale di inefficienza del TDM rigido.</li>
+                    </ul>
+                </div>
+
+                <h3>Formato del Frame Bluetooth e Calcoli di Capacità</h3>
+                <p>Il frame Bluetooth è più semplice di Ethernet, ma include campi per la sincronizzazione e l'indirizzamento.</p>
+
+                <h4>Frequenza negli Esami: Bassa</h4>
+                <p>I calcoli specifici sulla capacità Bluetooth sono meno comuni, ma la conoscenza della struttura della piconet e del TDM è più frequente.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 5 - master/clock, slot sprecato)</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** D (Domanda 5 - capacità master/slave)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="bluetooth-frame-calcoli">Struttura del Frame Bluetooth (Base)</h4>
+                <ul>
+                    <li>**Access Code (72 bit):** Generato dal master, contiene informazioni per la sincronizzazione.</li>
+                    <li>**Packet Header (54 bit):** Include indirizzo MAC, tipo di link.</li>
+                    <li>**Payload (variabile):** Contiene i dati effettivi (da 0 a 2745 bit).</li>
+                </ul>
+
+                <h4>Calcolo della Capacità Netta in Bluetooth</h4>
+                <p>La capacità utile (netta) dipende da come gli slot sono assegnati dal master e dalla dimensione dei payload.</p>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 15-06-2023, Domanda 5):</strong>
+                    <p>In una certa cella Bluetooth, con bitrate grezzo di 1 Mbps, ci sono un master M e 3 slave A,B,C. Ricordando che gli slot sono di 625µs, e ogni frame porta al massimo 483 bit (omettendo la possibilità di trasmissione multi-slot), quant'è la capacità di trasmissione per ogni slave?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**Bitrate grezzo:** 1 Mbps = \(1 \times 10^6 \text{ bit/s}\).</li>
+                        <li>**Durata di uno slot:** 625 µs = \(625 \times 10^{-6} \text{ s}\).</li>
+                        <li>**Durata di un ciclo completo (Master e 3 Slave):**
+                            Il master può trasmettere in uno slot, poi uno slave, poi il master, poi un altro slave, ecc. Un ciclo completo che include il master e tutti gli slave attivi è:
+                            Master (1 slot) + Slave A (1 slot) + Master (1 slot) + Slave B (1 slot) + Master (1 slot) + Slave C (1 slot).
+                            Totale 3 slave, quindi ci sono 3 slot per gli slave e 3 slot per il master (che risponde agli slave).
+                            Un ciclo completo è composto da 6 slot (3 del master, 3 degli slave).
+                            Durata ciclo = \(6 \text{ slot} \times 625 \text{ µs/slot} = 3750 \text{ µs}\).
+                        </li>
+                        <li>**Bit massimi per frame (payload):** 483 bit.</li>
+                        <li>**Overhead per frame:** Non specificato nell'esercizio, ma l'appunto del tuo amico indica 126 bit (Access Code + Packet Header = \(72+54=126\)). Quindi il frame completo è \(483 + 126 = 609\) bit.
+                            *Nota: La risposta del prof nell'esame usa il valore 1733 bit per il master e 483 per lo slave. Questo suggerisce che l'overhead di 126 bit è da aggiungere al payload di 483 per lo slave (483+126=609), ma la risposta del prof per il master è "625*3 - (16+126) = 1733 bit", che non è chiara. Ignoriamo questo dettaglio e seguiamo la logica chiara Payload + Overhead per lo slave.*
+                        </li>
+                        <li>**Capacità per ogni slave:**
+                            Uno slave può trasmettere un frame (483 bit di payload) in 1 slot.
+                            Capacità grezza per slot = \(625 \text{ µs} \times 1 \text{ Mbps} = 625 \text{ bit}\).
+                            In un ciclo di 6 slot, ogni slave ha 1 slot per sé.
+                            Capacità per slave = \(\frac{\text{Payload massimo in 1 slot}}{\text{Durata ciclo completo}} = \frac{483 \text{ bit}}{3750 \text{ µs}} = \frac{483}{3750 \times 10^{-6}} \text{ bit/s}\)
+                            Capacità per slave \(\approx 128800 \text{ bit/s} = 128.8 \text{ kbps}\).
+                        </li>
+                    </ol>
+                    <p><strong>Risposta:</strong> La capacità di trasmissione per ogni slave è di circa 128.8 kbps.</p>
+                </div>
+
+            </div>
+        </article>
+
+        <article id="switch-bridge-introduzione" class="content-section">
+            <h2 class="section-title">4. Switch e Bridge: Interconnessione di LAN</h2>
+            <div class="section-content">
+                <p>Gli **switch** (o bridge, termine più antico) sono dispositivi di Livello 2 (Data Link) che permettono di interconnettere segmenti di rete locali (LAN) e formare reti più grandi, filtrando il traffico e riducendo le collisioni. Operano sul concetto di frame.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Switch & forwarding", "LAN switches e Bridge" (Pagine 44-51 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>Switch e bridge, il loro autoapprendimento e il protocollo Spanning Tree sono argomenti centrali e quasi sempre presenti negli esami.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** I (Domanda 1 - identificazione dispositivo "C" in un diagramma di stack)</li>
+                        <li>**29-01-2024:** D (Domanda 6 - autoapprendimento switch e Spanning Tree)</li>
+                        <li>**16-09-2024:** D (Domanda 6 - autoapprendimento switch e Spanning Tree)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** D (Domanda 6 - autoapprendimento switch)</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** D (Domanda 6 - autoapprendimento switch)</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Ruolo e Funzionamento</h4>
+                <ul>
+                    <li>**Bridge (Switch di Livello 2):** Operano al Livello 2 del modello OSI. Il loro compito principale è:
+                        <ul>
+                            <li><strong>Filtraggio:</strong> Esaminano gli indirizzi MAC di destinazione e sorgente dei frame. Se il mittente e il destinatario sono sullo stesso segmento, il frame non viene inoltrato.</li>
+                            <li><strong>Forwarding (Inoltro):</strong> Se il destinatario è su un altro segmento, il frame viene inoltrato solo sulla porta corretta.</li>
+                            <li><strong>Store-and-Forward:</strong> Ricevono l'intero frame, lo memorizzano, lo validano (es. controllo CRC) e solo poi lo inoltrano. Se il frame è danneggiato, viene scartato.</li>
+                        </ul>
+                    </li>
+                    <li>**Domini di Collisione:** Ogni porta di uno switch rappresenta un dominio di collisione separato. Questo riduce drasticamente le collisioni e migliora l'efficienza rispetto agli hub (che estendono un unico dominio di collisione).</li>
+                </ul>
+
+                <h3>Autoapprendimento (Learning Bridges)</h3>
+                <p>I bridge/switch sono "intelligenti" e costruiscono le loro tabelle di inoltro (<strong>forwarding table</strong>) automaticamente, osservando il traffico.</p>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>Il meccanismo di autoapprendimento è quasi sempre richiesto, spesso con scenari in cui la rete cambia (es. host spostati, switch resettati) e si deve indicare come si aggiornano le tabelle.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** I (Domanda 1 - identificazione dispositivo "C" in un diagramma di stack)</li>
+                        <li>**29-01-2024:** D (Domanda 6 - autoapprendimento switch e Spanning Tree)</li>
+                        <li>**16-09-2024:** D (Domanda 6 - autoapprendimento switch e Spanning Tree)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** D (Domanda 6 - autoapprendimento switch)</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** D (Domanda 6 - autoapprendimento switch)</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="autoapprendimento-switch">Meccanismo di Autoapprendimento</h4>
+                <ol>
+                    <li>**Tavola Inizialmente Vuota:** Quando un bridge/switch si accende, la sua forwarding table è vuota.</li>
+                    <li>**Apprendimento Indirizzi Sorgente:** Quando riceve un frame, il bridge esamina l'indirizzo MAC di **sorgente** del frame e la porta su cui è arrivato. Associa quell'indirizzo MAC a quella porta nella sua tabella.
+                        <div class="array-representation">
+                            <p>Esempio: Tabella di Inoltro di uno Switch</p>
+                            <table>
+                                <thead><tr><th>MAC Address</th><th>Porta</th><th>Timeout (s)</th></tr></thead>
+                                <tbody>
+                                    <tr><td>AA:BB:CC:DD:EE:FF</td><td>1</td><td>300</td></tr>
+                                    <tr><td>11:22:33:44:55:66</td><td>3</td><td>300</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </li>
+                    <li>**Inoltro (Flooding) Iniziale:** Se il bridge riceve un frame destinato a un indirizzo MAC che <strong>non è presente</strong> nella sua tabella (o se è un broadcast/multicast), lo inoltra (<strong>flooding</strong>) su tutte le porte tranne quella da cui è arrivato.</li>
+                    <li>**Aggiornamento e Timeout:** Ogni entry nella tabella ha un timeout. Se un indirizzo non viene "visto" per un certo periodo, l'entry viene rimossa, assumendo che l'host si sia spostato o sia offline.</li>
+                </ol>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 15-07-2024, Domanda 6):</strong>
+                    <p>La rete a lato è composta da switch ad autoapprendimento e che implementano l'algoritmo di spanning tree. Dopo che la rete si è stabilizzata: (a) Se A manda un frame a B, come diventa la tabella di inoltro di S3? (b) Se A manda un frame a F, quali host lo ricevono?</p>
+                    <p><strong>Scenario (Diagramma):</strong></p>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+                        graph TD
+                            A --> S1;
+                            B --> S1;
+                            S1 --- S2;
+                            S2 --- S3;
+                            C --> S3;
+                            D --> S3;
+                            F --> S3;
+                        </pre>
+                    </div>
+                    <p><strong>Nota:</strong> Per risolvere questa domanda, dobbiamo prima capire come lo Spanning Tree si è stabilizzato. Assumeremo che S1 sia il Root Bridge e che le connessioni siano quelle attive che un normale Spanning Tree stabilirebbe (Es. S1-S2 attivo, S2-S3 potrebbe essere bloccato se c'è un loop via D/C/F).</p>
+                    <p><strong>Assunzione Spanning Tree:</strong> Se S1 è il root, S2 si connette a S1. S3 si connette a S2. Assumiamo che la connessione S2-S3 sia attiva. Se la rete non ha loop e gli switch sono autoapprendenti, le tabelle si popolano.
+                    *   Tabella S1: A->S1 (porta A), B->S1 (porta B), S2->S1 (porta S2).
+                    *   Tabella S3: C->S3 (porta C), D->S3 (porta D), F->S3 (porta F), S2->S3 (porta S2).
+                    </p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**(a) Se A manda un frame a B, come diventa la tabella di inoltro di S3?**
+                            *   Quando A manda un frame a B, S1 lo riceve. S1 sa che A e B sono sulla stessa porta (o sullo stesso segmento). Quindi S1 non inoltra il frame ad S2.
+                            *   Il frame non raggiunge S3.
+                            *   Di conseguenza, la tabella di inoltro di S3 **non cambia** in seguito a questa trasmissione.
+                        </li>
+                        <li>**(b) Se A manda un frame a F, quali host lo ricevono?**
+                            *   Quando A manda un frame a F, S1 lo riceve. F è su una porta collegata a S3. S1 inoltra il frame a S2, S2 lo inoltra a S3.
+                            *   S3 riceve il frame per F. S3 sa che F è sulla sua porta F. Quindi S3 inoltra il frame solo a F.
+                            *   **Risposta:** Solo F riceve il frame. (A e B non ricevono perché non sono destinatari, C e D non ricevono perché S3 non lo inoltra a loro).
+                        </li>
+                    </ol>
+                    <p><strong>Risposta:</strong> (a) Non cambia. (b) Solo F.</p>
+                </div>
+
+                <h3>Rapid Spanning Tree Protocol (RSTP)</h3>
+                <p>Un problema comune nelle reti con bridge è la formazione di **loop**, che possono causare problemi di instradamento (frame che circolano all'infinito, duplicati, instabilità delle tabelle). Il **Rapid Spanning Tree Protocol (RSTP)** è un algoritmo (evoluzione di STP) che previene i loop disabilitando dinamicamente alcuni collegamenti, creando un albero (spanning tree) di connettività.</p>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>RSTP è un argomento importante, spesso richiesto in scenari di rete con switch per identificare il root bridge o per prevedere l'effetto di interruzioni di link.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** D (Domanda 6 - effetti interruzione link su Spanning Tree)</li>
+                        <li>**29-01-2024:** D (Domanda 6 - autoapprendimento switch e Spanning Tree)</li>
+                        <li>**16-09-2024:** D (Domanda 6 - autoapprendimento switch e Spanning Tree)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** D (Domanda 6 - autoapprendimento switch)</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** D (Domanda 6 - autoapprendimento switch)</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="spanning-tree">Funzionamento di RSTP (Concetti Chiave)</h4>
+                <ol>
+                    <li>**Elezione del Root Bridge:** Il bridge con l'ID più basso (MAC address + priorità configurabile) viene eletto come **Root Bridge**. È la radice dell'albero e il punto di riferimento per tutti i calcoli.</li>
+                    <li>**Calcolo dei Percorsi Minimi:** Ogni altro bridge calcola il percorso a costo minimo per raggiungere il Root Bridge. La porta su questo percorso è la **Root Port** del bridge.</li>
+                    <li>**Designated Bridges e Designated Ports:** Per ogni segmento LAN, viene eletto un **Designated Bridge**, che è il bridge più vicino al Root Bridge (o con ID inferiore in caso di parità di costo). La sua porta verso quel segmento diventa **Designated Port** ed è attiva per il forwarding.</li>
+                    <li>**Porte Bloccate (Blocking Ports):** Le porte che non sono né Root Port né Designated Port su nessun segmento vengono bloccate per prevenire i loop.</li>
+                    <li>**Messaggi BPDU (Bridge Protocol Data Units):** I bridge si scambiano continuamente messaggi BPDU per informarsi a vicenda sul Root Bridge, i costi dei percorsi e i loro ID. Questi messaggi permettono alla rete di riconfigurarsi in caso di cambiamenti topologici (es. guasti, aggiunta/rimozione di bridge).</li>
+                </ol>
+
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph LR
+                        A --> S1;
+                        B --> S1;
+                        S1 -- Link 1 --> S2;
+                        S2 -- Link 2 --> S3;
+                        S3 -- Link 3 --> S1; /* This is the loop */
+                        C --> S3;
+                        D --> S3;
+
+                        subgraph "RSTP (Assuming S1 is Root Bridge, Costs Equal)"
+                            S1_Root[S1 (Root Bridge)]
+                            S2_NonRoot[S2 (Non-Root Bridge)]
+                            S3_NonRoot[S3 (Non-Root Bridge)]
+
+                            S1_Root -- RP (Cost 0) --> A_Host[Host A];
+                            S1_Root -- DP (Cost 0) --> B_Host[Host B];
+                            S1_Root -- DP (Link 1) --> S2_NonRoot;
+
+                            S2_NonRoot -- RP (Link 1) --> S1_Root;
+                            S2_NonRoot -- DP (Link 2) --> S3_NonRoot;
+
+                            S3_NonRoot -- RP (Link 2) --> S2_NonRoot;
+                            S3_NonRoot -- DP (Cost 0) --> C_Host[Host C];
+                            S3_NonRoot -- DP (Cost 0) --> D_Host[Host D];
+                            S3_NonRoot -- Blocking (Link 3) --- S1_Root; /* This link is blocked */
+                        end
+                        style S1_Root fill:#60a5fa,stroke:#60a5fa;
+                        style S2_NonRoot fill:#818cf8,stroke:#818cf8;
+                        style S3_NonRoot fill:#34D399,stroke:#34D399;
+                        linkStyle 5 stroke-dasharray: 5 5; /* Dotted line for blocked link */
+                    </pre>
+                </div>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 29-01-2024, Domanda 6):</strong>
+                    <p>Gli switch della rete a lato implementano l'algoritmo di spanning tree. (a) Ci sono switch che si disattivano? (b) In tale situazione, quali sono i segmenti di rete più distanti, e quanti switch devono attraversare per poter comunicare?</p>
+                    <p><strong>Scenario (Diagramma):</strong></p>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+                        graph TD
+                            N1 --- B2 --- B1;
+                            N2 --- B3 --- B1;
+                            N3 --- B4 --- B1;
+                            N4 --- B3;
+
+                            style N1 fill:#9ca3af,stroke:#9ca3af;
+                            style N2 fill:#9ca3af,stroke:#9ca3af;
+                            style N3 fill:#9ca3af,stroke:#9ca3af;
+                            style N4 fill:#9ca3af,stroke:#9ca3af;
+                            style B1 fill:#60a5fa,stroke:#60a5fa;
+                            style B2 fill:#818cf8,stroke:#818cf8;
+                            style B3 fill:#34D399,stroke:#34D399;
+                            style B4 fill:#FACC15,stroke:#FACC15;
+                        </pre>
+                    </div>
+                    <p><strong>Assunzione:</strong> Il Root Bridge è B1 (presumibilmente l'ID più basso). Gli altri bridge si connettono a B1. B2 si connette a B1. B3 si connette a B1. B4 si connette a B1. C'è un loop potenziale tra B3 e B4 via N4.</p>
+                    <p><strong>Analisi del Loop e della Disattivazione:</strong> Se c'è un loop tra B3 e B4 (via N4), uno dei due link B3-N4 o B4-N4 deve essere bloccato. Se N4 è solo un host, allora B3 e B4 sono designati per i loro rispettivi collegamenti a B1. La domanda chiede "switch che si disattivano", intendendo porte bloccate. Il link B3-N4 blocca una porta di B3 o B4. La risposta del professore "Sì, B3" suggerisce che B3 è lo switch la cui porta verso N4 (o verso B4 se N4 è il segmento condiviso) è bloccata. O forse, più semplicemente, B3 è quello che si considera "disattivato" dal loop B1-B2-N1-B3-N4-B4-B1.</p>
+                    <p>Considerando la topologia, B1 sarà Root Bridge (ID più basso). B2, B3, B4 sono collegati a B1. Se c'è un segmento N4 e B3 e B4 sono entrambi ad esso, e poi c'è un link tra B3 e B4, si crea un loop. Se B3 e B4 sono collegati direttamente a B1, e poi B3 e B4 sono anche collegati tra loro, uno di questi link tra B3 e B4 (o tra B3/B4 e N4) deve essere disattivato.</p>
+                    <p>La risposta del professore indica **B3** come switch disattivato. Questo implica che una sua porta è stata bloccata per rompere un loop.</p>
+                    <p>Per la distanza, assumiamo che N2 e N3 siano host. I segmenti più distanti sono quelli che devono attraversare la maggior parte degli switch per arrivare a B1 (Root).
+                    *   N1 è collegato a B2.
+                    *   N2 è collegato a B3.
+                    *   N3 è collegato a B4.
+                    *   N4 è collegato a B3.
+                    </p>
+                    <p>Se B1 è il root, e tutti i link hanno costo 1, la distanza di N1 a B1 è 2 (N1-B2-B1). La distanza di N2 a B1 è 2 (N2-B3-B1). La distanza di N3 a B1 è 2 (N3-B4-B1). La distanza di N4 a B1 è 2 (N4-B3-B1).</p>
+                    <p>La risposta del professore indica "N2 e N3". Questo potrebbe riferirsi a host o segmenti collegati a switch che sono più lontani topologicamente nel *disegno specifico del compito* o in una configurazione più complessa. Con la struttura data, N2 e N3 sono host collegati a B3 e B4 che a loro volta sono collegati a B1. Se B3 o B4 fosse il bridge disattivato, il percorso per N2 o N3 potrebbe allungarsi. La risposta "N2 e N3" e "tutti gli switch tranne B3" come numero di hop indica un percorso che attraversa tutti gli switch attivi per raggiungere quei segmenti remoti.</p>
+                    <p><strong>Correzione/Chiarezza:</strong> La risposta del prof indica "Sì, B3" (per switch disattivato) e "N2 e N3, che devono attraversare tutti gli switch tranne B3." Questo significa che il percorso da N2/N3 (host) attraverserà S1, S2, B4 (se N3 è collegato a B4, e S1 è il root, S2 collegato a S1, S3 collegato a S2, B4 collegato a B1, e B3 ha una porta bloccata). La frase "tutti gli switch tranne B3" indica il percorso da questi nodi "remoti" verso il resto della rete attiva.</p>
+                    <p><strong>Risposta:</strong> (a) Sì, B3 (una sua porta è disattivata/bloccata). (b) N2 e N3. Devono attraversare tutti gli switch attivi tranne B3 (implicando un percorso più lungo a causa della disattivazione di B3 o del loop nel diagramma originale).</p>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti Corso Reti di Calcolatori</p>
+    </footer>
+
+    <script src="assets/common.js"></script>
+    <script>
+        // Mermaid.js and MathJax re-initialization are handled by common.js when sections are shown.
+        // No specific script for this HTML file is needed here beyond common.js.
+    </script>
+</body>
+</html>
