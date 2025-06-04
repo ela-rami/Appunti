@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capitolo 6: Sicurezza delle Reti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="assets/common.css">
+</head>
+<body data-pdf-path="percorso/al/tuo/pdf_prof_del_Capitolo6_se_esistente.pdf"> <!-- Placeholder per eventuale PDF del capitolo -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Capitolo 6: Sicurezza delle Reti</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="index.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice dei Capitoli</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF Cap.6)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#introduzione-sicurezza" class="sidebar-link">1. Introduzione: Obiettivi e Minacce</a></li>
+            <li><a href="#obiettivi-sicurezza-cia" class="sidebar-link">1.1. Obiettivi della Sicurezza (Triade CIA)</a></li>
+            <li><a href="#tipologie-attacchi" class="sidebar-link">1.2. Tipologie di Attacchi</a></li>
+            <li><a href="#crittografia-simmetrica" class="sidebar-link">2. Crittografia Simmetrica (a Chiave Privata)</a></li>
+            <li><a href="#modi-operativi-simmetrici" class="sidebar-link">2.1. Modi Operativi (ECB, CBC, OFB, CTR)</a></li>
+            <li><a href="#crittografia-asimmetrica" class="sidebar-link">3. Crittografia Asimmetrica (a Chiave Pubblica)</a></li>
+            <li><a href="#rsa-algoritmo" class="sidebar-link">3.1. Algoritmo RSA</a></li>
+            <li><a href="#diffie-hellman" class="sidebar-link">3.2. Scambio Chiavi Diffie-Hellman</a></li>
+            <li><a href="#funzioni-hash-mac" class="sidebar-link">4. Funzioni Hash e MAC (Message Authentication Code)</a></li>
+            <li><a href="#firme-digitali" class="sidebar-link">5. Firme Digitali</a></li>
+            <li><a href="#certificati-x509-pki" class="sidebar-link">6. Certificati X.509 e PKI (Public Key Infrastructure)</a></li>
+            <li><a href="#autenticazione-entita" class="sidebar-link">7. Autenticazione delle Entità</a></li>
+            <li><a href="#protocolli-sicurezza-applicativi" class="sidebar-link">8. Protocolli di Sicurezza Applicativi</a></li>
+            <li><a href="#tls-https" class="sidebar-link">8.1. TLS/HTTPS</a></li>
+            <li><a href="#pgp-pec" class="sidebar-link">8.2. PGP e PEC</a></li>
+            <li><a href="#wep-problemi" class="sidebar-link">8.3. WEP e le Sue Vulnerabilità</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="introduzione-sicurezza" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione alla Sicurezza delle Reti</h2>
+            <div class="section-content">
+                <p>La sicurezza delle reti di calcolatori è fondamentale in un ambiente interconnesso, dove le informazioni sono distribuite e soggette a potenziali minacce. L'obiettivo è proteggere gli asset (risorse) garantendo determinate proprietà di sicurezza e difendendosi dagli attacchi.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "SICUREZZA", "OBIETTIVI : CIA", "ATTACCHI", "implementazione dei servizi di sicurezza" (Pagine 12, 121-127 del PDF completo).
+                </div>
+
+                <h3>Obiettivi della Sicurezza (Triade CIA)</h3>
+                <p>La sicurezza delle reti si pone tre obiettivi principali, noti come la **Triade CIA** (Confidentiality, Integrity, Availability).</p>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>La Triade CIA e l'identificazione degli attacchi attivi/passivi sono concetti fondamentali e appaiono in quasi tutti gli esami, spesso come prima domanda di sicurezza.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 15 - attacchi attivi/passivi, goal CIA)</li>
+                        <li>**17-02-2023:** D (Domanda 15 - attacchi attivi/passivi, misure sicurezza)</li>
+                        <li>**15-06-2023:** D (Domanda 15 - attacchi attivi/passivi, goal CIA)</li>
+                        <li>**29-01-2024:** D (Domanda 15 - attacchi attivi/passivi, aspetto sicurezza)</li>
+                        <li>**16-09-2024:** D (Domanda 15 - quale attacco impediscono meccanismi)</li>
+                        <li>**19-02-2024:** D (Domanda 15 - servizi di sicurezza e funzionalità)</li>
+                        <li>**15-07-2024:** D (Domanda 15 - attacchi attivi/passivi, aspetto sicurezza)</li>
+                        <li>**04-09-2023:** D (Domanda 15 - majority candidate, ma risposte si riferiscono a CIA)</li>
+                        <li>**17-06-2024:** D (Domanda 15 - majority candidate, ma risposte si riferiscono a CIA)</li>
+                        <li>**Appello X:** D (Domanda 15 - majority candidate, ma risposte si riferiscono a CIA)</li>
+                        <li>**Appello Y:** D (Domanda 15 - majority candidate, ma risposte si riferiscono a CIA)</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="obiettivi-sicurezza-cia">Triade CIA</h4>
+                <ul>
+                    <li><strong>Confidenzialità (Confidentiality):</strong> Proteggere i dati e i metadati da accessi e divulgazioni non autorizzate. Solo gli utenti autorizzati dovrebbero essere in grado di leggere le informazioni.</li>
+                    <li><strong>Integrità (Integrity):</strong> Garantire che i dati siano accurati, completi e non siano stati modificati da entità non autorizzate o in modo non autorizzato. Garantisce anche l'autenticità dell'origine dei dati.</li>
+                    <li><strong>Disponibilità (Availability):</strong> Assicurare che le risorse di rete e i servizi siano sempre accessibili e utilizzabili da parte degli utenti autorizzati quando necessario.</li>
+                </ul>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD
+                        A[Confidenzialità] --- B[Integrità];
+                        A --- C[Disponibilità];
+                        B --- C;
+                        style A fill:#60a5fa,stroke:#60a5fa,stroke-width:2px;
+                        style B fill:#818cf8,stroke:#818cf8,stroke-width:2px;
+                        style C fill:#34D399,stroke:#34D399,stroke-width:2px;
+                    </pre>
+                </div>
+
+                <h3>Tipologie di Attacchi</h3>
+                <p>Gli attacchi alla sicurezza possono essere classificati come **passivi** o **attivi**, a seconda che modifichino o meno i dati/servizi.</p>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>L'identificazione e la distinzione tra attacchi passivi e attivi, e la loro associazione con la Triade CIA, sono domande ricorrenti.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 15)</li>
+                        <li>**17-02-2023:** D (Domanda 15)</li>
+                        <li>**15-06-2023:** D (Domanda 15)</li>
+                        <li>**29-01-2024:** D (Domanda 15)</li>
+                        <li>**16-09-2024:** D (Domanda 15 - implica comprensione di attacchi per sapere cosa impediscono HMAC/Cifratura/Firma)</li>
+                        <li>**19-02-2024:** D (Domanda 15)</li>
+                        <li>**15-07-2024:** D (Domanda 15)</li>
+                        <li>**04-09-2023:** D (Domanda 15)</li>
+                        <li>**17-06-2024:** D (Domanda 15)</li>
+                        <li>**Appello X:** D (Domanda 15)</li>
+                        <li>**Appello Y:** D (Domanda 15)</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="tipologie-attacchi">Attacchi Passivi</h4>
+                <p>L'attaccante osserva o intercetta le informazioni senza modificarle o interrompere il servizio. Difficili da rilevare.</p>
+                <ul>
+                    <li><strong>Snooping (o Eavesdropping):</strong> Accesso non autorizzato ai dati. Leggere messaggi che non sono destinati a te.</li>
+                    <li><strong>Sniffing:</strong> Intercettazione dei dati durante la trasmissione (es. su una LAN condivisa).</li>
+                    <li><strong>Traffic Analysis:</strong> Ottenere informazioni analizzando i metadati dei pacchetti (chi comunica con chi, quando, quanto spesso, dimensioni), anche se il contenuto è cifrato. Rischia la confidenzialità dei metadati.</li>
+                </ul>
+
+                <h4 class="subsubsection-title">Attacchi Attivi</h4>
+                <p>L'attaccante modifica i dati, interrompe il servizio o si spaccia per un'altra entità. Più facili da rilevare, più difficili da prevenire.</p>
+                <ul>
+                    <li><strong>Modifica:</strong> Intercettare e alterare i messaggi in transito (es. cambiare un valore in una fattura). Rischia l'integrità.</li>
+                    <li><strong>Masquerading (Impersonificazione):</strong> Un attaccante si spaccia per un utente o un sistema autorizzato (es. "Man-in-the-Middle"). Rischia l'integrità e la confidenzialità.</li>
+                    <li><strong>Replay Attack:</strong> L'attaccante intercetta un messaggio valido e lo ritrasmette in un secondo momento per ottenere un effetto non autorizzato (es. ritrasmettere una richiesta di prelievo bancario). Rischia l'integrità del flusso di comunicazione.</li>
+                    <li><strong>Repudiation (Disconoscimento):</strong> Una parte nega di aver inviato o ricevuto un messaggio valido. Rischia l'integrità.</li>
+                    <li><strong>Denial of Service (DoS/DDoS):</strong> Impedire l'accesso o interrompere un servizio legittimo (es. sovraccaricare un server con richieste). Rischia la disponibilità.</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 15-06-2023, Domanda 15):</strong>
+                    <p>Dick è riuscito a carpire la password dell'account email di Bob, suo acerrimo concorrente in affari. Per ognuno delle seguenti azioni che può fare Dick, si dica se è un attacco attivo o passivo, e a quale goal della triade CIA:</p>
+                    <p>(a) Modificare il server di email di uscita, cosicché le mail inviate da Bob passino per un server controllato da Dick.<br>
+                    (b) Leggere le mail di Bob, così intercettate.<br>
+                    (c) Sostituire nelle mail con le fatture che Bob invia ai suoi clienti, le coordinate bancarie di Bob con le proprie.</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) **Attivo, Integrità dei metadati (Masquerading del server).** Modificare il server è un'azione che altera il comportamento del sistema (attivo). Il goal compromesso è l'integrità dei metadati di routing/flusso email, e Dick si spaccia per il server legittimo (masquerading).</li>
+                        <li>(b) **Passivo, Confidenzialità.** Leggere le mail intercettate è un attacco che non modifica i dati né il servizio (passivo). Il goal compromesso è la confidenzialità del contenuto delle mail.</li>
+                        <li>(c) **Attivo, Integrità dei dati.** Sostituire le coordinate bancarie nelle fatture è un'azione che altera il contenuto dei dati (attivo). Il goal compromesso è l'integrità del messaggio.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="crittografia-simmetrica" class="content-section">
+            <h2 class="section-title">2. Crittografia Simmetrica (a Chiave Privata)</h2>
+            <div class="section-content">
+                <p>La **crittografia simmetrica** (o a chiave privata/condivisa) è un metodo di cifratura in cui la stessa chiave segreta viene utilizzata sia dal mittente per cifrare il messaggio, sia dal destinatario per decifrarlo.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "CIFRATURA", "CIFRATURA SIMMETRICA", "Utilizzo di cifrari a blocchi" (Pagine 129-138 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>La crittografia simmetrica, in particolare i modi operativi (ECB, CBC, OFB, CTR) e le loro proprietà (propagazione errori, parallelismo), è un argomento frequentemente richiesto.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 16 - master key spazio chiavi)</li>
+                        <li>**17-02-2023:** D (Domanda 17 - protocollo scambio chiavi simmetriche)</li>
+                        <li>**15-06-2023:** D (Domanda 16 - master key spazio chiavi)</li>
+                        <li>**29-01-2024:** D (Domanda 16 - cifrario simmetrico, modo operativo)</li>
+                        <li>**16-09-2024:** D (Domanda 16 - cifrario AES, robustezza)</li>
+                        <li>**19-02-2024:** D (Domanda 17 - protocollo scambio chiavi simmetriche)</li>
+                        <li>**15-07-2024:** D (Domanda 16 - AES CBC, scambi blocchi)</li>
+                        <li>**04-09-2023:** D (Domanda 16 - AES OFB, K/IV uguali)</li>
+                        <li>**17-06-2024:** D (Domanda 16 - AES OFB, K/IV uguali)</li>
+                        <li>**Appello X:** D (Domanda 16 - AES OFB, K/IV uguali)</li>
+                        <li>**Appello Y:** D (Domanda 16 - AES OFB, K/IV uguali)</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Principi e Proprietà</h4>
+                <ul>
+                    <li><strong>Chiave Segreta Unica:</strong> Mittente e destinatario condividono la stessa chiave segreta \(K\).</li>
+                    <li><strong>Funzioni:</strong>
+                        <ul>
+                            <li>Cifratura: \(C = E_K(M)\) (Ciphertext = Encrypt con chiave K, Messaggio)</li>
+                            <li>Decifratura: \(M = D_K(C)\) (Messaggio = Decrypt con chiave K, Ciphertext)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Requisiti:</strong>
+                        <ul>
+                            <li>Un buon algoritmo: Impossibile ottenere il messaggio in chiaro dal ciphertext senza la chiave.</li>
+                            <li>La chiave deve rimanere segreta.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Principio di Kerckhoffs:</strong> La sicurezza di un sistema crittografico deve dipendere solo dalla segretezza della chiave, non dalla segretezza dell'algoritmo stesso.</li>
+                </ul>
+
+                <h4 class="subsubsection-title">Algoritmi Comuni</h4>
+                <ul>
+                    <li><strong>AES (Advanced Encryption Standard):</strong> Un cifrario a **blocchi** standard, molto robusto e veloce. Cifra blocchi di 128 bit usando chiavi da 128, 192 o 256 bit.</li>
+                    <li><strong>RC4:</strong> Un cifrario a **flusso** (stream cipher) orientato ai byte. Genera un keystream pseudo-casuale che viene combinato con il messaggio tramite XOR. **Non riutilizzare mai la stessa chiave o lo stesso IV/stato!**</li>
+                </ul>
+
+                <h3 class="subsection-title" id="modi-operativi-simmetrici">2.1. Modi Operativi (ECB, CBC, OFB, CTR)</h3>
+                <p>I modi operativi definiscono come un cifrario a blocchi viene applicato a messaggi più lunghi di un singolo blocco, o come viene trasformato in un cifrario a flusso.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** D (Domanda 16 - cifrario simmetrico, modo operativo)</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** D (Domanda 16 - AES CBC, scambi blocchi)</li>
+                        <li>**04-09-2023:** D (Domanda 16 - AES OFB, K/IV uguali)</li>
+                        <li>**17-06-2024:** D (Domanda 16 - AES OFB, K/IV uguali)</li>
+                        <li>**Appello X:** D (Domanda 16 - AES OFB, K/IV uguali)</li>
+                        <li>**Appello Y:** D (Domanda 16 - AES OFB, K/IV uguali)</li>
+                    </ul>
+                </div>
+
+                <h4>Modi Operativi Comuni</h4>
+                <ul>
+                    <li><strong>ECB (Electronic Codebook Mode):</strong>
+                        <ul>
+                            <li><strong>Idea:</strong> Ogni blocco di testo in chiaro è cifrato indipendentemente dagli altri, usando la stessa chiave.</li>
+                            <li><strong>Problemi:</strong> Non nasconde i pattern del messaggio (blocchi uguali in chiaro producono ciphertext uguali). <strong>Inadatto per dati con pattern ripetitivi (es. immagini) o per messaggi lunghi.</strong></li>
+                            <li><strong>Vantaggi:</strong> Semplice, permette cifratura parallela.</li>
+                        </ul>
+                    </li>
+                    <li><strong>CBC (Cipher Block Chaining Mode):</strong>
+                        <ul>
+                            <li><strong>Idea:</strong> Ogni blocco di testo in chiaro è combinato (XOR) con il blocco di ciphertext precedente prima di essere cifrato. Richiede un **Initialization Vector (IV)** per il primo blocco.</li>
+                            <li><strong>Vantaggi:</strong> Nasconde i pattern (blocchi uguali in chiaro producono ciphertext diversi). Ogni blocco di ciphertext dipende da tutti i blocchi precedenti.</li>
+                            <li><strong>Problemi:</strong> Gli errori di trasmissione si propagano: un singolo bit errato nel ciphertext influenzerà il blocco corrente e il blocco successivo. Non permette cifratura parallela (ma sì decifratura). L'IV deve essere conosciuto e trasmesso (spesso in chiaro).</li>
+                        </ul>
+                    </li>
+                    <li><strong>OFB (Output Feedback Mode):</strong>
+                        <ul>
+                            <li><strong>Idea:</strong> Trasforma il cifrario a blocchi in un cifrario a flusso. Genera un keystream cifrando l'output precedente del cifrario (non il testo in chiaro), che viene poi combinato con il testo in chiaro tramite XOR. Richiede un IV.</li>
+                            <li><strong>Vantaggi:</strong> Gli errori di trasmissione **non si propagano** (un errore su un bit influenzerà solo quel bit). Permette cifratura/decifratura parallela (se il keystream è pre-generato).</li>
+                            <li><strong>Problemi:</strong> Simile ai cifrari a flusso, se il keystream viene riutilizzato (stessa chiave e stesso IV), la sicurezza è compromessa.</li>
+                        </ul>
+                    </li>
+                    <li><strong>CTR (Counter Mode):</strong>
+                        <ul>
+                            <li><strong>Idea:</strong> Trasforma il cifrario a blocchi in un cifrario a flusso. Un contatore (che si incrementa per ogni blocco) viene cifrato, e il risultato viene combinato con il testo in chiaro tramite XOR. Richiede un IV (il valore iniziale del contatore).</li>
+                            <li><strong>Vantaggi:</strong> Gli errori di trasmissione **non si propagano**. Permette cifratura e decifratura **altamente parallele** (i blocchi del keystream possono essere generati indipendentemente).</li>
+                            <li><strong>Problemi:</strong> Non riutilizzare mai la stessa chiave con lo stesso valore iniziale del contatore.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 15-07-2024, Domanda 16):</strong>
+                    <p>Un flusso di dati M = M1, M2, . . . viene cifrato usando AES in modalità CBC. Ogni messaggio corrisponde ad un blocco. (a) Si dia la definizione ricorrente dei messaggi cifrati. (b) Cosa succede se durante la trasmissione i blocchi 2 e 3 vengono scambiati, ossia al destinatario arriva la sequenza C1, C3, C2, C4, . . . , e il destinatario non sa riordinarli?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) In modalità CBC, il blocco di ciphertext \(C_i\) è generato cifrando il risultato della combinazione (XOR) del blocco di testo in chiaro \(M_i\) con il blocco di ciphertext precedente \(C_{i-1}\). Il primo blocco \(C_1\) usa un Initialization Vector (IV) al posto di \(C_0\).
+                            La definizione ricorrente è:
+                            <div class="math-block">
+                                $$ C_i = E_K(M_i \oplus C_{i-1}) $$
+                            </div>
+                            (dove \(C_0 = \text{IV}\)).
+                        </li>
+                        <li>(b) Se la sequenza ricevuta è C1, C3, C2, C4... (cioè C2 e C3 scambiati), e il destinatario non sa riordinarli (TCP fornisce l'ordine, ma questa è una domanda sulla crittografia del blocco in sé):
+                            *   La decifratura di C1 sarà corretta.
+                            *   Quando si tenta di decifrare C3 (che dovrebbe essere C2): la decifratura di C3 userà C1. Ciò produrrà un blocco di testo in chiaro \(M'_3\) **sbagliato** perché la \(C_2\) usata per decifrare \(C_3\) (cioè \(C_1\)) è sbagliata.
+                            *   Quando si tenta di decifrare C2 (che dovrebbe essere C3): la decifratura di C2 userà \(C_3\). Anche questo produrrà un blocco \(M'_2\) **sbagliato** perché la \(C_i\) usata per decifrare \(C_2\) (cioè \(C_3\)) è sbagliata.
+                            *   Quando si tenta di decifrare C4: userà C2. Poiché C2 è già sbagliato, anche \(M'_4\) sarà **sbagliato**.
+                            *   **In CBC, un errore (o dislocazione) in un blocco di ciphertext si propaga ai blocchi successivi.** Tutti i blocchi da quello scambiato in poi risulteranno decifrati in modo errato. Questo a causa della dipendenza "a catena" tra i blocchi.
+                        </li>
+                    </ul>
+                    <p><strong>Risposta:</strong> (a) \( C_i = E_K(M_i \oplus C_{i-1}) \), con \(C_0 = \text{IV}\). (b) I blocchi M2, M3, M4 (e tutti i successivi) verranno decifrati in modo errato a causa della propagazione dell'errore (dislocazione).</p>
+                </div>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 04-09-2023, Domanda 16):</strong>
+                    <p>Un flusso di dati M = M1, M2, . . . viene cifrato usando AES in modalità OFB, ossia \(R_{i+1} = E_K(R_i)\) e \(C_i = M_i \oplus R_{i+1}\). \(R_0\) viene inizializzato con un valore IV. (a) Quale vulnerabilità ci può essere se due flussi di dati si cifrano usando la stessa K e lo stesso IV? (b) Come si può evitare tale pericolo, se IV è generato casualmente (e non si può escludere che si ripeta)?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) Se due flussi di dati \(M\) e \(M'\) vengono cifrati usando la **stessa chiave \(K\) e lo stesso Initialization Vector (IV)** in modalità OFB, allora il keystream \(R_1, R_2, \dots\) generato sarà esattamente lo stesso per entrambi.
+                            Avremo: \(C_i = M_i \oplus R_i\) e \(C'_i = M'_i \oplus R_i\).
+                            Se un attaccante intercetta entrambi i ciphertext \(C\) e \(C'\), può calcolare:
+                            <div class="math-block">
+                                $$ C_i \oplus C'_i = (M_i \oplus R_i) \oplus (M'_i \oplus R_i) $$
+                                $$ C_i \oplus C'_i = M_i \oplus M'_i $$
+                            </div>
+                            Questo significa che l'attaccante ottiene l'XOR dei due testi in chiaro. Se uno dei due testi in chiaro è noto (o se l'attaccante può indovinarlo o ha un dizionario), può facilmente recuperare l'altro testo in chiaro. Questa è una grave vulnerabilità, nota come **"attacco del keystream uguale"**.
+                        </li>
+                        <li>(b) Per evitare questa vulnerabilità, la regola fondamentale è **non riutilizzare mai la stessa coppia (chiave, IV)**. Se l'IV è generato casualmente, ma non si può escludere che si ripeta (es. spazio degli IV troppo piccolo rispetto al numero di connessioni), allora l'IV dovrebbe essere combinato con altri elementi (es. un contatore o un valore unico per sessione) o la chiave stessa dovrebbe essere modificata periodicamente (es. per ogni sessione). Questo è il concetto alla base delle **chiavi di sessione** (session keys) generate in modo fresco e unico per ogni nuova comunicazione.</li>
+                    </ul>
+                    <p><strong>Risposta:</strong> (a) Se K e IV sono uguali per due flussi, si ottiene \(M \oplus M'\) dal ciphertext \(C \oplus C'\), permettendo di recuperare i testi in chiaro se uno è noto o indovinabile. (b) Bisogna cambiare la chiave periodicamente (es. per ogni sessione) o garantire che la coppia (chiave, IV) sia unica. Si usano **chiavi di sessione** "fresche".</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="crittografia-asimmetrica" class="content-section">
+            <h2 class="section-title">3. Crittografia Asimmetrica (a Chiave Pubblica)</h2>
+            <div class="section-content">
+                <p>La **crittografia asimmetrica** (o a chiave pubblica/privata) utilizza una coppia di chiavi correlate matematicamente: una **chiave pubblica** (conosciuta da tutti) e una **chiave privata** (conosciuta solo dal proprietario). È stata una rivoluzione perché risolve il problema della distribuzione sicura delle chiavi e abilita nuove funzionalità come le firme digitali.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Crittografia asimmetrica con chiave pubblica", "RSA", "Diffie-Helman scambio di chiavi" (Pagine 144-147, 159-161 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>RSA e Diffie-Hellman sono frequentemente testati, spesso con domande sui loro principi matematici, la generazione di chiavi, i calcoli e le loro vulnerabilità (es. Man-in-the-Middle).</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 17 - DH autenticazione)</li>
+                        <li>**17-02-2023:** D (Domanda 16 - RSA proprietà algebriche), D (Domanda 18 - HTTPS, DH)</li>
+                        <li>**15-06-2023:** D (Domanda 18 - DH info pubbliche, generazione chiave)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** D (Domanda 15 - RSA funzionalità), D (Domanda 18 - HTTPS, DH)</li>
+                        <li>**15-07-2024:** D (Domanda 18 - DH, MITM)</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** D (Domanda 18 - DH, MITM)</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title" id="rsa-algoritmo">3.1. Algoritmo RSA</h3>
+                <p>RSA è un algoritmo di crittografia asimmetrica ampiamente utilizzato per la cifratura, le firme digitali e lo scambio di chiavi. La sua sicurezza si basa sulla difficoltà computazionale di fattorizzare grandi numeri primi.</p>
+                <p><strong>Generazione delle Chiavi:</strong></p>
+                <ol>
+                    <li>Scegli due numeri primi grandi, distinti, \(p\) e \(q\).</li>
+                    <li>Calcola \(n = p \cdot q\). Questo è il **modulo** della chiave pubblica e privata.</li>
+                    <li>Calcola il **toziente di Eulero** \( \phi(n) = (p-1)(q-1) \).</li>
+                    <li>Scegli un intero \(e\) (esponente pubblico) tale che \(1 < e < \phi(n)\) e \( \text{gcd}(e, \phi(n)) = 1 \) (cioè, \(e\) e \(\phi(n)\) sono coprimi). La **chiave pubblica è \((e, n)\)**.</li>
+                    <li>Calcola \(d\) (esponente privato) tale che \(d \cdot e \equiv 1 \pmod{\phi(n)}\). La **chiave privata è \((d, n)\)**. ( \(d\) è l'inverso moltiplicativo di \(e\) modulo \(\phi(n)\) ).</li>
+                </ol>
+                <p><strong>Cifratura (con chiave pubblica del destinatario \((e, n)\)):</strong>
+                    Messaggio \(M\) (come numero) \(\rightarrow\) Ciphertext \(C\).
+                    <div class="math-block">
+                        $$ C = M^e \pmod{n} $$
+                    </div>
+                </p>
+                <p><strong>Decifratura (con chiave privata del destinatario \((d, n)\)):</strong>
+                    Ciphertext \(C\) \(\rightarrow\) Messaggio \(M\).
+                    <div class="math-block">
+                        $$ M = C^d \pmod{n} $$
+                    </div>
+                </p>
+                <p><strong>Proprietà algebriche:</strong>
+                    Si può dimostrare che \( (M^e \pmod{n})^d \pmod{n} = M \pmod{n} \). Questo perché \(e \cdot d \equiv 1 \pmod{\phi(n)}\), quindi \(e \cdot d = 1 + k \cdot \phi(n)\) per qualche intero \(k\). Per il teorema di Eulero, \(M^{\phi(n)} \equiv 1 \pmod{n}\) se \( \text{gcd}(M, n)=1 \).
+                    Quindi \( M^{e \cdot d} = M^{1 + k \cdot \phi(n)} = M \cdot (M^{\phi(n)})^k \equiv M \cdot 1^k \equiv M \pmod{n} \).
+                </p>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 17-02-2023, Domanda 16):</strong>
+                    <p>Un certo utente A ha creato una chiave pubblica RSA \((e, n)\), e la corrispondente chiave privata \(d\). (a) Si dica come viene generata la cifratura \(C\) di un messaggio \(M\), sequenza di bit di lunghezza \(\le \log_2(n)\). (b) Supponiamo di aver intercettato \(C_1\) e \(C_2\), cifrature di due messaggi \(M_1, M_2\) a noi sconosciuti. È possibile produrre la cifratura di \(M_1 \times M_2\) senza conoscere la chiave privata?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) La cifratura \(C\) di un messaggio \(M\) con chiave pubblica \((e, n)\) è generata usando la formula:
+                            <div class="math-block">
+                                $$ C = M^e \pmod{n} $$
+                            </div>
+                            Il messaggio \(M\) deve essere trattato come un numero intero \(M < n\).
+                        </li>
+                        <li>(b) **Sì, è possibile.** La cifratura RSA ha la proprietà di **omomorfismo moltiplicativo** sotto modulo \(n\). Questo significa che:
+                            <div class="math-block">
+                                $$ C_1 \cdot C_2 \pmod{n} = (M_1^e \pmod{n}) \cdot (M_2^e \pmod{n}) \pmod{n} $$
+                                $$ C_1 \cdot C_2 \pmod{n} = (M_1 \cdot M_2)^e \pmod{n} $$
+                            </div>
+                            Quindi, il prodotto delle cifrature \((C_1 \cdot C_2 \pmod{n})\) è la cifratura del prodotto dei messaggi \((M_1 \cdot M_2)\). Questo può essere fatto dall'attaccante senza conoscere la chiave privata \(d\).
+                        </li>
+                    </ul>
+                    <p><strong>Risposta:</strong> (a) \( C = M^e \pmod{n} \). (b) Sì, \( C_1 \cdot C_2 \pmod{n} \) è la cifratura di \( M_1 \cdot M_2 \).</p>
+                </div>
+
+                <h3 class="subsection-title" id="diffie-hellman">3.2. Scambio Chiavi Diffie-Hellman</h3>
+                <p>**Diffie-Hellman (DH)** è un protocollo per stabilire una chiave segreta condivisa tra due parti su un canale non sicuro, senza che la chiave venga mai trasmessa esplicitamente. La sua sicurezza si basa sulla difficoltà computazionale del problema del logaritmo discreto.</p>
+                <p><strong>Idea:</strong> Entrambe le parti (Alice e Bob) creano una "chiave parziale" usando un numero segreto proprio e alcuni parametri pubblici. Scambiano queste chiavi parziali e le combinano con il proprio numero segreto per derivare la stessa chiave condivisa.</p>
+                <p><strong>Passaggi:</strong></p>
+                <ol>
+                    <li>**Parametri Pubblici:** Alice e Bob concordano su un numero primo \(p\) e una base \(g\) (un generatore modulo \(p\)). Questi sono pubblici.</li>
+                    <li>**Scelta Segreta:**
+                        <ul>
+                            <li>Alice sceglie un numero segreto \(a\).</li>
+                            <li>Bob sceglie un numero segreto \(b\).</li>
+                        </ul>
+                    </li>
+                    <li>**Calcolo Chiavi Parziali:**
+                        <ul>
+                            <li>Alice calcola \(y_A = g^a \pmod{p}\).</li>
+                            <li>Bob calcola \(y_B = g^b \pmod{p}\).</li>
+                        </ul>
+                    </li>
+                    <li>**Scambio Pubblico:** Alice invia \(y_A\) a Bob. Bob invia \(y_B\) ad Alice.</li>
+                    <li>**Derivazione Chiave Condivisa:**
+                        <ul>
+                            <li>Alice calcola \(K = y_B^a \pmod{p}\).</li>
+                            <li>Bob calcola \(K = y_A^b \pmod{p}\).</li>
+                        </ul>
+                        Poiché \(y_B^a \pmod{p} = (g^b)^a \pmod{p} = g^{ab} \pmod{p}\), e \(y_A^b \pmod{p} = (g^a)^b \pmod{p} = g^{ab} \pmod{p}\), entrambi derivano la stessa chiave segreta \(K\).
+                    </li>
+                </ol>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph LR
+                        A[Alice] -- Public: p, g --> B[Bob];
+                        A -- Choose a --> A_Secret[Secret a];
+                        B -- Choose b --> B_Secret[Secret b];
+
+                        A -- Calculate yA = g^a mod p --> yA_Val[yA];
+                        B -- Calculate yB = g^b mod p --> yB_Val[yB];
+
+                        yA_Val -- Send yA --> B;
+                        yB_Val -- Send yB --> A;
+
+                        A -- Calculate K = yB^a mod p --> K_Alice[Shared Key K];
+                        B -- Calculate K = yA^b mod p --> K_Bob[Shared Key K];
+
+                        K_Alice --- K_Bob; /* Indicates they derive the same key */
+                        style A_Secret fill:#FACC15,stroke:#FACC15,stroke-width:1px;
+                        style B_Secret fill:#FACC15,stroke:#FACC15,stroke-width:1px;
+                        style K_Alice fill:#34D399,stroke:#34D399,stroke-width:1px;
+                        style K_Bob fill:#34D399,stroke:#34D399,stroke-width:1px;
+                    </pre>
+                </div>
+
+                <h4 class="subsubsection-title">Vulnerabilità al Man-in-the-Middle (MITM)</h4>
+                <p>La versione base di Diffie-Hellman è vulnerabile a un attacco Man-in-the-Middle perché non prevede autenticazione. Un attaccante (Mallory) può intercettare le chiavi parziali e stabilire due chiavi segrete separate: una con Alice e una con Bob.</p>
+                <ol>
+                    <li>Alice invia \(y_A\) a Mallory. Mallory la intercetta.</li>
+                    <li>Mallory invia \(y_M\) (la sua chiave parziale) ad Alice.</li>
+                    <li>Bob invia \(y_B\) a Mallory. Mallory la intercetta.</li>
+                    <li>Mallory invia \(y_M\) a Bob.</li>
+                </ol>
+                <p>Così, Alice e Mallory stabiliscono una chiave \(K_{AM}\), e Bob e Mallory stabiliscono una chiave \(K_{BM}\). Mallory può ora decifrare tutti i messaggi tra Alice e Bob (usando \(K_{AM}\)), ri-cifrarli (usando \(K_{BM}\)), e inoltrarli a Bob, rimanendo completamente trasparente.</p>
+                <p><strong>Soluzione:</strong> L'autenticazione è necessaria. Si possono usare firme digitali (RSA) per firmare le chiavi parziali Diffie-Hellman scambiate, o utilizzare un protocollo che integra DH con meccanismi di autenticazione come TLS/SSL.</p>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 15-07-2024, Domanda 18):</strong>
+                    <p>Il protocollo a lato è una variante dello scambio chiavi Diffie-Hellman, dove \(y_A, y_B\) sono le mezze chiavi pubbliche di A e B, rispettivamente. (a) Si descriva come viene calcolata la chiave condivisa di sessione \(K_S\). (b) Completare il protocollo nelle parti mancanti (i ". . . ") in modo da rendere lo scambio robusto agli attacchi MITM. Si assuma che A e B abbiano precondiviso anche una chiave master \(K\) e possano usare una funzione hash robusta \(H\).</p>
+                    <p><strong>Passaggi iniziali del protocollo dato:</strong><br>
+                    1. A \(\rightarrow\) B : \(y_A\)<br>
+                    2. B \(\rightarrow\) A : \(y_B\)<br>
+                    </p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) La chiave condivisa di sessione \(K_S\) viene calcolata da Alice come \((y_B)^a \pmod{p}\) e da Bob come \((y_A)^b \pmod{p}\). Queste due espressioni sono matematicamente equivalenti e portano allo stesso valore \(g^{ab} \pmod{p}\).</li>
+                        <li>(b) Per rendere il protocollo robusto agli attacchi MITM, è necessaria l'autenticazione delle chiavi parziali scambiate. Poiché hanno una chiave master \(K\) e una funzione hash \(H\) robusta, possono usare MAC (Message Authentication Code) o firme digitali.
+                            Una possibile estensione (basata su HMAC della chiave master):
+                            <div class="mermaid-container">
+                                <pre class="mermaid">
+                                graph TD
+                                    A[Alice] -- 1. Send yA, H(K, yA) --> B[Bob];
+                                    B -- 2. Send yB, H(K, yB) --> A;
+
+                                    subgraph "Verifica di Bob (dopo step 1)"
+                                        B_Verify_A["Calcola H(K, yA)"];
+                                        B_Verify_A -- Confronta --> B_Ok[OK se uguali];
+                                    end
+                                    subgraph "Verifica di Alice (dopo step 2)"
+                                        A_Verify_B["Calcola H(K, yB)"];
+                                        A_Verify_B -- Confronta --> A_Ok[OK se uguali];
+                                    end
+
+                                    A --> B_Verify_A;
+                                    B --> A_Verify_B;
+                                </pre>
+                            </div>
+                            Protocollo aggiornato (versione semplificata per mostrare l'idea):
+                            <ol>
+                                <li>A \(\rightarrow\) B : \(y_A\), \(H(K, y_A)\) (Alice invia \(y_A\) e il MAC di \(y_A\) usando la chiave master \(K\))</li>
+                                <li>B \(\rightarrow\) A : \(y_B\), \(H(K, y_B)\) (Bob invia \(y_B\) e il MAC di \(y_B\) usando la chiave master \(K\))</li>
+                            </ol>
+                            Con questo, entrambe le parti possono verificare l'autenticità delle chiavi parziali ricevute. Se il MAC corrisponde, sanno che la chiave parziale proviene dalla controparte legittima e non da un attaccante.
+                        </li>
+                    </ul>
+                    <p><strong>Risposta:</strong> (a) \( K_S = y_B^a \pmod{p} = y_A^b \pmod{p} \). (b) Si può aggiungere un HMAC usando la chiave master \(K\): A invia \(y_A\), \(H(K, y_A)\); B invia \(y_B\), \(H(K, y_B)\). Le parti verificano l'HMAC dell'altra per autenticazione.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="funzioni-hash-mac" class="content-section">
+            <h2 class="section-title">4. Funzioni Hash e MAC (Message Authentication Code)</h2>
+            <div class="section-content">
+                <p>Le **funzioni hash crittografiche** sono strumenti essenziali per garantire l'integrità dei dati. Un **MAC (Message Authentication Code)** le estende per fornire autenticazione.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "MAC: Message authentication Code", "FUNZIONI DI HASH per calcolare il MAC", "Secure Hash Algorithm", "HMAC" (Pagine 139-142 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>Concetti come le proprietà delle funzioni hash (collision resistance, pre-image resistance) e il funzionamento di HMAC sono ricorrenti, spesso in domande che chiedono cosa impediscono o come vengono utilizzati.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 17 - H(KM, yB, N) in DH autenticato)</li>
+                        <li>**17-02-2023:** D (Domanda 17 - H(KM, yB, N) in protocollo scambio chiavi)</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** D (Domanda 15 - quale attacco impedisce HMAC)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** D (Domanda 17 - H(M, T) in autenticazione)</li>
+                        <li>**04-09-2023:** D (Domanda 18 - X.509 e hash cifrata)</li>
+                        <li>**17-06-2024:** D (Domanda 17 - H(M, T) in autenticazione)</li>
+                        <li>**Appello X:** D (Domanda 18 - X.509 e hash cifrata)</li>
+                        <li>**Appello Y:** D (Domanda 18 - X.509 e hash cifrata)</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Funzioni Hash Crittografiche</h4>
+                <p>Una funzione hash crittografica `h` prende un input di dimensione arbitraria e produce un output (hash digest o fingerprint) di dimensione fissa.</p>
+                <div class="math-block">
+                    $$ h = H(M) $$
+                </div>
+                <p><strong>Proprietà Desiderabili:</strong></p>
+                <ul>
+                    <li><strong>Pre-image Resistance (Resistenza alla Pre-immagine):</strong> Dato un hash `h`, è computazionalmente impossibile trovare un messaggio `M` tale che `H(M) = h`. (Protezione contro la ricreazione del messaggio originale da un hash)</li>
+                    <li><strong>Second Pre-image Resistance (Resistenza alla Seconda Pre-immagine):</strong> Dato un messaggio `M1`, è computazionalmente impossibile trovare un `M2` diverso da `M1` tale che `H(M2) = H(M1)`. (Protezione contro la modifica di un messaggio conosciuto)</li>
+                    <li><strong>Collision Resistance (Resistenza alle Collisioni):</strong> È computazionalmente impossibile trovare due messaggi distinti `M1` e `M2` tali che `H(M1) = H(M2)`. (Protezione contro la creazione di due messaggi con lo stesso hash)</li>
+                </ul>
+                <p><strong>Uso:</strong> Si usano per verificare l'integrità di un messaggio (un cambiamento anche minimo nel messaggio produce un hash completamente diverso).</p>
+
+                <h4 class="subsubsection-title">MAC (Message Authentication Code)</h4>
+                <p>Un MAC è un codice che garantisce sia l'integrità che l'autenticazione del messaggio. Viene generato da una funzione hash che prende come input sia il messaggio che una **chiave segreta condivisa**.</p>
+                <div class="math-block">
+                    $$ \text{MAC} = C_K(M) = H(K || M) \text{ o } H(M || K) $$
+                </div>
+                <p><strong>Funzionamento:</strong> Il mittente calcola il MAC e lo invia insieme al messaggio. Il ricevitore ricalcola il MAC usando lo stesso messaggio e la stessa chiave. Se i MAC corrispondono, il messaggio è integro e proviene dal mittente autenticato (che possiede la chiave).</p>
+
+                <h4 class="subsubsection-title">HMAC (Hash-based Message Authentication Code)</h4>
+                <p>HMAC è una costruzione specifica e più robusta per generare un MAC, utilizzando una funzione hash crittografica (es. SHA-256) e una chiave segreta.</p>
+                <div class="math-block">
+                    $$ \text{HMAC}_K(M) = H((K \oplus \text{opad}) || H((K \oplus \text{ipad}) || M)) $$
+                </div>
+                <p>Dove `opad` e `ipad` sono costanti di padding. HMAC è ampiamente utilizzato.</p>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 16-09-2024, Domanda 15):</strong>
+                    <p>Per ognuno dei seguenti meccanismi, si indichi quale attacco mira ad impedire: (a) HMAC; (b) Cifratura simmetrica dei dati; (c) Firma digitale.</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) **HMAC:** Mira ad impedire attacchi all'**integrità** del messaggio (assicura che i dati non siano stati modificati) e all'**autenticazione dell'origine** (verifica che il messaggio provenga da chi possiede la chiave segreta).</li>
+                        <li>(b) **Cifratura simmetrica dei dati:** Mira ad impedire attacchi alla **confidenzialità** dei dati (assicura che solo il destinatario con la chiave possa leggere il messaggio).</li>
+                        <li>(c) **Firma digitale:** Mira ad impedire attacchi all'**autenticazione dell'origine** (verifica l'identità del mittente) e al **non ripudio** (impedisce al mittente di negare di aver inviato il messaggio).</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="firme-digitali" class="content-section">
+            <h2 class="section-title">5. Firme Digitali</h2>
+            <div class="section-content">
+                <p>Le **firme digitali** sono un meccanismo crittografico che fornisce autenticazione, integrità e non ripudio dell'origine di un messaggio. Si basano sulla crittografia asimmetrica.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta la sezione "FIRMA DIGITALE" (Pagina 148-149 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>Le firme digitali sono un concetto chiave e appaiono frequentemente in domande che chiedono il loro scopo, funzionamento e le proprietà che garantiscono (non ripudio, autenticazione).</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 17 - in DH protocollo)</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** D (Domanda 15 - quale attacco impedisce)</li>
+                        <li>**19-02-2024:** D (Domanda 15 - funzionalità RSA)</li>
+                        <li>**15-07-2024:** D (Domanda 17 - protocollo autenticazione con firma)</li>
+                        <li>**04-09-2023:** D (Domanda 18 - X.509 e hash cifrata)</li>
+                        <li>**17-06-2024:** D (Domanda 17 - protocollo autenticazione con firma)</li>
+                        <li>**Appello X:** D (Domanda 18 - X.509 e hash cifrata)</li>
+                        <li>**Appello Y:** D (Domanda 18 - X.509 e hash cifrata)</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Funzionamento</h4>
+                <p>Una firma digitale viene creata usando la **chiave privata** del mittente e può essere verificata da chiunque usando la **chiave pubblica** del mittente.</p>
+                <ol>
+                    <li>**Hashing:** Il mittente calcola l'hash (digest) del messaggio \(M\), \(h = H(M)\). Si firma l'hash anziché l'intero messaggio per efficienza.</li>
+                    <li>**Firma:** Il mittente cifra l'hash \(h\) con la propria chiave privata \(d\). La firma \(S\) è:
+                        <div class="math-block">
+                            $$ S = h^d \pmod{n} $$
+                        </div>
+                        Il messaggio \(M\) e la firma \(S\) vengono inviati al destinatario.
+                    </li>
+                    <li>**Verifica:** Il destinatario riceve \(M\) e \(S\).
+                        <ol>
+                            <li>Decifra la firma \(S\) usando la chiave pubblica \(e\) del mittente per ottenere un \(h'\):
+                                <div class="math-block">
+                                    $$ h' = S^e \pmod{n} $$
+                                </div>
+                            </li>
+                            <li>Ricalcola l'hash del messaggio ricevuto \(M\) (cioè \(h_{new} = H(M)\)).</li>
+                            <li>Confronta \(h'\) con \(h_{new}\). Se \(h' = h_{new}\), la firma è valida.</li>
+                        </ol>
+                    </li>
+                </ol>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph LR
+                        subgraph "Mittente (Alice)"
+                            M_Alice[Messaggio M] --> H_Alice[Hash H(M)];
+                            H_Alice --> S_Alice[Sign H(M) with Private Key d];
+                            S_Alice --> Signature[Signature S];
+                        end
+
+                        subgraph "Canale Non Sicuro"
+                            M_S[M, S];
+                        end
+
+                        subgraph "Destinatario (Bob)"
+                            M_Bob[Messaggio M];
+                            S_Bob[Signature S];
+                            S_Bob --> Verify_S[Verify S with Public Key e];
+                            Verify_S --> H_Prime[H'(M)];
+                            M_Bob --> H_Bob[Hash H(M)];
+                            H_Prime -- Compare --> H_Bob;
+                            H_Bob -- Equal? --> Valid[Firma Valida];
+                            H_Bob -- Not Equal? --> Invalid[Firma Non Valida];
+                        end
+
+                        M_Alice --> M_S;
+                        Signature --> M_S;
+                        M_S --> M_Bob;
+                        M_S --> S_Bob;
+                    </pre>
+                </div>
+
+                <h4>Proprietà Garantite dalla Firma Digitale</h4>
+                <ul>
+                    <li><strong>Autenticazione dell'Origine:</strong> Solo il mittente che possiede la chiave privata può aver generato quella firma.</li>
+                    <li><strong>Integrità:</strong> Un qualsiasi cambiamento nel messaggio \(M\) causerebbe un hash \(H(M)\) diverso, e la verifica fallirebbe.</li>
+                    <li><strong>Non Ripudio:</strong> Il mittente non può negare di aver inviato il messaggio, poiché solo lui avrebbe potuto generare la firma con la sua chiave privata.</li>
+                    <li><strong>Verificabilità da Terze Parti:</strong> Un terzo può verificare la firma usando la chiave pubblica del mittente, risolvendo dispute.</li>
+                </ul>
+                <p>Le firme digitali **non garantiscono la confidenzialità**. Il messaggio \(M\) stesso di solito è trasmesso in chiaro.</p>
+            </div>
+        </article>
+
+        <article id="certificati-x509-pki" class="content-section">
+            <h2 class="section-title">6. Certificati X.509 e PKI (Public Key Infrastructure)</h2>
+            <div class="section-content">
+                <p>La **PKI (Public Key Infrastructure)** è un sistema che permette la distribuzione e la gestione sicura delle chiavi pubbliche, risolvendo il problema di come fare a sapere che una chiave pubblica appartiene effettivamente a una certa persona o entità. Il cuore della PKI è il **Certificato X.509**.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "CA (Certificati di Autorità)", "Servizio di Autenticazione X.509", "Estensioni del certificato", "Revoca di un certificato", "Gerarchia Del CA" (Pagine 149-153 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>I certificati X.509, il loro contenuto, il ruolo della CA e i meccanismi di revoca sono argomenti centrali e quasi sempre presenti negli esami.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 18 - HTTPS, X.509)</li>
+                        <li>**17-02-2023:** D (Domanda 17 - X.509 contenuto)</li>
+                        <li>**15-06-2023:** D (Domanda 17 - X.509 contenuto)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** D (Domanda 18 - X.509 contenuto)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** D (Domanda 18 - X.509 contenuto)</li>
+                        <li>**17-06-2024:** D (Domanda 18 - X.509 contenuto)</li>
+                        <li>**Appello X:** D (Domanda 18 - X.509 contenuto)</li>
+                        <li>**Appello Y:** D (Domanda 18 - X.509 contenuto)</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Ruolo della Certification Authority (CA)</h4>
+                <p>Una **Certification Authority (CA)** è un'entità fidata (spesso una terza parte) che emette e firma digitalmente i certificati. La CA agisce da garante: se ti fidi della CA, puoi fidarti delle chiavi pubbliche certificate da essa.</p>
+                <ul>
+                    <li>**Autorità Radice (Root CA):** Le CA più in alto nella gerarchia si auto-firmano. Le loro chiavi pubbliche sono preinstallate e fidate nei sistemi operativi e browser.</li>
+                    <li>**Gerarchia:** Le CA si organizzano in una gerarchia. Una CA intermedia può emettere certificati per altre CA più in basso, o per utenti finali.</li>
+                </ul>
+
+                <h4 class="subsubsection-title">Contenuto di un Certificato X.509</h4>
+                Un certificato X.509 è un documento digitale che include (tra gli altri):
+                <ul>
+                    <li><strong>Versione:</strong> La versione di X.509 (v1, v2, v3).</li>
+                    <li><strong>Numero Seriale:</strong> Un identificatore univoco del certificato.</li>
+                    <li><strong>Algoritmo della Firma:</strong> L'algoritmo usato dalla CA per firmare il certificato.</li>
+                    <li><strong>Emittente (Issuer):</strong> Il nome della CA che ha emesso il certificato.</li>
+                    <li><strong>Periodo di Validità:</strong> Data di inizio e data di fine validità.</li>
+                    <li><strong>Soggetto (Subject):</strong> Il nome (e altre informazioni) dell'entità a cui appartiene la chiave pubblica.</li>
+                    <li><strong>Chiave Pubblica del Soggetto:</strong> La chiave pubblica che viene certificata, con l'algoritmo associato.</li>
+                    <li><strong>Firma della CA:</strong> La firma digitale della CA, generata usando la sua chiave privata, per garantire l'autenticità e l'integrità del certificato.</li>
+                    <li><strong>Estensioni (X.509 v3):</strong> Informazioni aggiuntive, come usi specifici della chiave, nomi alternativi (es. domini, email).</li>
+                </ul>
+                <p>Quando un utente riceve un certificato, ne verifica la validità (firma della CA, periodo di validità) usando la chiave pubblica della CA.</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Certificato X.509"
+                            Version["Versione"]
+                            Serial["Numero Seriale"]
+                            AlgoSig["Algoritmo Firma"]
+                            Issuer["Emittente (CA)"]
+                            Validity["Periodo Validità (Da/A)"]
+                            Subject["Soggetto (Nome)"]
+                            SubjectKey["Chiave Pubblica Soggetto"]
+                            Extensions["Estensioni (v3)"]
+                            CASig["Firma CA"]
+                        end
+                        Version --> Serial;
+                        Serial --> AlgoSig;
+                        AlgoSig --> Issuer;
+                        Issuer --> Validity;
+                        Validity --> Subject;
+                        Subject --> SubjectKey;
+                        SubjectKey --> Extensions;
+                        Extensions --> CASig;
+                    </pre>
+                </div>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 15-06-2023, Domanda 17):</strong>
+                    <p>Per ognuna delle seguenti informazioni contenute in un certificato X.509, si dica se è stata generata dal soggetto o dall'emittente: (a) Chiave pubblica del soggetto; (b) Timestamp di inizio e fine validità; (c) Firma del certificato; (d) Identità del soggetto.</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) **Chiave pubblica del soggetto:** Generata dal **soggetto** (l'utente o server a cui il certificato si riferisce).</li>
+                        <li>(b) **Timestamp di inizio e fine validità:** Definito dall'**emittente** (la CA che emette il certificato).</li>
+                        <li>(c) **Firma del certificato:** Generata dall'**emittente** (la CA che firma il certificato con la sua chiave privata).</li>
+                        <li>(d) **Identità del soggetto:** Riferisce al **soggetto** stesso, che ha richiesto il certificato.</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Revoca dei Certificati</h4>
+                <p>Se un certificato viene compromesso (es. chiave privata rubata) o non è più valido per altri motivi, può essere **revocato** dalla CA prima della sua scadenza naturale.</p>
+                <ul>
+                    <li>**CRL (Certificate Revocation List):** Una lista (periodicamente pubblicata dalla CA) di certificati che sono stati revocati. I sistemi client devono consultare la CRL per verificare se un certificato è ancora valido.</li>
+                    <li>**OCSP (Online Certificate Status Protocol):** Un protocollo più moderno per verificare lo stato di un singolo certificato in tempo reale.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="autenticazione-entita" class="content-section">
+            <h2 class="section-title">7. Autenticazione delle Entità</h2>
+            <div class="section-content">
+                <p>**L'autenticazione delle entità** è il processo di verificare l'identità di una parte (persona, processo, dispositivo) con cui si sta comunicando. È diversa dall'autenticazione del messaggio (che verifica l'origine di un singolo messaggio).</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta la sezione "Gestione delle chiavi e autenticazione delle entità", "Autenticazione asimmetrica" (Pagine 156-159 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>I protocolli di autenticazione delle entità, in particolare quelli che usano Nonce e Timestamp, sono molto ricorrenti negli esami.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 17 - DH autenticazione)</li>
+                        <li>**17-02-2023:** D (Domanda 17 - protocollo scambio chiavi simmetriche)</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** D (Domanda 17 - protocollo scambio chiavi simmetriche)</li>
+                        <li>**16-09-2024:** D (Domanda 17 - protocollo autenticazione con firma)</li>
+                        <li>**19-02-2024:** D (Domanda 17 - protocollo scambio chiavi simmetriche)</li>
+                        <li>**15-07-2024:** D (Domanda 17 - protocollo autenticazione con firma)</li>
+                        <li>**04-09-2023:** D (Domanda 17 - protocollo scambio chiavi simmetriche)</li>
+                        <li>**17-06-2024:** D (Domanda 17 - protocollo autenticazione con firma)</li>
+                        <li>**Appello X:** D (Domanda 17 - protocollo scambio chiavi simmetriche)</li>
+                        <li>**Appello Y:** D (Domanda 17 - protocollo scambio chiavi simmetriche)</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Meccanismi di Autenticazione</h4>
+                <p>Gli algoritmi di autenticazione utilizzano prove basate su segreti (chiavi private) o informazioni uniche per dimostrare l'identità.</p>
+                <ul>
+                    <li>**Challenge-Response:** Un'entità (Verifier) invia una sfida all'altra entità (Claimant), e il Claimant deve fornire una risposta che solo lui, conoscendo un certo segreto, potrebbe generare.</li>
+                    <li>**Uso di Nonce (Numbers Once):** Un numero casuale (nonce) generato e usato solo una volta. Permette di garantire la "freschezza" di una comunicazione o di una chiave, prevenendo attacchi replay.</li>
+                    <li>**Uso di Timestamp:** Un'indicazione temporale inclusa nei messaggi. Se combinato con un nonce o una firma, aiuta a prevenire attacchi replay (se il timestamp è troppo vecchio o fuori intervallo, il messaggio è scartato). Richiede orologi sincronizzati.</li>
+                </ul>
+
+                <h4 class="subsubsection-title">Protocolli di Autenticazione</h4>
+                Esistono vari protocolli, da quelli unidirezionali a quelli bidirezionali (Three-Way Authentication). L'obiettivo è dimostrare che chi sta comunicando è chi dice di essere.
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 02-02-2023, Domanda 17):</strong>
+                    <p>Nella variante del protocollo Diffie-Hellman a lato, \(y_A, y_B\) sono le mezze chiavi pubbliche, \(H\) è una funzione di hash prefissata e \(K_M\) è una chiave precondivisa tra A e B. \(N\) è una nonce generata da A. (a) A è autenticato per B? Perchè? (b) B è autenticato per A? Perchè?</p>
+                    <p><strong>Protocollo dato:</strong><br>
+                    1. A \(\rightarrow\) B : A, \(y_A\), \(N\)<br>
+                    2. B \(\rightarrow\) A : B, \(y_B\), \(H(K_M, y_B, N)\)<br>
+                    3. A \(\rightarrow\) B : \(H(K_M, y_A, N)\)<br>
+                    </p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) **A non è autenticato per B.** A invia \(y_A\) e \(N\). \(N\) è generata da A, non da B. Non c'è una sfida da parte di B a cui A risponde con un segreto noto solo ad A. Un attaccante potrebbe intercettare A e inviare un proprio \(y_A\) e \(N\). Non essendoci prova crittografica che \(y_A\) e \(N\) provengano da A, B non ha modo di autenticare A. Il passo 3 non aggiunge autenticazione per A, è A che usa H per se stesso.</li>
+                        <li>(b) **B è autenticato per A.** Nel passo 2, B invia \(H(K_M, y_B, N)\).
+                            *   **B dimostra di conoscere \(K_M\):** Solo B, conoscendo la chiave master \(K_M\) (condivisa tra A e B), può calcolare il valore corretto di \(H(K_M, y_B, N)\). Se A verifica questo hash e corrisponde, A sa che B ha calcolato l'hash.
+                            *   **B risponde alla sfida \(N\):** La nonce \(N\) è stata generata da A e inviata nel passo 1. Includerla nell'hash di B dimostra che B sta rispondendo alla comunicazione corrente di A, non a una vecchia sessione (prevenendo attacchi replay).
+                            Quindi, B autentica se stesso ad A.
+                        </li>
+                    </ul>
+                    <p><strong>Risposta:</strong> (a) A non è autenticato per B. (b) B è autenticato per A perché risponde alla challenge di A (usando \(N\)) e dimostra di conoscere \(K_M\).</p>
+                </div>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 15-07-2024, Domanda 17):</strong>
+                    <p>Nel protocollo a lato, \(P_{RB}\) è la chiave privata di B, \(T\) è un timestamp generato da A, e \(H\) è una funzione di hash scelta a priori. (a) Il messaggio M è puntuale (ossia non soggetto ad attacchi replay) per A? (b) B è autenticato per A? Si motivino le risposte.</p>
+                    <p><strong>Protocollo dato:</strong><br>
+                    1. A \(\rightarrow\) S : A, B, \(\{H(M), T\}_{K_A}\)<br>
+                    2. S \(\rightarrow\) A : \(\{H(M), T\}_{K_B}\)<br>
+                    3. A \(\rightarrow\) B : A, M, \(\{H(M), T\}_{K_B}\)<br>
+                    </p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) **Sì, il messaggio M è puntuale per A.** Il messaggio \(M\) è associato al timestamp \(T\). Se A verifica che \(T\) è attuale (non troppo vecchio) e che non è stato manipolato (grazie alla firma), A può essere certo che M è "fresco" e non un replay.</li>
+                        <li>(b) **No, B non è autenticato per A.** A riceve nel passo 3 un messaggio che include \(\{H(M), T\}_{K_B}\). Questa è la firma di B su \(H(M)\) e \(T\). A può verificarla usando la chiave pubblica di B. Tuttavia, il messaggio \(M\) e il timestamp \(T\) sono generati da A (o da una terza parte che li ha trasmessi). Non c'è un elemento generato da B o una sfida da A a cui B risponde con un segreto di B. Quindi, A non ha prova che B sia attivo e abbia generato il messaggio.</li>
+                    </ul>
+                    <p><strong>Risposta:</strong> (a) Sì, per via del timestamp T. (b) No, perché A non ha una sfida a B per autenticarlo.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="protocolli-sicurezza-applicativi" class="content-section">
+            <h2 class="section-title">8. Protocolli di Sicurezza Applicativi</h2>
+            <div class="section-content">
+                <p>Molti servizi di sicurezza sono implementati a livelli più alti dello stack, spesso tramite protocolli che operano a cavallo del Livello Trasporto e Applicazione, o direttamente a livello Applicazione.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Sicurezza nel web", "SESSIONE TLS", "PGP (Pretty Good Privacy)", "PEC" (Pagine 161-165 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>TLS/HTTPS è molto frequente. PGP/PEC meno, ma importanti per l'email.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 18 - HTTPS, X.509)</li>
+                        <li>**17-02-2023:** D (Domanda 18 - HTTPS, DH)</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** D (Domanda 18 - HTTPS)</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** D (Domanda 18 - HTTPS, DH)</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title" id="tls-https">8.1. TLS/HTTPS</h3>
+                <p><strong>TLS (Transport Layer Security)</strong> è il protocollo standard per la sicurezza delle comunicazioni sul web (e non solo), successore di SSL. Opera principalmente tra il Livello Trasporto e il Livello Applicazione.</p>
+                <p><strong>HTTPS (Hypertext Transfer Protocol Secure)</strong> è l'applicazione di HTTP su TLS. La combinazione garantisce confidenzialità e integrità del traffico web.</p>
+                <p><strong>Funzionamento (Semplificato):</strong></p>
+                <ol>
+                    <li><strong>Handshake Protocol:</strong> Fase iniziale in cui client e server negoziano la suite di cifrari, si autenticano a vicenda (server per client, client opzionale per server, tipicamente usando certificati X.509 e crittografia asimmetrica come RSA o DH), e stabiliscono una chiave di sessione segreta (Master Secret).</li>
+                    <li><strong>Record Protocol:</strong> Utilizza la chiave di sessione stabilita per cifrare e autenticare i dati delle applicazioni (es. pagine web). Fornisce confidenzialità e integrità.</li>
+                </ol>
+                <p><strong>Cosa Protegge/Non Protegge TLS/HTTPS:</strong></p>
+                <ul>
+                    <li>**Protegge:** Il contenuto della pagina web, i dati del form (username, password), i cookie, ecc. (confidenzialità e integrità).</li>
+                    <li>**NON Protegge:**
+                        <ul>
+                            <li>L'**indirizzo IP** del server e del client (è a Livello Rete, necessario per il routing).</li>
+                            <li>La **porta** di destinazione (es. 443 per HTTPS).</li>
+                            <li>Il **nome del dominio** (nell'handshake TLS e nelle query DNS).</li>
+                            <li>La **quantità di dati** trasferita (traffic analysis).</li>
+                            <li>L'**ora di inizio e fine** della connessione.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 02-02-2023, Domanda 18):</strong>
+                    <p>Un browser si collega ad un server mediante HTTPS. Il server possiede un certificato X.509 valido; l'autenticazione è avvenuta mediante il metodo RSA. (a) Il browser è autenticato per il server? (b) L'indirizzo IP del client è segreto? (c) Il path della pagina web richiesta è coperto dalla cifratura TLS?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) **No, il browser non è autenticato per il server** nella configurazione standard di HTTPS. L'autenticazione del server è obbligatoria, ma l'autenticazione del client (browser) è facoltativa e richiede un certificato client, cosa non comune per la navigazione web generale.</li>
+                        <li>(b) **No, l'indirizzo IP del client non è segreto.** L'indirizzo IP è a Livello Rete (IP layer) ed è necessario per il routing dei pacchetti attraverso Internet. Non è cifrato da TLS.</li>
+                        <li>(c) **Sì, il path (percorso) della pagina web richiesta è coperto dalla cifratura TLS.** Il path fa parte della richiesta HTTP (es. `GET /path/to/page HTTP/1.1`), e l'intero contenuto della richiesta HTTP è cifrato da TLS.</li>
+                    </ul>
+                </div>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 29-01-2024, Domanda 18):</strong>
+                    <p>Si dica quali delle seguenti informazioni sono ottenibili da un attaccante che osserva una connessione HTTPS: (a) Indirizzo IP e porta del client; (b) Quantità di dati trasferita; (c) URL completo della pagina richiesta; (d) Chiave pubblica del server (nel caso di uno scambio RSA); (e) Pre-master secret.</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) **Sì, Indirizzo IP e porta del client** sono ottenibili. Sono informazioni di Livello Rete/Trasporto e non sono cifrate da TLS.</li>
+                        <li>(b) **Sì, Quantità di dati trasferita** è ottenibile. L'attaccante può osservare la dimensione dei pacchetti cifrati, permettendo la traffic analysis.</li>
+                        <li>(c) **No, URL completo della pagina richiesta** non è ottenibile. L'URL è parte dell'header HTTP che è cifrato da TLS.</li>
+                        <li>(d) **Sì, Chiave pubblica del server** è ottenibile. La chiave pubblica del server è contenuta nel suo certificato X.509, che viene trasmesso in chiaro durante la fase di handshake TLS (per permettere al client di verificare l'autenticità del server).</li>
+                        <li>(e) **No, Pre-master secret** non è ottenibile. Il pre-master secret è generato casualmente dal client e cifrato con la chiave pubblica del server (nel caso RSA), quindi è segreto.</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title" id="pgp-pec">8.2. PGP (Pretty Good Privacy) e PEC (Posta Elettronica Certificata)</h3>
+                <p>Questi protocolli aggiungono sicurezza alle comunicazioni email.</p>
+                <ul>
+                    <li><strong>PGP (Pretty Good Privacy):</strong>
+                        <ul>
+                            <li>**Scopo:** Fornire confidenzialità, autenticazione, integrità per le email. Non offre non ripudio del destinatario.</li>
+                            <li>**Funzionamento:** Utilizza un mix di crittografia simmetrica e asimmetrica. La chiave di sessione (simmetrica) per cifrare l'email è cifrata con la chiave pubblica del destinatario. La firma digitale (per autenticazione/integrità) viene creata con la chiave privata del mittente.</li>
+                            <li>**Portachiavi:** Ogni utente PGP mantiene un "portachiavi" con le proprie chiavi private (cifrate con passphrase) e le chiavi pubbliche degli amici.</li>
+                            <li>**Modello di Fiducia:** Rete di fiducia ("web of trust") piuttosto che gerarchia di CA.</li>
+                        </ul>
+                    </li>
+                    <li><strong>PEC (Posta Elettronica Certificata):</strong>
+                        <ul>
+                            <li>**Scopo:** Simile a una raccomandata con ricevuta di ritorno, garantisce valore legale di invio e consegna. Offre non ripudio dell'invio e della consegna.</li>
+                            <li>**Funzionamento:** Il server del mittente rilascia una "ricevuta di accettazione". Il server del destinatario rilascia una "ricevuta di consegna" (quando l'email arriva nella casella postale del destinatario). Entrambe le ricevute sono firmate digitalmente.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3 class="subsection-title" id="wep-problemi">8.3. WEP (Wireless Equivalent Privacy) e le Sue Vulnerabilità</h3>
+                <p>WEP era il primo standard di sicurezza per il Wi-Fi (802.11), ora obsoleto e sconsigliato a causa delle sue gravi vulnerabilità.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "WEP", "Bug di WEP: attacco del compleanno", "Correzione di WEP" (Pagine 142-144 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Rara (ma concetto importante)</h4>
+                <p>Mentre WEP è ampiamente trattato negli appunti del tuo amico per via delle sue vulnerabilità, non è apparso direttamente in domande specifiche negli esami che mi hai fornito (almeno non con calcoli o dettagli specifici). Tuttavia, la sua discussione illustra principi di sicurezza importanti (es. riutilizzo di chiavi/IV, attacco del compleanno).</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Vulnerabilità Principali di WEP</h4>
+                <ul>
+                    <li>**Riutilizzo dell'Initialization Vector (IV):** WEP usa un IV di 24 bit, troppo piccolo per essere unico in reti trafficate. La stessa chiave simmetrica è riutilizzata con lo stesso IV, rendendo il keystream riutilizzabile e vulnerabile agli attacchi (come l'attacco del keystream uguale, vedi Crittografia Simmetrica).</li>
+                    <li>**Attacco del Compleanno (Birthday Attack):** Sfrutta la probabilità di collisioni tra IV. È possibile trovare due IV uguali in un numero relativamente piccolo di pacchetti.</li>
+                    <li>**Debolezze nel Checksum (CRC-32):** Il CRC-32 di WEP non è crittograficamente sicuro e permette attacchi di modifica del messaggio.</li>
+                </ul>
+                <p>WEP è stato sostituito da standard più robusti come WPA (Wi-Fi Protected Access) e WPA2/WPA3, che utilizzano algoritmi crittografici più forti (es. AES) e una migliore gestione delle chiavi (es. TKIP, CCMP).</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti Corso Reti di Calcolatori</p>
+    </footer>
+
+    <script src="assets/common.js"></script>
+    <script>
+        // Mermaid.js and MathJax re-initialization are handled by common.js when sections are shown.
+        // No specific script for this HTML file is needed here beyond common.js.
+    </script>
+</body>
+</html>
