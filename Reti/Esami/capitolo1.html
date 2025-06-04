@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capitolo 1: Fondamenti e Livello Fisico</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="assets/common.css">
+
+    <style>
+        /* Nessuno stile specifico della lezione necessario qui, common.css gestisce tutto */
+    </style>
+</head>
+<body data-pdf-path="percorso/al/tuo/pdf_prof_del_Capitolo1_se_esistente.pdf"> <!-- Placeholder per eventuale PDF del capitolo -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Capitolo 1: Fondamenti e Livello Fisico</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="index.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice dei Capitoli</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF Cap.1)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#introduzione-reti" class="sidebar-link">1. Introduzione e Modelli Architetturali</a></li>
+            <li><a href="#modello-osi-tcpip-funzionalita" class="sidebar-link">1.1. Funzionalità dei Livelli OSI/TCP-IP</a></li>
+            <li><a href="#commutazione-reti" class="sidebar-link">2. Commutazione di Circuito vs Pacchetto</a></li>
+            <li><a href="#performance-reti" class="sidebar-link">3. Performance di Rete (Latenza, Throughput, RTT)</a></li>
+            <li><a href="#latenza-calcolo" class="sidebar-link">3.1. Calcolo della Latenza e Componenti</a></li>
+            <li><a href="#throughput-calcolo" class="sidebar-link">3.2. Calcolo del Throughput e Efficienza</a></li>
+            <li><a href="#teoremi-shannon" class="sidebar-link">4. Teoremi di Shannon-Hartley e Nyquist</a></li>
+            <li><a href="#rapporto-snr" class="sidebar-link">5. Rapporto Segnale-Rumore (S/N) e Decibel (dB)</a></li>
+            <li><a href="#codifiche-linea" class="sidebar-link">6. Codifiche di Linea e Baud Rate</a></li>
+            <li><a href="#tipologie-codifiche" class="sidebar-link">6.1. NRZ, NRZI, Manchester, 4B/5B, MLT-3</a></li>
+            <li><a href="#baud-rate-spiegazione" class="sidebar-link">6.2. Baud Rate e Bitrate</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="introduzione-reti" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione alle Reti di Calcolatori e Modelli Architetturali</h2>
+            <div class="section-content">
+                <p>Le reti di calcolatori sono sistemi complessi che permettono a dispositivi interconnessi di scambiare dati e risorse. Per gestire questa complessità, sono stati sviluppati modelli architetturali stratificati, i più importanti dei quali sono il <strong>Modello OSI (Open Systems Interconnection)</strong> e il <strong>Modello TCP/IP (Transmission Control Protocol/Internet Protocol)</strong>. Questi modelli dividono il processo di comunicazione in livelli logici, ognuno con responsabilità specifiche.</p>
+
+                <h3>Funzionalità dei Livelli OSI/TCP-IP</h3>
+                <p>La comprensione delle funzionalità di ciascun livello è fondamentale, poiché molte domande d'esame richiedono di associare una specifica operazione al suo strato corretto. Sebbene il modello OSI sia più una guida concettuale, e TCP/IP sia la base di Internet, spesso le domande fanno riferimento a entrambi per le funzionalità generali.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "STACK ISO/OSI" e "Architettura TCP/IP" (Pagine 1, 8, 9 del formulario e Pagine 6, 7, 8, 9 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>Questo argomento è quasi sempre presente, spesso come prima domanda d'esame, richiedendo di associare funzionalità a specifici livelli dello stack TCP/IP o OSI. La sua ricorrenza è molto elevata.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 1)</li>
+                        <li>**17-02-2023:** D (Domanda 1)</li>
+                        <li>**15-06-2023:** I (Domanda 1 - chiede di un dispositivo con diversi stack)</li>
+                        <li>**29-01-2024:** D (Domanda 1)</li>
+                        <li>**16-09-2024:** D (Domanda 1)</li>
+                        <li>**19-02-2024:** I (Domanda 1 - chiede quale protocollo si usa per un tipo di condivisione)</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** D (Domanda 1)</li>
+                        <li>**17-06-2024:** D (Domanda 1)</li>
+                        <li>**Appello X:** D (Domanda 1)</li>
+                        <li>**Appello Y:** D (Domanda 1)</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="modello-osi-tcpip-funzionalita">Funzionalità dei Livelli OSI/TCP-IP</h4>
+                <p>Analizziamo le principali funzionalità per ciascun livello, con riferimento a come sono state richieste negli esami:</p>
+
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Modello OSI (7 Livelli)"
+                            A[7. Applicazione] --> P[6. Presentazione];
+                            P --> S[5. Sessione];
+                            S --> T[4. Trasporto];
+                            T --> N[3. Rete];
+                            N --> D[2. Data Link];
+                            D --> F[1. Fisico];
+                        end
+
+                        subgraph "Modello TCP/IP (4/5 Livelli)"
+                            AppTCP[Applicazione] --> TransTCP[Trasporto];
+                            TransTCP --> NetTCP[Internet/Rete];
+                            NetTCP --> HostNet[Host-to-Network];
+                        end
+
+                        style T fill:#60a5fa,stroke:#60a5fa,stroke-width:2px;
+                        style N fill:#818cf8,stroke:#818cf8,stroke-width:2px;
+                        style D fill:#60a5fa,stroke:#60a5fa,stroke-width:2px;
+                        style F fill:#818cf8,stroke:#818cf8,stroke-width:2px;
+                        style NetTCP fill:#818cf8,stroke:#818cf8,stroke-width:2px;
+                        style TransTCP fill:#60a5fa,stroke:#60a5fa,stroke-width:2px;
+
+                        AppTCP -.-> A;
+                        TransTCP -.-> S;
+                        TransTCP -.-> T;
+                        NetTCP -.-> N;
+                        HostNet -.-> D;
+                        HostNet -.-> F;
+
+                        click A "alert('Livello 7: Applicazione');"
+                        click P "alert('Livello 6: Presentazione');"
+                        click S "alert('Livello 5: Sessione');"
+                        click T "alert('Livello 4: Trasporto');"
+                        click N "alert('Livello 3: Rete');"
+                        click D "alert('Livello 2: Data Link');"
+                        click F "alert('Livello 1: Fisico');"
+                        click AppTCP "alert('Livello Applicazione (TCP/IP)');"
+                        click TransTCP "alert('Livello Trasporto (TCP/IP)');"
+                        click NetTCP "alert('Livello Internet/Rete (TCP/IP)');"
+                        click HostNet "alert('Livello Host-to-Network (TCP/IP)');"
+                    </pre>
+                </div>
+
+                <ul>
+                    <li><strong>Livello 1: Fisico (Physical Layer)</strong>
+                        <ul>
+                            <li><strong>Definizione:</strong> Definisce le caratteristiche fisiche dell'hardware, la rappresentazione dei simboli in bit (encoding/decoding) e gestisce la trasmissione dei bit grezzi sul canale di comunicazione.</li>
+                            <li><strong>Esempi dalle Domande:</strong>
+                                <ul>
+                                    <li>"Codifica/decodifica bit su mezzo fisico" (02-02-2023, 17-02-2023, 29-01-2024, 04-09-2023, Appello Y).</li>
+                                    <li>"Caratteristiche dell'hardware fisico con cui si accede alla rete" (Appunti Amico).</li>
+                                    <li>"Gestisce la trasmissione dei bit grezzi sul canale" (Appunti Amico).</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Livello 2: Collegamento Dati (Data Link Layer)</strong>
+                        <ul>
+                            <li><strong>Definizione:</strong> Controlla lo scambio di dati su un canale fisico. Si occupa di collezionare un flusso di bit in <strong>frame</strong>, rilevare e correggere errori, controllo di flusso, indirizzamento delle interfacce.</li>
+                            <li><strong>Esempi dalle Domande:</strong>
+                                <ul>
+                                    <li>"Riconoscimento errori di trasmissione" (02-02-2023, 17-02-2023, 29-01-2024, 04-09-2023, Appello Y).</li>
+                                    <li>"Riconoscimento dei frame" (16-09-2024).</li>
+                                    <li>"Controllo lo scambio di dati su un canale fisico" (Appunti Amico).</li>
+                                    <li>"Rilevazione e correzione degli errori con CRC" (Appunti Amico).</li>
+                                    <li>"Trasmette frame da un host all'altro" (Appunti Amico).</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Livello 3: Rete (Network Layer)</strong>
+                        <ul>
+                            <li><strong>Definizione:</strong> Si occupa del <strong>ROUTING</strong> dei dati attraverso la rete, determina il percorso migliore per la trasmissione dei dati e gestisce l'instradamento degli indirizzi IP. Rende i livelli superiori indipendenti dalle tecnologie di trasmissione. PDU = pacchetto.</li>
+                            <li><strong>Esempi dalle Domande:</strong>
+                                <ul>
+                                    <li>"Inoltro dati su reti di tipo differente" (29-01-2024).</li>
+                                    <li>"Gestione dei gruppi multicast" (16-09-2024, 04-09-2023, Appello X).</li>
+                                    <li>"Effettuare correttamente il ROUTING dei dati" (Appunti Amico).</li>
+                                    <li>"Gestisce l'instradamento degli indirizzi IP" (Appunti Amico).</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Livello 4: Trasporto (Transport Layer)</strong>
+                        <ul>
+                            <li><strong>Definizione:</strong> Utilizza le porte (socket) per il demultiplexing alle applicazioni. Crea un canale (connessione) che collega i processi e assicura che i messaggi siano consegnati senza errori, in sequenza e senza perdite o duplicazioni. Gestisce la congestione della rete. Protocolli: TCP, UDP.</li>
+                            <li><strong>Esempi dalle Domande:</strong>
+                                <ul>
+                                    <li>"Controllo trasmissione dati duplicati" (16-09-2024).</li>
+                                    <li>"Demultiplexing alle applicazioni" (02-02-2023, 17-02-2023, 04-09-2023, Appello Y).</li>
+                                    <li>"Gestisce la congestione della rete" (Appunti Amico).</li>
+                                    <li>"Assicura che i messaggi siano consegnati senza errori, in sequenza" (Appunti Amico).</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Livello 5: Sessione (Session Layer)</strong>
+                        <ul>
+                            <li><strong>Definizione:</strong> Raggruppa e controlla diverse connessioni tra stesse applicazioni in un'unica sessione. Si occupa della sincronia di invio/ricezione messaggi e di inserire punti di backup nel flusso dati.</li>
+                            <li><strong>Esempi dalle Domande:</strong> Nessuna domanda d'esame specifica si è concentrata esclusivamente sul Livello Sessione in questo set di esami.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Livello 6: Presentazione (Presentation Layer)</strong>
+                        <ul>
+                            <li><strong>Definizione:</strong> Si occupa di compressione, cifratura e conversione dei formati di interpretazione dei dati tra formato di rete e formato applicativo. Assicura che i dati siano correttamente interpretati dal ricevente.</li>
+                            <li><strong>Esempi dalle Domande:</strong>
+                                <ul>
+                                    <li>"Compressione dei dati" (16-09-2024, 29-01-2024).</li>
+                                    <li>"Conversione formato dei dati" (02-02-2023, 17-02-2023, 04-09-2023, Appello Y).</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Livello 7: Applicazione (Application Layer)</strong>
+                        <ul>
+                            <li><strong>Definizione:</strong> Interfaccia tra le applicazioni utente e la rete. Si occupa di gestione delle sessioni, accesso ai servizi di rete e presentazione dei dati. Include protocolli come HTTP, SMTP, FTP, SNMP.</li>
+                            <li><strong>Esempi dalle Domande:</strong>
+                                <ul>
+                                    <li>"Conversione formato dei dati" (anche se può cadere in Presentazione, è spesso gestita dalle applicazioni) (02-02-2023, 17-02-2023, 04-09-2023, Appello Y).</li>
+                                    <li>"Gestione delle sessioni, accesso ai servizi di rete, presentazione dei dati" (Appunti Amico).</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="commutazione-reti" class="content-section">
+            <h2 class="section-title">2. Commutazione di Circuito vs Commutazione di Pacchetto</h2>
+            <div class="section-content">
+                <p>Questo argomento confronta due approcci fondamentali per instradare i dati in una rete, con implicazioni dirette sulla performance (jitter, latenza, utilizzo risorse) e sulla robustezza.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "COMMUTAZIONE DI PACCHETTO" e "COMMUTAZIONE DI CIRCUITO" (Pagina 1 del formulario) e "RETE COMMUTATA", "COMMUTAZIONE DI CIRCUITO", "COMMUTAZIONE DI PACCHETTO" (Pagina 5 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Media</h4>
+                Le domande su questo argomento sono abbastanza ricorrenti, spesso richiedendo un confronto diretto tra le due modalità in termini di proprietà specifiche come robustezza o jitter.
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** I (Domanda 1 - chiede di un dispositivo con diversi stack)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** D (Domanda 6)</li>
+                        <li>**15-07-2024:** D (Domanda 6)</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** D (Domanda 6)</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Commutazione di Circuito</h4>
+                <ul>
+                    <li><strong>Idea:</strong> Viene assegnato un canale dedicato e fisso per tutta la durata della comunicazione tra due host. Prima della trasmissione dei dati, è necessaria una fase di "setup" per stabilire questo circuito.</li>
+                    <li><strong>Caratteristiche:</strong>
+                        <ul>
+                            <li><strong>Canale Dedicato:</strong> Risorse garantite.</li>
+                            <li><strong>Tempo di Setup:</strong> Richiede tempo per stabilire la connessione.</li>
+                            <li><strong>Spreco di Risorse:</strong> Le risorse rimangono dedicate anche se non utilizzate (es. pause nella conversazione).</li>
+                            <li><strong>Jitter Ridotto:</strong> Il ritardo è costante e prevedibile, non c'è varianza nel tempo di arrivo dei pacchetti (questo è il punto chiave spesso testato).</li>
+                            <li><strong>Non Robusto ai Guasti:</strong> Se il canale dedicato si guasta, la comunicazione si interrompe.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4 class="subsubsection-title">Commutazione di Pacchetto</h4>
+                <ul>
+                    <li><strong>Idea:</strong> I dati vengono suddivisi in piccoli blocchi indipendenti chiamati "pacchetti". Ogni pacchetto viene instradato individualmente attraverso la rete, potendo seguire percorsi diversi per raggiungere la destinazione. Non c'è una connessione dedicata.</li>
+                    <li><strong>Caratteristiche:</strong>
+                        <ul>
+                            <li><strong>Nessun Setup:</strong> Non richiede una fase di setup del canale.</li>
+                            <li><strong>Utilizzo Efficiente:</strong> Le risorse del canale sono condivise dinamicamente tra più comunicazioni.</li>
+                            <li><strong>Jitter Aumentato:</strong> Il ritardo può variare molto a causa della congestione sulla rete e dei percorsi diversi, aumentando il jitter.</li>
+                            <li><strong>Robusto ai Guasti:</strong> Se una parte della rete si guasta, i pacchetti possono essere re-instradati su percorsi alternativi.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 19-02-2024, Domanda 6):</strong>
+                    <p>Si dica se ognuna delle seguenti affermazioni è vera o falsa:</p>
+                    <p>(a) Una rete a commutazione di circuito è più robusta ai guasti rispetto ad una rete a commutazione di pacchetto.<br>
+                    (b) La comunicazione tra due host in una rete a commutazione di circuito richiede un tempo di setup.<br>
+                    (c) La commutazione di pacchetto è più indicata per ridurre il jitter (= varianza della latenza).</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) <strong>Falso</strong>. La commutazione di pacchetto è più robusta ai guasti perché può re-instradare i pacchetti su percorsi alternativi in caso di fallimento di un link. Nella commutazione di circuito, un guasto nel circuito dedicato interrompe la comunicazione.</li>
+                        <li>(b) <strong>Vero</strong>. La commutazione di circuito richiede una fase di setup per stabilire il circuito dedicato prima che i dati possano essere trasmessi.</li>
+                        <li>(c) <strong>Falso</strong>. La commutazione di circuito è più indicata per ridurre il jitter perché il percorso è fisso e dedicato, garantendo un ritardo costante. La commutazione di pacchetto, con percorsi variabili e congestione, tende ad aumentare il jitter.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="performance-reti" class="content-section">
+            <h2 class="section-title">3. Performance di Rete (Latenza, Throughput, RTT)</h2>
+            <div class="section-content">
+                <p>La valutazione delle performance di una rete si basa su metriche chiave come la <strong>latenza (delay)</strong> e il <strong>throughput</strong>. È fondamentale comprendere come calcolare queste metriche e quali fattori le influenzano.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Throughput", "Latenza (Delay)", "RTT (Round Trip Time)" e "Delay x Throughput" (Pagina 1 e 2 del formulario, Pagine 11-13 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                Le domande su latenza e throughput sono quasi sempre presenti, spesso richiedendo calcoli diretti o l'interpretazione di scenari specifici.
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 2)</li>
+                        <li>**17-02-2023:** D (Domanda 2)</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** D (Domanda 4)</li>
+                        <li>**16-09-2024:** D (Domanda 4)</li>
+                        <li>**19-02-2024:** D (Domanda 3, 4)</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** D (Domanda 2)</li>
+                        <li>**17-06-2024:** D (Domanda 4)</li>
+                        <li>**Appello X:** D (Domanda 2)</li>
+                        <li>**Appello Y:** D (Domanda 2)</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Definizioni Chiave</h4>
+                <ul>
+                    <li><strong>Throughput:</strong> Quantità effettiva di bit trasmessi al secondo su un canale di comunicazione. Tiene conto di ritardi, perdite e overhead.
+                        <div class="math-block">
+                            $$ \text{Throughput} = \frac{\text{Numero di bit trasmessi}}{\text{Tempo totale}} $$
+                        </div>
+                    </li>
+                    <li><strong>Latenza (Delay):</strong> Il tempo che intercorre tra l'invio di un messaggio e la sua ricezione. È la somma di diverse componenti.</li>
+                    <li><strong>RTT (Round Trip Time):</strong> Il tempo che un messaggio impiega per andare dal mittente al destinatario e tornare indietro (ping doppio della latenza). È un parametro cruciale per molti protocolli.</li>
+                    <li><strong>Jitter:</strong> La varianza del ritardo. Un problema per applicazioni real-time come lo streaming.</li>
+                </ul>
+
+                <h4 class="subsubsection-title" id="latenza-calcolo">Calcolo della Latenza e delle Sue Componenti</h4>
+                La latenza totale (Total Delay) è la somma di diverse componenti:
+                <div class="math-block">
+                    $$ \text{Latenza Totale} = \text{Tempo Propagazione Segnale} + \text{Tempo Trasmissione} + \text{Tempo Accodamento} + \text{Tempo Elaborazione Nodi} $$
+                </div>
+
+                <ul>
+                    <li><strong>Tempo di Propagazione del Segnale:</strong> Il tempo impiegato dal primo bit per viaggiare attraverso il mezzo fisico dal mittente al destinatario. Dipende dalla distanza e dalla velocità di propagazione nel mezzo.
+                        <div class="math-block">
+                            $$ \text{Tempo Propagazione Segnale} = \frac{\text{Lunghezza Canale [m]}}{\text{Velocità di Propagazione [m/s]}} $$
+                        </div>
+                        <p>Tipiche velocità di propagazione:</p>
+                        <ul>
+                            <li>Vuoto: \(3 \times 10^8 \text{ m/s}\)</li>
+                            <li>Cavo in rame: circa \(2.3 \times 10^8 \text{ m/s}\)</li>
+                            <li>Fibra ottica: circa \(2.0 \times 10^8 \text{ m/s}\)</li>
+                        </ul>
+                        <p>Il <strong>Velocity Factor</strong> è il rapporto tra la velocità nel canale e la velocità della luce nel vuoto.</p>
+                    </li>
+                    <li><strong>Tempo di Trasmissione:</strong> Il tempo necessario per inviare tutti i bit del messaggio sul canale, una volta che il primo bit ha iniziato a essere trasmesso. Dipende dalla dimensione del messaggio e dal bitrate del canale.
+                        <div class="math-block">
+                            $$ \text{Tempo Trasmissione} = \frac{\text{Dimensione Messaggio [bit]}}{\text{Throughput Canale [bit/s]}} $$
+                        </div>
+                    </li>
+                    <li><strong>Tempo di Accodamento:</strong> Il tempo che un pacchetto spende in attesa in una coda del router o switch prima di essere elaborato e trasmesso. Dipende dal traffico di rete e dalla congestione. Questo è il componente più variabile della latenza.</li>
+                    <li><strong>Tempo di Elaborazione Nodi:</strong> Il tempo che un nodo (router, switch) impiega per processare l'header di un pacchetto, effettuare controlli (es. CRC), e decidere dove inoltrarlo. Spesso si assume \(\Theta(1)\) o trascurabile rispetto agli altri.</li>
+                </ul>
+
+                <h4 class="subsubsection-title" id="throughput-calcolo">Calcolo del Throughput e Efficienza</h4>
+                <p>Spesso si chiede di calcolare il throughput netto o l'efficienza. L'efficienza è il rapporto tra il tempo utile di trasmissione dei dati e il tempo totale impiegato per la comunicazione.</p>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 29-01-2024, Domanda 4):</strong>
+                    <p>Un host è collegato ad una rete Gigabit Ethernet, che ha un bitrate grezzo di 1 Gb/s. Quanto è il tempo necessario per trasmettere un frame con un payload massimo (1500 byte), tenendo conto di tutti i tempi introdotti dal protocollo (IPG incluso)?</p>
+                    <p><strong>Dati Aggiuntivi dagli Appunti/Formulario (che verranno trattati in dettaglio nei capitoli futuri, ma qui usati per il calcolo):</strong></p>
+                    <ul>
+                        <li>Frame Ethernet: Preamble (7 byte), SFD (1 byte), MAC Dest (6 byte), MAC Sorg (6 byte), Type (2 byte), Payload (max 1500 byte), CRC-32 (4 byte).</li>
+                        <li>Overhead Ethernet (es. preambolo+SFD+header+CRC) = \(7+1+6+6+2+4 = 26\) byte.</li>
+                        <li>IPG (InterPacket Gap): per 1 Gb/s, l'IPG è di 96 bit (12 byte).</li>
+                    </ul>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**Dimensione totale del frame (in byte):**
+                            Preamble + SFD + MAC Dest + MAC Sorg + Type + Payload + CRC-32
+                            = \(7 + 1 + 6 + 6 + 2 + 1500 + 4 = 1526\) byte.
+                        </li>
+                        <li>**Dimensione totale del frame (in bit):**
+                            \(1526 \text{ byte} \times 8 \text{ bit/byte} = 12208 \text{ bit}\).
+                        </li>
+                        <li>**Tempo di trasmissione del frame:**
+                            Bitrate grezzo = \(1 \text{ Gb/s} = 10^9 \text{ bit/s}\).
+                            Tempo trasmissione frame = \(\frac{12208 \text{ bit}}{10^9 \text{ bit/s}} = 12.208 \times 10^{-6} \text{ s} = 12.208 \text{ µs}\).
+                        </li>
+                        <li>**IPG (InterPacket Gap):**
+                            Tempo IPG = \(\frac{96 \text{ bit}}{10^9 \text{ bit/s}} = 0.096 \times 10^{-6} \text{ s} = 0.096 \text{ µs}\).
+                        </li>
+                        <li>**Tempo totale necessario per trasmettere un frame:**
+                            Tempo trasmissione frame + Tempo IPG = \(12.208 \text{ µs} + 0.096 \text{ µs} = 12.304 \text{ µs}\).
+                        </li>
+                    </ol>
+                    <p><strong>Risposta:</strong> Il tempo necessario è di circa \(12.3 \text{ µs}\).</p>
+                </div>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 02-02-2023, Domanda 2):</strong>
+                    <p>Un dispositivo trasmette ad intervalli regolari un messaggio di 100 byte di dati; il frame comprende anche un'intestazione di 5 byte, un CRC-16, e un preambolo pari a 50 bit. (a) Quant'è la dimensione effettiva, in bit, dell'intero frame, compresa intestazione e CRC? (b) Viene usato un canale wireless con capacità grezza pari a 150 kbps e una FEC 4/5 (ossia, ogni 4 bit di dati reali viene aggiunto 1 bit di ridondanza). Quanto tempo è necessario per trasmettere tale frame?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**(a) Dimensione effettiva del frame (in bit):**
+                            Dati: 100 byte
+                            Intestazione: 5 byte
+                            CRC: 16 bit
+                            Preambolo: 50 bit
+                            Trasformiamo tutto in bit:
+                            Dati in bit = \(100 \text{ byte} \times 8 \text{ bit/byte} = 800 \text{ bit}\).
+                            Intestazione in bit = \(5 \text{ byte} \times 8 \text{ bit/byte} = 40 \text{ bit}\).
+                            Dimensione totale del frame (senza FEC) = Dati + Intestazione + CRC + Preambolo = \(800 + 40 + 16 + 50 = 906 \text{ bit}\).
+                            <strong>Risposta (a):</strong> 906 bit.
+                        </li>
+                        <li>**(b) Tempo di trasmissione del frame:**
+                            Il canale usa FEC 4/5: ogni 4 bit di dati reali, se ne trasmettono 5. Questo significa che per ogni 4 bit reali, se ne trasmettono 5.
+                            Bit totali da trasmettere (con FEC) = Dimensione frame reale \(\times \frac{5}{4} = 906 \text{ bit} \times \frac{5}{4} = 1132.5 \text{ bit}\).
+                            Capacità grezza del canale = 150 kbps = \(150 \times 10^3 \text{ bit/s}\).
+                            Tempo necessario = \(\frac{\text{Bit totali da trasmettere}}{\text{Capacità grezza}} = \frac{1132.5 \text{ bit}}{150 \times 10^3 \text{ bit/s}} = 0.00755 \text{ s} = 7.55 \text{ ms}\).
+                            <strong>Risposta (b):</strong> 7.55 ms.
+                        <div class="correction-box">
+                            <strong>Correzione/Chiarezza:</strong> La risposta del prof nell'esame riporta (a) "(100 - 5) * 8 + 16 + 50 = 906 bit", il che è un errore di calcolo. L'intestazione di 5 byte si somma al payload di 100 byte per formare la parte dati del frame, non si sottrae. La dimensione del payload *più* l'intestazione è \( (100+5) \times 8 = 840 \) bit. Quindi: \( 840 \text{ bit} + 16 \text{ bit (CRC)} + 50 \text{ bit (preambolo)} = 906 \text{ bit} \). Il risultato numerico del professore è corretto per la somma finale, ma la formula "(100 - 5) * 8" è fuorviante. La mia spiegazione con la somma è più precisa. Per (b) la soluzione è allineata.
+                        </div>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </article>
+
+        <article id="teoremi-shannon" class="content-section">
+            <h2 class="section-title">4. Teoremi di Shannon-Hartley e Nyquist</h2>
+            <div class="section-content">
+                <p>Questi due teoremi sono pilastri fondamentali per comprendere la capacità massima di un canale di comunicazione, sia ideale che reale. Sono essenziali per calcolare il bitrate teorico massimo.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "SHANNON-NYQUIST" e "TEOREMA SHANNON-HARTLEY" (Pagina 2 del formulario, Pagina 15 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                I calcoli basati sui teoremi di Shannon-Hartley e Nyquist sono quasi sempre presenti, spesso richiedendo di trovare la capacità, la banda o il rapporto S/N.
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 1 - chiede quanti bit utili in TDM, non direttamente Shannon)</li>
+                        <li>**17-02-2023:** D (Domanda 2)</li>
+                        <li>**15-06-2023:** D (Domanda 2)</li>
+                        <li>**29-01-2024:** D (Domanda 2)</li>
+                        <li>**16-09-2024:** D (Domanda 2)</li>
+                        <li>**19-02-2024:** D (Domanda 2)</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** D (Domanda 2)</li>
+                        <li>**17-06-2024:** D (Domanda 2)</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Teorema di Nyquist-Shannon (Canale Ideale)</h4>
+                <p>Questo teorema stabilisce il massimo bitrate (velocità di trasmissione di bit) che può essere raggiunto su un canale ideale, senza rumore. Dipende dal numero di simboli \(M\) che possono essere codificati e dalla banda \(B\).</p>
+                <p>Per un canale senza rumore che può trasmettere \(M\) simboli distinti per ciclo, il massimo bitrate \(C_{\text{ideal}}\) è:</p>
+                <div class="math-block">
+                    $$ C_{\text{ideal}} = 2B \log_2(M) $$
+                </div>
+                <p>Dove:</p>
+                <ul>
+                    <li>\(B\) è la banda del canale (in Hertz).</li>
+                    <li>\(M\) è il numero di stati o livelli di segnale distinti (simboli) che possono essere utilizzati per codificare le informazioni. Ogni simbolo trasporta \(\log_2(M)\) bit.</li>
+                </ul>
+                <p>Un corollario importante è che il massimo <strong>Baud Rate (R)</strong> (numero di simboli al secondo) su un canale ideale è \(2B\).</p>
+                <div class="math-block">
+                    $$ R_{\text{max}} = 2B $$
+                </div>
+
+                <h4 class="subsubsection-title">Teorema di Shannon-Hartley (Canale Reale)</h4>
+                <p>Questo teorema definisce la massima capacità di canale \(C_{\text{real}}\) (bitrate) che può essere raggiunta in presenza di rumore bianco gaussiano (un tipo di rumore casuale). È il limite teorico superiore per qualsiasi sistema di codifica senza errore.</p>
+                <div class="math-block">
+                    $$ C_{\text{real}} = B \log_2 \left( 1 + \frac{S}{N} \right) $$
+                </div>
+                <p>Dove:</p>
+                <ul>
+                    <li>\(B\) è la banda del canale (in Hertz).</li>
+                    <li>\(S\) è la potenza media del segnale ricevuto.</li>
+                    <li>\(N\) è la potenza media del rumore.</li>
+                    <li>\(\frac{S}{N}\) è il rapporto segnale/rumore (SNR), un numero puro.</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 17-02-2023, Domanda 2):</strong>
+                    <p>Una certa tecnologia mira ad offrire una capacità netta di 100Mbps trasmettendo i bit con codifica 4B/5B su un canale fisico che ha una banda di 25 MHz. Quanto deve essere il rapporto S/N minimo (in dB)?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**Calcolo della capacità grezza:**
+                            La codifica 4B/5B significa che per ogni 4 bit di dati reali, ne vengono trasmessi 5. Quindi la capacità grezza (bitrate grezzo) è maggiore della capacità netta.
+                            Capacità netta = 100 Mbps.
+                            Capacità grezza \(C = 100 \text{ Mbps} \times \frac{5}{4} = 125 \text{ Mbps}\).
+                        </li>
+                        <li>**Uso del Teorema di Shannon-Hartley:**
+                            Conosciamo \(C = 125 \text{ Mbps}\) e \(B = 25 \text{ MHz}\). Vogliamo trovare \(\frac{S}{N}\).
+                            \(C = B \log_2 \left( 1 + \frac{S}{N} \right)\)
+                            \(125 \times 10^6 = (25 \times 10^6) \log_2 \left( 1 + \frac{S}{N} \right)\)
+                            \(\frac{125 \times 10^6}{25 \times 10^6} = \log_2 \left( 1 + \frac{S}{N} \right)\)
+                            \(5 = \log_2 \left( 1 + \frac{S}{N} \right)\)
+                            \(\Rightarrow 1 + \frac{S}{N} = 2^5\)
+                            \(1 + \frac{S}{N} = 32\)
+                            \(\frac{S}{N} = 31\)
+                        </li>
+                        <li>**Conversione in Decibel (dB):**
+                            \(\text{SNR}_{\text{dB}} = 10 \log_{10} \left( \frac{S}{N} \right)\)
+                            \(\text{SNR}_{\text{dB}} = 10 \log_{10} (31) \approx 10 \times 1.49136 \approx 14.91 \text{ dB}\).
+                        </li>
+                    </ol>
+                    <p><strong>Risposta:</strong> Il rapporto S/N minimo deve essere circa 14.9 dB.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="rapporto-snr" class="content-section">
+            <h2 class="section-title">5. Rapporto Segnale-Rumore (S/N) e Decibel (dB)</h2>
+            <div class="section-content">
+                <p>Il rapporto segnale/rumore (SNR) è una misura fondamentale della qualità del segnale in un canale di comunicazione, cruciale per determinare la capacità di trasmissione dati. Viene spesso espresso in decibel (dB).</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta la sezione "SIGNAL-TO-NOISE RATIO [S/N]" (Pagina 2 del formulario, Pagina 15 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                È un concetto quasi sempre richiesto in calcoli che coinvolgono il teorema di Shannon-Hartley, o per interpretare la qualità del segnale.
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 2)</li>
+                        <li>**17-02-2023:** D (Domanda 2)</li>
+                        <li>**15-06-2023:** D (Domanda 2)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** D (Domanda 2)</li>
+                        <li>**19-02-2024:** D (Domanda 2)</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** D (Domanda 2)</li>
+                        <li>**17-06-2024:** D (Domanda 2)</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Rapporto Segnale-Rumore (S/N)</h4>
+                <p>È un numero puro che mette in rapporto la potenza media del segnale (\(S\)) con la potenza media del rumore (\(N\)).</p>
+                <div class="math-block">
+                    $$ \text{SNR} = \frac{S}{N} $$
+                </div>
+                <p>Un SNR più alto indica un segnale più forte rispetto al rumore, il che permette di trasmettere più dati con meno errori.</p>
+
+                <h4 class="subsubsection-title">Decibel (dB)</h4>
+                <p>Spesso, il rapporto segnale/rumore viene convertito in decibel per esprimere valori molto ampi in una scala logaritmica più gestibile.</p>
+                <div class="math-block">
+                    $$ \text{SNR}_{\text{dB}} = 10 \log_{10} \left( \frac{S}{N} \right) $$
+                </div>
+                <p>Esempi di interpretazione:</p>
+                <ul>
+                    <li><strong>SNR = 1:</strong> \(\text{SNR}_{\text{dB}} = 10 \log_{10}(1) = 0 \text{ dB}\). Significa che la potenza del segnale è uguale alla potenza del rumore (\(S=N\)).</li>
+                    <li><strong>SNR = 10:</strong> \(\text{SNR}_{\text{dB}} = 10 \log_{10}(10) = 10 \text{ dB}\). Significa che il segnale è 10 volte più potente del rumore.</li>
+                    <li><strong>SNR = 100:</strong> \(\text{SNR}_{\text{dB}} = 10 \log_{10}(100) = 20 \text{ dB}\). Significa che il segnale è 100 volte più potente del rumore.</li>
+                    <li><strong>SNR = 0.01:</strong> \(\text{SNR}_{\text{dB}} = 10 \log_{10}(0.01) = -20 \text{ dB}\). Significa che il segnale è 100 volte più debole del rumore.</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 16-09-2024, Domanda 2):</strong>
+                    <p>Un certo canale, con una banda di 20MHz, mostra un SNR di 15 dB. Se si adotta una codifica 4B/5B, qual è la massima capacità netta ottenibile?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**Convertire SNR da dB a rapporto puro:**
+                            \(\text{SNR}_{\text{dB}} = 10 \log_{10} \left( \frac{S}{N} \right) \Rightarrow 15 = 10 \log_{10} \left( \frac{S}{N} \right)\)
+                            \(1.5 = \log_{10} \left( \frac{S}{N} \right) \Rightarrow \frac{S}{N} = 10^{1.5} \approx 31.62\).
+                        </li>
+                        <li>**Calcolare la capacità grezza (Shannon-Hartley):**
+                            \(C_{\text{grezza}} = B \log_2 \left( 1 + \frac{S}{N} \right) = (20 \times 10^6 \text{ Hz}) \log_2 (1 + 31.62)\)
+                            \(C_{\text{grezza}} = (20 \times 10^6) \log_2 (32.62) \approx (20 \times 10^6) \times 5.029\)
+                            \(C_{\text{grezza}} \approx 100.58 \text{ Mbps}\).
+                        </li>
+                        <li>**Calcolare la capacità netta (considerando la codifica 4B/5B):**
+                            La codifica 4B/5B significa che 5 bit grezzi trasportano 4 bit di dati reali.
+                            Capacità netta = \(C_{\text{grezza}} \times \frac{4}{5} = 100.58 \text{ Mbps} \times 0.8 \approx 80.46 \text{ Mbps}\).
+                        </li>
+                    </ol>
+                    <p><strong>Risposta:</strong> La massima capacità netta ottenibile è circa 80.46 Mbps.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="codifiche-linea" class="content-section">
+            <h2 class="section-title">6. Codifiche di Linea e Baud Rate</h2>
+            <div class="section-content">
+                <p>La codifica di linea è il processo di conversione di dati binari (bit) in segnali fisici che possono essere trasmessi su un canale. Diverse codifiche hanno proprietà differenti in termini di efficienza, gestione della sincronizzazione e immunità al rumore.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Codifica", "Codifica NRZ", "Codifica NRZI", "Codifica Manchester", "Codifica MLT-3", "Codifica 4B/5B" e "BAUD RATE" (Pagina 2 del formulario, Pagine 14-17 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                Le domande sulle codifiche di linea sono presenti abbastanza frequentemente, spesso richiedendo di identificare problemi specifici (sincronizzazione, troppi 0/1 consecutivi) e come le diverse codifiche li risolvono o le loro proprietà (es. in-place, stabilità, spazio).
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** D (Domanda 2)</li>
+                        <li>**15-06-2023:** I (Domanda 1 - chiede di un dispositivo con diversi stack)</li>
+                        <li>**29-01-2024:** D (Domanda 2)</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="tipologie-codifiche">Tipologie di Codifiche di Linea</h4>
+                <p>Il processo di codifica trasforma i bit in <strong>simboli</strong>, che sono le unità di segnale effettivamente trasmesse. Il numero di bit per simbolo e il numero di simboli trasmessi al secondo (Baud Rate) determinano il bitrate.</p>
+
+                <ul>
+                    <li><strong>Codifica NRZ (Non Return To Zero)</strong>
+                        <ul>
+                            <li><strong>Idea:</strong> Rappresenta '1' con un segnale alto (es. 5V) e '0' con un segnale basso (es. 0V).</li>
+                            <li><strong>Problemi:</strong>
+                                <ul>
+                                    <li><strong>Sincronizzazione:</strong> Lunghe sequenze di '0' o '1' consecutivi non provocano transizioni di segnale, rendendo difficile per il ricevitore mantenere la sincronizzazione con il clock del trasmettitore.</li>
+                                    <li><strong>Componente DC:</strong> La presenza di lunghe sequenze di '0' o '1' può portare a una componente DC (corrente continua) che può causare deriva del segnale e problemi in alcuni tipi di canali.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Codifica NRZI (Non Return to Zero Inverted)</strong>
+                        <ul>
+                            <li><strong>Idea:</strong> Una transizione di segnale (cambio di stato) rappresenta un '1'. L'assenza di transizione (il segnale rimane nello stesso stato) rappresenta uno '0'.</li>
+                            <li><strong>Vantaggi:</strong> Risolve parzialmente il problema delle lunghe sequenze di '1' (ogni '1' causa una transizione, aiutando la sincronizzazione).</li>
+                            <li><strong>Problemi:</strong> Non risolve il problema delle lunghe sequenze di '0' (un blocco di '0' consecutivi non produce transizioni, causando perdita di sincronizzazione).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Codifica Manchester</strong>
+                        <ul>
+                            <li><strong>Idea:</strong> Ogni bit è rappresentato da una transizione nel mezzo del periodo del bit. Un '0' è rappresentato da una transizione da basso ad alto. Un '1' è rappresentato da una transizione da alto a basso.</li>
+                            <li><strong>Vantaggi:</strong>
+                                <ul>
+                                    <li><strong>Auto-cloccante:</strong> Garantisce una transizione di segnale per ogni bit, facilitando la sincronizzazione tra trasmettitore e ricevitore.</li>
+                                    <li><strong>Nessuna Componente DC:</strong> Le transizioni bilanciano il segnale, evitando la componente DC.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Svantaggi:</strong>
+                                <ul>
+                                    <li><strong>Inefficienza (Doppio del Baud Rate):</strong> Richiede due transizioni di segnale per rappresentare un singolo bit (es. '0' è '01', '1' è '10'). Questo raddoppia il baud rate rispetto al bitrate, dimezzando l'efficienza spettrale.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><strong>Codifica MLT-3 (Multi-Level Transmission - 3 levels)</strong>
+                        <ul>
+                            <li><strong>Idea:</strong> Utilizza tre livelli di segnale (-1, 0, +1). Una transizione avviene quando si trasmette un '1': lo stato del segnale passa a +1, 0, -1, 0, ... (ciclo). Un '0' non provoca transizioni, il segnale rimane nello stato attuale.</li>
+                            <li><strong>Vantaggi:</strong> Riduce il numero di transizioni rispetto a Manchester, permettendo un bitrate maggiore per una data banda. Crea un'onda che approssima una sinusoide.</li>
+                            <li><strong>Problemi:</strong> Lunghi blocchi di '0' possono causare perdita di sincronizzazione (simile a NRZI).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Codifica 4B/5B</strong>
+                        <ul>
+                            <li><strong>Idea:</strong> Non è una codifica di linea diretta, ma uno schema di codifica di blocco. Ogni 4 bit di dati vengono mappati a un blocco di 5 bit, e questi 5 bit vengono poi codificati con una tecnica come NRZI o MLT-3.</li>
+                            <li><strong>Vantaggi:</strong> I blocchi di 5 bit sono scelti per garantire che non ci siano mai più di un certo numero di '0' consecutivi (es. 3), risolvendo il problema della sincronizzazione in NRZI/MLT-3.</li>
+                            <li><strong>Svantaggi:</strong> Aumenta l'overhead (\(5/4 = 1.25\)), riducendo l'efficienza.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4 class="subsubsection-title" id="baud-rate-spiegazione">Baud Rate e Bitrate</h4>
+                <p>È importante distinguere tra Baud Rate e Bitrate, concetti che le codifiche di linea influenzano direttamente.</p>
+                <ul>
+                    <li><strong>Baud Rate (R):</strong> È il numero di simboli trasmessi al secondo. Si misura in Baud (simboli/s).
+                        <div class="math-block">
+                            $$ \text{Baud Rate [baud]} = \frac{\text{Numero di simboli trasmessi}}{\text{Tempo [s]}} $$
+                        </div>
+                    </li>
+                    <li><strong>Bitrate (C):</strong> È il numero di bit trasmessi al secondo. Si misura in bit/s o bps.
+                        <div class="math-block">
+                            $$ \text{Bitrate [bit/s]} = \text{Baud Rate [baud]} \times \text{Bit per simbolo} $$
+                        </div>
+                        Dove <strong>Bit per simbolo</strong> è \(\log_2(M)\), se \(M\) è il numero di stati/livelli usati per ogni simbolo.
+                    </li>
+                </ul>
+                <p>La relazione tra Baud Rate e Bitrate dipende dalla codifica. Ad esempio, in Manchester, 1 bit richiede 2 simboli, quindi il Bitrate è la metà del Baud Rate.</p>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 29-01-2024, Domanda 2):</strong>
+                    <p>Un segnale portante sinusoidale a 10MHz viene modulato in fase, con quattro possibili sfasamenti (+45º, +135º, -45º, -135º). (a) Quanti bit si possono codificare in ogni simbolo? (b) Se si invia un simbolo ogni due cicli della sinusoide, qual è il bitrate massimo ottenibile?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**(a) Bit per simbolo:**
+                            Ci sono 4 possibili sfasamenti distinti. Questo significa che \(M=4\) simboli.
+                            Bit per simbolo = \(\log_2(M) = \log_2(4) = 2 \text{ bit/simbolo}\).
+                            <strong>Risposta (a):</strong> 2 bit.
+                        </li>
+                        <li>**(b) Bitrate massimo ottenibile:**
+                            La frequenza della sinusoide è \(10 \text{ MHz}\).
+                            Si invia un simbolo ogni due cicli della sinusoide. Questo significa che il Baud Rate è la metà della frequenza della sinusoide.
+                            Baud Rate = \(\frac{10 \text{ MHz}}{2} = 5 \text{ Mbaud}\).
+                            Bitrate = Baud Rate \(\times\) Bit per simbolo = \(5 \text{ Mbaud} \times 2 \text{ bit/simbolo} = 10 \text{ Mbps}\).
+                        </li>
+                    </ol>
+                    <p><strong>Risposta (b):</strong> 10 Mbps.</p>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti Corso Reti di Calcolatori</p>
+    </footer>
+
+    <script src="assets/common.js"></script>
+    <script>
+        // Mermaid.js and MathJax re-initialization (handled by common.js when sections are shown)
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof mermaid !== 'undefined') {
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme: 'dark',
+                    darkMode: true,
+                    fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                    themeVariables: {
+                        primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                        primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                        primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                        lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                        secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                        tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                        fontSize: '14px',
+                        textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                        mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(),
+                        nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    }
+                });
+
+                const mermaidOriginalDefinitions = new Map();
+                document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                    const id = diag.id || `mermaid-dynamic-init-${index}`;
+                    diag.id = id;
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = diag.innerHTML;
+                    const decodedContent = tempDiv.textContent || tempDiv.innerText || "";
+                    mermaidOriginalDefinitions.set(id, decodedContent.trim());
+                    diag.innerHTML = '';
+                    diag.style.visibility = 'hidden';
+                });
+
+                async function renderMermaidDiagram(diagElement) {
+                    const diagramId = diagElement.id;
+                    const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                    if (!diagramDefinition) {
+                        diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                        diagElement.style.visibility = 'visible';
+                        return;
+                    }
+                    diagElement.innerHTML = '';
+                    try {
+                        const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now();
+                        const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                        diagElement.innerHTML = svg;
+                        diagElement.style.visibility = 'visible';
+                    } catch (e) {
+                        diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                        diagElement.style.visibility = 'visible';
+                    }
+                }
+
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.addEventListener('sectionshown', function(event) {
+                        this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                    });
+                });
+
+                const initiallyActiveSection = document.querySelector('.content-section.active-section');
+                if (initiallyActiveSection) {
+                    initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
