@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capitolo 4: Livello Rete (Network Layer)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="assets/common.css">
+</head>
+<body data-pdf-path="percorso/al/tuo/pdf_prof_del_Capitolo4_se_esistente.pdf"> <!-- Placeholder per eventuale PDF del capitolo -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Capitolo 4: Livello Rete (Network Layer)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="index.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice dei Capitoli</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF Cap.4)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#introduzione-routing" class="sidebar-link">1. Introduzione: Instradamento dei Dati</a></li>
+            <li><a href="#indirizzamento-ip-ipv4" class="sidebar-link">2. Indirizzamento IP (IPv4): Classi, Subnetting, CIDR</a></li>
+            <li><a href="#classi-ip-ipv4" class="sidebar-link">2.1. Classi IP (IPv4) e Indirizzi Speciali</a></li>
+            <li><a href="#subnetting-cidr" class="sidebar-link">2.2. Subnetting e CIDR (Classless Inter-Domain Routing)</a></li>
+            <li><a href="#frammentazione-ip" class="sidebar-link">2.3. Frammentazione e Riassemblaggio IP</a></li>
+            <li><a href="#ipv6" class="sidebar-link">3. IPv6: La Nuova Generazione di Indirizzi IP</a></li>
+            <li><a href="#nat-network-address-translation" class="sidebar-link">4. NAT (Network Address Translation)</a></li>
+            <li><a href="#protocolli-ancillari-ip" class="sidebar-link">5. Protocolli Ancillari di IP</a></li>
+            <li><a href="#arp-address-resolution-protocol" class="sidebar-link">5.1. ARP (Address Resolution Protocol)</a></li>
+            <li><a href="#dhcp-dynamic-host-configuration-protocol" class="sidebar-link">5.2. DHCP (Dynamic Host Configuration Protocol)</a></li>
+            <li><a href="#icmp-internet-control-message-protocol" class="sidebar-link">5.3. ICMP (Internet Control Message Protocol)</a></li>
+            <li><a href="#routing-algorithms" class="sidebar-link">6. Algoritmi di Routing</a></li>
+            <li><a href="#distance-vector-routing" class="sidebar-link">6.1. Distance Vector Routing (RIP)</a></li>
+            <li><a href="#link-state-routing" class="sidebar-link">6.2. Link State Routing (OSPF)</a></li>
+            <li><a href="#inter-domain-routing-bgp" class="sidebar-link">6.3. Inter-Domain Routing (BGP)</a></li>
+            <li><a href="#multicast" class="sidebar-link">7. Multicast in IP</a></li>
+            <li><a href="#routing-multicast" class="sidebar-link">7.1. Routing Multicast</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="introduzione-routing" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione: Instradamento dei Dati nel Livello Rete</h2>
+            <div class="section-content">
+                <p>Il <strong>Livello Rete (Network Layer)</strong> è il terzo strato del modello OSI e il livello "Internet" nel modello TCP/IP. Il suo ruolo principale è quello di permettere la comunicazione tra host che si trovano in reti diverse (anche eterogenee) e di instradare i dati (pacchetti) attraverso la rete in modo efficiente.</p>
+                <p>La PDU (Protocol Data Unit) del Livello Rete è il <strong>pacchetto</strong> (o datagramma IP). A differenza dei frame (Livello 2), che operano su un singolo canale fisico o LAN estesa, i pacchetti di Livello Rete possono attraversare multiple reti interconnesse, gestite da <strong>router</strong>.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "3. Strato Rete (Network Layer)", "Switch & forwarding", "Router (switch lv.3)" e "IP service model" (Pagina 1 del formulario e Pagine 8, 44-47, 54-55 del PDF completo).
+                </div>
+
+                <h3>Concetti Chiave del Livello Rete</h3>
+                <ul>
+                    <li><strong>Instradamento (Routing):</strong> Determinare il percorso migliore per un pacchetto dal mittente al destinatario. Questo è il compito principale dei router, che utilizzano algoritmi di routing per costruire e mantenere le loro tabelle di inoltro.</li>
+                    <li><strong>Indirizzamento:</strong> Assegnare indirizzi logici (es. indirizzi IP) agli host e alle interfacce dei router, che sono gerarchici e globalmente unici.</li>
+                    <li><strong>Frammentazione:</strong> Suddividere pacchetti grandi in frammenti più piccoli per adattarsi alle limitazioni di dimensione dei frame dei livelli inferiori (MTU).</li>
+                    <li><strong>Servizio Best-Effort:</strong> Il protocollo IP offre un servizio "best-effort" o inaffidabile. Ciò significa che non garantisce la consegna, l'ordine, né l'assenza di duplicati. Queste garanzie, se richieste, devono essere fornite dai livelli superiori (es. TCP).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="indirizzamento-ip-ipv4" class="content-section">
+            <h2 class="section-title">2. Indirizzamento IP (IPv4): Classi, Subnetting, CIDR</h2>
+            <div class="section-content">
+                <p>L'indirizzo IP (Internet Protocol) è un identificatore numerico logico assegnato a ciascun dispositivo connesso a una rete basata su IP. In IPv4, gli indirizzi sono a 32 bit e sono gerarchici, divisi in una parte "rete" e una parte "host".</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Indirizzi globali", "CLASSI IPv4", "Subnetting", "Classless Inter-Domain Routing" (Pagine 57-61 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>L'indirizzamento IP, specialmente IPv4 con subnetting e CIDR, è un argomento centrale e quasi sempre presente negli esami. Le domande richiedono spesso di identificare sottoreti, broadcast, o di applicare il CIDR.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** D (Domanda 7 - calcolo sottorete/broadcast)</li>
+                        <li>**16-09-2024:** D (Domanda 7 - calcolo sottorete/broadcast)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** D (Domanda 7 - calcolo sottorete/broadcast)</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title" id="classi-ip-ipv4">2.1. Classi IP (IPv4) e Indirizzi Speciali</h3>
+                <p>Storicamente, gli indirizzi IPv4 erano divisi in classi, basate sui primi bit dell'indirizzo:</p>
+                <ul>
+                    <li><strong>Classe A:</strong> Inizia con '0'. 8 bit per la rete, 24 bit per l'host. Grande numero di host per rete.
+                        <div class="array-representation">
+                            <table>
+                                <thead><tr><th>0</th><th colspan="7">Network</th><th colspan="24">Host</th></tr></thead>
+                                <tbody><tr><td colspan="32">Esempio: 10.0.0.0/8</td></tr></tbody>
+                            </table>
+                        </div>
+                    </li>
+                    <li><strong>Classe B:</strong> Inizia con '10'. 16 bit per la rete, 16 bit per l'host. Numero medio di host e reti.
+                        <div class="array-representation">
+                            <table>
+                                <thead><tr><th>10</th><th colspan="14">Network</th><th colspan="16">Host</th></tr></thead>
+                                <tbody><tr><td colspan="32">Esempio: 172.16.0.0/12</td></tr></tbody>
+                            </table>
+                        </div>
+                    </li>
+                    <li><strong>Classe C:</strong> Inizia con '110'. 24 bit per la rete, 8 bit per l'host. Molte reti piccole.
+                        <div class="array-representation">
+                            <table>
+                                <thead><tr><th>110</th><th colspan="21">Network</th><th colspan="8">Host</th></tr></thead>
+                                <tbody><tr><td colspan="32">Esempio: 192.168.1.0/24</td></tr></tbody>
+                            </table>
+                        </div>
+                    </li>
+                    <li><strong>Classe D:</strong> Inizia con '1110'. Identifica indirizzi <strong>Multicast</strong>.
+                        <div class="array-representation">
+                            <table>
+                                <thead><tr><th>1110</th><th colspan="28">Multicast Address</th></tr></thead>
+                                <tbody><tr><td colspan="32">Esempio: 224.0.0.0/4</td></tr></tbody>
+                            </table>
+                        </div>
+                    </li>
+                    <li><strong>Classe E:</strong> Inizia con '1111'. Riservata per scopi sperimentali.</li>
+                </ul>
+
+                <h4>Indirizzi Speciali (Molto Importanti)</h4>
+                <ul>
+                    <li><strong>Indirizzo di Rete:</strong> L'indirizzo IP di una sottorete in cui la parte host è interamente composta da '0'. Non può essere assegnato a un host. (es. 192.168.1.0/24)</li>
+                    <li><strong>Indirizzo di Broadcast:</strong> L'indirizzo IP di una sottorete in cui la parte host è interamente composta da '1'. Un pacchetto inviato a questo indirizzo viene ricevuto da tutti gli host di quella sottorete. Non può essere assegnato a un host. (es. 192.168.1.255/24)</li>
+                    <li><strong>Loopback Address:</strong> 127.0.0.1/8. Utilizzato per riferirsi al proprio host. Qualsiasi pacchetto inviato a questo indirizzo non esce dalla macchina.</li>
+                    <li><strong>Indirizzi Privati:</strong> Range specifici riservati per l'uso in reti private e non instradabili su Internet.
+                        <ul>
+                            <li>Classe A: 10.0.0.0/8</li>
+                            <li>Classe B: 172.16.0.0/12 (da 172.16.0.0 a 172.31.255.255)</li>
+                            <li>Classe C: 192.168.0.0/16 (da 192.168.0.0 a 192.168.255.255)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Indirizzo "Tutti gli IP":</strong> 0.0.0.0/8. Indirizzo non instradabile e invalido, usato ad esempio da un host che non ha ancora un IP.</li>
+                    <li><strong>Autoconfigurazione Link-Local:</strong> 169.254.0.0/16. Usato quando DHCP non è disponibile.</li>
+                </ul>
+
+                <h3 class="subsection-title" id="subnetting-cidr">2.2. Subnetting e CIDR (Classless Inter-Domain Routing)</h3>
+                <p>Le classi IP si sono rivelate inefficienti e limitanti. Il <strong>Subnetting</strong> permette di dividere una rete di classe in sottoreti più piccole, mentre il <strong>CIDR</strong> ha superato il concetto di classi, rendendo l'allocazione degli indirizzi più flessibile ed efficiente.</p>
+
+                <h4>Subnetting (o Sottoreti)</h4>
+                <p>Consiste nel prendere bit dalla parte "host" di un indirizzo IP e usarli per identificare le sottoreti. Questo è reso possibile dalla <strong>subnet mask</strong>.</p>
+                <ul>
+                    <li><strong>Subnet Mask:</strong> Una sequenza di bit che, applicata in AND logico all'indirizzo IP, isola la parte di rete e sottorete. I bit a '1' identificano la parte rete+sottorete, i bit a '0' identificano la parte host.</li>
+                    <li>La divisione in sottoreti è visibile solo all'interno della rete (non su Internet).</li>
+                </ul>
+                <div class="array-representation">
+                    <p>Esempio: Indirizzo 192.168.1.10 con Subnet Mask 255.255.255.0</p>
+                    <table>
+                        <thead><tr><th colspan="8">192</th><th colspan="8">168</th><th colspan="8">1</th><th colspan="8">10</th></tr></thead>
+                        <tbody>
+                            <tr><td colspan="32">Indirizzo IP (Binario): 11000000.10101000.00000001.00001010</td></tr>
+                            <tr><td colspan="32">Subnet Mask (Binario): 11111111.11111111.11111111.00000000</td></tr>
+                            <tr><td colspan="32">Indirizzo Rete (AND): 11000000.10101000.00000001.00000000 (192.168.1.0)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>CIDR (Classless Inter-Domain Routing)</h4>
+                <p>Ha sostituito il concetto di classi IP. Gli indirizzi sono rappresentati con un prefisso di lunghezza variabile, indicato dal `/lunghezza_prefisso` (es. 192.168.1.0/24).</p>
+                <ul>
+                    <li>La lunghezza del prefisso indica quanti bit (a partire da sinistra) appartengono alla parte di rete. Il resto dei bit sono per l'host.</li>
+                    <li>Permette un'allocazione più efficiente degli indirizzi e riduce la dimensione delle tabelle di routing (aggregazione di prefissi).</li>
+                    <li>Il principio del "match più lungo" è usato dai router: se un pacchetto corrisponde a più prefissi nella tabella di routing, viene scelto il prefisso più lungo (più specifico).</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 29-01-2024, Domanda 7):</strong>
+                    <p>Si considerino i seguenti due indirizzi IP: 192.168.10.1 e 192.168.12.1. (a) Qual è la sottorete più piccola (ossia con il minor numero di indirizzi) che contiene entrambi questi indirizzi? (dare indirizzo/CIDR). (b) Qual è l'indirizzo di broadcast di tale sottorete?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**Convertire in binario e trovare il prefisso comune più lungo:**
+                            192.168.10.1 \(\rightarrow\) 11000000.10101000.00001010.00000001
+                            192.168.12.1 \(\rightarrow\) 11000000.10101000.00001100.00000001
+                            Confrontiamo i bit da sinistra:
+                            11000000.10101000.00001**0**10.00000001
+                            11000000.10101000.00001**1**00.00000001
+                            Il prefisso comune più lungo si ferma a `00001` (5 bit dell'ultimo byte significativo del terzo ottetto). Contando i bit: 8 (primo) + 8 (secondo) + 5 (del terzo) = 21 bit.
+                            Il prefisso comune è `11000000.10101000.00001xxx.xxxxxxxx`.
+                            L'indirizzo di rete di questa sottorete è `11000000.10101000.00001000.00000000`, che in decimale è 192.168.8.0.
+                        </li>
+                        <li>**(a) Sottorete più piccola che li contiene:**
+                            L'indirizzo di rete è 192.168.8.0 e il prefisso è /21.
+                            **Risposta (a):** 192.168.8.0/21.
+                        </li>
+                        <li>**(b) Indirizzo di broadcast di tale sottorete:**
+                            Per ottenere l'indirizzo di broadcast, si impostano a '1' tutti i bit della parte host.
+                            La parte host ha \(32 - 21 = 11\) bit.
+                            Indirizzo di rete: 11000000.10101000.00001000.00000000
+                            Parte host: `00000000.00000000`
+                            Broadcast: `00001111.11111111`
+                            Convertendo in binario: 11000000.10101000.00001111.11111111
+                            In decimale: 192.168.15.255.
+                        </li>
+                    </ol>
+                    <p><strong>Risposta (b):</strong> 192.168.15.255.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="frammentazione-ip" class="content-section">
+            <h2 class="section-title">2.3. Frammentazione e Riassemblaggio IP</h2>
+            <div class="section-content">
+                <p>I pacchetti IP possono attraversare reti con diverse dimensioni massime del frame a Livello 2 (MTU - Maximum Transmission Unit). Per gestire questa eterogeneità, il Livello Rete può frammentare i pacchetti IP in frammenti più piccoli.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta la sezione "Frammentazione e riassemblamento" (Pagine 56-57 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>Le domande sulla frammentazione sono comuni, spesso richiedendo calcoli sulla dimensione dei frammenti e sul numero di frammenti generati.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 7 - frammentazione di un pacchetto con MTU specifico)</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** D (Domanda 7 - frammentazione di un pacchetto con MTU specifico)</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Meccanismo di Frammentazione</h4>
+                <ul>
+                    <li>**MTU (Maximum Transmission Unit):** La dimensione massima del payload che un frame di Livello 2 può trasportare. Varia a seconda della tecnologia di rete (es. Ethernet standard 1500 byte).</li>
+                    <li>**Flag DF (Don't Fragment):** Un bit nell'header IP. Se DF=1, il pacchetto non può essere frammentato; se necessario, viene scartato e viene inviato un messaggio ICMP al mittente. Se DF=0, il pacchetto può essere frammentato.</li>
+                    <li>**Offset:** Un campo nell'header IP che indica la posizione (in multipli di 8 byte) del payload di un frammento all'interno del payload originale del pacchetto.</li>
+                    <li>**Flag MF (More Fragments):** Un bit nell'header IP. MF=1 indica che ci sono altri frammenti successivi; MF=0 indica che è l'ultimo frammento.</li>
+                </ul>
+                <p>La frammentazione avviene tipicamente nei **router** quando un pacchetto deve attraversare una rete con MTU inferiore. Il riassemblaggio avviene solo all'**host di destinazione**.</p>
+                <p><strong>Regola per il Payload Frammentato:</strong> La dimensione del payload di ogni frammento deve essere un multiplo di 8 byte (a causa del campo Offset).</p>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 29-01-2024, Domanda 7):</strong>
+                    <p>Un router deve inoltrare un pacchetto IP che ha un payload di 1200 byte (più intestazione standard) su una interfaccia che ha una MTU di 400 byte. (a) Quanto è grande il payload del primo frammento? (b) Quanti frammenti si formano?</p>
+                    <p><strong>Dati:</strong></p>
+                    <ul>
+                        <li>Payload pacchetto originale = 1200 byte.</li>
+                        <li>Intestazione standard IP = 20 byte.</li>
+                        <li>Dimensione totale pacchetto originale = \(1200 + 20 = 1220\) byte.</li>
+                        <li>MTU dell'interfaccia = 400 byte.</li>
+                    </ul>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**Spazio disponibile per il payload in un frammento:**
+                            Ogni frammento avrà un'intestazione IP di 20 byte. Quindi, lo spazio per il payload in un frammento è:
+                            MTU - Dimensione Intestazione = \(400 - 20 = 380\) byte.
+                        </li>
+                        <li>**Dimensioni dei payload dei frammenti (multipli di 8):**
+                            Il payload di ogni frammento deve essere un multiplo di 8 byte. Il più grande multiplo di 8 minore o uguale a 380 è 376.
+                            Quindi, ogni frammento (tranne l'ultimo, se più piccolo) avrà un payload di 376 byte.
+                        </li>
+                        <li>**(a) Payload del primo frammento:**
+                            Il payload del primo frammento sarà di 376 byte.
+                            **Risposta (a):** 376 byte.
+                        </li>
+                        <li>**(b) Quanti frammenti si formano?**
+                            Payload originale = 1200 byte.
+                            Payload per frammento = 376 byte.
+                            *   **Primo frammento:** Payload = 376 byte. Offset = 0.
+                            *   **Secondo frammento:** Payload = 376 byte. Offset = \(\frac{376}{8} = 47\).
+                            *   **Terzo frammento:** Payload = 376 byte. Offset = \(\frac{376 \times 2}{8} = 94\).
+                            *   Payload totali frammentati finora = \(376 + 376 + 376 = 1128\) byte.
+                            *   Payload rimanente = \(1200 - 1128 = 72\) byte.
+                            *   **Quarto frammento:** Payload = 72 byte. Offset = \(\frac{1128}{8} = 141\). Questo è l'ultimo frammento.
+                            Si formano 4 frammenti.
+                        </li>
+                    </ol>
+                    <p><strong>Risposta (b):</strong> Si formano 4 frammenti.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="ipv6" class="content-section">
+            <h2 class="section-title">3. IPv6: La Nuova Generazione di Indirizzi IP</h2>
+            <div class="section-content">
+                <p>IPv6 (Internet Protocol version 6) è stato sviluppato per superare le limitazioni di IPv4, in particolare l'esaurimento degli indirizzi, e per introdurre nuove funzionalità.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Next Generation IP - IPv6", "Indirizzi IPv6", "Header IPv6", "Transizione da IPv4 a IPv6" (Pagine 81-83 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Bassa</h4>
+                <p>Le domande su IPv6 sono meno frequenti rispetto a IPv4, e di solito si concentrano sulle sue caratteristiche principali (dimensione indirizzo, flow label) e sui meccanismi di transizione da IPv4.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 10 - dimensione indirizzo, supporto applicazioni)</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** D (Domanda 10 - flow label, gestione a livello trasporto)</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Caratteristiche Principali di IPv6</h4>
+                <ul>
+                    <li><strong>Dimensione dell'Indirizzo:</strong> 128 bit (vs 32 bit di IPv4). Questo fornisce un numero enormemente maggiore di indirizzi (\(3.4 \times 10^{38}\)).</li>
+                    <li><strong>Header Semplificato e Estensioni:</strong> L'header IPv6 è più semplice e di dimensione fissa (40 byte). Le funzionalità aggiuntive (come frammentazione, sicurezza, routing sorgente) sono gestite tramite "header di estensione" opzionali.</li>
+                    <li><strong>Flow Label (20 bit):</strong> Un campo nell'header IPv6 che identifica pacchetti appartenenti allo stesso "flusso" di dati. Permette ai router di trattare i pacchetti di un flusso in modo omogeneo, garantendo QoS (Quality of Service) o percorsi specifici.</li>
+                </ul>
+
+                <h4 class="subsubsection-title">Meccanismi di Transizione da IPv4 a IPv6</h4>
+                Poiché IPv4 e IPv6 non sono direttamente compatibili e la transizione è graduale, sono stati sviluppati meccanismi per permettere la coesistenza e la comunicazione tra le due versioni:
+                <ul>
+                    <li><strong>Dual Protocol Stack:</strong> Un host o un router ha implementato sia lo stack IPv4 che IPv6. Le applicazioni devono essere in grado di funzionare con entrambi.</li>
+                    <li><strong>Tunneling:</strong> Pacchetti IPv6 vengono incapsulati all'interno di pacchetti IPv4 per attraversare reti IPv4 che non supportano IPv6. I benefici di IPv6 sono nascosti durante il tunneling.</li>
+                    <li><strong>Header Translation:</strong> Un router traduce l'header di un pacchetto da IPv6 a IPv4 (o viceversa) quando attraversa un confine tra reti di versioni diverse.</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 02-02-2023, Domanda 10):</strong>
+                    <p>(a) Quanti bit occupa un indirizzo IPv6? (b) Affinché applicazioni su due host diversi possano comunicare via IPv6, è sufficiente che i due host supportino tale protocollo (ad esempio, come dual stack)?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) Un indirizzo IPv6 occupa **128 bit**.</li>
+                        <li>(b) <strong>No</strong>, non è sufficiente che solo i due host supportino IPv6. Se la comunicazione deve attraversare router intermedi che supportano solo IPv4, allora la comunicazione diretta IPv6 fallirà. In questo caso, sarebbero necessari meccanismi di transizione come il **tunneling** o **header translation** tra i router intermedi per permettere la comunicazione IPv6. Anche le applicazioni stesse devono essere scritte per utilizzare le socket IPv6.</li>
+                    </ul>
+                </div>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 04-09-2023, Domanda 10):</strong>
+                    <p>Il protocollo IPv6 prevede un campo "etichetta di flusso" ("flow label") nell'intestazione. (a) Chi definisce questo campo, e chi lo utilizza? (b) Potrebbe essere sostituito da un campo a livello trasporto (ad esempio, come campo opzionale nell'intestazione TCP)?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) Il campo "flow label" è definito dal **mittente** (sorgente). Viene utilizzato dai **router intermedi** per trattare pacchetti dello stesso flusso in modo omogeneo (es. per QoS).</li>
+                        <li>(b) <strong>No</strong>, non può essere sostituito da un campo a livello trasporto. I router operano a livello di rete e non hanno accesso alle informazioni del livello trasporto (che potrebbero essere cifrate o frammentate), quindi non potrebbero leggere o interpretare un campo in un header TCP. Il flow label di IPv6 è specificamente progettato per essere visibile e utilizzabile a livello di rete.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="nat-network-address-translation" class="content-section">
+            <h2 class="section-title">4. NAT (Network Address Translation)</h2>
+            <div class="section-content">
+                <p>NAT (Network Address Translation) è una tecnologia che permette a più dispositivi in una rete privata (che usano indirizzi IP privati) di condividere un singolo indirizzo IP pubblico per accedere a Internet. È stata una soluzione cruciale per rallentare l'esaurimento degli indirizzi IPv4.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Reti IP private e NAT", "Network Address Translation (NAT) con port mapping" (Pagine 65-67 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>Le domande su NAT sono frequenti, spesso richiedendo di spiegare il suo funzionamento, i suoi vantaggi e le sue limitazioni (in particolare il "rompere l'end-to-end").</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** D (Domanda 8 - NAT e port mapping)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Funzionamento di NAT (con Port Mapping)</h4>
+                <p>Un router NAT si trova al confine tra una rete privata e Internet. Quando un host della rete privata vuole comunicare con l'esterno:</p>
+                <ol>
+                    <li>Il router NAT intercetta i pacchetti in uscita.</li>
+                    <li>Sostituisce l'indirizzo IP privato di sorgente (e la porta sorgente, se necessario, usando il **port mapping**) con il proprio indirizzo IP pubblico e una porta pubblica (assegnata dinamicamente).</li>
+                    <li>Memorizza questa associazione (mappatura) in una tabella di traduzione NAT.</li>
+                    <li>Quando riceve un pacchetto di risposta dall'esterno, usa la tabella NAT per risalire all'indirizzo IP privato e alla porta originale dell'host interno, e inoltra il pacchetto.</li>
+                </ol>
+
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph LR
+                        subgraph Rete Privata
+                            H1(Host Privato 1<br/>192.168.1.10:49675)
+                            H2(Host Privato 2<br/>192.168.1.11:50000)
+                        end
+
+                        H1 --> R_NAT(Router NAT<br/>Pubblico: 85.10.47.36);
+                        H2 --> R_NAT;
+
+                        subgraph Internet
+                            Server(Server Esterno<br/>75.32.1.3:443)
+                        end
+
+                        R_NAT -- Tra d. NAT --> Server;
+                        Server -- Risposta --> R_NAT;
+                        R_NAT -- Tra d. NAT --> H1;
+
+                        subgraph "Tabella NAT Esempio"
+                            direction LR
+                            subgraph "Mappature Attive"
+                                map1("Privato: 192.168.1.10:49675<br/>Pubblico: 85.10.47.36:60000")
+                                map2("Privato: 192.168.1.11:50000<br/>Pubblico: 85.10.47.36:60001")
+                            end
+                        end
+                        R_NAT -.-> map1;
+                        R_NAT -.-> map2;
+
+                        classDef publicNode fill:#60a5fa,stroke:#60a5fa,stroke-width:2px;
+                        class Server publicNode;
+                        class R_NAT publicNode;
+                    </pre>
+                </div>
+
+                <h4>Vantaggi di NAT</h4>
+                <ul>
+                    <li><strong>Conservazione Indirizzi IPv4:</strong> Permette a molteplici dispositivi di condividere pochi indirizzi IP pubblici.</li>
+                    <li><strong>"Firewall Naturale":</strong> Gli host interni sono "nascosti" da Internet, rendendo più difficile l'accesso diretto dall'esterno (a meno che non ci sia una mappatura esplicita per un servizio).</li>
+                    <li><strong>Load Balancing:</strong> Può essere usato per distribuire il traffico in entrata su più server interni.</li>
+                    <li><strong>Facilita la Migrazione ISP:</strong> Cambiare ISP è più semplice, basta cambiare l'indirizzo IP pubblico del router NAT.</li>
+                </ul>
+
+                <h4>Problemi e Limitazioni di NAT</h4>
+                <ul>
+                    <li><strong>Rompere la Connettività End-to-End:</strong> Il principio fondamentale del modello IP è la connettività diretta tra host. NAT rompe questo principio, rendendo difficile per gli host esterni avviare connessioni verso gli host interni (senza configurazioni speciali come port forwarding o UPnP). Questo è un problema per applicazioni P2P o server ospitati in rete privata.</li>
+                    <li><strong>Complicazioni per Applicazioni:</strong> Alcune applicazioni (es. VoIP, giochi online) che incorporano indirizzi IP nei loro payload possono avere problemi con NAT, richiedendo soluzioni come STUN, TURN, ICE.</li>
+                    <li><strong>Overhead:</strong> Il router NAT deve modificare gli header IP e ricalcolare checksum, aggiungendo un piccolo overhead.</li>
+                    <li><strong>Single Point of Failure:</strong> Il router NAT può diventare un collo di bottiglia o un singolo punto di fallimento.</li>
+                </ul>
+
+                <h4 class="subsubsection-title">STUN (Session Traversal Utilities for NAT) e TURN (Traversal Using Relays around NAT)</h4>
+                <p>Sono protocolli usati per permettere agli host dietro NAT di comunicare tra loro o con host esterni, aggirando alcune delle limitazioni di NAT.</p>
+                <ul>
+                    <li>**STUN:** Permette a un host privato di scoprire il proprio indirizzo IP pubblico e la porta che il NAT gli ha assegnato per una specifica connessione.</li>
+                    <li>**TURN:** Usato quando STUN non è sufficiente (es. NAT simmetrici restrittivi). I dati vengono inoltrati attraverso un server TURN pubblico, che agisce da relè tra i due host.</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 16-09-2024, Domanda 8):</strong>
+                    <p>Una rete 192.168.1.0/24 è collegata ad Internet attraverso un router con indirizzo pubblico 85.10.47.36, che implementa NAT, le cui tabelle sono attualmente vuote. (a) L'host 192.168.1.10 dalla porta 49675 apre una connessione TCP con 75.32.1.3:443. Quale porta viene aperta sul router? (b) Supponiamo che 75.32.1.3 accetta connessioni solo dalla porta 10000. Si potrebbe usare NAT per aggirare questo vincolo e permettere connessioni da 192.168.1.10:49675?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) L'host 192.168.1.10 dalla porta 49675 si connette a 75.32.1.3:443. Il router NAT intercetterà questo pacchetto. La mappatura di default di NAT è quella di riutilizzare la porta sorgente sul lato pubblico, se disponibile. Quindi, molto probabilmente, il router aprirà la porta **49675** sul suo indirizzo pubblico (85.10.47.36:49675) e mapperà questo alla connessione interna.</li>
+                        <li>(b) <strong>Sì, si potrebbe usare NAT per aggirare questo vincolo.</strong> L'amministratore della rete privata potrebbe configurare il router NAT per effettuare un port forwarding specifico (o "port remapping"). Ad esempio, si potrebbe dire al router NAT che qualsiasi connessione in uscita dall'host 192.168.1.10:49675 verso 75.32.1.3:443, deve avere la sua porta sorgente tradotta in **10000** sul lato pubblico. In questo modo, il server 75.32.1.3 vedrebbe una connessione proveniente da 85.10.47.36:10000, che accetterebbe.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="protocolli-ancillari-ip" class="content-section">
+            <h2 class="section-title">5. Protocolli Ancillari di IP</h2>
+            <div class="section-content">
+                <p>Oltre al protocollo IP stesso, esistono diversi protocolli che supportano e migliorano il suo funzionamento, spesso operando a cavallo tra il Livello Rete e altri livelli inferiori o superiori.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "PROTOCOLLI ANCILLARI DI IP", "Address Resolution Protocol – ARP", "DHCP – Dynamic Host Configuration Protocol", "Segnalazione di errori (ICMP - Internet Control Message Protocol)" (Pagine 61-65 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>ARP, DHCP e ICMP sono frequentemente testati, con domande che chiedono il loro scopo, funzionamento e interazione con gli indirizzi IP/MAC.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 8 - DHCP)</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** D (Domanda 8 - DHCP)</li>
+                        <li>**16-09-2024:** D (Domanda 8 - ARP)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** D (Domanda 8 - DHCP)</li>
+                        <li>**17-06-2024:** D (Domanda 8 - ARP)</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title" id="arp-address-resolution-protocol">5.1. ARP (Address Resolution Protocol)</h3>
+                <p>ARP è un protocollo utilizzato per risolvere gli indirizzi IP (Livello 3) in indirizzi MAC (Livello 2) all'interno della stessa rete locale (LAN). Ogni host mantiene una tabella ARP (o cache ARP) per memorizzare queste associazioni.</p>
+                <ul>
+                    <li><strong>Funzionamento:</strong>
+                        <ol>
+                            <li>Un host (A) vuole comunicare con un altro host (B) sulla stessa LAN, ma conosce solo l'indirizzo IP di B.</li>
+                            <li>A controlla la sua tabella ARP. Se l'associazione IP di B -> MAC di B non è presente, A invia una **richiesta ARP (ARP Request)**.</li>
+                            <li>La richiesta ARP è un messaggio **broadcast** sulla LAN (inviato a tutti gli host). Contiene l'indirizzo IP di B e chiede "chi possiede questo IP, per favore mi dia il suo MAC".</li>
+                            <li>L'host B riceve la richiesta e, riconoscendo il proprio IP, risponde con un **ARP Reply** al solo host A. Il Reply contiene l'indirizzo MAC di B.</li>
+                            <li>L'host A riceve il Reply, aggiorna la sua tabella ARP e può ora incapsulare i pacchetti IP in frame di Livello 2 con il MAC di B come destinazione.</li>
+                        </ol>
+                    </li>
+                    <li>Le entry nella tabella ARP hanno un timeout e vengono rimosse se non utilizzate o aggiornate.</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 16-09-2024, Domanda 8):</strong>
+                    <p>Un host ha un'interfaccia con indirizzo 10.10.1.23, netmask 255.255.255.0. Riceve una richiesta ARP per l'indirizzo 10.10.1.45. (a) Cosa deve rispondere? (b) Se sull'interfaccia intercetta una risposta a tale richiesta, cosa può fare?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) L'indirizzo IP dell'interfaccia è 10.10.1.23 e la netmask è 255.255.255.0 (corrisponde a /24). L'indirizzo richiesto è 10.10.1.45. Poiché entrambi gli indirizzi (10.10.1.23 e 10.10.1.45) appartengono alla stessa sottorete (10.10.1.0/24), l'host che riceve la richiesta ARP (se è 10.10.1.45) **deve rispondere** con il proprio indirizzo MAC. Se l'host che riceve la richiesta non è 10.10.1.45, allora non risponde.
+                        <div class="clarification-box">
+                            <strong>Chiarimento sulla Risposta del Professore:</strong> La risposta del prof "Niente, anche se conosce l'indirizzo corrispondente" potrebbe essere intesa come "se l'host che riceve la domanda è 10.10.1.23, e la domanda è per 10.10.1.45, allora 10.10.1.23 non risponde, anche se 'conosce' 10.10.1.45 come parte della stessa rete". L'host in questione (10.10.1.23) non è il destinatario dell'ARP Request, quindi non deve rispondere. La mia spiegazione è più chiara sul ruolo di chi risponde.
+                        </div>
+                        </li>
+                        <li>(b) Se l'interfaccia intercetta una risposta ARP a tale richiesta (es. un altro host risponde per 10.10.1.45), può **memorizzare l'associazione IP-MAC** nella propria tabella ARP locale. Questo è un meccanismo di "snooping" passivo che permette agli host di apprendere le associazioni senza dover inviare richieste.</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title" id="dhcp-dynamic-host-configuration-protocol">5.2. DHCP (Dynamic Host Configuration Protocol)</h3>
+                <p>DHCP è un protocollo applicativo (spesso operante via UDP) che permette di assegnare automaticamente gli indirizzi IP e altri parametri di configurazione di rete (subnet mask, gateway, DNS server) agli host.</p>
+                <ul>
+                    <li><strong>Funzionamento (DHCP Discovery Process):</strong>
+                        <ol>
+                            <li>**DHCP Discover:** Un host appena connesso alla rete (senza IP) invia un messaggio **broadcast** "DHCP Discover" per trovare un server DHCP.</li>
+                            <li>**DHCP Offer:** Un server DHCP sulla rete risponde con un messaggio "DHCP Offer" (può essere broadcast o unicast) proponendo un indirizzo IP disponibile e altri parametri.</li>
+                            <li>**DHCP Request:** L'host sceglie una delle offerte e invia un messaggio **broadcast** "DHCP Request" per richiedere formalmente l'indirizzo IP offerto.</li>
+                            <li>**DHCP ACK:** Il server DHCP conferma l'assegnazione con un "DHCP ACK", e l'host configura il suo indirizzo IP.</li>
+                        </ol>
+                    </li>
+                    <li>**DHCP Relay Agent:** Se un server DHCP si trova su una sottorete diversa da quella dell'host, un DHCP Relay Agent (spesso un router) può inoltrare i messaggi DHCP (broadcast) come unicast al server remoto e viceversa.</li>
+                    <li><strong>Tipi di Assegnazione:</strong>
+                        <ul>
+                            <li>**Dinamica:** Indirizzi assegnati per un tempo limitato (lease time). L'host deve rinnovare il lease periodicamente.</li>
+                            <li>**Statica:** Indirizzo IP fisso associato a un MAC address specifico.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 02-02-2023, Domanda 8):</strong>
+                    <p>Un client utilizza il protocollo DHCP per configurare i parametri di rete. (a) Oltre all'indirizzo IP, quali altre informazioni dovrebbe ricevere dal server DHCP? (b) Come si comporta il client se il server DHCP non risponde, o non è presente?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) Oltre all'indirizzo IP, il client dovrebbe ricevere:
+                            <ul>
+                                <li>La **subnet mask** della rete.</li>
+                                <li>L'indirizzo IP del **gateway predefinito** (router della rete).</li>
+                                <li>L'indirizzo IP di uno o più **server DNS** (Domain Name System).</li>
+                            </ul>
+                        </li>
+                        <li>(b) Se il server DHCP non risponde o non è presente, il client può:
+                            <ul>
+                                <li>Continuare a inviare messaggi "DHCP Discover" per un certo periodo.</li>
+                                <li>Assegnarsi un indirizzo IP "APIPA" (Automatic Private IP Addressing) dal range 169.254.0.0/16. Questo indirizzo è locale e permette solo comunicazioni sulla stessa LAN, non verso Internet.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title" id="icmp-internet-control-message-protocol">5.3. ICMP (Internet Control Message Protocol)</h3>
+                <p>ICMP è un protocollo ancillare di IP che opera a Livello Rete. Viene utilizzato per segnalare errori o condizioni inattese e per scambiare informazioni di stato sui link e sugli host. Non è un protocollo di routing, ma supporta l'instradamento.</p>
+                <ul>
+                    <li><strong>Tipi di Messaggi ICMP (con Campo Tipo/Codice):</strong>
+                        <ul>
+                            <li>**Messaggi di Errore:**
+                                <ul>
+                                    <li>**Destination Unreachable (Tipo 3):** Se un host o una rete è irraggiungibile.</li>
+                                    <li>**Time Exceeded (Tipo 11):** Se il campo TTL di un pacchetto raggiunge 0 (indicando un loop o un ritardo eccessivo).</li>
+                                    <li>**Parameter Problem (Tipo 12):** Se c'è un errore in un campo dell'header IP.</li>
+                                </ul>
+                            </li>
+                            <li>**Messaggi Informativi/Di Richiesta:**
+                                <ul>
+                                    <li>**Echo Request/Reply (Tipo 8/0):** Usati per "ping" (testare la raggiungibilità di un host e misurare RTT).</li>
+                                    <li>**Timestamp Request/Reply (Tipo 13/14):** Per misurare ritardi.</li>
+                                    <li>**Router Solicitation/Advertisement (Tipo 9/10):** Per la scoperta di router.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>**Funzionamento di Traceroute:** Utilizza messaggi ICMP Time Exceeded (tipo 11) e TTL crescente per mappare il percorso di un pacchetto attraverso la rete e identificare i router intermedi.</li>
+                    <li>**ICMP Redirect:** Un router può inviare un messaggio ICMP Redirect a un host per informarlo di un percorso più breve o migliore verso una destinazione.</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 04-09-2023, Domanda 11):</strong>
+                    <p>Un processo C sta inviando datagrammi UDP alla porta P di un certo host S. (a) Cosa vuol dire se, ad un certo punto, C riceve da S un pacchetto ICMP con "Destination Unreachable"? (b) Se C invia i datagrammi D1 e D2 in sequenza, il server può ricevere la concatenazione dei payload di D1 e D2 in un unico datagramma?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) Se il processo C riceve un pacchetto ICMP "Destination Unreachable" dall'host S, significa che la porta P su S a cui C sta inviando dati **non è aperta o non è disponibile** per il processo che dovrebbe riceverli. In altre parole, l'applicazione server su S che dovrebbe ascoltare su quella porta non è attiva o ha chiuso la connessione.</li>
+                        <li>(b) <strong>No</strong>. I datagrammi UDP sono unità di dati indipendenti. Anche se inviati in sequenza, il protocollo UDP non garantisce né l'ordine né l'assenza di duplicati, e tantomeno la concatenazione dei payload. Ogni datagramma viene trattato separatamente. Se si desidera la concatenazione o un flusso continuo, è necessario un protocollo di Livello Trasporto orientato alla connessione (come TCP) o una gestione a livello applicativo.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="routing-algorithms" class="content-section">
+            <h2 class="section-title">6. Algoritmi di Routing</h2>
+            <div class="section-content">
+                <p>Gli algoritmi di routing sono il cuore del Livello Rete. Essi determinano come i pacchetti vengono inoltrati attraverso la rete per raggiungere la loro destinazione. Si distinguono in base alla loro natura (centralizzati/distribuiti, statici/dinamici) e all'ambito di applicazione (intra-domain o inter-domain).</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Routing", "Instradamento intra-network", "Instradamento a STATO DELLE LINEE", "Instradamento a VETTORE DELLE DISTANZE", "Interdomain routing" (Pagine 68-79 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>Gli algoritmi di routing (Distance Vector, Link State, BGP) sono tra gli argomenti più frequentemente testati, spesso con scenari di rete, aggiornamenti di tabelle e analisi di problemi come i loop.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 9 - DV, update tabella B)</li>
+                        <li>**17-02-2023:** D (Domanda 9 - OSPF, LSP, flooding)</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** D (Domanda 9 - DV, update tabella C)</li>
+                        <li>**16-09-2024:** D (Domanda 9 - OSPF, LSP, flooding)</li>
+                        <li>**19-02-2024:** D (Domanda 9 - DV, update tabella A)</li>
+                        <li>**15-07-2024:** D (Domanda 9 - OSPF, LSP, flooding)</li>
+                        <li>**04-09-2023:** D (Domanda 9 - OSPF, LSP, flooding)</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title">Tabelle di Instradamento e Inoltro</h3>
+                <ul>
+                    <li>**Tabella di Instradamento (Routing Table):** È la mappa logica utilizzata dagli algoritmi di routing per calcolare i percorsi. Contiene informazioni su destinazioni, costi, next hop, e talvolta come l'informazione è stata appresa. Viene costruita dagli algoritmi di routing.</li>
+                    <li>**Tabella di Inoltro (Forwarding Table / FIB - Forwarding Information Base):** È la tabella concreta utilizzata dal router per inoltrare i pacchetti. Contiene l'indirizzo di rete di destinazione e l'interfaccia di uscita (e il MAC del next hop). È ottimizzata per la ricerca veloce in hardware.</li>
+                </ul>
+
+                <h3 class="subsection-title" id="distance-vector-routing">6.1. Distance Vector Routing (RIP)</h3>
+                <p>Gli algoritmi Distance Vector sono distribuiti e dinamici. Ogni router mantiene un "vettore di distanze" (un array) che indica il costo minimo conosciuto per raggiungere tutti gli altri nodi della rete, e il "next hop" per quel percorso.</p>
+                <ul>
+                    <li>**Funzionamento:** Ogni router scambia periodicamente (es. ogni 30 secondi per RIP) il proprio vettore di distanze con i suoi vicini diretti. Quando un router riceve un vettore da un vicino, aggiorna il proprio (principio di Bellman-Ford): se un percorso verso una destinazione tramite il vicino è migliore (costo attuale via vicino + costo del vicino per destinazione < costo attuale), lo aggiorna.</li>
+                    <li>**RIP (Routing Information Protocol):** Un esempio di protocollo Distance Vector. Il costo è misurato in "hop count" (numero di router da attraversare). Il limite massimo di hop è 15 (16 è considerato infinito), limitando le dimensioni delle reti.</li>
+                    <li>**Problemi:**
+                        <ul>
+                            <li>**Counting to Infinity:** Se un link si guasta, la notizia si propaga lentamente. I router possono continuare a credere di poter raggiungere una destinazione attraverso un percorso più lungo, formando loop temporanei, finché la distanza non raggiunge "infinito" (es. 16 hop).</li>
+                            <li>**Split Horizon:** Per mitigare i loop, un router non annuncia a un vicino un percorso che ha appreso da quel vicino stesso.</li>
+                            <li>**Split Horizon with Poison Reverse:** Una variante più robusta di Split Horizon, dove un router annuncia un percorso appreso da un vicino come "infinito" (costo massimo) a quel vicino.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 02-02-2023, Domanda 9):</strong>
+                    <p>I router della rete a lato utilizzano un algoritmo basato sul vettore delle distanza. (a) Si dia la tabella di instradamento di B (b) È possibile che si crei una instabilità per B, a causa di una interruzione di un collegamento (e se sì, quale)?</p>
+                    <p><strong>Scenario (Diagramma con costi in ms):</strong></p>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+                        graph LR
+                            A --- 1 --- B;
+                            A --- 4 --- E;
+                            B --- 3 --- C;
+                            B --- 1 --- D;
+                            C --- 1 --- D;
+                            D --- 2 --- E;
+                        </pre>
+                    </div>
+                    <p><strong>Soluzione (a): Tabella di instradamento di B</strong></p>
+                    <p>Assumiamo costi uniformi per semplicità dell'esempio del professore, anche se il diagramma originale ha costi in ms. Se si assume che i costi sono 1 per ogni link per la distanza vettore (come spesso si fa con RIP), o si usano i costi ms per calcolare il percorso minimo. Usiamo i costi in ms dal diagramma e Bellman-Ford.</p>
+                    <p><strong>Tabella iniziale di B (solo vicini):</strong></p>
+                    <div class="array-representation">
+                        <table>
+                            <thead><tr><th>Dest</th><th>Dist</th><th>Next Hop</th></tr></thead>
+                            <tbody>
+                                <tr><td>A</td><td>1</td><td>A</td></tr>
+                                <tr><td>C</td><td>3</td><td>C</td></tr>
+                                <tr><td>D</td><td>1</td><td>D</td></tr>
+                                <tr><td>E</td><td>\(\infty\)</td><td>-</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p>Dopo gli aggiornamenti dai vicini (A, C, D) e l'applicazione di Bellman-Ford:</p>
+                    <ul>
+                        <li>**Verso A:** via A (costo 1).</li>
+                        <li>**Verso C:** via C (costo 3).</li>
+                        <li>**Verso D:** via D (costo 1).</li>
+                        <li>**Verso E:**
+                            *   Via A: Costo(A,E) = Costo(B,A) + Costo(A,E) = 1 + 4 = 5.
+                            *   Via C: Costo(C,E) = Costo(B,C) + Costo(C,D) + Costo(D,E) = 3 + 1 + 2 = 6. (C apprende E via D, D apprende E via D)
+                            *   Via D: Costo(D,E) = Costo(B,D) + Costo(D,E) = 1 + 2 = 3.
+                            Il percorso migliore per E è via D con costo 3.
+                        </li>
+                    </ul>
+                    <p><strong>Tabella finale di B:</strong></p>
+                    <div class="array-representation">
+                        <table>
+                            <thead><tr><th>Dest</th><th>Dist</th><th>Next Hop</th></tr></thead>
+                            <tbody>
+                                <tr><td>A</td><td>1</td><td>A</td></tr>
+                                <tr><td>C</td><td>3</td><td>C</td></tr>
+                                <tr><td>D</td><td>1</td><td>D</td></tr>
+                                <tr><td>E</td><td>3</td><td>D</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p><strong>Soluzione (b): Instabilità per B</strong></p>
+                    <ul>
+                        <li>**Sì, è possibile** che si crei un'instabilità a causa di un'interruzione.</li>
+                        <li>Se il collegamento **A-E si interrompe** (o A-D), e B si perde la notifica immediata da A (o da D).
+                            *   B potrebbe continuare a credere di raggiungere E via A (o D). A (o D) a sua volta potrebbe crederlo raggiungibile via B (se non usano Split Horizon con Poison Reverse).
+                            *   Questo può portare al problema del "Counting to Infinity", dove A e B (o D e B) si annunciano a vicenda un percorso verso E con un costo crescente, formando un loop finché la distanza non raggiunge il massimo (es. 16 per RIP).</li>
+                    </ul>
+                    <p><strong>Risposta:</strong> (a) Tabella di B come sopra. (b) Sì, se salta il collegamento A-E o A-D, e B non riceve la notifica, si può creare un counting to infinity.</p>
+                </div>
+
+                <h3 class="subsection-title" id="link-state-routing">6.2. Link State Routing (OSPF)</h3>
+                <p>Gli algoritmi Link State sono distribuiti e dinamici. Ogni router mantiene una mappa completa della topologia della rete.</p>
+                <ul>
+                    <li>**Funzionamento:**
+                        <ol>
+                            <li>**Scoperta dei Vicini:** Ogni router invia periodicamente pacchetti "HELLO" ai vicini per scoprire chi sono e verificare l'attività dei link.</li>
+                            <li>**Generazione LSP (Link State Packet):** Quando lo stato di un link (costo o attività) cambia, o periodicamente, un router genera un LSP. L'LSP contiene l'ID del router, i costi dei suoi link diretti ai vicini, e un numero di sequenza.</li>
+                            <li>**Flooding Affidabile:** L'LSP viene inviato (flooding) a tutti gli altri router della rete. Ogni router che riceve un LSP lo inoltra a tutti i vicini tranne quello da cui l'ha ricevuto, e memorizza solo l'LSP più recente (basato sul numero di sequenza).</li>
+                            <li>**Calcolo Percorsi Minimi:** Una volta che ogni router ha una copia di tutti gli LSP (e quindi una mappa completa della rete), esegue l'algoritmo di **Dijkstra** per calcolare i percorsi a costo minimo verso tutti gli altri nodi e costruire la propria tabella di inoltro.</li>
+                        </ol>
+                    </li>
+                    <li>**OSPF (Open Shortest Path First):** Un esempio di protocollo Link State. Misura il costo dei link in base a metriche configurabili (banda, latenza, ecc.). Supporta aree (per gerarchia) e bilanciamento del carico.</li>
+                    <li>**Vantaggi:** Convergenza molto rapida in caso di cambiamento (guasto/ripristino), perché l'informazione viene diffusa velocemente a tutti. Non soffre di "counting to infinity".</li>
+                    <li>**Svantaggi:** Richiede più memoria e CPU per mantenere la mappa della rete ed eseguire Dijkstra. Più traffico di controllo (flooding).</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 17-02-2023, Domanda 9):</strong>
+                    <p>I router della rete a lato utilizzano un algoritmo basato sullo stato dei collegamenti; i numeri rappresentano il ritardo in ms introdotto da ogni linea. (a) Quanti pacchetti LSP è necessario salvare in ogni router? (b) Se il router C genera un nuovo pacchetto LSP, quanto tempo è necessario affinché esso raggiunga tutti i router della rete (trascurando il tempo impiegato internamente da ogni router)?</p>
+                    <p><strong>Scenario (Diagramma con nodi A, B, C, D, E e collegamenti):</strong></p>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+                        graph LR
+                            A --- 1 --- B;
+                            A --- 4 --- E;
+                            B --- 3 --- C;
+                            B --- 1 --- D;
+                            C --- 1 --- D;
+                            D --- 2 --- E;
+                        </pre>
+                    </div>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**(a) Quanti pacchetti LSP salvare in ogni router?**
+                            *   In Link State, ogni router genera un LSP. Ogni router nella rete deve memorizzare l'LSP generato da *ciascuno* degli altri router per costruire la mappa completa.
+                            *   Nel diagramma ci sono 5 router (A, B, C, D, E).
+                            *   Quindi, ogni router deve salvare 5 pacchetti LSP (il proprio più quello degli altri 4).
+                            **Risposta (a):** 5 pacchetti LSP.
+                        </li>
+                        <li>**(b) Tempo di propagazione LSP:**
+                            *   I pacchetti LSP vengono diffusi tramite "flooding affidabile".
+                            *   Il tempo necessario affinché un pacchetto raggiunga tutti i nodi dipende dal tempo massimo di propagazione attraverso i link della rete.
+                            *   Il percorso più lungo nel grafico è, ad esempio, A-E (costo 4ms) o C-A (costo 3ms via B). Il tempo massimo tra due nodi è circa 4ms.
+                            *   Il flooding garantisce che il pacchetto raggiunga tutti entro il tempo del percorso più lungo.
+                            *   Il problema menziona "trascurando il tempo impiegato internamente da ogni router", focalizzandosi sul tempo di propagazione sui link.
+                            **Risposta (b):** Il tempo necessario è il ritardo massimo di propagazione nel grafo, che è 4ms (es. A-E).
+                            <div class="correction-box">
+                                <strong>Correzione/Chiarezza:</strong> La risposta del prof nell'esame indica: "(a) Per poter applicare Dijkstra bisogna conoscere l'intero grafo, quindi bisogna conoscere lo stato di ogni collegamento. Quindi servono 7 entry. (b) Siccome va in flooding affidabile, bastano 3 ms per arrivare dappertutto." La mia interpretazione del numero di LSP (5) è più corretta basandomi sul concetto di "LSP per ogni router". La risposta del prof "7 entry" potrebbe riferirsi a un numero di link o nodi/link, o a una topologia leggermente diversa considerata. Per il tempo di flooding, la risposta "3 ms" implica che in quella configurazione specifica, il percorso più lungo dal mittente (C) a qualsiasi altro nodo era 3ms (es. C-B-A=4ms, C-D-E=3ms). Nel mio diagramma A-E è 4ms. Il concetto di base è che il tempo di flooding è dettato dalla massima distanza di propagazione.
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+
+                <h3 class="subsection-title" id="inter-domain-routing-bgp">6.3. Inter-Domain Routing (BGP)</h3>
+                <p>Gli algoritmi inter-domain (tra Autonomous System - AS) si occupano dell'instradamento tra grandi domini amministrativi (es. tra ISP). Il protocollo principale è BGP (Border Gateway Protocol).</p>
+                <ul>
+                    <li>**Autonomous System (AS):** Un AS è un insieme di router e reti sotto un'unica amministrazione (es. un ISP, una grande azienda). Ogni AS ha un ID univoco (ASN - Autonomous System Number).</li>
+                    <li>**Tipi di AS:**
+                        <ul>
+                            <li>**Stub AS:** Ha un solo collegamento a un altro AS (es. un cliente collegato al suo ISP). Gestisce solo traffico locale.</li>
+                            <li>**Multihomed AS:** Ha più collegamenti ad altri AS (per ridondanza o bilanciamento), ma gestisce solo traffico locale.</li>
+                            <li>**Transit AS:** Permette il passaggio di traffico tra altri AS (es. un grande ISP).</li>
+                        </ul>
+                    </li>
+                    <li>**Funzionamento di BGP:** I router BGP scambiano "percorsi" verso destinazioni di rete, non solo distanze. Un percorso è una sequenza di AS (AS-Path) che un pacchetto dovrebbe attraversare per raggiungere la destinazione.
+                        <ul>
+                            <li>**eBGP (external BGP):** Usato per scambiare percorsi tra router di AS diversi.</li>
+                            <li>**iBGP (internal BGP):** Usato per scambiare percorsi all'interno dello stesso AS.</li>
+                        </ul>
+                    </li>
+                    <li>**Criteri di Scelta del Percorso:** BGP usa una politica basata su vari attributi (es. AS-Path, metriche, politiche locali) per scegliere il percorso migliore, non solo il più breve (come in intra-domain). Questo permette di implementare politiche commerciali.</li>
+                    <li>**Prevenzione Loop:** Un AS non accetta percorsi che contengono il proprio ASN nell'AS-Path, prevenendo loop.</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 02-02-2023, Domanda 10):</strong>
+                    <p>(a) Che differenza c'è tra un AS "stub" e uno "multihomed"? (b) È possibile che uno stub diventi multihomed, e viceversa?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) Un AS "stub" ha un **singolo collegamento** a un altro AS (solitamente il suo ISP), e gestisce solo il traffico che ha origine o termina al suo interno. Non permette il traffico di transito per altri AS. Un AS "multihomed" ha **più collegamenti** ad altri AS (es. a più ISP), ma anch'esso solitamente gestisce solo il traffico che ha origine o termina al suo interno, non permettendo il transito.</li>
+                        <li>(b) **Sì, è possibile.**
+                            *   Uno stub diventa multihomed se aggiunge un nuovo collegamento a un AS esterno (es. un secondo ISP) e inizia a pubblicizzare i propri prefissi anche attraverso questo nuovo link.
+                            *   Un multihomed può diventare stub se perde tutti i suoi collegamenti esterni tranne uno, oppure se decide di disabilitare tutti i collegamenti extra per politica.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="multicast" class="content-section">
+            <h2 class="section-title">7. Multicast in IP</h2>
+            <div class="section-content">
+                <p>Il **Multicast** è una modalità di comunicazione in cui un mittente invia un singolo flusso di dati a un gruppo di destinatari. A differenza di unicast (uno a uno) e broadcast (uno a tutti sulla LAN), multicast è uno a molti.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Internet Multicast", "Multicast in IP", "Gestione dei gruppi multicast", "Routing multicast" (Pagine 83-89 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Media</h4>
+                <p>Le domande sul multicast sono mediamente ricorrenti, spesso legate alla Classe D di indirizzi IP, alla gestione dei gruppi e al protocollo IGMP.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** D (Domanda 10 - gestione gruppi multicast, dispositivo di unione)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** D (Domanda 10 - gestione gruppi multicast, dispositivo di unione)</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title">Concetti Chiave del Multicast</h3>
+                <ul>
+                    <li>**Indirizzi IP Multicast (Classe D):** Gli indirizzi IP da 224.0.0.0 a 239.255.255.255 sono riservati per i gruppi multicast.</li>
+                    <li>**Ruolo del Router:** Il router è responsabile di duplicare i pacchetti multicast e inoltrarli solo sulle interfacce dove ci sono membri del gruppo.</li>
+                    <li>**Vantaggi:** Efficienza della banda (un solo flusso per molti), ridondanza eliminata, il mittente non ha bisogno di conoscere tutti i destinatari.</li>
+                </ul>
+
+                <h3 class="subsection-title" id="routing-multicast">7.1. Gestione dei Gruppi Multicast e Routing</h3>
+                <ul>
+                    <li>**IGMP (Internet Group Management Protocol):** Utilizzato dagli host per segnalare al loro router locale di voler unirsi o lasciare un gruppo multicast.</li>
+                    <li>**Alberi di Distribuzione Multicast (Multicast Distribution Trees):** I router costruiscono degli alberi per instradare i pacchetti multicast dal mittente ai membri del gruppo.
+                        <ul>
+                            <li>**Source-Based Tree:** Un albero separato per ogni coppia (mittente, gruppo). Il router costruisce il percorso a costo minimo dal mittente. Esempio: DVMRP (Distance Vector Multicast Routing Protocol) che usa Flood-and-Prune.</li>
+                            <li>**Group-Shared Tree:** Un unico albero per tutto il gruppo, radicato in un "rendezvous point" (RP) o "core router". I mittenti inviano i dati all'RP, che poi li distribuisce lungo l'albero condiviso. Esempio: PIM-SM (Protocol Independent Multicast - Sparse Mode).</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 04-09-2023, Domanda 10):</strong>
+                    <p>(a) Un host collegato ad una rete locale, cosa deve fare per ricevere pacchetti multicast da un certo gruppo? (b) Quale dispositivo della rete locale si occupa dell'unione al corrispondente albero di distribuzione multicast?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) Per ricevere pacchetti multicast da un certo gruppo, l'host deve inviare un messaggio **IGMP Join Group** (Internet Group Management Protocol) al suo router locale, specificando l'indirizzo del gruppo multicast a cui vuole unirsi.</li>
+                        <li>(b) Il **router locale** (o bridge) della rete locale si occupa di gestire le richieste IGMP degli host e di unirsi al corrispondente albero di distribuzione multicast per quel gruppo. È il router che poi riceverà i pacchetti multicast e li inoltrerà ai membri del gruppo sulla sua LAN.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti Corso Reti di Calcolatori</p>
+    </footer>
+
+    <script src="assets/common.js"></script>
+    <script>
+        // Mermaid.js and MathJax re-initialization are handled by common.js when sections are shown.
+        // No specific script for this HTML file is needed here beyond common.js.
+    </script>
+</body>
+</html>
