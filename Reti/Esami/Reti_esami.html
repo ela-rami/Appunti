@@ -76,6 +76,31 @@
             border-bottom: 1px solid var(--border-soft);
             padding-bottom: 0.5rem;
         }
+        /* Styles for chapter list */
+        .lezioni-lista { list-style: none; padding: 0; }
+        .lezioni-lista li {
+            margin-bottom: 1rem;
+            background-color: rgba(255,255,255,0.03);
+            border-radius: var(--border-radius-small);
+            transition: background-color 0.2s ease;
+        }
+        .lezioni-lista li:hover { background-color: rgba(96, 165, 250, 0.1); }
+        .lezioni-lista a {
+            display: flex;
+            align-items: center;
+            color: var(--text-secondary);
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            border-radius: var(--border-radius-small);
+            font-size: 1.1rem;
+            transition: color 0.2s ease;
+        }
+        .lezioni-lista a:hover { color: var(--accent-primary); }
+        .lezioni-lista .lesson-icon {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+        }
         /* Styles for navigation buttons */
         .nav-button {
             display: inline-block;
@@ -117,8 +142,15 @@
     <div class="container">
         <main>
             <section class="content-category">
-                <h2>Esami</h2>
-                <p style="text-align: center; padding: 2rem 0; color: var(--text-secondary);">Nessun esame disponibile al momento.</p>
+                <h2>Indice Capitoli</h2>
+                                <ul class="lezioni-lista">
+                    <li><a href="capitolo1.html"><span class="lesson-icon"></span> Capitolo 1: Fondamenti e Livello Fisico</a></li>
+                    <li><a href="capitolo2.html"><span class="lesson-icon"></span> Capitolo 2: Livello Collegamento Dati (Data Link Layer)</a></li>
+                    <li><a href="capitolo3.html"><span class="lesson-icon"></span> Capitolo 3: Tecnologie di Accesso alla Rete (LAN/Wireless)</a></li>
+                    <li><a href="capitolo4.html"><span class="lesson-icon"></span> Capitolo 4: Livello Rete (Network Layer)</a></li>
+                    <li><a href="capitolo5.html"><span class="lesson-icon"></span> Capitolo 5: Livello Trasporto (Transport Layer)</a></li>
+                    <li><a href="capitolo6.html"><span class="lesson-icon"></span> Capitolo 6: Sicurezza delle Reti</a></li>
+                </ul>
                 <div style="text-align: center; margin-top: 1rem;">
                     <a href="../Reti_home.html" class="nav-button">Torna alla Home</a>
                 </div>
