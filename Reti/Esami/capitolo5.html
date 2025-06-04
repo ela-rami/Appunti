@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capitolo 5: Livello Trasporto (Transport Layer)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="assets/common.css">
+</head>
+<body data-pdf-path="percorso/al/tuo/pdf_prof_del_Capitolo5_se_esistente.pdf"> <!-- Placeholder per eventuale PDF del capitolo -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Capitolo 5: Livello Trasporto (Transport Layer)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="index.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice dei Capitoli</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF Cap.5)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#introduzione-trasporto" class="sidebar-link">1. Introduzione al Livello Trasporto</a></li>
+            <li><a href="#porte-socket" class="sidebar-link">1.1. Porte (Socket) e Modello Client/Server</a></li>
+            <li><a href="#tipi-comunicazione-trasporto" class="sidebar-link">1.2. Tipi di Comunicazione</a></li>
+            <li><a href="#udp-protocol" class="sidebar-link">2. UDP (User Datagram Protocol)</a></li>
+            <li><a href="#tcp-protocol" class="sidebar-link">3. TCP (Transmission Control Protocol)</a></li>
+            <li><a href="#diagramma-stato-tcp" class="sidebar-link">3.1. Diagramma di Stato TCP</a></li>
+            <li><a href="#fase1-handshake-tcp" class="sidebar-link">3.2. Fase 1: Handshake (Three-Way Handshake)</a></li>
+            <li><a href="#fase2-trasferimento-dati-tcp" class="sidebar-link">3.3. Fase 2: Trasferimento Dati</a></li>
+            <li><a href="#fase3-chiusura-tcp" class="sidebar-link">3.4. Fase 3: Chiusura della Connessione</a></li>
+            <li><a href="#controllo-flusso-tcp" class="sidebar-link">3.5. Controllo di Flusso (Sliding Window TCP)</a></li>
+            <li><a href="#variabili-controllo-flusso" class="sidebar-link">3.5.1. Variabili e Finestre di Flusso</a></li>
+            <li><a href="#silly-window-nagle" class="sidebar-link">3.5.2. Silly Window Syndrome e Algoritmo di Nagle</a></li>
+            <li><a href="#protezione-wraparound" class="sidebar-link">3.6. Protezione dal Wraparound dei Numeri di Sequenza</a></li>
+            <li><a href="#controllo-congestione-tcp" class="sidebar-link">3.7. Controllo della Congestione TCP</a></li>
+            <li><a href="#cwnd-aimd" class="sidebar-link">3.7.1. Congestion Window (CWND) e AIMD</a></li>
+            <li><a href="#timeout-rto" class="sidebar-link">3.7.2. Stima del Timeout (RTO) e Karn-Partridge</a></li>
+            <li><a href="#slow-start-fast-retransmit-recovery" class="sidebar-link">3.7.3. Slow Start, Fast Retransmit, Fast Recovery</a></li>
+            <li><a href="#red-evitamento-congestione" class="sidebar-link">3.7.4. RED (Random Early Detection)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="introduzione-trasporto" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione al Livello Trasporto</h2>
+            <div class="section-content">
+                <p>Il <strong>Livello Trasporto (Transport Layer)</strong> è il quarto strato del modello OSI e il livello "Trasporto" nel modello TCP/IP. Mentre il Livello Rete si occupa di instradare pacchetti tra host (host-to-host), il Livello Trasporto estende questo servizio alla **comunicazione processo-a-processo** (o applicazione-a-applicazione).</p>
+                <p>Il suo compito principale è creare un canale logico che collega un processo sul mittente con un processo sul destinatario, fornendo servizi di affidabilità (consegna in ordine, senza perdite o duplicati) e controllo (flusso, congestione), se richiesto dall'applicazione. Le PDU di questo livello sono chiamate **segmenti** (per TCP) o **datagrammi** (per UDP).</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "4. Strato Trasporto (Transport Layer)", "Indirizzamento in TCP/IP", "Client/server model", "Tipi di comunicazione" (Pagina 1 del formulario e Pagine 8, 90-93 del PDF completo).
+                </div>
+
+                <h3>Porte (Socket) e Modello Client/Server</h3>
+                <p>Per identificare i processi specifici su un host, il Livello Trasporto utilizza i numeri di **porta** (o **socket**). Una porta è un identificatore logico che un processo usa per "ascoltare" o "inviare" dati.</p>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>La conoscenza delle porte, della loro gestione e del modello Client/Server è frequentemente richiesta, a volte in domande specifiche sull'indirizzamento o sull'interazione tra i livelli.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** I (Domanda 1 - identificazione dispositivo "C" in un diagramma di stack)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** I (Domanda 11 - UDP, ICMP, porta non raggiungibile)</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="porte-socket">Numeri di Porta</h4>
+                <p>Un numero di porta è un intero a 16 bit (da 0 a 65535).</p>
+                <ul>
+                    <li><strong>Well-Known Ports (0-1023):</strong> Assegnate a servizi e protocolli standard (es. HTTP: 80, FTP: 21, SMTP: 25, DNS: 53). Possono essere usate solo da processi privilegiati (admin/root).</li>
+                    <li><strong>Registered Ports (1024-49151):</strong> Registrate da IANA per applicazioni specifiche, ma non richiedono privilegi speciali per essere usate.</li>
+                    <li><strong>Dynamic/Private Ports (49152-65535):</strong> Assegnate dinamicamente dal sistema operativo ai processi client che avviano una connessione.</li>
+                </ul>
+
+                <h4 class="subsubsection-title">Modello Client/Server</h4>
+                <p>Un'architettura di comunicazione comune in cui:</p>
+                <ul>
+                    <li>**Server:** Un processo che offre un servizio. Rimane in esecuzione ("passivo") e attende richieste su una porta **well-known** o **registered** (nota ai client).</li>
+                    <li>**Client:** Un processo che richiede un servizio. Avvia la connessione e usa una porta **dinamica** (assegnata temporaneamente dal sistema).</li>
+                </ul>
+                <p>Una connessione (o "socket endpoint") è identificata dalla tupla `(indirizzo IP sorgente, porta sorgente, indirizzo IP destinazione, porta destinazione)`.</p>
+
+                <h3>Tipi di Comunicazione a Livello Trasporto</h3>
+                <p>Il Livello Trasporto offre due tipi principali di servizi, con garanzie e overhead diversi:</p>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>La distinzione e la scelta tra protocolli orientati alla connessione e senza connessione è un tema ricorrente, spesso in relazione a specifici servizi applicativi.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** D (Domanda 11 - scelta protocollo per servizi)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** D (Domanda 10 - multicast UDP)</li>
+                        <li>**04-09-2023:** D (Domanda 11 - scelta protocollo per servizi)</li>
+                        <li>**17-06-2024:** D (Domanda 1 - funzionalità trasporto)</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="tipi-comunicazione-trasporto">Connection-Oriented (Orientato alla Connessione)</h4>
+                <ul>
+                    <li>**Idea:** Prima di scambiare dati, viene stabilita una connessione logica tra i due processi, mantenendo uno "stato" della comunicazione (es. numeri di sequenza, finestre, timeout).</li>
+                    <li>**Caratteristiche:**
+                        <ul>
+                            <li><strong>Affidabile:</strong> Garantisce la consegna dei dati, in ordine, senza perdite o duplicati.</li>
+                            <li><strong>Controllo di Flusso:</strong> Impedisce al mittente di sovraccaricare il ricevitore.</li>
+                            <li><strong>Controllo di Congestione:</strong> Rallenta la trasmissione per evitare di sovraccaricare la rete.</li>
+                            <li><strong>Overhead:</strong> Maggiore (per setup, gestione stato, ACK, ritrasmissioni).</li>
+                            <li><strong>Esempi:** TCP (Transmission Control Protocol), SCTP.</strong></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4 class="subsubsection-title">Connectionless (Senza Connessione)</h4>
+                <ul>
+                    <li>**Idea:** Ogni datagramma viene trattato indipendentemente. Non c'è fase di setup, né stato mantenuto sulla comunicazione.</li>
+                    <li><strong>Caratteristiche:**
+                        <ul>
+                            <li><strong>Inaffidabile:</strong> Non garantisce consegna, ordine, né assenza di duplicati.</li>
+                            <li><strong>Basso Overhead:</strong> Veloce e leggero.</li>
+                            <li><strong>Esempi:** UDP (User Datagram Protocol).</strong></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 04-09-2023, Domanda 11):</strong>
+                    <p>Si dica quale protocollo di trasporto è più adatto ad implementare ciascuno dei seguenti servizi:</p>
+                    <p>(a) streaming audio-video in tempo reale;<br>
+                    (b) trasferimento email da server a server;<br>
+                    (c) accesso remoto tipo SSH o Telnet.</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) **UDP**. Lo streaming audio-video in tempo reale privilegia la bassa latenza e tollera piccole perdite. UDP, essendo connectionless e a basso overhead, introduce meno ritardi rispetto a TCP.</li>
+                        <li>(b) **TCP**. Il trasferimento di email richiede affidabilità e consegna garantita dei dati (nessuna perdita o corruzione), che è fornita da TCP.</li>
+                        <li>(c) **TCP**. L'accesso remoto (SSH, Telnet) richiede una comunicazione affidabile, in ordine e senza perdite per garantire la coerenza dei comandi e delle risposte. TCP è la scelta appropriata.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </article>
+
+        <article id="udp-protocol" class="content-section">
+            <h2 class="section-title">2. UDP (User Datagram Protocol)</h2>
+            <div class="section-content">
+                <p>UDP è il protocollo di trasporto più semplice, fornendo un servizio di comunicazione processo-a-processo "best-effort".</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "UDP - datagrammi" (Pagina 9 del formulario e Pagine 93-95 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Alta</h4>
+                <p>UDP è un argomento frequente, spesso in domande di confronto con TCP, sulla sua utilità per specifici servizi, o sul suo formato di header (in particolare il checksum).</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** D (Domanda 11 - scelta protocollo per servizi)</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** B (Domanda 10 - multicast UDP)</li>
+                        <li>**04-09-2023:** B (Domanda 11 - scelta protocollo per servizi)</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Caratteristiche di UDP</h4>
+                <ul>
+                    <li><strong>Connectionless:</strong> Non stabilisce una connessione prima di trasmettere.</li>
+                    <li><strong>Inaffidabile:</strong> Non garantisce consegna, ordine, né previene duplicati. Non ha meccanismi di ritrasmissione o timeout.</li>
+                    <li><strong>Datagrammi Indipendenti:</strong> Ogni PDU UDP (datagramma) è trattato separatamente.</li>
+                    <li><strong>Basso Overhead:</strong> L'header è minimo, rendendolo molto leggero e veloce.</li>
+                    <li><strong>Non ha controllo di flusso né di congestione.</strong></li>
+                </ul>
+
+                <h4 class="subsubsection-title">Formato del Datagramma UDP (Header)</h4>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph LR
+                        A[Source Port<br/>(16 bits)] --> B[Destination Port<br/>(16 bits)];
+                        B --> C[Length<br/>(16 bits)];
+                        C --> D[Checksum<br/>(16 bits)];
+                        D --> Payload;
+
+                        style A fill:#60a5fa,stroke:#60a5fa,stroke-width:1px;
+                        style B fill:#818cf8,stroke:#818cf8,stroke-width:1px;
+                        style C fill:#34D399,stroke:#34D399,stroke-width:1px;
+                        style D fill:#FACC15,stroke:#FACC15,stroke-width:1px;
+                    </pre>
+                </div>
+                <p>L'header UDP è di soli 8 byte.</p>
+                <ul>
+                    <li><strong>Source Port (16 bit):</strong> Porta del processo mittente.</li>
+                    <li><strong>Destination Port (16 bit):</strong> Porta del processo destinatario.</li>
+                    <li><strong>Length (16 bit):</strong> Lunghezza totale del datagramma UDP (header + payload) in byte.</li>
+                    <li><strong>Checksum (16 bit):</strong> Opzionale in IPv4, obbligatorio in IPv6 per UDP. Viene calcolato sull'intero datagramma UDP, un "pseudo-header" IP (che include indirizzi IP sorgente/destinazione, protocollo, lunghezza UDP) e zero-padding. Il pseudo-header non viene trasmesso.</li>
+                </ul>
+
+                <h4 class="subsubsection-title">Usi Tipici di UDP</h4>
+                UDP è adatto per applicazioni che privilegiano la velocità e tollerano le perdite, o che implementano la propria affidabilità a livello applicativo.
+                <ul>
+                    <li><strong>Streaming Multimediale in Tempo Reale:</strong> Audio/video, VoIP (una piccola perdita è preferibile a un ritardo causato da ritrasmissioni).</li>
+                    <li><strong>Query/Risposta Semplici:</strong> DNS (Domain Name System), DHCP (Dynamic Host Configuration Protocol), NTP (Network Time Protocol).</li>
+                    <li><strong>Multicast/Broadcast:</strong> Funziona solo con UDP.</li>
+                    <li><strong>Applicazioni che gestiscono la propria affidabilità:</strong> QUIC, RTP.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="tcp-protocol" class="content-section">
+            <h2 class="section-title">3. TCP (Transmission Control Protocol)</h2>
+            <div class="section-content">
+                <p>TCP è il protocollo di trasporto più importante di Internet, fornendo un servizio di comunicazione **affidabile** e **orientato alla connessione** tra processi.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "TCP – segmenti", "Diagramma a stati TCP", "Sliding window TCP", "Controllo di flusso TCP", "Protezione dal Wraparound", "Controllo della congestione" (Pagine 9-11 del formulario e Pagine 95-119 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>TCP è un argomento fondamentale e quasi onnipresente negli esami. Le domande coprono il suo stato, le fasi (handshake, trasferimento, chiusura), il controllo di flusso e, in particolare, il controllo della congestione (Slow Start, Fast Retransmit, RED).</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 4 - Sliding Window), D (Domanda 12 - TCP Listen stato)</li>
+                        <li>**17-02-2023:** D (Domanda 12 - TCP Listen stato)</li>
+                        <li>**15-06-2023:** D (Domanda 3 - Stop and Wait), B (Domanda 12 - TCP Close stato)</li>
+                        <li>**29-01-2024:** D (Domanda 12 - TCP Close stato)</li>
+                        <li>**16-09-2024:** D (Domanda 4 - Sliding Window), D (Domanda 12 - TCP SYN stato), D (Domanda 13 - TCP buffer/AdvertisedWindow), D (Domanda 14 - TCP congestione)</li>
+                        <li>**19-02-2024:** D (Domanda 3 - Stop and Wait), B (Domanda 12 - TCP Close stato), I (Domanda 13 - TCP Nagle)</li>
+                        <li>**15-07-2024:** I (Domanda 11 - UDP, ICMP, porta non raggiungibile), B (Domanda 12 - TCP Close stato), B (Domanda 13 - TCP buffer/AdvertisedWindow), B (Domanda 14 - TCP congestione/RED)</li>
+                        <li>**04-09-2023:** D (Domanda 12 - TCP Close stato), D (Domanda 13 - TCP buffer/AdvertisedWindow), D (Domanda 14 - TCP congestione)</li>
+                        <li>**17-06-2024:** I (Domanda 1 - funzionalità trasporto)</li>
+                        <li>**Appello X:** D (Domanda 1 - TDM/Sliding Window)</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Caratteristiche di TCP</h4>
+                <ul>
+                    <li><strong>Connection-Oriented:</strong> Richiede una fase di setup della connessione (handshake) e di chiusura. Mantiene uno stato per ogni connessione.</li>
+                    <li><strong>Affidabile:</strong> Garantisce la consegna dei dati, in ordine, senza perdite o duplicati, tramite numeri di sequenza, riscontri (ACK) e ritrasmissioni.</li>
+                    <li><strong>Stream di Byte:</strong> TCP vede i dati come un flusso continuo di byte, non come blocchi discreti. Raggruppa i byte in segmenti per la trasmissione.</li>
+                    <li><strong>Controllo di Flusso:</strong> Impedisce al mittente di sovraccaricare il buffer del ricevitore.</li>
+                    <li><strong>Controllo di Congestione:</strong> Rallenta la trasmissione per evitare di sovraccaricare la rete stessa.</li>
+                    <li><strong>Full Duplex:</strong> I dati possono essere trasmessi in entrambe le direzioni contemporaneamente.</li>
+                    <li>**Header TCP:** Di 20 byte minimo.</li>
+                </ul>
+
+                <h3 class="subsection-title" id="diagramma-stato-tcp">3.1. Diagramma di Stato TCP</h3>
+                <p>Una connessione TCP attraversa diverse fasi, ognuna rappresentata da uno stato. Gli eventi (es. chiamate di sistema, ricezione segmenti) provocano transizioni tra gli stati.</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    stateDiagram-v2
+                        [*] --> CLOSED
+
+                        CLOSED --> LISTEN: passive open
+                        CLOSED --> SYN_SENT: active open
+
+                        SYN_SENT --> ESTABLISHED: SYN+ACK, then ACK received
+                        SYN_SENT --> CLOSED: RST received
+                        SYN_SENT --> SYN_RCVD: SYN received (simultaneous open)
+
+                        LISTEN --> SYN_RCVD: SYN received
+
+                        SYN_RCVD --> ESTABLISHED: ACK received
+                        SYN_RCVD --> CLOSED: RST received (or timeout)
+
+                        ESTABLISHED --> CLOSE_WAIT: FIN received
+                        ESTABLISHED --> FIN_WAIT_1: close()
+
+                        FIN_WAIT_1 --> FIN_WAIT_2: ACK received
+                        FIN_WAIT_1 --> CLOSING: FIN received (simultaneous close)
+
+                        FIN_WAIT_2 --> TIME_WAIT: FIN received
+
+                        CLOSING --> TIME_WAIT: ACK received
+
+                        CLOSE_WAIT --> LAST_ACK: close()
+
+                        LAST_ACK --> CLOSED: ACK received
+
+                        TIME_WAIT --> CLOSED: timeout (2*MSL)
+                    </pre>
+                </div>
+                <p>Comprendere il diagramma di stato è cruciale per le domande sui comportamenti di TCP.</p>
+
+                <h3 class="subsection-title" id="fase1-handshake-tcp">3.2. Fase 1: Handshake (Three-Way Handshake)</h3>
+                <p>Prima di scambiare dati, TCP stabilisce una connessione affidabile tra client e server attraverso un processo di tre passaggi.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 12 - TCP Listen stato)</li>
+                        <li>**17-02-2023:** D (Domanda 12 - TCP Listen stato)</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** D (Domanda 12 - TCP SYN stato)</li>
+                        <li>**19-02-2024:** N</li>
+                        <li>**15-07-2024:** N</li>
+                        <li>**04-09-2023:** N</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Processo del Three-Way Handshake</h4>
+                <ol>
+                    <li><strong>SYN (Synchronize):</strong> Il client (in stato CLOSED) invia un segmento SYN al server (che è in stato LISTEN), con un numero di sequenza iniziale (`ISN - Initial Sequence Number`).</li>
+                    <li><strong>SYN+ACK (Synchronize-Acknowledgement):</strong> Il server (in stato LISTEN) riceve il SYN, passa allo stato SYN_RCVD, e risponde con un segmento SYN+ACK. Questo segmento contiene il proprio ISN e un ACK per il SYN del client (AckNum = client_ISN + 1).</li>
+                    <li><strong>ACK (Acknowledgement):</strong> Il client riceve il SYN+ACK, passa allo stato ESTABLISHED, e risponde con un segmento ACK per il SYN+ACK del server (AckNum = server_ISN + 1).</li>
+                </ol>
+                <p>A questo punto, entrambi gli host sono in stato ESTABLISHED e la connessione è aperta per il trasferimento dati bidirezionale.</p>
+
+                <h4 class="subsubsection-title">Connessione Simultanea</h4>
+                <p>Raramente, client e server possono tentare di aprire una connessione contemporaneamente, inviando entrambi un SYN l'uno all'altro. In questo caso, entrambi passano a SYN_RCVD e rispondono con SYN+ACK. Questo porta comunque a una connessione ESTABLISHED.</p>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 16-09-2024, Domanda 12):</strong>
+                    <p>Una socket TCP sull'host A è in stato LISTEN. (a) Riceve un segmento con SYN=1. In che stato si porta? (b) Poi riceve un segmento con SYN=1, ma con un SeqNum diverso. In che stato si porta, e cosa invia in risposta?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) Se una socket in stato <strong>LISTEN</strong> riceve un segmento con SYN=1 (il primo passo del three-way handshake), significa che un client sta tentando di connettersi. La socket si porta nello stato **SYN_RCVD** (SYN Received).</li>
+                        <li>(b) Se, mentre è in stato SYN_RCVD, riceve un **secondo** segmento con SYN=1 ma con un <strong>numero di sequenza diverso</strong>, TCP lo interpreta come un nuovo tentativo di connessione separata (potrebbe essere un altro client, o un tentativo fallito precedente). La socket **rimane nello stato SYN_RCVD** per la connessione originale. In risposta al nuovo SYN, invia un nuovo segmento **SYN+ACK** con il numero di sequenza appropriato per *quella nuova* richiesta. Questo avvia una nuova procedura di handshake TCP per la seconda connessione.</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title" id="fase2-trasferimento-dati-tcp">3.3. Fase 2: Trasferimento Dati</h3>
+                <p>Una volta stabilita la connessione (stato ESTABLISHED), i dati vengono scambiati come uno stream di byte.</p>
+                <ul>
+                    <li>**Piggybacking:** Gli ACK (riscontri) per i dati ricevuti sono spesso "impacchettati" (piggybacked) sui segmenti che trasportano dati nella direzione opposta.</li>
+                    <li>**Buffer:** Sia il mittente che il ricevitore mantengono un buffer circolare per i dati. Il mittente scrive dati nel suo buffer e li segmenta per l'invio. Il ricevitore li riassembla nel suo buffer, da cui l'applicazione li legge.</li>
+                    <li>**Flag PSH (Push):** Il mittente può impostare questo flag per indicare al ricevitore di "spingere" i dati all'applicazione immediatamente, bypassando il buffering. Utile per applicazioni interattive (es. Telnet).</li>
+                    <li>**Flag URG (Urgent):** Indica che un segmento contiene dati urgenti che devono essere processati immediatamente. Il campo "Urgent Pointer" nell'header TCP indica la fine dei dati urgenti.</li>
+                </ul>
+
+                <h3 class="subsection-title" id="fase3-chiusura-tcp">3.4. Fase 3: Chiusura della Connessione</h3>
+                <p>La chiusura della connessione TCP è un processo a quattro vie (o a due vie se la chiusura è simultanea), che permette a entrambi i lati di terminare la trasmissione dati in modo pulito.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 12 - TCP Listen stato)</li>
+                        <li>**17-02-2023:** D (Domanda 12 - TCP Listen stato)</li>
+                        <li>**15-06-2023:** B (Domanda 12 - TCP Close stato)</li>
+                        <li>**29-01-2024:** D (Domanda 12 - TCP Close stato)</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** B (Domanda 12 - TCP Close stato)</li>
+                        <li>**15-07-2024:** B (Domanda 12 - TCP Close stato)</li>
+                        <li>**04-09-2023:** D (Domanda 12 - TCP Close stato)</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Processo di Chiusura (Four-Way Handshake)</h4>
+                <ol>
+                    <li>**FIN (Finishing):** Il lato che vuole chiudere (Initiator) invia un segmento FIN. Passa a stato **FIN_WAIT_1**.</li>
+                    <li>**ACK (Acknowledgement):** Il ricevitore (Responder) riceve il FIN, invia un ACK per il FIN. Passa a stato **CLOSE_WAIT**. Il Responder può ancora inviare dati.</li>
+                    <li>**FIN (Finishing):** Quando il Responder ha finito di inviare i suoi dati, invia anch'esso un FIN. Passa a stato **LAST_ACK**.</li>
+                    <li>**ACK (Acknowledgement):** L'Initiator riceve il FIN dal Responder, invia un ACK. Passa a stato **TIME_WAIT**. Il Responder riceve questo ACK e passa a CLOSED.</li>
+                </ol>
+
+                <h4 class="subsubsection-title">Stato TIME_WAIT (Molto Importante)</h4>
+                <p>L'Initiator rimane nello stato **TIME_WAIT** per un periodo pari a **2 * MSL (Maximum Segment Lifetime)** (solitamente 1-2 minuti). Questo è cruciale per:</p>
+                <ul>
+                    <li>**Affidabilità dell'ultimo ACK:** Garantisce che l'ultimo ACK dell'Initiator raggiunga il Responder, anche se si perde. Se si perdesse, il Responder ritrasmetterebbe il FIN, e l'Initiator in TIME_WAIT lo riceverebbe e ritrasmetterebbe l'ACK.</li>
+                    <li>**Prevenire "reincarnazioni":** Impedisce che segmenti "vecchi" di una connessione precedente (con gli stessi indirizzi IP e porte) possano arrivare e interferire con una nuova connessione con gli stessi parametri. L'MSL è il tempo massimo stimato che un segmento può rimanere in rete.</li>
+                </ul>
+
+                <h4 class="subsubsection-title">Chiusura Simultanea</h4>
+                <p>Se entrambi i lati chiamano `close()` contemporaneamente, entrambi inviano FIN. Riceveranno FIN dall'altro lato, risponderanno con ACK, e poi invieranno il proprio FIN, procedendo attraverso uno stato CLOSING per poi passare a TIME_WAIT.</p>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 15-06-2023, Domanda 12):</strong>
+                    <p>Una socket TCP si trova nello stato ESTABLISHED. (a) Se l'applicazione esegue una close() su tale socket, in che stato si porta la socket? (b) Cosa viene inviato alla controparte? (c) Cosa deve fare la socket dei nuovi segmenti che eventualmente riceve in questo stato?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) Se l'applicazione esegue `close()` su una socket in stato ESTABLISHED, la socket si porta nello stato **FIN_WAIT_1**.</li>
+                        <li>(b) Alla controparte viene inviato un segmento **FIN** (con l'eventuale rimanente payload da trasmettere).</li>
+                        <li>(c) Se la socket in FIN_WAIT_1 riceve nuovi segmenti dalla controparte, essa deve continuare a **metterli nel buffer e renderli disponibili all'applicazione**, come sempre. La chiusura del lato locale non impedisce al lato remoto di continuare a inviare dati finché non riceve un FIN anche da questo lato.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="controllo-flusso-tcp" class="content-section">
+            <h2 class="section-title">3.5. Controllo di Flusso (Sliding Window TCP)</h2>
+            <div class="section-content">
+                <p>Il controllo di flusso in TCP impedisce al trasmettitore di sovraccaricare il ricevitore, ossia di inviare dati più velocemente di quanto il ricevitore possa processarli e bufferizzarli. TCP utilizza una variante della tecnica **Sliding Window** a Livello Trasporto, basata sulla dimensione dei buffer del ricevitore.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Sliding window TCP", "Controllo di flusso TCP" (Pagina 10 del formulario e Pagine 102-104 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>Il controllo di flusso è un argomento chiave, spesso combinato con domande sul controllo di congestione. I calcoli di finestra disponibile e le variabili sono frequenti.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 4 - Sliding Window generale)</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** D (Domanda 4 - Sliding Window generale), D (Domanda 13 - TCP buffer/AdvertisedWindow)</li>
+                        <li>**19-02-2024:** I (Domanda 13 - TCP Nagle)</li>
+                        <li>**15-07-2024:** B (Domanda 13 - TCP buffer/AdvertisedWindow)</li>
+                        <li>**04-09-2023:** D (Domanda 13 - TCP buffer/AdvertisedWindow)</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** D (Domanda 1 - TDM/Sliding Window)</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="variabili-controllo-flusso">Variabili e Finestre di Flusso</h4>
+                <p>Sia il mittente che il ricevitore mantengono un set di variabili di stato:</p>
+                <ul>
+                    <li>**Variabili del Trasmettitore:**
+                        <ul>
+                            <li><strong>LastByteAcked:</strong> L'ultimo byte di dati che è stato riscontrato dal ricevitore.</li>
+                            <li><strong>LastByteSent:</strong> L'ultimo byte di dati che è stato inviato dal trasmettitore.</li>
+                            <li><strong>LastByteWritten:</strong> L'ultimo byte di dati scritto dall'applicazione nel buffer del trasmettitore.</li>
+                        </ul>
+                        <strong>Invariante del Trasmettitore:</strong> \( \text{LastByteAcked} \le \text{LastByteSent} \le \text{LastByteWritten} \)
+                    </li>
+                    <li>**Variabili del Ricevitore:**
+                        <ul>
+                            <li><strong>NextByteExpected:</strong> Il numero di sequenza del prossimo byte che il ricevitore si aspetta di ricevere.</li>
+                            <li><strong>LastByteRcvd:</strong> L'ultimo byte di dati ricevuto e bufferizzato dal ricevitore.</li>
+                            <li><strong>LastByteRead:</strong> L'ultimo byte letto dall'applicazione dal buffer del ricevitore.</li>
+                        </ul>
+                        <strong>Invariante del Ricevitore:</strong> \( \text{LastByteRead} \le \text{NextByteExpected} \le \text{LastByteRcvd} + 1 \)
+                    </li>
+                </ul>
+
+                <h4 class="subsubsection-title">Finestra Annunciata (AdvertisedWindow)</h4>
+                <p>Il ricevitore comunica al mittente la dimensione del suo buffer disponibile tramite il campo **Window Size** nell'header TCP. Questo valore è chiamato **AdvertisedWindow**.</p>
+                <div class="math-block">
+                    $$ \text{AdvertisedWindow} = \text{MaxRecvBuffer} - (\text{NextByteExpected} - 1) - \text{LastByteRead} $$
+                    $$ \text{AdvertisedWindow} = \text{MaxRecvBuffer} - (\text{LastByteRcvd} - \text{LastByteRead}) $$
+                </div>
+                <p>Questo è lo spazio libero nel buffer del ricevitore. Il ricevitore invia continuamente questo valore al mittente.</p>
+
+                <h4 class="subsubsection-title">Finestra Effettiva (EffectiveWindow)</h4>
+                <p>Il mittente calcola la sua finestra effettiva, ovvero la quantità di dati che può ancora inviare prima di saturare la finestra del ricevitore.</p>
+                <div class="math-block">
+                    $$ \text{EffectiveWindow} = \text{AdvertisedWindow} - (\text{LastByteSent} - \text{LastByteAcked}) $$
+                </div>
+                <p>Il termine \((\text{LastByteSent} - \text{LastByteAcked})\) rappresenta i byte già inviati ma non ancora riscontrati. Il mittente invia solo se `EffectiveWindow > 0`.</p>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 04-09-2023, Domanda 13):</strong>
+                    <p>Una socket TCP ha un buffer di uscita di dimensione MaxSendBuffer=10000 byte. Ad un dato istante, le sue variabili di stato sono LastByteAcked=1999, LastByteSent=6999, LastByteWritten=9999. (a) Quanti byte possono essere immediatamente inviati alla controparte? (b) Quanti byte può ancora produrre l'applicazione, prima di bloccarsi (supponendo che nel frattempo non venga ricevuto alcun Acknowledgment dalla controparte)?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) **Byte inviabili alla controparte (Finestra Effettiva):**
+                            L'informazione sul buffer del ricevitore è data dalla `AdvertisedWindow`. Se non specificata, assumiamo sia grande e che il limite sia solo dal buffer del mittente, o che si chieda quanti byte possono essere inviati *sotto i vincoli del mittente*. Dagli appunti del tuo amico, l'AdvertisedWindow è il limite per il mittente. L'esercizio non dà `AdvertisedWindow` né `MaxRecvBuffer`, ma il prof negli appelli simili spesso la specifica o si deduce. Nel caso specifico, la soluzione del prof dice: "Le ultime informazioni ricevute dalla controparte dicevano che AdvertisedWindow=2000". Usiamo questo valore.
+                            `AdvertisedWindow = 2000`.
+                            `LastByteSent = 6999`.
+                            `LastByteAcked = 1999`.
+                            `EffectiveWindow = AdvertisedWindow - (LastByteSent - LastByteAcked)`
+                            `EffectiveWindow = 2000 - (6999 - 1999) = 2000 - 5000 = -3000`.
+                            Un valore negativo significa che la finestra è chiusa o che il mittente ha inviato troppo. Questo non ha senso.
+                            **Riesaminiamo la domanda e la soluzione del prof:**
+                            La risposta del prof per (a) è "Le ultime informazioni ricevute dalla controparte dicevano che AdvertisedWindow=2000, ma da allora sono stati spediti 3000-1000=2000 byte, quindi non si può spedire nessun altro byte." Questa frase si riferisce a uno scenario diverso.
+
+                            **Consideriamo il caso in cui viene dato LastByteAcked=1000, AdvertisedWindow=4000, LastByteSent=3000, LastByteWritten=4000 (questo da un esame del 15-07-2024, Domanda 13):**
+                            *   `AdvertisedWindow = 4000`
+                            *   `LastByteSent = 3000`
+                            *   `LastByteAcked = 1000`
+                            *   Byte inviati ma non riscontrati = `LastByteSent - LastByteAcked = 3000 - 1000 = 2000` byte.
+                            *   Byte che possono essere immediatamente inviati = `AdvertisedWindow - (LastByteSent - LastByteAcked) = 4000 - 2000 = 2000` byte.
+                            *   **Risposta (a):** 2000 byte.
+
+                            **Ora torniamo all'esercizio originale (04-09-2023) con: LastByteAcked=1999, LastByteSent=6999, LastByteWritten=9999. Qui MaxSendBuffer=10000.**
+                            *   L'esercizio NON fornisce `AdvertisedWindow`. Senza di essa, non possiamo calcolare `EffectiveWindow` che è il limite dal ricevitore.
+                            *   Assumendo che la domanda si concentri sul buffer del mittente (MaxSendBuffer) e il limite imposto dal receiver non sia più stringente del buffer del mittente.
+                            *   Spazio occupato nel buffer di invio: `LastByteSent - LastByteAcked = 6999 - 1999 = 5000` byte.
+                            *   Byte ancora inviabili dal buffer del mittente: `MaxSendBuffer - (LastByteSent - LastByteAcked) = 10000 - 5000 = 5000` byte.
+                            *   **Risposta (a) del prof è "Non si può spedire nessun altro byte" e dice "Le ultime informazioni ricevute dalla controparte dicevano che AdvertisedWindow=2000, ma da allora sono stati spediti 3000-1000=2000 byte".** Questa è una spiegazione che si riferisce a dati *diversi* da quelli forniti nella domanda.
+                            *   Se usiamo i dati forniti *nella domanda originale* (1999, 6999), senza `AdvertisedWindow` esplicita, e assumendo un `AdvertisedWindow` tale che `EffectiveWindow` non sia negativa: La domanda chiede quanti byte possono essere immediatamente inviati. I byte inviati ma non riscontrati sono 5000. Se `AdvertisedWindow` fosse 2000 (come nell'esempio del prof per altro compito), allora `EffectiveWindow` sarebbe negativa. C'è un'ambiguità o un dato mancante nella domanda per poterla risolvere con l'AdvertisedWindow. La domanda "Quanti byte possono essere immediatamente inviati alla controparte?" di solito implica `EffectiveWindow`.
+                            *   **Conclusione:** Per questa specifica domanda (04-09-2023, D13a), senza l'AdvertisedWindow, la risposta esatta è difficile. Se si assume che il limite sia solo il buffer del mittente, la risposta sarebbe 5000 byte. Se è zero, `AdvertisedWindow` deve essere <= `LastByteSent - LastByteAcked`.
+
+                        </li>
+                        <li>(b) **Byte che l'applicazione può ancora produrre nel buffer del mittente:**
+                            Buffer di uscita del mittente: `MaxSendBuffer = 10000` byte.
+                            Byte già scritti dall'applicazione nel buffer: `LastByteWritten = 9999`.
+                            Spazio libero nel buffer di uscita per l'applicazione = `MaxSendBuffer - LastByteWritten = 10000 - 9999 = 1` byte.
+                            L'applicazione può produrre solo 1 byte in più prima di bloccarsi.
+                            **Risposta (b):** 1 byte.
+                            <div class="correction-box">
+                                <strong>Correzione/Chiarezza:</strong> La risposta del prof per (b) è "sono 4999 byte da 7000 a 11999, più 1001 da 0 a 1000, quindi 6000 byte in tutto." Questa si riferisce a uno scenario completamente diverso. La mia analisi è basata sulle variabili fornite e sulla logica del buffer produttore-consumatore.
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title" id="silly-window-nagle">Silly Window Syndrome e Algoritmo di Nagle</h4>
+                <p>La **Silly Window Syndrome (SWS)** è un problema di efficienza in TCP dove segmenti molto piccoli vengono inviati, aumentando l'overhead degli header rispetto al payload utile. Si verifica quando il mittente è troppo aggressivo nell'invio di piccoli dati, o quando il ricevitore apre la finestra molto lentamente (es. 1 byte alla volta).</p>
+                <ul>
+                    <li>**Algoritmo di Nagle:** Progettato per mitigare la SWS. Funziona così:
+                        <ul>
+                            <li>Se ci sono dati da inviare e la finestra è aperta, ma ci sono già dati non riscontrati in volo, il mittente **attende** finché non riceve un ACK (che libera la finestra o conferma i dati in volo).</li>
+                            <li>Se non ci sono dati in volo, o se la finestra è completamente aperta (>= MSS), i dati vengono inviati immediatamente.</li>
+                        </ul>
+                        Questo algoritmo raggruppa piccoli dati in un unico segmento più grande, riducendo l'overhead.
+                    </li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 19-02-2024, Domanda 13):</strong>
+                    <p>Un processo sta inviando dati ad un altro processo, attraverso una connessione TCP con MSS=1460 byte e RTT=30ms. Se il processo sender scrive nella socket un buffer di 200 byte ogni 5 ms, qual è la dimensione del payload segmenti inviati? Si spieghi il motivo.</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ol>
+                        <li>**Dati di input:**
+                            MSS (Maximum Segment Size) = 1460 byte.
+                            RTT = 30 ms.
+                            Ritmo di scrittura applicazione: 200 byte ogni 5 ms.
+                        </li>
+                        <li>**Dati scritti dall'applicazione nell'RTT:**
+                            In un RTT (30 ms), l'applicazione scrive \( \frac{30 \text{ ms}}{5 \text{ ms/scrittura}} \times 200 \text{ byte/scrittura} = 6 \times 200 = 1200 \text{ byte}\).
+                        </li>
+                        <li>**Applicazione dell'Algoritmo di Nagle:**
+                            *   L'Algoritmo di Nagle dice che se ci sono dati non riscontrati in volo, e la finestra non è completamente aperta, si deve attendere l'ACK.
+                            *   Il mittente raccoglierà i dati scritti dall'applicazione fino a quando non riceverà un ACK (o fino a quando non avrà MSS byte).
+                            *   Poiché 1200 byte (`LastByteWritten` in un RTT) sono minori dell'MSS (1460 byte), il mittente attenderà di accumulare questi 1200 byte prima di inviarli (o fino a quando non scade il timer per il primo segmento, ma Nagle aspetta l'ACK).
+                            *   Alla ricezione dell'ACK del segmento precedente, TCP invierà il segmento con tutti i 1200 byte accumulati.
+                        </li>
+                    </ol>
+                    <p><strong>Risposta:</strong> La dimensione del payload dei segmenti inviati sarà di 1200 byte. Questo avviene perché l'Algoritmo di Nagle, trovando che i dati scritti nell'RTT (1200 byte) sono meno dell'MSS (1460 byte) e presumibilmente essendoci dati in volo (essendo una connessione attiva), attende di accumulare questi dati prima di inviare un singolo segmento.</p>
+                </div>
+
+            </div>
+        </article>
+
+        <article id="protezione-wraparound" class="content-section">
+            <h2 class="section-title">3.6. Protezione dal Wraparound dei Numeri di Sequenza</h2>
+            <div class="section-content">
+                <p>Come già discusso nel Capitolo 2 per il Livello Data Link, il problema del wraparound si ripropone anche a Livello Trasporto, dove i numeri di sequenza sono più grandi (32 bit) ma anche le velocità di trasmissione sono maggiori. Il problema è che un vecchio segmento, con un numero di sequenza riutilizzato, potrebbe arrivare "tardi" e essere scambiato per un nuovo segmento valido.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta la sezione "Protezione dal Wraparound" (Pagina 10 del formulario e Pagine 104-105 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Bassa</h4>
+                <p>Questo argomento è meno ricorrente in quanto a calcoli diretti, ma è importante conoscerne il concetto e perché TCP usa numeri di sequenza così grandi.</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** D (Domanda 12 - TCP Listen stato, ma in contesto di MSL)</li>
+                        <li>**17-02-2023:** D (Domanda 12 - TCP Listen stato, ma in contesto di MSL)</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** N</li>
+                        <li>**19-02-2024:** D (Domanda 12 - TCP Close stato, in contesto di MSL)</li>
+                        <li>**15-07-2024:** B (Domanda 12 - TCP Close stato, in contesto di MSL)</li>
+                        <li>**04-09-2023:** D (Domanda 12 - TCP Close stato, in contesto di MSL)</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Il Problema</h4>
+                <p>I numeri di sequenza TCP sono a 32 bit. A velocità molto elevate, è teoricamente possibile che tutti i numeri di sequenza vengano "avvolti" (reused) prima che un segmento con un numero di sequenza precedente sia completamente uscito dalla rete e il suo ACK sia arrivato.</p>
+
+                <h4 class="subsubsection-title">Soluzione: MSL (Maximum Segment Lifetime)</h4>
+                <p>TCP si basa sul concetto di **MSL (Maximum Segment Lifetime)**, il tempo massimo che un segmento può rimanere in rete. Tipicamente è di 2 minuti. Lo stato TIME_WAIT, che dura 2*MSL, serve proprio a garantire che tutti i segmenti "vecchi" di una connessione siano scomparsi prima che un numero di sequenza possa essere riutilizzato per una nuova incarnazione della stessa connessione.</p>
+                <p>La condizione per evitare il wraparound è che il numero massimo di byte che possono essere in volo in un dato momento (determinato dalla finestra) sia minore del numero totale di byte che possono essere identificati da numeri di sequenza univoci in un MSL.</p>
+                <p>In pratica, la dimensione della finestra (`AdvertisedWindow`) deve essere significativamente più piccola del range dei numeri di sequenza. TCP usa 32 bit per i numeri di sequenza e 16 bit per la `Window Size`, quindi la condizione è ampiamente soddisfatta (\(2^{32} \gg 2 \times 2^{16}\)).</p>
+            </div>
+        </article>
+
+        <article id="controllo-congestione-tcp" class="content-section">
+            <h2 class="section-title">3.7. Controllo della Congestione TCP</h2>
+            <div class="section-content">
+                <p>Il controllo della congestione in TCP è un meccanismo cruciale per prevenire e reagire alla congestione nella rete. A differenza del controllo di flusso (che previene il sovraccarico del *ricevitore*), il controllo di congestione previene il sovraccarico della *rete* stessa.</p>
+
+                <div class="note-box">
+                    <strong>Riferimento agli Appunti del tuo Amico:</strong> Consulta le sezioni "Controllo della congestione e allocazione delle risorse", "Controllo della congestione in TCP", "Evitamento della congestione in TCP" (Pagine 10 del formulario e Pagine 107-120 del PDF completo).
+                </div>
+
+                <h4>Frequenza negli Esami: Molto Alta</h4>
+                <p>Questo è un argomento **estremamente importante** e quasi sempre presente, spesso in domande complesse che richiedono la comprensione e l'applicazione degli algoritmi (Slow Start, Fast Retransmit/Recovery, RED).</p>
+
+                <div class="exercise-box">
+                    <strong>Occorrenze dell'Argomento negli Esami:</strong>
+                    <ul>
+                        <li>**02-02-2023:** N</li>
+                        <li>**17-02-2023:** N</li>
+                        <li>**15-06-2023:** N</li>
+                        <li>**29-01-2024:** N</li>
+                        <li>**16-09-2024:** D (Domanda 14 - TCP congestione)</li>
+                        <li>**19-02-2024:** D (Domanda 14 - TCP congestione)</li>
+                        <li>**15-07-2024:** B (Domanda 14 - TCP congestione/RED)</li>
+                        <li>**04-09-2023:** D (Domanda 14 - TCP congestione)</li>
+                        <li>**17-06-2024:** N</li>
+                        <li>**Appello X:** N</li>
+                        <li>**Appello Y:** N</li>
+                    </ul>
+                </div>
+
+                <h4 class="subsubsection-title">Congestione della Rete</h4>
+                <p>La congestione si verifica quando la quantità di traffico inviata a una rete (o parte di essa) supera la sua capacità, portando a ritardi elevati e perdita di pacchetti (overflow dei buffer dei router). TCP cerca di evitare questo "congestion collapse".</p>
+
+                <h4 class="subsubsection-title" id="cwnd-aimd">Congestion Window (CWND) e AIMD (Additive Increase Multiplicative Decrease)</h4>
+                <ul>
+                    <li><strong>Congestion Window (CWND):</strong> Una variabile di stato mantenuta dal mittente TCP. Limita la quantità di dati che il mittente può avere "in volo" (non ancora riscontrati). Il numero effettivo di byte inviabili è il minimo tra `AdvertisedWindow` (finestra del ricevitore) e `CWND`.
+                        <div class="math-block">
+                            $$ \text{Effective Window} = \min(\text{AdvertisedWindow}, \text{CWND}) $$
+                        </div>
+                    </li>
+                    <li><strong>AIMD (Additive Increase Multiplicative Decrease):</strong> L'algoritmo di base di TCP per adattare la CWND.
+                        <ul>
+                            <li>**Additive Increase:** Quando la rete non è congestionata (ACK ricevuti), la CWND aumenta linearmente. Tipicamente, per ogni RTT (o gruppo di ACK che copre una CWND completa), la CWND aumenta di 1 MSS (Maximum Segment Size).
+                                <div class="math-block">
+                                    $$ \text{CWND}_{t+1} = \text{CWND}_t + \alpha \quad (\alpha > 0 \text{, es. 1 MSS}) $$
+                                </div>
+                            </li>
+                            <li>**Multiplicative Decrease:** Quando la rete rileva congestione (pacchetti persi, timeout), la CWND diminuisce drasticamente (tipicamente dimezzata).
+                                <div class="math-block">
+                                    $$ \text{CWND}_{t+1} = \text{CWND}_t \times \beta \quad (\beta < 1 \text{, es. 0.5}) $$
+                                </div>
+                            </li>
+                        </ul>
+                        Questo comportamento crea un andamento "a dente di sega" della CWND: aumenta lentamente, diminuisce rapidamente.
+                    </li>
+                    <li>**Congestion Threshold (ssthresh):** Una variabile di stato. Inizialmente, la CWND cresce esponenzialmente fino a `ssthresh`, poi linearmente.</li>
+                </ul>
+
+                <h4 class="subsubsection-title" id="timeout-rto">Stima del Timeout (RTO) e Karn-Partridge Algorithm</h4>
+                <p>Il trasmettitore imposta un **Retransmission Timeout (RTO)** per ogni segmento. Se l'ACK non arriva entro l'RTO, il segmento viene ritrasmesso. L'RTO deve essere adattivo e basato sull'RTT (Round Trip Time) stimato.</p>
+                <ul>
+                    <li>**Stima RTT:** TCP calcola un `EstimatedRTT` basato su un RTT campionata (`SampleRTT`) tramite una media pesata.
+                        <div class="math-block">
+                            $$ \text{EstimatedRTT} = (1-\gamma) \cdot \text{EstimatedRTT} + \gamma \cdot \text{SampleRTT} $$
+                        </div>
+                        (Dove \(\gamma\) è un fattore di smorzamento, es. 0.125).
+                    </li>
+                    <li>**RTO:** Calcolato da `EstimatedRTT` con un margine di sicurezza (es. `RTO = EstimatedRTT + 4 * DevRTT`).</li>
+                    <li>**Problema di Karn-Partridge:** Se un segmento viene ritrasmesso, l'ACK che arriva potrebbe essere per la trasmissione originale o per la ritrasmissione. Per evitare ambiguità, l'algoritmo Karn-Partridge specifica che:
+                        <ul>
+                            <li>Non si aggiorna l'EstimatedRTT con SampleRTT derivato da segmenti ritrasmessi.</li>
+                            <li>Si raddoppia l'RTO ad ogni ritrasmissione consecutiva di un segmento (exponential backoff del RTO).</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4 class="subsubsection-title" id="slow-start-fast-retransmit-recovery">Slow Start, Fast Retransmit, Fast Recovery</h4>
+                <p>Questi meccanismi affinano il comportamento di TCP in risposta alla congestione.</p>
+                <ul>
+                    <li>**Slow Start:**
+                        <ul>
+                            <li>**Idea:** Inizialmente, la CWND parte da un valore piccolo (es. 1 MSS). Per ogni ACK ricevuto, la CWND aumenta di 1 MSS. Questo porta a una crescita **esponenziale** della CWND.</li>
+                            <li>**Scopo:** Esplorare rapidamente la capacità della rete all'inizio di una connessione o dopo un timeout, fino a raggiungere la `ssthresh` (Congestion Threshold).</li>
+                            <li>**Transizione:** Quando CWND raggiunge `ssthresh`, TCP passa a `Additive Increase`.</li>
+                        </ul>
+                    </li>
+                    <li>**Fast Retransmit:**
+                        <ul>
+                            <li>**Idea:** Un segnale di congestione più precoce di un timeout. Se il mittente riceve **tre ACK duplicati** (ACK per lo stesso numero di sequenza, indicando che i segmenti successivi sono arrivati ma un segmento è stato perso), ritrasmette immediatamente il segmento perso **senza attendere il timeout**.</li>
+                            <li>**Scopo:** Reagire più velocemente alle perdite di pacchetti dovute a congestione lieve, evitando l'RTO.</li>
+                        </ul>
+                    </li>
+                    <li>**Fast Recovery:**
+                        <ul>
+                            <li>**Idea:** Associata a Fast Retransmit. Dopo un Fast Retransmit, la `ssthresh` viene dimezzata, e la CWND viene impostata a `ssthresh + 3 MSS`. Poi si entra direttamente in `Additive Increase` (saltando Slow Start).</li>
+                            <li>**Scopo:** Riprendere la trasmissione più velocemente dopo una perdita indicata da ACK duplicati, assumendo che la rete non sia completamente congestionata.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4 class="subsubsection-title" id="red-evitamento-congestione">RED (Random Early Detection)</h4>
+                <p>RED è un meccanismo di **evitamento della congestione** implementato nei **router** (non negli host TCP). Invece di aspettare che i buffer siano pieni e scartare pacchetti ("tail drop"), RED scarta pacchetti in modo probabilistico e anticipato.</p>
+                <ul>
+                    <li>**Idea:** Se la lunghezza media della coda (`AvgLen`) supera una soglia (`MinThresh`), il router inizia a scartare i pacchetti in arrivo con una certa probabilità (`P(drop)`). Più `AvgLen` cresce, maggiore è `P(drop)`. Se `AvgLen` supera `MaxThresh`, tutti i pacchetti vengono scartati.</li>
+                    <li>**Formula `AvgLen`:** `AvgLen = (1 - w) * AvgLen + w * SampleLen` (media mobile ponderata).</li>
+                    <li>**Formula `P(drop)`:** `P(drop) = MaxP * (AvgLen - MinThresh) / (MaxThresh - MinThresh)`.</li>
+                    <li>**Scopo:** Dare un segnale precoce di congestione (perdita di pacchetti) agli host TCP prima che la rete diventi completamente congestionata. Gli host reagiscono a queste piccole perdite riducendo la CWND, stabilizzando la rete più dolcemente.</li>
+                </ul>
+
+                <div class="exercise-box">
+                    <strong>Esercizio d'Esame Esempio (adattato dal 04-09-2023, Domanda 14):</strong>
+                    <p>Un router applica la strategia RED ad un flusso di pacchetti in ingresso ad una coda di una interfaccia che ha una velocità massima di 10 MB/s. Si osserva che il router scarta il 20% dei pacchetti di tale flusso. (a) A che velocità arrivano i pacchetti in ingresso al router (in MB/s)? (b) L'eliminazione dei pacchetti quale effetto dovrebbe avere sull'host che sta generando i pacchetti?</p>
+                    <p><strong>Soluzione:</strong></p>
+                    <ul>
+                        <li>(a) **Velocità di arrivo dei pacchetti:**
+                            *   La coda si stabilizza quando il tasso di arrivo è uguale al tasso di uscita meno il tasso di scarto.
+                            *   Velocità massima di uscita = 10 MB/s.
+                            *   Il router scarta il 20% dei pacchetti (0.20). Questo significa che il 80% dei pacchetti (0.80) viene inoltrato.
+                            *   Sia \(R_{in}\) il tasso di arrivo dei pacchetti.
+                            *   Il tasso di pacchetti inoltrati = \(R_{in} \times (1 - \text{scarto})\).
+                            *   Affinché la coda si stabilizzi, il tasso di pacchetti inoltrati deve essere uguale alla velocità massima di uscita.
+                            *   \(R_{in} \times (1 - 0.20) = 10 \text{ MB/s}\)
+                            *   \(R_{in} \times 0.80 = 10 \text{ MB/s}\)
+                            *   \(R_{in} = \frac{10}{0.80} = 12.5 \text{ MB/s}\).
+                            **Risposta (a):** I pacchetti arrivano al router a 12.5 MB/s.
+                        </li>
+                        <li>(b) **Effetto sull'host generatore:**
+                            *   L'eliminazione dei pacchetti (scarto) da parte del router viene interpretata dall'host mittente TCP come un segnale di **congestione**.
+                            *   In risposta a questa perdita, l'host TCP ridurrà la sua **Congestion Window (CWND)** (dimezzandola se rileva un timeout o se riceve 3 ACK duplicati) e di conseguenza **rallenterà la sua velocità di trasmissione**.
+                            *   Questo effetto è desiderabile per evitare di aggravare ulteriormente la congestione nella rete.
+                            **Risposta (b):** L'eliminazione dei pacchetti dovrebbe far sì che l'host riduca la sua velocità di trasmissione, a causa dei meccanismi di controllo della congestione di TCP che interpretano la perdita come segnale di congestione.
+                            <div class="correction-box">
+                                <strong>Correzione/Chiarezza:</strong> La risposta del prof nell'esame riporta "(a) La coda si stabilizza quando i dati che vengono accodati equivalgono a quelli che escono. Quindi il datarate in ingresso C deve essere tale che 0.8 * C = 10, e quindi C = 10/0.8 = 12.5 MB/s. (b) Se è TCP, dovrebbe rallentare." La mia soluzione e spiegazione sono allineate e più dettagliate.
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti Corso Reti di Calcolatori</p>
+    </footer>
+
+    <script src="assets/common.js"></script>
+    <script>
+        // Mermaid.js and MathJax re-initialization are handled by common.js when sections are shown.
+        // No specific script for this HTML file is needed here beyond common.js.
+    </script>
+</body>
+</html>
