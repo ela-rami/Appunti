@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 17: Funzioni di Hash e Indirizzamento Aperto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        .note-title { font-size: 1.05rem; color: var(--accent-secondary); margin-top: 1.2rem; margin-bottom: 0.6rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+
+        .array-representation table {
+            margin: 0 auto; /* Centra la tabella */
+            border-collapse: collapse;
+            font-family: var(--font-code);
+        }
+        .array-representation th, .array-representation td {
+            border: 1px solid var(--border-soft);
+            padding: 0.5em 0.75em;
+            min-width: 30px; /* Larghezza minima cella */
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .array-representation th { /* Indici */
+            background-color: var(--code-bg);
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .array-representation td { /* Valori */
+             background-color: var(--bg-card);
+             color: var(--text-primary);
+        }
+        .array-representation td.highlight-current {
+            border: 2px solid var(--accent-secondary) !important;
+            font-weight: bold;
+        }
+        .array-representation td.cell-deleted {
+            background-color: rgba(239, 68, 68, 0.2) !important; 
+            color: #fca5a5;
+            text-decoration: line-through;
+        }
+         .array-representation td.cell-nil {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1); /* Viola chiaro trasparente */
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em;
+            margin: 1.5em 0;
+            border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box { /* Per evidenziare gli esercizi per casa e le loro soluzioni */
+            background-color: rgba(250, 204, 21, 0.1); /* Giallo chiaro trasparente */
+            border-left: 4px solid #FACC15; /* Giallo */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .correction-box { /* Per evidenziare le correzioni alle spiegazioni della prof */
+            background-color: rgba(239, 68, 68, 0.1); /* Rosso chiaro trasparente */
+            border-left: 4px solid #EF4444; /* Rosso */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .correction-box strong { color: #EF4444; }
+
+        .clarification-box { /* Per evidenziare approfondimenti/chiarimenti aggiunti da me */
+            background-color: rgba(52, 211, 153, 0.08); /* Verde acqua chiaro trasparente */
+            border-left: 4px solid #34D399; /* Verde acqua */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 26 nov 2020 (2).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 17: Funzioni di Hash e Indirizzamento Aperto</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-recap" class="sidebar-link">1. Introduzione e Recap: Il Problema dell'Hashing</a></li>
+            <li><a href="#proprieta-funzioni-hash" class="sidebar-link">2. Proprietà di una Buona Funzione di Hash</a></li>
+            <li><a href="#proprieta-fondamentali" class="sidebar-link">2.1. Requisiti Fondamentali</a></li>
+            <li><a href="#proprieta-suriettivita" class="sidebar-link">2.2. Suriettività</a></li>
+            <li><a href="#proprieta-uniformita" class="sidebar-link">2.3. Distribuzione Uniforme ("Equiprobabilità")</a></li>
+            <li><a href="#metodi-funzioni-hash" class="sidebar-link">3. Metodi per la Costruzione di Funzioni di Hash</a></li>
+            <li><a href="#metodo-divisione" class="sidebar-link">3.1. Metodo della Divisione</a></li>
+            <li><a href="#metodo-moltiplicazione" class="sidebar-link">3.2. Metodo della Moltiplicazione</a></li>
+            <li><a href="#open-addressing-intro" class="sidebar-link">4. Hashing con Indirizzamento Aperto (Open Addressing)</a></li>
+            <li><a href="#open-addressing-idea" class="sidebar-link">4.1. Idea Fondamentale e Confronto con Chaining</a></li>
+            <li><a href="#open-addressing-funzione-ispezione" class="sidebar-link">4.2. Funzione di Hash con Sequenza di Ispezione</a></li>
+            <li><a href="#cancellazione-open-addressing" class="sidebar-link">5. Il Problema della Cancellazione nell'Indirizzamento Aperto</a></li>
+            <li><a href="#cancellazione-fallimento-nil" class="sidebar-link">5.1. Perché il Marcatore NIL da solo non basta</a></li>
+            <li><a href="#cancellazione-soluzione-deleted" class="sidebar-link">5.2. La Soluzione: il Marcatore DELETED</a></li>
+            <li><a href="#open-addressing-operazioni" class="sidebar-link">5.3. Implementazione delle Operazioni (Inserimento, Ricerca, Cancellazione)</a></li>
+            <li><a href="#tecniche-ispezione" class="sidebar-link">6. Tecniche di Ispezione (Probing)</a></li>
+            <li><a href="#ispezione-lineare" class="sidebar-link">6.1. Ispezione Lineare (Linear Probing) e Clustering Primario</a></li>
+            <li><a href="#altre-tecniche-ispezione" class="sidebar-link">6.2. Altre Tecniche (cenni)</a></li>
+            <li><a href="#analisi-open-addressing" class="sidebar-link">7. Analisi delle Prestazioni (cenni)</a></li>
+            <li><a href="#esercizi-suggeriti" class="sidebar-link">8. Esercizi Suggeriti (Aggiunti dall'AI)</a></li>
+            <li><a href="#conclusioni" class="sidebar-link">9. Conclusioni</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-recap" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione e Recap: Il Problema dell'Hashing</h2>
+            <div class="section-content">
+                <p>La professoressa inizia la lezione riprendendo il discorso generale sulle <strong>tabelle di hash</strong>. L'obiettivo è trovare un modo efficiente per memorizzare un insieme di chiavi, che cambia dinamicamente nel tempo e che proviene da un universo molto vasto.</p>
+                <p>Si ricorda il compromesso fondamentale da raggiungere:</p>
+                <ul>
+                    <li><strong>Efficienza Temporale:</strong> Operazioni di ricerca, inserimento e cancellazione veloci, idealmente in tempo costante \(\Theta(1)\).</li>
+                    <li><strong>Efficienza Spaziale:</strong> Utilizzare una quantità di memoria proporzionale al numero di elementi effettivamente memorizzati, non all'intero universo.</li>
+                </ul>
+                <p>La discussione di oggi si concentra su come costruire "buone" funzioni di hash e introduce una nuova tecnica di gestione delle collisioni: l'<strong>indirizzamento aperto</strong>.</p>
+            </div>
+        </article>
+
+        <article id="proprieta-funzioni-hash" class="content-section">
+            <h2 class="section-title">2. Proprietà di una Buona Funzione di Hash</h2>
+            <div class="section-content">
+                <p>Prima di analizzare le tecniche di gestione delle collisioni, la professoressa dedica del tempo a definire quali sono le caratteristiche di una funzione di hash "ragionevole" o "buona".</p>
+            </div>
+        </article>
+
+        <article id="proprieta-fondamentali" class="content-section">
+            <h3 class="subsection-title">2.1. Requisiti Fondamentali</h3>
+            <div class="section-content">
+                <p>Una funzione di hash \(h\) deve soddisfare alcune proprietà di base per essere valida:</p>
+                <ol>
+                    <li>
+                        <strong>Dominio e Codominio Corretti:</strong> La funzione deve prendere come input una chiave dall'universo \(U\) e restituire un indice valido per la tabella \(T\), che ha dimensione \(M\).
+                        <div class="math-block">
+                        \( h: U \rightarrow \{0, 1, \dots, M-1\} \)
+                        </div>
+                        Questo significa che per qualsiasi chiave <code>x.key</code>, il valore di <code>h(x.key)</code> deve essere compreso tra 0 e M-1. Questa è la prima verifica da fare quando si analizza una funzione di hash.
+                    </li>
+                    <li>
+                        <strong>Non-Iniettività (Collisioni Inevitabili):</strong> Dato che l'universo delle chiavi \(|U|\) è tipicamente molto più grande della dimensione della tabella \(M\) (\(|U| \gg M\)), per il principio dei cassetti (o di Dirichlet), è matematicamente garantito che esisteranno almeno due chiavi distinte \(x.key \neq y.key\) tali che \(h(x.key) = h(y.key)\). Una funzione di hash <strong>non può essere iniettiva</strong> in generale. La gestione di queste collisioni è il cuore del problema dell'hashing.
+                    </li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="proprieta-suriettivita" class="content-section">
+            <h3 class="subsection-title">2.2. Suriettività</h3>
+            <div class="section-content">
+                <p>Una buona funzione di hash dovrebbe essere <strong>suriettiva</strong>. Questo significa che ogni slot della tabella (da 0 a M-1) deve poter essere raggiunto da almeno una chiave dell'universo.</p>
+                <div class="math-block">
+                \( \forall j \in \{0, \dots, M-1\}, \exists x \in U \text{ tale che } h(x.key) = j \)
+                </div>
+                <p>Se una funzione non fosse suriettiva, ci sarebbero delle celle della tabella che non verrebbero mai utilizzate, rappresentando uno spreco di memoria e una cattiva distribuzione delle chiavi.</p>
+            </div>
+        </article>
+        
+        <article id="proprieta-uniformita" class="content-section">
+            <h3 class="subsection-title">2.3. Distribuzione Uniforme ("Equiprobabilità")</h3>
+            <div class="section-content">
+                <p>Questa è la proprietà ideale, spesso assunta nelle analisi teoriche (come l'Ipotesi di Hashing Uniforme Semplice). Una funzione di hash ideale distribuisce le chiavi in modo uniforme su tutti gli \(M\) slot.</p>
+                <p>Questo implica che, in media, il numero di chiavi dell'universo che mappano a un qualsiasi slot \(j\) è approssimativamente:</p>
+                <div class="math-block">
+                \( \approx \frac{|U|}{M} \text{ elementi per posizione} \)
+                </div>
+                <p>Una distribuzione uniforme aiuta a minimizzare la lunghezza delle liste nel chaining o il numero di ispezioni nell'open addressing, portando a performance migliori.</p>
+            </div>
+        </article>
+        
+        <article id="metodi-funzioni-hash" class="content-section">
+            <h2 class="section-title">3. Metodi per la Costruzione di Funzioni di Hash (per chiavi intere)</h2>
+            <div class="section-content">
+                <p>La professoressa presenta due metodi standard per creare funzioni di hash quando le chiavi da gestire sono numeri interi.</p>
+            </div>
+        </article>
+
+        <article id="metodo-divisione" class="content-section">
+            <h3 class="subsection-title">3.1. Metodo della Divisione</h3>
+            <div class="section-content">
+                <p>Questo è il metodo più semplice e intuitivo. La funzione di hash è definita come:</p>
+                <div class="math-block">
+                \( h(k) = k \pmod{M} \)
+                </div>
+                <p>Si calcola semplicemente il resto della divisione della chiave intera \(k\) per la dimensione della tabella \(M\).</p>
+                <p><strong>Considerazioni sulla Scelta di M:</strong></p>
+                <ul>
+                    <li><strong>Scelta da Evitare:</strong> Non si dovrebbe mai scegliere \(M\) come una <strong>potenza di 2</strong> (es. \(M = 2^p\)). In questo caso, \(k \pmod{2^p}\) dipenderebbe solo dagli ultimi \(p\) bit della rappresentazione binaria della chiave \(k\), ignorando completamente gli altri bit. Se i dati di input presentano delle regolarità negli ultimi bit, questo può portare a una distribuzione pessima e a molte collisioni.</li>
+                    <li><strong>Scelta Ideale:</strong> Una scelta buona per \(M\) è un <strong>numero primo</strong> che non sia troppo vicino a una potenza di 2. Questo aiuta a "mescolare" meglio le chiavi e a distribuire gli elementi in modo più uniforme.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="metodo-moltiplicazione" class="content-section">
+            <h3 class="subsection-title">3.2. Metodo della Moltiplicazione</h3>
+            <div class="section-content">
+                <p>Questo metodo è meno sensibile alla scelta di \(M\). Si articola in due passaggi principali, a seconda che le chiavi siano già normalizzate o meno.</p>
+                <p><strong>Passo 1: Normalizzazione della chiave (se non lo è già)</strong></p>
+                <p>Si sceglie una costante reale \(R\) tale che \(0 < R < 1\). Spesso si sceglie un valore "irrazionale" o che abbia una buona rappresentazione binaria, come la sezione aurea \(\phi^{-1} \approx 0.618\). Si calcola:</p>
+                <div class="math-block">
+                \( \text{parte\_frazionaria} = k \cdot R - \lfloor k \cdot R \rfloor \)
+                </div>
+                <p>Questa operazione produce un valore nell'intervallo \([0, 1)\).</p>
+                
+                <p><strong>Passo 2: Mappatura all'indice della tabella</strong></p>
+                <p>Si moltiplica la parte frazionaria per la dimensione della tabella \(M\) e si prende la parte intera inferiore (floor) del risultato:</p>
+                <div class="math-block">
+                \( h(k) = \lfloor M \cdot (k \cdot R - \lfloor k \cdot R \rfloor) \rfloor \)
+                </div>
+                <p><strong>Vantaggio:</strong> La scelta di \(M\) è molto meno critica. Ad esempio, qui si possono usare potenze di 2 per \(M\) senza i problemi del metodo della divisione, il che può essere efficiente a livello di implementazione (operazioni di bit-shifting).</p>
+                <div class="clarification-box">
+                    <strong>Connessione con Bucket Sort (Aggiunto):</strong>
+                    <p>La formula del metodo della moltiplicazione è essenzialmente la stessa usata in <strong>Bucket Sort</strong> per distribuire elementi dall'intervallo \([0, 1)\) negli \(N\) bucket. Lì, le chiavi \(k\) sono già in \([0, 1)\) (quindi non serve il passo con \(R\)), e la formula è \(\lfloor N \cdot k \rfloor\). Il principio di usare la moltiplicazione e la parte intera per mappare un intervallo in un set di indici è identico.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="open-addressing-intro" class="content-section">
+            <h2 class="section-title">4. Hashing con Indirizzamento Aperto (Open Addressing)</h2>
+            <div class="section-content">
+                <p>Dopo aver discusso come costruire funzioni di hash, la professoressa introduce l'<strong>indirizzamento aperto</strong>, una tecnica alternativa al chaining per la gestione delle collisioni.</p>
+            </div>
+        </article>
+
+        <article id="open-addressing-idea" class="content-section">
+            <h3 class="subsection-title">4.1. Idea Fondamentale e Confronto con Chaining</h3>
+            <div class="section-content">
+                <p>L'idea fondamentale dell'indirizzamento aperto è che <strong>tutti gli elementi sono memorizzati direttamente all'interno della tabella di hash stessa</strong>. Non ci sono liste concatenate o altre strutture dati esterne.</p>
+                <ul>
+                    <li><strong>Vantaggi:</strong> Risparmio di memoria (niente puntatori) e potenziale miglioramento della località di riferimento.</li>
+                    <li><strong>Svantaggi:</strong> Il fattore di carico \(\alpha = N/M\) deve essere \(\le 1\). La gestione delle cancellazioni è più complessa.</li>
+                </ul>
+                <p>Quando si inserisce un elemento e lo slot calcolato è già occupato (collisione), l'algoritmo deve "ispezionare" (o "sondare", in inglese *probe*) altre celle della tabella seguendo una sequenza predefinita, finché non ne trova una libera.</p>
+            </div>
+        </article>
+        
+        <article id="open-addressing-funzione-ispezione" class="content-section">
+            <h3 class="subsection-title">4.2. Funzione di Hash con Sequenza di Ispezione</h3>
+            <div class="section-content">
+                <p>La funzione di hash per l'indirizzamento aperto definisce una sequenza di ispezione per ogni chiave. La funzione dipende non solo dalla chiave \(k\), ma anche dal numero del tentativo \(i\), che va da 0 a M-1.</p>
+                <p>La funzione è della forma: \(h: U \times \{0, 1, \dots, M-1\} \rightarrow \{0, 1, \dots, M-1\}\)</p>
+                <p>La sequenza di ispezione per la chiave \(k\) è \(\langle h(k, 0), h(k, 1), \dots, h(k, M-1) \rangle\).</p>
+                <p><strong>Requisito Fondamentale:</strong> Per ogni chiave \(k\), la sequenza di ispezione deve essere una <strong>permutazione</strong> degli indici \((0, 1, \dots, M-1)\). Questo garantisce che, se c'è almeno uno slot libero, l'algoritmo lo troverà scandendo tutte le posizioni possibili.</p>
+            </div>
+        </article>
+
+        <article id="cancellazione-open-addressing" class="content-section">
+            <h2 class="section-title">5. Il Problema della Cancellazione nell'Indirizzamento Aperto</h2>
+            <div class="section-content">
+                <p>Questo è un punto critico e complesso dell'indirizzamento aperto. Non si può semplicemente rimuovere un elemento e marcare la sua cella come vuota (<code>NIL</code>).</p>
+            </div>
+        </article>
+        
+        <article id="cancellazione-fallimento-nil" class="content-section">
+            <h3 class="subsection-title">5.1. Perché il Marcatore NIL da solo non basta</h3>
+            <div class="section-content">
+                <p>Cancellare un elemento e mettere <code>NIL</code> al suo posto interromperebbe la "catena" di ispezione per altri elementi che hanno subito una collisione in quel punto.</p>
+                <p><strong>Esempio illustrativo:</strong></p>
+                <p>Usiamo ispezione lineare su una tabella di dimensione M.
+                <ol>
+                    <li>Inserisco `k1`, che va in posizione `j`.</li>
+                    <li>Inserisco `k2`, che collide con `k1` e, dopo ispezione, va in posizione `j+1`.</li>
+                    <li>Ora cancello `k1` e metto `NIL` in posizione `j`.</li>
+                    <li>Se adesso cerco `k2`, l'algoritmo calcola la sua posizione iniziale `j`, la trova vuota (<code>NIL</code>) e conclude (erroneamente) che `k2` non è nella tabella, senza continuare a ispezionare la posizione `j+1`.</li>
+                </ol>
+            </div>
+        </article>
+        
+        <article id="cancellazione-soluzione-deleted" class="content-section">
+            <h3 class="subsection-title">5.2. La Soluzione: il Marcatore DELETED</h3>
+            <div class="section-content">
+                <p>Per risolvere questo, ogni cella della tabella può trovarsi in uno di tre stati:</p>
+                <ol>
+                    <li><strong>Occupata:</strong> contiene un elemento valido.</li>
+                    <li><strong>Vuota (NIL):</strong> non ha mai contenuto un elemento (o è stata riorganizzata).</li>
+                    <li><strong>Cancellata (DELETED):</strong> conteneva un elemento che è stato rimosso.</li>
+                </ol>
+                <p>Le operazioni gestiscono questi stati in modo diverso:</p>
+                <ul>
+                    <li><strong>Ricerca:</strong> Se durante l'ispezione si incontra una cella `DELETED`, la ricerca <strong>deve proseguire</strong>. Si ferma solo se trova l'elemento o una cella `NIL`.</li>
+                    <li><strong>Inserimento:</strong> Una cella `DELETED` è considerata libera. Un nuovo elemento può essere inserito al suo posto, sovrascrivendo il marcatore.</li>
+                </ul>
+                 <div class="array-representation">
+                    <p>Tabella con i tre stati possibili:</p>
+                    <table><thead><tr><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+                    <tbody><tr><td>Ancona</td><td class="cell-deleted">DELETED</td><td>Belluno</td><td class="cell-nil">NIL</td><td>Cagliari</td></tr></tbody></table>
+                     <caption>Se cerco una chiave che mappa a 1, troverò DELETED e continuerò a cercare in 2, 3, etc. Se inserisco, posso usare la cella 1.</caption>
+                </div>
+            </div>
+        </article>
+        
+        <article id="open-addressing-operazioni" class="content-section">
+            <h3 class="subsection-title">5.3. Implementazione delle Operazioni (Inserimento, Ricerca)</h3>
+            <div class="section-content">
+                <p>La professoressa mostra lo pseudocodice per l'inserimento e la ricerca (la cancellazione è una ricerca seguita da una marcatura).</p>
+                <pre><code class="language-pseudocode">
+// Inserimento con Indirizzamento Aperto
+Hash-Insert-Open(T, k_insert)
+  i = 0 // Indice del tentativo di ispezione
+  repeat
+    j = h(k_insert, i) // Calcola la j-esima posizione da provare
+    
+    // Se la cella è libera (o era stata cancellata), inserisci
+    if T[j] == NIL or T[j] == DELETED then
+      T[j] = k_insert
+      return j // Inserimento riuscito
+    else
+      i = i + 1 // Altrimenti, passa al tentativo successivo
+      
+  until i == M // Se ho provato tutte le M posizioni
+  
+  error "Hash table overflow" // La tabella è piena
+
+// Ricerca con Indirizzamento Aperto
+Hash-Search-Open(T, k_search)
+  i = 0
+  repeat
+    j = h(k_search, i)
+    
+    if T[j] == k_search then
+      return j // Elemento trovato
+      
+    i = i + 1
+  
+  // La ricerca termina se trovo una cella NIL (che interrompe la catena)
+  // o se ho scandito tutta la tabella senza successo.
+  until T[j] == NIL or i == M
+  
+  return NIL // Elemento non trovato
+                </code></pre>
+                 <div class="correction-box">
+                    <strong>Correzione allo Pseudocodice dell'Inserimento (dalla registrazione):</strong>
+                    <p>Durante la scrittura dello pseudocodice dell'inserimento, la professoressa ha inizialmente usato una struttura `while` che poteva portare a un errore nel caso limite (`i=M`). La versione corretta, più robusta, è quella presentata sopra con un ciclo `repeat...until`. L'idea chiave è che il ciclo deve continuare finché non si trova uno slot libero (`NIL` o `DELETED`) o finché non si sono provati tutti gli `M` possibili slot.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="tecniche-ispezione" class="content-section">
+            <h2 class="section-title">6. Tecniche di Ispezione (Probing)</h2>
+            <div class="section-content">
+                <p>La professoressa conclude accennando brevemente a come la sequenza di ispezione viene generata nella pratica.</p>
+            </div>
+        </article>
+
+        <article id="ispezione-lineare" class="content-section">
+            <h3 class="subsection-title">6.1. Ispezione Lineare (Linear Probing) e Clustering Primario</h3>
+            <div class="section-content">
+                <p>È la tecnica più semplice. Si usa una funzione di hash ausiliaria \(h'(k)\) per la posizione iniziale, e poi si ispezionano le celle successive in modo sequenziale.</p>
+                <div class="math-block">
+                \( h(k, i) = (h'(k) + i) \pmod{M} \)
+                </div>
+                <p><strong>Problema del Clustering Primario:</strong> Come già discusso, questa tecnica soffre di "clustering primario". Lunghi blocchi di celle occupate tendono a crescere, perché qualsiasi chiave che mappa all'interno o subito prima del blocco dovrà scorrere fino alla fine, allungandolo. Questo peggiora notevolmente le performance medie.</p>
+            </div>
+        </article>
+
+        <article id="altre-tecniche-ispezione" class="content-section">
+            <h3 class="subsection-title">6.2. Altre Tecniche (cenni)</h3>
+            <div class="section-content">
+                <p>La professoressa menziona che per mitigare il clustering esistono tecniche più sofisticate che generano sequenze di ispezione non contigue:</p>
+                <ul>
+                    <li><strong>Ispezione Quadratica (Quadratic Probing):</strong> Usa un termine quadratico per il passo (es. \(h(k,i)=(h'(k)+c_1 i+c_2 i^2)\pmod M\)). Riduce il clustering primario ma può soffrire di clustering secondario (chiavi con lo stesso hash iniziale seguono la stessa sequenza di ispezione).</li>
+                    <li><strong>Hashing Doppio (Double Hashing):</strong> Utilizza due funzioni di hash, \(h_1\) per la posizione iniziale e \(h_2\) per la dimensione del passo: \(h(k,i)=(h_1(k)+i \cdot h_2(k))\pmod M\). È la tecnica più efficace per approssimare una distribuzione uniforme delle sequenze di ispezione.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="analisi-open-addressing" class="content-section">
+            <h2 class="section-title">7. Analisi delle Prestazioni (cenni)</h2>
+            <div class="section-content">
+                <p>La professoressa conclude con una nota sulla performance dell'indirizzamento aperto. Assumendo un hashing uniforme (che l'hashing doppio approssima bene), il numero atteso di ispezioni dipende fortemente dal fattore di carico \(\alpha = N/M\).</p>
+                <p>Il numero atteso di ispezioni per un inserimento (o una ricerca con esito negativo) è al più:</p>
+                <div class="math-block">
+                \( \frac{1}{1 - \alpha} \)
+                </div>
+                <p>Questo dimostra matematicamente perché le performance degradano rapidamente man mano che la tabella si riempie (\(\alpha \to 1\)).</p>
+            </div>
+        </article>
+
+        <article id="esercizi-suggeriti" class="content-section">
+            <h2 class="section-title">8. Esercizi Suggeriti (Aggiunti dall'AI)</h2>
+            <div class="section-content">
+                <p>La professoressa non ha assegnato esplicitamente esercizi in questa lezione. Di seguito, alcuni esercizi per consolidare i concetti presentati.</p>
+                <div class="exercise-box">
+                    <strong>Esercizio 1: Gestione di NIL e DELETED</strong>
+                    <p><strong>Testo:</strong> Si consideri una tabella di hash con indirizzamento aperto e ispezione lineare. Lo stato attuale della tabella (M=7) è: <code>[22, NIL, 8, 15, DELETED, NIL, 29]</code>.
+                    <ol>
+                        <li>Si vuole cercare la chiave <code>k=1</code>. Quale sequenza di slot viene ispezionata e qual è l'esito? (Assumere \(h'(k) = k \pmod 7\)).</li>
+                        <li>Si vuole inserire la chiave <code>k=36</code>. Quale sequenza di slot viene ispezionata e dove viene inserita?</li>
+                    </ol>
+                    </p>
+                    <p><strong>Soluzione (Idea):</strong></p>
+                    <ol>
+                        <li><strong>Ricerca di 1:</strong> \(h'(1) = 1\). Controllo <code>T[1]</code>. È <code>NIL</code>. Poiché la catena di ispezione si interrompe su <code>NIL</code>, la ricerca termina qui con esito negativo (chiave non trovata). L'algoritmo non prosegue.</li>
+                        <li><strong>Inserimento di 36:</strong> \(h'(36) = 36 \pmod 7 = 1\).
+                            <ul>
+                                <li>Controllo <code>T[1]</code>. È <code>NIL</code>. Poiché `NIL` indica una cella libera, 36 viene inserito qui.</li>
+                                <li>Tabella finale: <code>[22, 36, 8, 15, DELETED, NIL, 29]</code>.</li>
+                            </ul>
+                        Se la cella <code>T[1]</code> fosse stata occupata, l'ispezione sarebbe proseguita a <code>T[2]</code>, poi <code>T[3]</code>. Alla cella <code>T[4]</code>, che è <code>DELETED</code>, l'inserimento si sarebbe fermato e 36 sarebbe stato messo lì.
+                    </p>
+                </div>
+                 <div class="exercise-box">
+                    <strong>Esercizio 2: Hashing Doppio</strong>
+                    <p><strong>Testo:</strong> Si vuole usare l'hashing doppio su una tabella di dimensione M=11 (numero primo). Le funzioni ausiliarie sono \(h_1(k) = k \pmod{11}\) e \(h_2(k) = 1 + (k \pmod{10})\). Calcolare la sequenza di ispezione per la chiave k=25.</p>
+                    <p><strong>Soluzione (Idea):</strong></p>
+                    <ul>
+                        <li>\(h_1(25) = 25 \pmod{11} = 3\). La posizione iniziale è 3.</li>
+                        <li>\(h_2(25) = 1 + (25 \pmod{10}) = 1 + 5 = 6\). Il passo è 6.</li>
+                    </ul>
+                    <p>La sequenza di ispezione \(h(25, i) = (3 + i \cdot 6) \pmod{11}\) sarà:</p>
+                    <ul>
+                        <li>i=0: \((3 + 0) \pmod{11} = 3\)</li>
+                        <li>i=1: \((3 + 6) \pmod{11} = 9\)</li>
+                        <li>i=2: \((3 + 12) \pmod{11} = 15 \pmod{11} = 4\)</li>
+                        <li>i=3: \((3 + 18) \pmod{11} = 21 \pmod{11} = 10\)</li>
+                        <li>i=4: \((3 + 24) \pmod{11} = 27 \pmod{11} = 5\)</li>
+                        <li>e così via... Si può verificare che la sequenza copre tutti gli 11 slot.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="conclusioni" class="content-section">
+            <h2 class="section-title">9. Conclusioni</h2>
+            <div class="section-content">
+                <p>La lezione ha approfondito la teoria e la pratica delle funzioni di hash e ha introdotto l'indirizzamento aperto come una potente alternativa al chaining per la gestione delle collisioni.</p>
+                <p><strong>Punti Chiave della Lezione:</strong></p>
+                <ul>
+                    <li>Una <strong>buona funzione di hash</strong> deve essere suriettiva, distribuire le chiavi in modo uniforme e la sua efficacia dipende dal metodo di costruzione (es. divisione vs. moltiplicazione) e dai parametri scelti (es. dimensione M).</li>
+                    <li>L'<strong>indirizzamento aperto</strong> memorizza tutti gli elementi nella tabella stessa, risparmiando spazio ma introducendo complessità nella gestione delle cancellazioni.</li>
+                    <li>Il marcatore <strong>DELETED</strong> è essenziale per il corretto funzionamento della ricerca in presenza di cancellazioni.</li>
+                    <li>Esistono diverse <strong>tecniche di ispezione</strong> (lineare, quadratica, hashing doppio), con diversi compromessi per mitigare i problemi di <strong>clustering</strong>.</li>
+                    <li>Le performance dell'indirizzamento aperto sono fortemente legate al <strong>fattore di carico \(\alpha\)</strong>, rendendo cruciale mantenere la tabella non eccessivamente piena.</li>
+                </ul>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || ""; 
+                mermaidOriginalDefinitions.set(id, decodedContent.trim());
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
