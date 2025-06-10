@@ -307,16 +307,27 @@
                 </ul>
                 <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
-                    graph TD
-                        P(Parent) --> X(Nodo x);
-                        X --> L(Figlio Sinistro);
-                        X --> R(Figlio Destro);
-                        L --> P;
-                        R --> P;
-                        style P fill:#1f2937,stroke:#9ca3af,stroke-width:1px
-                        style X fill:#1f2937,stroke:#60a5fa,stroke-width:2px
-                        style L fill:#1f2937,stroke:#818cf8,stroke-width:1px
-                        style R fill:#1f2937,stroke:#818cf8,stroke-width:1px
+graph TD
+    subgraph "Struttura di un Nodo e Puntatori"
+        P(Padre)
+        N(Nodo x)
+        LS(Figlio Sinistro)
+        LD(Figlio Destro)
+    end
+
+    P -- "figlio" --> N
+    N -- "padre (p)" --> P
+
+    N -- "sinistro (left)" --> LS
+    N -- "destro (right)" --> LD
+    
+    LS -- "padre (p)" --> N
+    LD -- "padre (p)" --> N
+
+    style P fill:#374151,stroke:#9ca3af,stroke-width:2px
+    style N fill:#3b82f6,stroke:#60a5fa,stroke-width:2px,color:#fff
+    style LS fill:#1f2937,stroke:#818cf8,stroke-width:2px
+    style LD fill:#1f2937,stroke:#818cf8,stroke-width:2px
                     </pre>
                 </div>
                 <p>Proprietà: un nodo ha al più due figli e un unico genitore (ad eccezione della radice, che non ha genitore).</p>
@@ -326,7 +337,7 @@
         <article id="visite-alberi-binari" class="content-section">
             <h2 class="section-title">2. Procedure di Visita degli Alberi Binari</h2>
             <div class="section-content">
-                <p>Una **procedura di visita** (o attraversamento, *traversal*) è un algoritmo che permette di percorrere un intero albero per analizzare il contenuto di ogni nodo **una sola volta**.</p>
+                <p>Una <strong>procedura di visita</strong> (o attraversamento, *traversal*) è un algoritmo che permette di percorrere un intero albero per analizzare il contenuto di ogni nodo **una sola volta**.</p>
                 <p>Per gli alberi binari, esistono tre principali strategie di visita, che si differenziano per l'ordine in cui "esaminano" il nodo corrente rispetto alla visita dei suoi sottoalberi sinistro e destro:</p>
                 <ol>
                     <li><strong>Pre-Order (Pre-visita):</strong> Esamina il nodo, poi visita il sottoalbero sinistro, poi visita il sottoalbero destro.</li>
@@ -353,16 +364,24 @@
                 <p>Dato il seguente albero:</p>
                 <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
-                    graph TD
-                        A(1) --> B(2);
-                        A --> C(8);
-                        B --> D(5);
-                        B --> E(4);
-                        C --> F(3);
-                        subgraph Legenda
-                           A;B;C;D;E;F;
-                        end
-                        style A fill:#60a5fa,stroke:#e5e7eb,color:#111827
+graph TD
+    subgraph "Albero di Esempio"
+        A(1) --> B(2)
+        A --> C(8)
+        B --> D(5)
+        B --> E(4)
+        C --> nil1((NIL))
+        C --> F(3)
+        D --> nil2((NIL))
+        D --> nil3((NIL))
+        E --> nil4((NIL))
+        E --> nil5((NIL))
+        F --> nil6((NIL))
+        F --> nil7((NIL))
+    end
+    style A fill:#60a5fa,stroke:#e5e7eb,color:#111827
+    classDef nil fill:#1f2937,stroke:#4b5563,stroke-dasharray:5;
+    class nil1,nil2,nil3,nil4,nil5,nil6,nil7 nil;
                     </pre>
                 </div>
                 <p>La visita Pre-Order produce la sequenza:</p>
@@ -401,14 +420,26 @@ Pre-Order(x) // x è il nodo da cui partire
                 </ol>
                  <p><strong>Esempio di esecuzione (stesso albero di prima):</strong></p>
                  <div class="mermaid-container tree-diagram">
-                    <pre class="mermaid">
-                    graph TD
-                        A(1) --> B(2);
-                        A --> C(8);
-                        B --> D(5);
-                        B --> E(4);
-                        C --> F(3);
-                    </pre>
+                     <pre class="mermaid">
+graph TD
+    subgraph "Albero di Esempio"
+        A(1) --> B(2)
+        A --> C(8)
+        B --> D(5)
+        B --> E(4)
+        C --> nil1((NIL))
+        C --> F(3)
+        D --> nil2((NIL))
+        D --> nil3((NIL))
+        E --> nil4((NIL))
+        E --> nil5((NIL))
+        F --> nil6((NIL))
+        F --> nil7((NIL))
+    end
+    style D fill:#60a5fa,stroke:#e5e7eb,color:#111827;
+    classDef nil fill:#1f2937,stroke:#4b5563,stroke-dasharray:5;
+    class nil1,nil2,nil3,nil4,nil5,nil6,nil7 nil;
+                     </pre>
                 </div>
                 <p>La visita In-Order produce la sequenza:</p>
                 <ol>
@@ -452,12 +483,24 @@ In-Order(x)
                 <p><strong>Esempio di esecuzione (stesso albero):</strong></p>
                 <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
-                    graph TD
-                        A(1) --> B(2);
-                        A --> C(8);
-                        B --> D(5);
-                        B --> E(4);
-                        C --> F(3);
+graph TD
+    subgraph "Albero di Esempio"
+        A(1) --> B(2)
+        A --> C(8)
+        B --> D(5)
+        B --> E(4)
+        C --> nil1((NIL))
+        C --> F(3)
+        D --> nil2((NIL))
+        D --> nil3((NIL))
+        E --> nil4((NIL))
+        E --> nil5((NIL))
+        F --> nil6((NIL))
+        F --> nil7((NIL))
+    end
+    style D fill:#60a5fa,stroke:#e5e7eb,color:#111827;
+    classDef nil fill:#1f2937,stroke:#4b5563,stroke-dasharray:5;
+    class nil1,nil2,nil3,nil4,nil5,nil6,nil7 nil;
                     </pre>
                 </div>
                 <p>La visita Post-Order produce la sequenza:</p>
@@ -565,17 +608,26 @@ Post-Order(x)
                 <p><strong>Esempio di un albero che NON è un BST:</strong></p>
                  <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
-                    graph TD
-                        A(10) --> B(2);
-                        A --> C(15);
-                        B --> D(1);
-                        B --> E(12);
-                        C --> F(30);
-                        E --> G(20)
-                        style E fill:#EF4444,stroke:#e5e7eb,color:#111827
-                        subgraph "Non è un BST"
-                           A;B;C;D;E;F;G
-                        end
+graph TD
+    subgraph "Esempio di Albero NON BST"
+        A(10) --> B(2)
+        A --> C(15)
+        B --> D(1)
+        B --> E(12)
+        C --> nil1((NIL))
+        C --> F(30)
+        D --> nil2((NIL))
+        D --> nil3((NIL))
+        E --> nil4((NIL))
+        E --> G(20)
+        F --> nil5((NIL))
+        F --> nil6((NIL))
+        G --> nil7((NIL))
+        G --> nil8((NIL))
+    end
+    style E fill:#ef4444,stroke:#f87171,stroke-width:2px,color:#fff;
+    classDef nil fill:#1f2937,stroke:#4b5563,stroke-dasharray:5;
+    class nil1,nil2,nil3,nil4,nil5,nil6,nil7,nil8 nil;
                     </pre>
                      <p>L'albero non è un BST perché, ad esempio, il nodo con chiave 12 si trova nel sottoalbero sinistro di 10, ma 12 > 10, violando la proprietà. Anche il nodo 20 viola la proprietà rispetto a 15 e 10.</p>
                 </div>
@@ -583,16 +635,26 @@ Post-Order(x)
                  <p><strong>Esempio di un albero che È un BST:</strong></p>
                  <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
-                    graph TD
-                        A(10) --> B(2);
-                        A --> C(15);
-                        B --> D(1);
-                        B --> E(5);
-                        C --> F(30);
-                        F --> G(20);
-                        subgraph "È un BST"
-                           A;B;C;D;E;F;G
-                        end
+graph TD
+    subgraph "Albero Binario di Ricerca (BST)"
+        A(10) --> B(2)
+        A --> C(15)
+        B --> D(1)
+        B --> E(5)
+        C --> nil1((NIL))
+        C --> F(30)
+        D --> nil2((NIL))
+        D --> nil3((NIL))
+        E --> nil4((NIL))
+        E --> nil5((NIL))
+        F --> G(20)
+        F --> nil6((NIL))
+        G --> nil7((NIL))
+        G --> nil8((NIL))
+    end
+    style A fill:#3b82f6,stroke:#60a5fa,stroke-width:2px,color:#fff;
+    classDef nil fill:#1f2937,stroke:#4b5563,stroke-dasharray:5;
+    class nil1,nil2,nil3,nil4,nil5,nil6,nil7,nil8 nil;
                     </pre>
                     <p>In questo caso, ogni nodo rispetta la proprietà del BST.</p>
                 </div>
