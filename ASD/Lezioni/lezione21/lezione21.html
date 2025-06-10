@@ -317,17 +317,25 @@
                 <p>Quindi, in generale, l'altezza \(h\) di un BST con \(N\) nodi è compresa tra \(\Omega(\log N)\) e \(O(N)\).</p>
                 <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
-                    graph TD
-                        subgraph "Albero Bilanciato (h=O(logN))"
-                            A(k) --> B;
-                            A --> C;
-                        end
-                        subgraph "Albero Degenere (h=O(N))"
-                           D(1) --> E(2);
-                           E(2) --> F(3);
-                           F(3) --> G(...);
-                           G --> H(N);
-                        end
+graph TD
+    subgraph "Albero Bilanciato (h ≈ log N)"
+        A(8) --> B(3);
+        A --> C(10);
+        B --> D(1);
+        B --> E(6);
+        C --> nil1((NIL));
+        C --> F(14);
+    end
+    subgraph "Albero Degenere (h = N-1)"
+       G(1) --> nil2((NIL));
+       G --> H(2);
+       H --> nil3((NIL));
+       H --> I(3);
+       I --> nil4((NIL));
+       I --> J(...);
+    end
+    classDef nil fill:#1f2937,stroke:#4b5563,stroke-dasharray:5;
+    class nil1,nil2,nil3,nil4 nil;
                     </pre>
                 </div>
                 <p>Questa variabilità nell'altezza avrà un impatto diretto sulla complessità delle operazioni.</p>
@@ -358,17 +366,22 @@
                 </div>
                 <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
-                    graph TD
-                        A(10) --> B(5)
-                        A --> C(20)
-                        C --> D(15)
-                        C --> E(Max: 20)
-                        subgraph Legenda
-                           A;B;C;D;E;
-                        end
-                        style E fill:#60a5fa,stroke:#e5e7eb,color:#111827
+graph TD
+    subgraph "Ricerca del Massimo (si segue il percorso a destra)"
+        A(10) --> B(5)
+        A --> C(20)
+        B --> nil1((NIL))
+        B --> nil2((NIL))
+        C --> D(15)
+        C --> nil3((NIL))
+        D --> nil4((NIL))
+        D --> nil5((NIL))
+    end
+    style C fill:#22c55e,stroke:#4ade80,stroke-width:2px,color:#fff;
+    classDef nil fill:#1f2937,stroke:#4b5563,stroke-dasharray:5;
+    class nil1,nil2,nil3,nil4,nil5 nil;
                     </pre>
-                    <p>Nell'esempio, partendo da 10 si va a destra (20). Il nodo 20 non ha un figlio destro, quindi è il massimo.</p>
+                    <p>Nell'esempio, partendo da 10 si va a destra (20). Il nodo 20 non ha un figlio destro (è NIL), quindi è il massimo. Può avere un figlio sinistro (15).</p>
                 </div>
                 
                 <p><strong>Ricerca del Minimo:</strong></p>
@@ -482,17 +495,31 @@ BST-Search(x, k) // Cerca la chiave k partendo dal nodo x
                 <p>Per trovarlo, basta partire dal figlio destro di <code>x</code> (<code>x.right</code>) e scendere sempre a sinistra finché possibile.</p>
                 <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
-                    graph TD
-                        X --> R("x.right");
-                        R --> L1;
-                        L1 --> L2("Successore di x<br/>(minimo del sottoalbero destro)");
-                        L2 --> L2_NIL(NIL);
-                        L2 --> L2_R;
-                        
-                        style X fill:#60a5fa,stroke:#e5e7eb,color:#111827
-                        style L2 fill:#818cf8,stroke:#e5e7eb,color:#111827
-                        style L2_NIL fill:#1f2937,stroke:#9ca3af,stroke-width:1px
+graph TD
+    subgraph "Successore (Caso 1: x ha sottoalbero destro)"
+        A(15) --> B(6);
+        A --> C(20);
+        B --> D(3);
+        B --> E(7);
+        C --> F(17);
+        C --> G(22);
+        
+        D --> nil1((NIL));
+        D --> nil2((NIL));
+        E --> nil3((NIL));
+        E --> nil4((NIL));
+        F --> nil5((NIL));
+        F --> nil6((NIL));
+        G --> nil7((NIL));
+        G --> nil8((NIL));
+    end
+
+    style A fill:#60a5fa,stroke:#93c5fd,stroke-width:2px,color:#fff;
+    style F fill:#818cf8,stroke:#a5b4fc,stroke-width:2px,color:#fff;
+    classDef nil fill:#1f2937,stroke:#4b5563,stroke-dasharray:5;
+    class nil1,nil2,nil3,nil4,nil5,nil6,nil7,nil8 nil;
                     </pre>
+                    <p>Esempio: Il successore del nodo <strong>15</strong> (blu) è il minimo del suo sottoalbero destro (radicato in 20), ovvero <strong>17</strong> (viola).</p>
                 </div>
             </div>
         </article>
@@ -503,21 +530,40 @@ BST-Search(x, k) // Cerca la chiave k partendo dal nodo x
                 <p>Se il figlio destro di <code>x</code> è <code>NIL</code>, il successore di <code>x</code> è il suo <strong>più basso antenato (genitore, nonno, ecc.) per il quale <code>x</code> si trova nel sottoalbero sinistro</strong>.</p>
                 <p>Per trovarlo, si risale l'albero da <code>x</code> usando i puntatori <code>parent</code>. Ci si ferma al primo antenato <code>y</code> tale che il nodo da cui si è arrivati (<code>x</code> o uno dei suoi antenati) è il <strong>figlio sinistro</strong> di <code>y</code>.</p>
                 <p><strong>Intuizione:</strong> Finché si risale da un figlio destro, significa che il genitore ha una chiave più piccola ed è già stato visitato nell'In-Order. Il primo "svoltamento a sinistra" che si fa risalendo indica il primo nodo con una chiave più grande.</p>
-                 <div class="mermaid-container tree-diagram">
+                <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
-                    graph TD
-                        Y("Successore di x") --> X_parent;
-                        X_parent --> X;
-                        X_parent -.-> R_child("Altro figlio");
-                        
-                        style Y fill:#818cf8,stroke:#e5e7eb,color:#111827
-                        style X fill:#60a5fa,stroke:#e5e7eb,color:#111827
-                        subgraph "Path di risalita"
-                           X -- "parent" --> X_parent;
-                           X_parent -- "parent" --> Y;
-                        end
+graph TD
+    subgraph "Esempio Successore (Caso 2)"
+        A(20) --> B(8)
+        A --> C(22)
+        B --> D(4)
+        B --> E(12)
+        E --> F(10)
+        E --> G(14)
+
+        C --> nil1((NIL)); C --> nil2((NIL))
+        D --> nil3((NIL)); D --> nil4((NIL))
+        F --> nil5((NIL)); F --> nil6((NIL))
+        G --> nil7((NIL)); G --> nil8((NIL))
+    end
+
+    %% Stile dei nodi per evidenziare il percorso
+    style G fill:#60a5fa,stroke:#93c5fd,stroke-width:2px,color:#fff;  
+    style E fill:#facc15,stroke:#fde047,color:#111827; 
+    style B fill:#facc15,stroke:#fde047,color:#111827; 
+    style A fill:#818cf8,stroke:#a5b4fc,stroke-width:2px,color:#fff;  
+
+    classDef nil fill:#1f2937,stroke:#4b5563,stroke-dasharray:5;
+    class nil1,nil2,nil3,nil4,nil5,nil6,nil7,nil8 nil;
                     </pre>
-                     <p>In questo schema, `X` è figlio di `X_parent`, che a sua volta è figlio sinistro di `Y`. Risalendo da `X`, `Y` è il primo antenato raggiunto da un sottoalbero sinistro.</p>
+                    <p>
+                        Per trovare il successore del nodo <strong>14</strong> (blu), che non ha un sottoalbero destro, si risale l'albero:
+                        <ol style="margin-top: 1rem; margin-left: 2rem;">
+                            <li>Si sale al genitore <strong>12</strong> (giallo). Poiché 14 è un figlio destro, si continua.</li>
+                            <li>Si sale al genitore <strong>8</strong> (giallo). Poiché 12 è un figlio destro, si continua.</li>
+                            <li>Si sale al genitore <strong>20</strong> (viola). Poiché 8 è un figlio <strong>sinistro</strong>, il nodo <strong>20</strong> è il successore.</li>
+                        </ol>
+                    </p>
                 </div>
                  <p><strong>Caso Limite:</strong> Se si risale fino alla radice e si scopre che <code>x</code> era l'elemento massimo dell'albero (si è sempre risaliti da un figlio destro), il puntatore al genitore diventerà `NIL`. In questo caso, <code>x</code> non ha successore.</p>
             </div>
@@ -629,35 +675,41 @@ BST-Insert(T, z) // T è l'albero, z è il nuovo nodo da inserire
                 <p>La professoressa mostra la costruzione di un BST partendo da un albero vuoto e inserendo la sequenza: <code>5, 20, 30, 15, 2, 10, 12, 18, 40</code>.</p>
                 <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
-                    graph TD
-                        A(5) --> B(2)
-                        A --> C(20)
-                        
-                        C --> D(15)
-                        C --> E(30)
-                        
-                        D --> F(10)
-                        
-                        F --> G(12)
-                        D --> H(18)
-                        
-                        E --> I(40)
-                        
-                        B --> B_NIL_L(NIL); B --> B_NIL_R(NIL);
-                        G --> G_NIL_L(NIL); G --> G_NIL_R(NIL);
-                        H --> H_NIL_L(NIL); H --> H_NIL_R(NIL);
-                        I --> I_NIL_L(NIL); I --> I_NIL_R(NIL);
+graph TD
+    subgraph "Albero Risultante dall'Inserimento"
+        A(5) --> B(2)
+        A --> C(20)
+        
+        B --> nil1((NIL))
+        B --> nil2((NIL))
 
-                        style B_NIL_L fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
-                        style B_NIL_R fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
-                        style G_NIL_L fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
-                        style G_NIL_R fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
-                        style H_NIL_L fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
-                        style H_NIL_R fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
-                        style I_NIL_L fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
-                        style I_NIL_R fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
+        C --> D(15)
+        C --> E(30)
+        
+        D --> F(10)
+        D --> H(18)
+
+        E --> nil3((NIL))
+        E --> I(40)
+
+        F --> nil4((NIL))
+        F --> G(12)
+
+        G --> nil5((NIL))
+        G --> nil6((NIL))
+
+        H --> nil7((NIL))
+        H --> nil8((NIL))
+
+        I --> nil9((NIL))
+        I --> nil10((NIL))
+    end
+    style A fill:#3b82f6,stroke:#60a5fa,stroke-width:2px,color:#fff;
+    classDef nil fill:#1f2937,stroke:#4b5563,stroke-dasharray:5;
+    class nil1,nil2,nil3,nil4,nil5,nil6,nil7,nil8,nil9,nil10 nil;
                     </pre>
                     <p>L'albero finale risultante dagli inserimenti sequenziali.</p>
+                </div>
                 </div>
             </div>
         </article>
