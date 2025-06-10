@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 18: Tabelle di Hash (Indirizzamento Aperto - Operazioni)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        .note-title { font-size: 1.05rem; color: var(--accent-secondary); margin-top: 1.2rem; margin-bottom: 0.6rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+
+        .array-representation table {
+            margin: 0 auto; /* Centra la tabella */
+            border-collapse: collapse;
+            font-family: var(--font-code);
+        }
+        .array-representation th, .array-representation td {
+            border: 1px solid var(--border-soft);
+            padding: 0.5em 0.75em;
+            min-width: 30px; /* Larghezza minima cella */
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .array-representation th { /* Indici */
+            background-color: var(--code-bg);
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .array-representation td { /* Valori */
+             background-color: var(--bg-card);
+             color: var(--text-primary);
+        }
+        .array-representation td.highlight-current {
+            border: 2px solid var(--accent-secondary) !important;
+            font-weight: bold;
+        }
+        .array-representation td.cell-deleted {
+            background-color: rgba(239, 68, 68, 0.2) !important; 
+            color: #fca5a5;
+            text-decoration: line-through;
+        }
+         .array-representation td.cell-nil {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1); /* Viola chiaro trasparente */
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em;
+            margin: 1.5em 0;
+            border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box { /* Per evidenziare gli esercizi per casa e le loro soluzioni */
+            background-color: rgba(250, 204, 21, 0.1); /* Giallo chiaro trasparente */
+            border-left: 4px solid #FACC15; /* Giallo */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .correction-box { /* Per evidenziare le correzioni alle spiegazioni della prof */
+            background-color: rgba(239, 68, 68, 0.1); /* Rosso chiaro trasparente */
+            border-left: 4px solid #EF4444; /* Rosso */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .correction-box strong { color: #EF4444; }
+
+        .clarification-box { /* Per evidenziare approfondimenti/chiarimenti aggiunti da me */
+            background-color: rgba(52, 211, 153, 0.08); /* Verde acqua chiaro trasparente */
+            border-left: 4px solid #34D399; /* Verde acqua */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 30 nov 2020 (2).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 18: Tabelle di Hash (Indirizzamento Aperto - Operazioni)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-recap" class="sidebar-link">1. Introduzione e Recap: Indirizzamento Aperto</a></li>
+            <li><a href="#operazioni-open-addressing" class="sidebar-link">2. Operazioni nell'Indirizzamento Aperto</a></li>
+            <li><a href="#operazioni-inserimento" class="sidebar-link">2.1. Inserimento (Hash-Insert-Open)</a></li>
+            <li><a href="#operazioni-ricerca" class="sidebar-link">2.2. Ricerca (Hash-Search-Open)</a></li>
+            <li><a href="#operazioni-cancellazione" class="sidebar-link">2.3. Cancellazione (Hash-Delete-Open)</a></li>
+            <li><a href="#operazioni-complessita" class="sidebar-link">2.4. Complessità delle Operazioni (Caso Peggiore)</a></li>
+            <li><a href="#analisi-caso-medio" class="sidebar-link">3. Analisi del Caso Medio</a></li>
+            <li><a href="#analisi-ipotesi-uniforme" class="sidebar-link">3.1. Ipotesi di Hashing Uniforme</a></li>
+            <li><a href="#analisi-teorema-costo" class="sidebar-link">3.2. Teorema sul Costo Medio (Senza Dimostrazione)</a></li>
+            <li><a href="#tecniche-ispezione-pratica" class="sidebar-link">4. Tecniche di Ispezione in Pratica</a></li>
+            <li><a href="#ispezione-lineare-ripasso" class="sidebar-link">4.1. Ispezione Lineare (e Clustering Primario)</a></li>
+            <li><a href="#ispezione-quadratica" class="sidebar-link">4.2. Ispezione Quadratica</a></li>
+            <li><a href="#hashing-doppio-ripasso" class="sidebar-link">4.3. Hashing Doppio</a></li>
+            <li><a href="#esercizio-ispezione-lineare" class="sidebar-link">5. Esercizio: Hashing con Ispezione Lineare</a></li>
+            <li><a href="#esercizi-casa" class="sidebar-link">6. Esercizi per Casa</a></li>
+            <li><a href="#conclusioni" class="sidebar-link">7. Conclusioni</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-recap" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione e Recap: Indirizzamento Aperto</h2>
+            <div class="section-content">
+                <p>La professoressa inizia la lezione riprendendo i concetti dell'<strong>hashing con indirizzamento aperto (open addressing)</strong>, presentati nella lezione precedente. Fa riferimento agli appunti PDF "Nota 30 nov 2020 (2).pdf".</p>
+                <p><strong>Recap dei Punti Chiave dell'Indirizzamento Aperto:</strong></p>
+                <ul>
+                    <li>Tutti gli elementi sono memorizzati direttamente nell'array della tabella di hash (dimensione <code>M</code>).</li>
+                    <li>Non ci sono liste concatenate o strutture dati esterne, risparmiando spazio.</li>
+                    <li>Quando si inserisce un elemento e si trova lo slot occupato (collisione), si utilizza una <strong>sequenza di ispezione (probing)</strong> per trovare uno slot libero.</li>
+                    <li>La funzione di hash dipende sia dalla chiave che dal tentativo di ispezione: \(h(k, i)\), dove \(i\) va da 0 a M-1.</li>
+                    <li>La sequenza di ispezione \(\langle h(k,0), h(k,1), \dots, h(k,M-1) \rangle\) deve essere una <strong>permutazione</strong> degli indici \((0, \dots, M-1)\) per garantire che tutti gli slot vengano visitati.</li>
+                    <li>La cancellazione è complessa e richiede un marcatore speciale <strong>DELETED</strong> per non interrompere le catene di ispezione durante la ricerca.</li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="operazioni-open-addressing" class="content-section">
+            <h2 class="section-title">2. Operazioni nell'Indirizzamento Aperto: Pseudocodice e Analisi</h2>
+            <div class="section-content">
+                <p>La professoressa analizza in dettaglio lo pseudocodice delle operazioni di inserimento, ricerca e cancellazione, discutendone la logica e la correttezza.</p>
+            </div>
+        </article>
+
+        <article id="operazioni-inserimento" class="content-section">
+            <h3 class="subsection-title">2.1. Inserimento (Hash-Insert-Open)</h3>
+            <div class="section-content">
+                <p>La procedura <code>Hash-Insert-Open(T, x)</code> (dove x è l'intero oggetto da inserire) cerca di inserire l'oggetto <code>x</code> nella tabella <code>T</code>.</p>
+                <pre><code class="language-pseudocode">
+Hash-Insert-Open(T, x, h)
+  M = T.length
+  i = 0  // Indice del tentativo di ispezione
+  
+  repeat
+    j = h(x.key, i) // Calcola la posizione per il tentativo i
+    
+    // Se lo slot è libero (NIL) o precedentemente cancellato (DELETED), inserisci.
+    if T[j] == NIL or T[j] == DELETED then
+      T[j] = x
+      return j // Restituisci la posizione di inserimento
+    else
+      i = i + 1 // Altrimenti, passa al tentativo successivo
+      
+  until i == M // Se ho provato tutte le M posizioni
+  
+  // Se il ciclo termina, la tabella è piena
+  error "Hash table overflow" 
+                </code></pre>
+                <p><strong>Logica:</strong></p>
+                <ol>
+                    <li>Si inizializza il contatore dei tentativi <code>i</code> a 0.</li>
+                    <li>Si entra in un ciclo che si ripeterà al massimo <code>M</code> volte.</li>
+                    <li>Ad ogni iterazione, si calcola l'indice <code>j</code> usando la funzione di hash con il tentativo corrente <code>i</code>.</li>
+                    <li>Se la cella <code>T[j]</code> è libera (<code>NIL</code>) o contiene un elemento cancellato (<code>DELETED</code>), si inserisce l'oggetto <code>x</code> in quella posizione e si termina con successo.</li>
+                    <li>Se la cella è occupata, si incrementa <code>i</code> e si continua con il prossimo tentativo.</li>
+                    <li>Se il ciclo completa <code>M</code> iterazioni senza trovare uno slot libero, significa che la tabella è piena e si solleva un errore di overflow.</li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="operazioni-ricerca" class="content-section">
+            <h3 class="subsection-title">2.2. Ricerca (Hash-Search-Open)</h3>
+            <div class="section-content">
+                <p>La procedura <code>Hash-Search-Open(T, k_search)</code> cerca una chiave <code>k_search</code> nella tabella <code>T</code>.</p>
+                <pre><code class="language-pseudocode">
+Hash-Search-Open(T, k_search, h)
+  i = 0
+  
+  repeat
+    j = h(k_search, i)
+    
+    // Se trovo l'elemento desiderato, restituisco il suo indice
+    if T[j] != NIL and T[j] != DELETED and T[j].key == k_search then
+        return j
+
+    i = i + 1
+    
+  // La ricerca termina se trovo una cella NIL (che interrompe la catena)
+  // o se ho scandito tutta la tabella senza successo.
+  until T[j] == NIL or i == M 
+  
+  return -1 // o un valore speciale per "non trovato"
+                </code></pre>
+                <div class="clarification-box">
+                    <strong>Approfondimento sulla Logica della Ricerca (dal dialogo della prof.ssa):</strong>
+                    <p>La professoressa chiarisce un punto importante: la ricerca deve continuare anche se incontra una cella <code>DELETED</code>. La catena di ispezione si interrompe solo quando si trova una cella <code>NIL</code> (che non è mai stata occupata da quando la catena è iniziata) o quando si è esaurita l'intera sequenza di ispezione (i=M).</p>
+                    <p>Una versione leggermente diversa ma equivalente dello pseudocodice (più simile a quella degli appunti PDF) potrebbe essere:</p>
+                     <pre><code class="language-pseudocode">
+// Versione alternativa di Hash-Search-Open
+Hash-Search-Open(T, k_search, h)
+  i = 0
+  j = h(k_search, i)
+
+  // Continua finché non trovo una cella vuota (NIL) E
+  // la cella corrente non contiene la chiave cercata.
+  while (T[j] != NIL and T[j].key != k_search) do
+    i = i + 1
+    if i == M then return -1 // Tutta la tabella controllata
+    j = h(k_search, i)
+  
+  if T[j].key == k_search then
+    return j
+  else // Se T[j] è NIL (o non è la chiave dopo i=M-1)
+    return -1
+                     </code></pre>
+                     <p>La professoressa, nella sua spiegazione orale, evidenzia la necessità di gestire il caso in cui `T[j]` sia `NIL` o `DELETED` prima di tentare di accedere a `.key`, per evitare errori. Lo pseudocodice corretto deve tenere conto di questo. L'essenza è che la ricerca prosegue su celle `DELETED` e si ferma su `NIL`.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="operazioni-cancellazione" class="content-section">
+            <h3 class="subsection-title">2.3. Cancellazione (Hash-Delete-Open)</h3>
+            <div class="section-content">
+                <p>La cancellazione è semplice una volta che si è trovata la posizione dell'elemento da cancellare.</p>
+                <pre><code class="language-pseudocode">
+Hash-Delete-Open(T, x, h)
+  // Cerca l'indice dell'oggetto x (o della sua chiave x.key)
+  j = Hash-Search-Open(T, x.key, h) 
+
+  // Se l'elemento è stato trovato (j non è un valore di errore)
+  if j != -1 then // o j != NIL
+    T[j] = DELETED
+                </code></pre>
+                <p>La procedura si basa sulla ricerca per localizzare l'elemento e, se trovato, lo sovrascrive con il marcatore speciale <code>DELETED</code>.</p>
+            </div>
+        </article>
+
+        <article id="operazioni-complessita" class="content-section">
+            <h3 class="subsection-title">2.4. Complessità delle Operazioni (Caso Peggiore)</h3>
+            <div class="section-content">
+                <p>Nel caso peggiore, ogni operazione (inserimento, ricerca, cancellazione) potrebbe dover ispezionare tutti gli <code>M</code> slot della tabella.</p>
+                <p>Ad esempio, se sto inserendo un elemento in una tabella quasi piena, potrei dover provare quasi tutte le posizioni. Se sto cercando un elemento che non c'è, e la tabella è piena (o piena di marcatori `DELETED`), dovrò scandire tutti gli <code>M</code> slot.</p>
+                <p>Pertanto, la complessità nel caso peggiore per tutte e tre le operazioni è \(\Theta(M)\) (o \(\Theta(N)\) se \(M\) è proporzionale a \(N\)).</p>
+            </div>
+        </article>
+        
+        <article id="analisi-caso-medio" class="content-section">
+            <h2 class="section-title">3. Analisi del Caso Medio</h2>
+            <div class="section-content">
+                <p>La professoressa discute l'analisi del caso medio, che è più interessante e mostra la vera efficacia dell'hashing. Questa analisi si basa su un'ipotesi forte.</p>
+            </div>
+        </article>
+
+        <article id="analisi-ipotesi-uniforme" class="content-section">
+            <h3 class="subsection-title">3.1. Ipotesi di Hashing Uniforme</h3>
+            <div class="section-content">
+                <p>L'analisi del caso medio per l'indirizzamento aperto si basa sull'<strong>Ipotesi di Hashing Uniforme</strong>. Questa ipotesi è più forte della "semplice" ipotesi uniforme vista per il chaining.</p>
+                <p><strong>Definizione:</strong> Si assume che, per ogni chiave <code>k</code>, la sua sequenza di ispezione \(\langle h(k,0), h(k,1), \dots \rangle\) sia una delle <code>M!</code> possibili permutazioni degli indici \((0, \dots, M-1)\), scelta in modo <strong>equiprobabile</strong>.</p>
+                <p><strong>Conseguenze:</strong></p>
+                <ul>
+                    <li>Ogni possibile sequenza di ispezione ha probabilità \(1/M!\).</li>
+                    <li>Questa è un'ipotesi molto forte e difficile da realizzare in pratica. Nessuna delle tecniche di ispezione viste (lineare, quadratica, hashing doppio) soddisfa pienamente questa ipotesi.</li>
+                    <li>L'hashing doppio è la tecnica che più si avvicina a questo comportamento ideale.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="analisi-teorema-costo" class="content-section">
+            <h3 class="subsection-title">3.2. Teorema sul Costo Medio (Senza Dimostrazione)</h3>
+            <div class="section-content">
+                <p>Sotto l'ipotesi di hashing uniforme, si può dimostrare il seguente teorema sul costo atteso delle operazioni.</p>
+                <p>Dato una tabella di hash con indirizzamento aperto e un fattore di carico \(\alpha = N/M < 1\), il <strong>numero atteso di ispezioni</strong> per un'operazione di inserimento (o una ricerca con esito negativo) è al più:</p>
+                <div class="math-block">
+                \( \frac{1}{1 - \alpha} \)
+                </div>
+                <p><strong>Interpretazione del Risultato:</strong></p>
+                <ul>
+                    <li>Questo risultato mostra che il costo atteso dipende criticamente dal fattore di carico \(\alpha\).</li>
+                    <li>Se la tabella è quasi vuota (\(\alpha \to 0\)), il numero di ispezioni tende a 1.</li>
+                    <li>Se la tabella è piena a metà (\(\alpha = 0.5\)), il numero atteso di ispezioni è \(1/(1-0.5) = 2\).</li>
+                    <li>Se la tabella è piena al 90% (\(\alpha = 0.9\)), il numero atteso è \(1/(1-0.9) = 1/0.1 = 10\).</li>
+                    <li>Man mano che \(\alpha\) si avvicina a 1, il costo atteso tende all'infinito.</li>
+                </ul>
+                <p>Questo conferma l'importanza di mantenere il fattore di carico basso nelle tabelle di hash con indirizzamento aperto. Se \(\alpha\) è una costante mantenuta bassa (es. \(\le 0.75\)), il costo atteso rimane costante.</p>
+            </div>
+        </article>
+
+        <article id="tecniche-ispezione-pratica" class="content-section">
+            <h2 class="section-title">4. Tecniche di Ispezione in Pratica (Ripasso e Confronto)</h2>
+            <div class="section-content">
+                <p>La professoressa rivede brevemente le tre tecniche di ispezione discusse, mettendole a confronto.</p>
+            </div>
+        </article>
+
+        <article id="ispezione-lineare-ripasso" class="content-section">
+            <h3 class="subsection-title">4.1. Ispezione Lineare e Clustering Primario</h3>
+            <div class="section-content">
+                <p>Formula: \( h(k, i) = (h'(k) + i) \pmod{M} \)</p>
+                <ul>
+                    <li><strong>Non soddisfa l'hashing uniforme:</strong> Genera solo <code>M</code> diverse sequenze di ispezione, non <code>M!</code>.</li>
+                    <li><strong>Problema:</strong> Clustering primario. I blocchi di celle occupate tendono a crescere, degradando le performance.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="ispezione-quadratica" class="content-section">
+            <h3 class="subsection-title">4.2. Ispezione Quadratica</h3>
+            <div class="section-content">
+                <p>Formula: \( h(k, i) = (h'(k) + c_1 i + c_2 i^2) \pmod{M} \)</p>
+                <ul>
+                    <li><strong>Mitiga il clustering primario:</strong> I salti non sono più contigui.</li>
+                    <li><strong>Non soddisfa l'hashing uniforme:</strong> Produce solo <code>M</code> sequenze diverse.</li>
+                    <li><strong>Problema:</strong> Clustering secondario. Se due chiavi diverse hanno lo stesso hash iniziale (\(h'(k_1) = h'(k_2)\)), genereranno la stessa identica sequenza di ispezione.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="hashing-doppio-ripasso" class="content-section">
+            <h3 class="subsection-title">4.3. Hashing Doppio</h3>
+            <div class="section-content">
+                <p>Formula: \( h(k, i) = (h_1(k) + i \cdot h_2(k)) \pmod{M} \)</p>
+                <ul>
+                    <li><strong>La tecnica migliore in pratica.</strong></li>
+                    <li><strong>Non soddisfa pienamente l'hashing uniforme, ma ci si avvicina molto:</strong> Genera circa \(M^2\) diverse sequenze di ispezione, un numero molto più grande di <code>M</code>, che porta a una migliore distribuzione.</li>
+                    <li><strong>Risolve il clustering secondario:</strong> Chiavi con lo stesso \(h_1\) avranno probabilmente \(h_2\) diversi, e quindi sequenze di ispezione diverse.</li>
+                    <li><strong>Requisito:</strong> \(h_2(k)\) deve essere sempre coprimo con \(M\). Questo si ottiene facilmente scegliendo \(M\) come numero primo e \(h_2\) che produca valori tra 1 e M-1.</li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="esercizio-ispezione-lineare" class="content-section">
+            <h2 class="section-title">5. Esercizio: Hashing con Ispezione Lineare (Esempio dei Comuni)</h2>
+            <div class="section-content">
+                <p>La professoressa svolge un esercizio pratico per illustrare il clustering primario con ispezione lineare.</p>
+                <p><strong>Setup:</strong></p>
+                <ul>
+                    <li>Tabella T di dimensione M=21 (una per ogni lettera dell'alfabeto italiano).</li>
+                    <li>Funzione di hash \(h'(comune) = \text{indice dell'iniziale}\).</li>
+                </ul>
+                <p><strong>Esecuzione:</strong></p>
+                <ol>
+                    <li><strong>Inserisci Bologna:</strong> h'("Bologna") \(\to\) 1. T[1] = Bologna.</li>
+                    <li><strong>Inserisci Bergamo:</strong> h'("Bergamo") \(\to\) 1 (collisione). Ispezione lineare: prova T[2], è libero. T[2] = Bergamo.</li>
+                    <li><strong>Inserisci Brescia:</strong> h'("Brescia") \(\to\) 1 (collisione). Prova T[2] (occupato). Prova T[3], è libero. T[3] = Brescia.
+                    <br><i>Si è formato un cluster [Bologna, Bergamo, Brescia].</i>
+                    </li>
+                    <li><strong>Inserisci Ancona:</strong> h'("Ancona") \(\to\) 0. T[0] = Ancona.</li>
+                    <li><strong>Inserisci Nova Milanese:</strong> h'("Nova Milanese") \(\to\) 13 (N). T[13] = Nova Milanese.</li>
+                </ol>
+                <p>La professoressa evidenzia che con la scansione lineare, se due chiavi \(x\) e \(y\) partono da posizioni diverse (\(h'(x) \neq h'(y)\)), le loro sequenze di ispezione possono comunque "convergere" e diventare identiche da un certo punto in poi se una finisce nel percorso di scansione dell'altra. Questo è il problema del <strong>clustering primario</strong>.</p>
+            </div>
+        </article>
+
+        <article id="esercizi-casa" class="content-section">
+            <h2 class="section-title">6. Esercizi per Casa</h2>
+            <div class="section-content">
+                <p>La professoressa assegna esercizi di verifica sulle funzioni di hash. L'obiettivo è determinare se una data funzione di hash è "buona" o meno.</p>
+                <div class="exercise-box">
+                    <strong>Esercizio (dalla Professoressa):</strong>
+                    <p>Analizzare le seguenti funzioni di hash per chiavi intere e una tabella di dimensione M, determinando se sono valide e/o ben distribuite.</p>
+                    <ol>
+                        <li>\(h_1(k) = (k \pmod M) + 3\).
+                            <br><strong>Soluzione (discussa in aula):</strong> Non è valida. Il risultato può essere > M-1 (es. se \(k \pmod M = M-1\), il risultato è M+2), andando fuori dalla tabella.
+                        </li>
+                        <li>\(h_2(k) = (k \pmod{M-3}) + 3\).
+                            <br><strong>Soluzione (discussa in aula):</strong> È valida (mappa sempre in [3, M-1]), ma non è buona perché non è suriettiva. Le posizioni 0, 1, 2 non vengono mai utilizzate.
+                        </li>
+                        <li>\(h_3(k) = (2 \cdot k) \pmod M\).
+                            <br><strong>Soluzione (discussa in aula):</strong> Se M è una potenza di 2 (o anche solo un numero pari, come M=2), questa funzione userà solo le posizioni pari, non essendo suriettiva.
+                        </li>
+                        <li>\(h_4(k) = \max(N-M, k) \pmod M\). (N è una costante fissata).
+                            <br><strong>Soluzione (discussa in aula):</strong> Non è buona. Se la maggior parte delle chiavi `k` è più piccola di `N-M`, la funzione restituirà quasi sempre `(N-M) mod M`, concentrando molte chiavi su un unico slot.
+                        </li>
+                        <li>\(h_5(k) = ((k \pmod M) + 125) \pmod M\).
+                            <br><strong>Soluzione (discussa in aula):</strong> Questa è fondamentalmente equivalente a `k mod M`, ma con uno shift fisso di 125 posizioni. È buona tanto quanto il metodo della divisione base. È valida e suriettiva. Sarà ben distribuita se M è un buon numero primo.
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </article>
+
+        <article id="conclusioni" class="content-section">
+            <h2 class="section-title">7. Conclusioni</h2>
+            <div class="section-content">
+                <p>La lezione ha fornito una panoramica completa delle operazioni e dell'analisi delle tabelle di hash con <strong>indirizzamento aperto</strong>.</p>
+                <p><strong>Punti Chiave da Ricordare:</strong></p>
+                <ul>
+                    <li>Le operazioni di inserimento, ricerca e cancellazione devono gestire attentamente i tre stati delle celle: **Occupato, NIL, DELETED**.</li>
+                    <li>Il costo nel caso peggiore è \(\Theta(M)\), ma il costo atteso (sotto ipotesi di hashing uniforme) è \(\Theta(1/(1-\alpha))\), rendendo cruciale mantenere basso il fattore di carico \(\alpha\).</li>
+                    <li>Le tecniche di ispezione (lineare, quadratica, hashing doppio) hanno diversi livelli di efficacia nel combattere il <strong>clustering</strong>, con l'hashing doppio che offre le migliori garanzie pratiche.</li>
+                    <li>La scelta di una buona funzione di hash e dei parametri (come M e le costanti di ispezione) è fondamentale per le prestazioni del sistema.</li>
+                </ul>
+                <p>La professoressa conclude annunciando che l'argomento successivo saranno gli <strong>alberi binari di ricerca (BST)</strong>.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || ""; 
+                mermaidOriginalDefinitions.set(id, decodedContent.trim());
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>

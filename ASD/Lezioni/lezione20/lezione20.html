@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 20: Alberi Binari e Alberi Binari di Ricerca (BST)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        .note-title { font-size: 1.05rem; color: var(--accent-secondary); margin-top: 1.2rem; margin-bottom: 0.6rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+
+        .array-representation table {
+            margin: 0 auto; /* Centra la tabella */
+            border-collapse: collapse;
+            font-family: var(--font-code);
+        }
+        .array-representation th, .array-representation td {
+            border: 1px solid var(--border-soft);
+            padding: 0.5em 0.75em;
+            min-width: 30px; /* Larghezza minima cella */
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .array-representation th { /* Indici */
+            background-color: var(--code-bg);
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .array-representation td { /* Valori */
+             background-color: var(--bg-card);
+             color: var(--text-primary);
+        }
+        .array-representation td.highlight-current {
+            border: 2px solid var(--accent-secondary) !important;
+            font-weight: bold;
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1); /* Viola chiaro trasparente */
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em;
+            margin: 1.5em 0;
+            border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box { /* Per evidenziare gli esercizi per casa e le loro soluzioni */
+            background-color: rgba(250, 204, 21, 0.1); /* Giallo chiaro trasparente */
+            border-left: 4px solid #FACC15; /* Giallo */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .correction-box { /* Per evidenziare le correzioni alle spiegazioni della prof */
+            background-color: rgba(239, 68, 68, 0.1); /* Rosso chiaro trasparente */
+            border-left: 4px solid #EF4444; /* Rosso */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .correction-box strong { color: #EF4444; }
+
+        .clarification-box { /* Per evidenziare approfondimenti/chiarimenti aggiunti da me */
+            background-color: rgba(52, 211, 153, 0.08); /* Verde acqua chiaro trasparente */
+            border-left: 4px solid #34D399; /* Verde acqua */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 7 dic 2020 (3).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 20: Alberi Binari e Alberi Binari di Ricerca (BST)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-alberi" class="sidebar-link">1. Introduzione agli Alberi Binari</a></li>
+            <li><a href="#visite-alberi-binari" class="sidebar-link">2. Procedure di Visita degli Alberi Binari</a></li>
+            <li><a href="#visita-preorder" class="sidebar-link">2.1. Visita in Pre-Order (Pre-visita)</a></li>
+            <li><a href="#visita-inorder" class="sidebar-link">2.2. Visita In-Order (In-visita)</a></li>
+            <li><a href="#visita-postorder" class="sidebar-link">2.3. Visita Post-Order (Post-visita)</a></li>
+            <li><a href="#visite-complessita" class="sidebar-link">2.4. Complessità delle Procedure di Visita</a></li>
+            <li><a href="#ricostruzione-albero-dalle-visite" class="sidebar-link">3. È possibile ricostruire un albero dalle sue visite?</a></li>
+            <li><a href="#alberi-binari-ricerca" class="sidebar-link">4. Alberi Binari di Ricerca (BST)</a></li>
+            <li><a href="#bst-definizione" class="sidebar-link">4.1. Definizione e Proprietà</a></li>
+            <li><a href="#bst-esempi" class="sidebar-link">4.2. Esempi: BST e non-BST</a></li>
+            <li><a href="#bst-operazioni" class="sidebar-link">4.3. Operazioni sui BST</a></li>
+            <li><a href="#bst-visita-inorder" class="sidebar-link">4.4. Proprietà della Visita In-Order su un BST</a></li>
+            <li><a href="#bst-ricerca-max-min" class="sidebar-link">5. Ricerca del Massimo e del Minimo in un BST</a></li>
+            <li><a href="#esercizi-riflessioni" class="sidebar-link">6. Esercizi e Riflessioni</a></li>
+            <li><a href="#conclusioni" class="sidebar-link">7. Conclusioni</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-alberi" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione agli Alberi Binari</h2>
+            <div class="section-content">
+                <p>La professoressa introduce il nuovo argomento: gli <strong>Alberi Binari di Ricerca (BST)</strong>. Prima di definire i BST, fa un ripasso generale sugli <strong>Alberi Binari</strong>, una struttura dati dinamica già incontrata, ad esempio, con le Heap.</p>
+                <p><strong>Struttura di un Nodo di un Albero Binario:</strong></p>
+                <p>Ogni nodo <code>x</code> di un albero binario contiene tipicamente i seguenti campi:</p>
+                <ul>
+                    <li><code>x.key</code>: La chiave (o valore) memorizzata nel nodo.</li>
+                    <li><code>x.left</code>: Un puntatore al figlio sinistro.</li>
+                    <li><code>x.right</code>: Un puntatore al figlio destro.</li>
+                    <li><code>x.parent</code>: Un puntatore al nodo genitore.</li>
+                </ul>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        P(Parent) --> X(Nodo x);
+                        X --> L(Figlio Sinistro);
+                        X --> R(Figlio Destro);
+                        L --> P;
+                        R --> P;
+                        style P fill:#1f2937,stroke:#9ca3af,stroke-width:1px
+                        style X fill:#1f2937,stroke:#60a5fa,stroke-width:2px
+                        style L fill:#1f2937,stroke:#818cf8,stroke-width:1px
+                        style R fill:#1f2937,stroke:#818cf8,stroke-width:1px
+                    </pre>
+                </div>
+                <p>Proprietà: un nodo ha al più due figli e un unico genitore (ad eccezione della radice, che non ha genitore).</p>
+            </div>
+        </article>
+
+        <article id="visite-alberi-binari" class="content-section">
+            <h2 class="section-title">2. Procedure di Visita degli Alberi Binari</h2>
+            <div class="section-content">
+                <p>Una **procedura di visita** (o attraversamento, *traversal*) è un algoritmo che permette di percorrere un intero albero per analizzare il contenuto di ogni nodo **una sola volta**.</p>
+                <p>Per gli alberi binari, esistono tre principali strategie di visita, che si differenziano per l'ordine in cui "esaminano" il nodo corrente rispetto alla visita dei suoi sottoalberi sinistro e destro:</p>
+                <ol>
+                    <li><strong>Pre-Order (Pre-visita):</strong> Esamina il nodo, poi visita il sottoalbero sinistro, poi visita il sottoalbero destro.</li>
+                    <li><strong>In-Order (In-visita):</strong> Visita il sottoalbero sinistro, poi esamina il nodo, poi visita il sottoalbero destro.</li>
+                    <li><strong>Post-Order (Post-visita):</strong> Visita il sottoalbero sinistro, poi visita il sottoalbero destro, poi esamina il nodo.</li>
+                </ol>
+                <div class="note-box">
+                    <strong>Cosa significa "esaminare il nodo"?</strong>
+                    <p>Nell'ambito della lezione, "esaminare" un nodo significa semplicemente stamparne la chiave (es. `print(x.key)`). In applicazioni reali, potrebbe significare eseguire un'operazione qualsiasi sui dati contenuti nel nodo.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="visita-preorder" class="content-section">
+            <h3 class="subsection-title">2.1. Visita in Pre-Order (Pre-visita)</h3>
+            <div class="section-content">
+                <p>La logica è: <strong>(1) Nodo, (2) Sinistra, (3) Destra</strong>.</p>
+                <ol>
+                    <li>Si esamina il nodo corrente.</li>
+                    <li>Si procede ricorsivamente sul figlio sinistro.</li>
+                    <li>Si procede ricorsivamente sul figlio destro.</li>
+                </ol>
+                <p><strong>Esempio di esecuzione:</strong></p>
+                <p>Dato il seguente albero:</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        A(1) --> B(2);
+                        A --> C(8);
+                        B --> D(5);
+                        B --> E(4);
+                        C --> F(3);
+                        subgraph Legenda
+                           A;B;C;D;E;F;
+                        end
+                        style A fill:#60a5fa,stroke:#e5e7eb,color:#111827
+                    </pre>
+                </div>
+                <p>La visita Pre-Order produce la sequenza:</p>
+                <ol>
+                    <li>Stampa 1 (radice).</li>
+                    <li>Vai a sinistra. Stampa 2.</li>
+                    <li>Vai a sinistra di 2. Stampa 5. (Sinistra e destra di 5 sono NIL).</li>
+                    <li>Torna a 2. Vai a destra. Stampa 4. (Sinistra e destra di 4 sono NIL).</li>
+                    <li>Torna a 1. Vai a destra. Stampa 8.</li>
+                    <li>Vai a sinistra di 8 (NIL). Vai a destra. Stampa 3.</li>
+                </ol>
+                <p><strong>Sequenza Risultante:</strong></p>
+                <div class="array-representation">
+                    <table><tbody><tr><td>1</td><td>2</td><td>5</td><td>4</td><td>8</td><td>3</td></tr></tbody></table>
+                </div>
+                <p><strong>Pseudocodice (Ricorsivo):</strong></p>
+                <pre><code class="language-pseudocode">
+Pre-Order(x) // x è il nodo da cui partire
+  if x != NIL then
+    print(x.key)          // 1. Esamina il nodo
+    Pre-Order(x.left)     // 2. Visita ricorsivamente a sinistra
+    Pre-Order(x.right)    // 3. Visita ricorsivamente a destra
+                </code></pre>
+                 <p>La visita dell'intero albero <code>T</code> si avvia con la chiamata <code>Pre-Order(T.root)</code>.</p>
+            </div>
+        </article>
+
+        <article id="visita-inorder" class="content-section">
+            <h3 class="subsection-title">2.2. Visita In-Order (In-visita)</h3>
+            <div class="section-content">
+                <p>La logica è: <strong>(1) Sinistra, (2) Nodo, (3) Destra</strong>.</p>
+                <ol>
+                    <li>Si visita ricorsivamente il figlio sinistro.</li>
+                    <li>Si esamina il nodo corrente.</li>
+                    <li>Si visita ricorsivamente il figlio destro.</li>
+                </ol>
+                 <p><strong>Esempio di esecuzione (stesso albero di prima):</strong></p>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        A(1) --> B(2);
+                        A --> C(8);
+                        B --> D(5);
+                        B --> E(4);
+                        C --> F(3);
+                    </pre>
+                </div>
+                <p>La visita In-Order produce la sequenza:</p>
+                <ol>
+                    <li>Parto da 1. Vado a sinistra (su 2).</li>
+                    <li>Da 2, vado a sinistra (su 5).</li>
+                    <li>Da 5, vado a sinistra (NIL). Stampo 5. Vado a destra (NIL).</li>
+                    <li>Torno a 2. Ho finito la visita a sinistra. Stampo 2.</li>
+                    <li>Vado a destra di 2 (su 4).</li>
+                    <li>Da 4, vado a sinistra (NIL). Stampo 4. Vado a destra (NIL).</li>
+                    <li>Torno a 1. Ho finito la visita a sinistra. Stampo 1.</li>
+                    <li>Vado a destra di 1 (su 8).</li>
+                    <li>Da 8, vado a sinistra (NIL). Stampo 8.</li>
+                    <li>Vado a destra di 8 (su 3).</li>
+                    <li>Da 3, vado a sinistra (NIL). Stampo 3. Vado a destra (NIL).</li>
+                    <li>Torno a 8, poi a 1. Ho finito.</li>
+                </ol>
+                <p><strong>Sequenza Risultante:</strong></p>
+                <div class="array-representation">
+                    <table><tbody><tr><td>5</td><td>2</td><td>4</td><td>1</td><td>8</td><td>3</td></tr></tbody></table>
+                </div>
+                 <p><strong>Pseudocodice (Ricorsivo):</strong></p>
+                <pre><code class="language-pseudocode">
+In-Order(x)
+  if x != NIL then
+    In-Order(x.left)      // 1. Visita ricorsivamente a sinistra
+    print(x.key)          // 2. Esamina il nodo
+    In-Order(x.right)     // 3. Visita ricorsivamente a destra
+                </code></pre>
+            </div>
+        </article>
+        
+        <article id="visita-postorder" class="content-section">
+            <h3 class="subsection-title">2.3. Visita Post-Order (Post-visita)</h3>
+            <div class="section-content">
+                <p>La logica è: <strong>(1) Sinistra, (2) Destra, (3) Nodo</strong>.</p>
+                <ol>
+                    <li>Si visita ricorsivamente il figlio sinistro.</li>
+                    <li>Si visita ricorsivamente il figlio destro.</li>
+                    <li>Si esamina il nodo corrente.</li>
+                </ol>
+                <p><strong>Esempio di esecuzione (stesso albero):</strong></p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        A(1) --> B(2);
+                        A --> C(8);
+                        B --> D(5);
+                        B --> E(4);
+                        C --> F(3);
+                    </pre>
+                </div>
+                <p>La visita Post-Order produce la sequenza:</p>
+                <p><strong>Sequenza Risultante:</strong></p>
+                <div class="array-representation">
+                    <table><tbody><tr><td>5</td><td>4</td><td>2</td><td>3</td><td>8</td><td>1</td></tr></tbody></table>
+                </div>
+                 <div class="exercise-box">
+                    <strong>Esercizio (dalla Professoressa): Scrivere il codice per la Post-Order</strong>
+                    <p><strong>Soluzione (Aggiunta da AI):</strong></p>
+                    <pre><code class="language-pseudocode">
+Post-Order(x)
+  if x != NIL then
+    Post-Order(x.left)      // 1. Visita ricorsivamente a sinistra
+    Post-Order(x.right)     // 2. Visita ricorsivamente a destra
+    print(x.key)          // 3. Esamina il nodo
+                    </code></pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="visite-complessita" class="content-section">
+            <h3 class="subsection-title">2.4. Complessità delle Procedure di Visita</h3>
+            <div class="section-content">
+                <p>Tutte e tre le procedure di visita (Pre-Order, In-Order, Post-Order) hanno la stessa complessità temporale.</p>
+                <p><strong>Limite Inferiore:</strong> Poiché ogni procedura deve visitare (e stampare) tutti gli <code>N</code> nodi dell'albero, il costo è almeno \(\Omega(N)\).</p>
+                <p><strong>Limite Superiore (Dimostrazione):</strong> Per dimostrare che il costo è anche \(O(N)\), si può scrivere un'equazione di ricorrenza per il tempo di esecuzione \(T(n)\) su un albero con \(n\) nodi.</p>
+                <p>Sia <code>m</code> il numero di nodi nel sottoalbero sinistro. Il numero di nodi nel sottoalbero destro sarà \(n - m - 1\).</p>
+                <p>L'equazione di ricorrenza per Pre-Order (e analogamente per le altre) è:</p>
+                <div class="math-block">
+                \( T(n) = T(m) + T(n-m-1) + \Theta(1) \)
+                </div>
+                <p>(con \(T(0)=\Theta(1)\) come caso base).</p>
+                <p><strong>Risoluzione per Sostituzione:</strong> Si vuole dimostrare che \(T(n) = O(n)\), ovvero \(T(n) \le c \cdot n\) per una costante \(c\).</p>
+                <p><strong>Ipotesi Induttiva:</strong> \(T(k) \le c \cdot k\) per ogni \(k < n\).</p>
+                <p>Sostituendo (e usando una costante <code>b</code> per il termine \(\Theta(1)\)):</p>
+                <p>\( T(n) = T(m) + T(n-m-1) + b \le c \cdot m + c \cdot (n-m-1) + b \)</p>
+                <p>\( T(n) \le cm + cn - cm - c + b = cn - c + b \)</p>
+                <p>Vogliamo che \(cn - c + b \le cn\). Questo è vero se \(-c+b \le 0\), ovvero \(c \ge b\). È sempre possibile trovare una tale costante \(c\).</p>
+                <p>Anche gestendo i casi base (\(T(0)=a, T(1)=2a+b\)), si trova una \(c\) che soddisfa le condizioni.</p>
+                <p><strong>Conclusione:</strong> La complessità temporale di tutte le visite è \(\Theta(N)\).</p>
+                <p><strong>Proprietà Spaziale:</strong> Nessuna di queste procedure ricorsive è <strong>in-place</strong> perché utilizzano lo stack di sistema per le chiamate ricorsive. Lo spazio richiesto sullo stack è proporzionale all'altezza dell'albero, \(h\). Quindi, la complessità spaziale è \(\Theta(h)\).</p>
+            </div>
+        </article>
+
+        <article id="ricostruzione-albero-dalle-visite" class="content-section">
+            <h2 class="section-title">3. È possibile ricostruire un albero binario dalle sue visite?</h2>
+            <div class="section-content">
+                <p>La professoressa pone una serie di domande interessanti sulla possibilità di ricostruire la struttura topologica di un albero binario a partire dalle sequenze prodotte dalle visite.</p>
+                <ol>
+                    <li><strong>Data solo una visita (es. Pre-Order), è possibile ricostruire l'albero?</strong>
+                        <p><strong>Risposta: No.</strong> La singola sequenza è ambigua. Ad esempio, la sequenza Pre-Order <code>[1, 2]</code> potrebbe corrispondere a un albero con 2 come figlio sinistro di 1, o a un albero con 2 come figlio destro di 1. Non abbiamo informazioni sufficienti per distinguere i due casi.</p>
+                    </li>
+                    <li><strong>Dati i risultati di Pre-Order e Post-Order, è possibile ricostruire l'albero?</strong>
+                        <p><strong>Risposta: No.</strong> Anche in questo caso, le informazioni non sono sufficienti per risolvere tutte le ambiguità. L'esempio <code>[1, 2]</code> (Pre) e <code>[2, 1]</code> (Post) è ancora valido sia per l'albero con 2 a sinistra che per quello con 2 a destra.</p>
+                    </li>
+                    <li><strong>Dati i risultati di Pre-Order e In-Order, è possibile ricostruire l'albero?</strong>
+                        <p><strong>Risposta: Sì.</strong> Questa combinazione fornisce informazioni sufficienti per ricostruire univocamente la struttura dell'albero.
+                        <p><strong>Algoritmo di Ricostruzione (Idea):</strong></p>
+                        <ol>
+                            <li>Il <strong>primo elemento della sequenza Pre-Order</strong> è sempre la <strong>radice</strong> dell'albero (o del sottoalbero corrente).</li>
+                            <li>Una volta identificata la radice, la si cerca nella <strong>sequenza In-Order</strong>.</li>
+                            <li>Tutti gli elementi a <strong>sinistra</strong> della radice nella sequenza In-Order appartengono al sottoalbero sinistro.</li>
+                            <li>Tutti gli elementi a <strong>destra</strong> della radice nella sequenza In-Order appartengono al sottoalbero destro.</li>
+                            <li>Si può ora procedere ricorsivamente sui sottoalberi sinistro e destro, utilizzando le porzioni appropriate delle sequenze Pre-Order e In-Order.</li>
+                        </ol>
+                    </li>
+                </ol>
+                 <div class="exercise-box">
+                    <strong>Esercizio (dalla Professoressa): Scrivere il codice e calcolare la complessità per la ricostruzione.</strong>
+                    <p><strong>Soluzione (Aggiunta da AI):</strong> Si tratta di un classico problema ricorsivo. L'implementazione efficiente spesso richiede di passare gli indici delle sottosequenze invece di creare nuovi array ad ogni chiamata. La ricerca della radice nella sequenza In-Order può essere ottimizzata usando una mappa (tabella di hash) per ottenere un accesso in O(1), portando la complessità totale a \(\Theta(N)\).</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="alberi-binari-ricerca" class="content-section">
+            <h2 class="section-title">4. Alberi Binari di Ricerca (BST - Binary Search Trees)</h2>
+            <div class="section-content">
+                 <p>La professoressa introduce finalmente la struttura dati principale della lezione: gli Alberi Binari di Ricerca (BST).</p>
+            </div>
+        </article>
+        
+        <article id="bst-definizione" class="content-section">
+            <h3 class="subsection-title">4.1. Definizione e Proprietà Fondamentale del BST</h3>
+            <div class="section-content">
+                <p>Un albero binario di ricerca è un albero binario che soddisfa la seguente <strong>proprietà del BST</strong>:</p>
+                <blockquote>
+                Per ogni nodo <code>x</code> nell'albero:
+                <ul>
+                    <li>Tutte le chiavi nel <strong>sottoalbero sinistro</strong> di <code>x</code> sono <strong>minori</strong> della chiave di <code>x</code> (\(y.key < x.key\)).</li>
+                    <li>Tutte le chiavi nel <strong>sottoalbero destro</strong> di <code>x</code> sono <strong>maggiori</strong> della chiave di <code>x</code> (\(y.key > x.key\)).</li>
+                </ul>
+                </blockquote>
+                <p><strong>Note importanti dalla professoressa:</strong></p>
+                <ul>
+                    <li>Questa proprietà deve valere <strong>per ogni nodo</strong> dell'albero, non solo per la radice.</li>
+                    <li>In questa definizione (e per la maggior parte del corso) si assume che <strong>non ci siano chiavi duplicate</strong>. Se ci fossero, si dovrebbero gestire con convenzioni specifiche (es. chiavi uguali sempre a destra) o, meglio, con strutture dati ausiliarie collegate al nodo.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="bst-esempi" class="content-section">
+            <h3 class="subsection-title">4.2. Esempi: BST e non-BST</h3>
+            <div class="section-content">
+                <p><strong>Esempio di un albero che NON è un BST:</strong></p>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        A(10) --> B(2);
+                        A --> C(15);
+                        B --> D(1);
+                        B --> E(12);
+                        C --> F(30);
+                        E --> G(20)
+                        style E fill:#EF4444,stroke:#e5e7eb,color:#111827
+                        subgraph "Non è un BST"
+                           A;B;C;D;E;F;G
+                        end
+                    </pre>
+                     <p>L'albero non è un BST perché, ad esempio, il nodo con chiave 12 si trova nel sottoalbero sinistro di 10, ma 12 > 10, violando la proprietà. Anche il nodo 20 viola la proprietà rispetto a 15 e 10.</p>
+                </div>
+                
+                 <p><strong>Esempio di un albero che È un BST:</strong></p>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        A(10) --> B(2);
+                        A --> C(15);
+                        B --> D(1);
+                        B --> E(5);
+                        C --> F(30);
+                        F --> G(20);
+                        subgraph "È un BST"
+                           A;B;C;D;E;F;G
+                        end
+                    </pre>
+                    <p>In questo caso, ogni nodo rispetta la proprietà del BST.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="bst-operazioni" class="content-section">
+            <h3 class="subsection-title">4.3. Operazioni sui BST</h3>
+            <div class="section-content">
+                <p>La professoressa elenca le operazioni tipiche che si vogliono eseguire su un BST, che verranno analizzate nelle prossime lezioni:</p>
+                <ul>
+                    <li><strong>Ricerca:</strong> Trovare una chiave specifica, il minimo, il massimo, il predecessore e il successore di un nodo.</li>
+                    <li><strong>Operazioni Dinamiche:</strong> Inserimento e Cancellazione di un nodo.</li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="bst-visita-inorder" class="content-section">
+            <h3 class="subsection-title">4.4. Proprietà della Visita In-Order su un BST</h3>
+            <div class="section-content">
+                <p>Viene enunciato un teorema fondamentale che collega i BST alle visite:</p>
+                <p><strong>Teorema:</strong> Un albero binario <code>T</code> è un albero binario di ricerca (BST) <strong>se e solo se</strong> una visita In-Order dell'albero produce una sequenza di chiavi <strong>ordinata in modo non decrescente (crescente, se non ci sono duplicati)</strong>.</p>
+                <p><strong>Dimostrazione (idea):</strong></p>
+                <ul>
+                    <li><strong>(\(\Rightarrow\)) Se T è un BST, allora la visita In-Order è ordinata:</strong>
+                    Questo segue direttamente dalla definizione. La visita In-Order visita prima tutto il sottoalbero sinistro (che contiene chiavi più piccole), poi il nodo corrente, e infine tutto il sottoalbero destro (che contiene chiavi più grandi). Questo processo, applicato ricorsivamente, garantisce che le chiavi vengano "stampate" in ordine crescente.</li>
+                    <li><strong>(\(\Leftarrow\)) Se la visita In-Order è ordinata, allora T è un BST:</strong>
+                    Se la visita In-Order di un nodo <code>x</code> produce una sequenza ordinata, significa che tutti i nodi visitati prima di <code>x</code> (che per definizione di In-Order sono quelli nel suo sottoalbero sinistro) hanno chiavi minori di <code>x.key</code>. Analogamente, tutti quelli visitati dopo (nel sottoalbero destro) hanno chiavi maggiori. Poiché questo vale per ogni nodo dell'albero, la proprietà del BST è soddisfatta.</li>
+                </ul>
+                <p>Questa proprietà fornisce un modo efficiente (\(\Theta(N)\)) per verificare se un albero binario è un BST.</p>
+            </div>
+        </article>
+
+        <article id="bst-ricerca-max-min" class="content-section">
+            <h2 class="section-title">5. Ricerca del Massimo e del Minimo in un BST</h2>
+            <div class="section-content">
+                <p>La lezione si conclude con l'introduzione alla prima operazione di ricerca sui BST: trovare il minimo e il massimo.</p>
+                <p>Grazie alla proprietà del BST:</p>
+                <ul>
+                    <li>Il <strong>minimo</strong> di un BST si trova seguendo i puntatori al figlio <strong>sinistro</strong> a partire dalla radice, finché non si raggiunge un nodo che non ha più un figlio sinistro (un puntatore a NIL).</li>
+                    <li>Il <strong>massimo</strong> di un BST si trova seguendo i puntatori al figlio <strong>destro</strong> a partire dalla radice, finché non si raggiunge un nodo che non ha più un figlio destro.</li>
+                </ul>
+                <p>La professoressa anticipa che la prossima lezione continuerà con l'analisi dettagliata di queste e altre operazioni sui BST.</p>
+            </div>
+        </article>
+
+        <article id="esercizi-riflessioni" class="content-section">
+            <h2 class="section-title">6. Esercizi e Riflessioni</h2>
+            <div class="section-content">
+                <div class="exercise-box">
+                    <strong>Esercizio/Riflessione (dalla Professoressa):</strong>
+                    <p>Pensa a come implementare una procedura che, dato un albero binario, determini se è un BST. Quale sarebbe il modo più efficiente, basandosi sul teorema della visita In-Order?</p>
+                    <p><strong>Soluzione (Idea):</strong> Si potrebbe modificare la visita In-Order. Durante la visita, si tiene traccia dell'ultimo valore stampato. Ogni volta che si "esamina" (stampa) un nuovo nodo, si confronta la sua chiave con quella dell'ultimo nodo esaminato. Se in un qualsiasi punto si trova una chiave minore o uguale a quella precedente, l'albero non è un BST e si può terminare. Se si completa la visita senza violazioni, l'albero è un BST. Questo ha costo \(\Theta(N)\).</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="conclusioni" class="content-section">
+            <h2 class="section-title">7. Conclusioni</h2>
+            <div class="section-content">
+                <p>La lezione ha introdotto le procedure di visita standard per gli alberi binari (Pre-Order, In-Order, Post-Order), analizzandone la logica, l'implementazione ricorsiva e la complessità lineare \(\Theta(N)\).</p>
+                <p>Successivamente, sono stati definiti gli <strong>Alberi Binari di Ricerca (BST)</strong>, una struttura dati fondamentale che impone un ordinamento sulle chiavi. È stata evidenziata la proprietà cruciale che collega i BST alla <strong>visita In-Order</strong>: un albero è un BST se e solo se la sua visita In-Order produce una sequenza ordinata.</p>
+                <p>Infine, si è iniziato a esplorare le operazioni sui BST, partendo dalla ricerca del minimo e del massimo. La prossima lezione approfondirà le altre operazioni di ricerca, inserimento e cancellazione.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || ""; 
+                mermaidOriginalDefinitions.set(id, decodedContent.trim());
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
