@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 21: BST: ricerca; inserimento</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        .note-title { font-size: 1.05rem; color: var(--accent-secondary); margin-top: 1.2rem; margin-bottom: 0.6rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+
+        .array-representation table {
+            margin: 0 auto; /* Centra la tabella */
+            border-collapse: collapse;
+            font-family: var(--font-code);
+        }
+        .array-representation th, .array-representation td {
+            border: 1px solid var(--border-soft);
+            padding: 0.5em 0.75em;
+            min-width: 30px; /* Larghezza minima cella */
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .array-representation th { /* Indici */
+            background-color: var(--code-bg);
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .array-representation td { /* Valori */
+             background-color: var(--bg-card);
+             color: var(--text-primary);
+        }
+
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1); /* Viola chiaro trasparente */
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em;
+            margin: 1.5em 0;
+            border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box { /* Per evidenziare gli esercizi per casa e le loro soluzioni */
+            background-color: rgba(250, 204, 21, 0.1); /* Giallo chiaro trasparente */
+            border-left: 4px solid #FACC15; /* Giallo */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .correction-box { /* Per evidenziare le correzioni alle spiegazioni della prof */
+            background-color: rgba(239, 68, 68, 0.1); /* Rosso chiaro trasparente */
+            border-left: 4px solid #EF4444; /* Rosso */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .correction-box strong { color: #EF4444; }
+
+        .clarification-box { /* Per evidenziare approfondimenti/chiarimenti aggiunti da me */
+            background-color: rgba(52, 211, 153, 0.08); /* Verde acqua chiaro trasparente */
+            border-left: 4px solid #34D399; /* Verde acqua */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 10 dic 2020 (2).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 21: BST: ricerca; inserimento</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-recap" class="sidebar-link">1. Introduzione e Recap sui BST</a></li>
+            <li><a href="#bst-altezza" class="sidebar-link">1.1. Altezza di un BST</a></li>
+            <li><a href="#bst-operazioni-ricerca" class="sidebar-link">2. Operazioni di Ricerca sui BST</a></li>
+            <li><a href="#ricerca-max-min" class="sidebar-link">2.1. Ricerca del Massimo e del Minimo</a></li>
+            <li><a href="#ricerca-max-min-pseudo" class="sidebar-link">2.1.1. Pseudocodice e Complessità</a></li>
+            <li><a href="#ricerca-chiave-specifica" class="sidebar-link">2.2. Ricerca di una Chiave Specifica</a></li>
+            <li><a href="#ricerca-chiave-pseudo" class="sidebar-link">2.2.1. Pseudocodice e Complessità</a></li>
+            <li><a href="#ricerca-successore-predecessore" class="sidebar-link">2.3. Ricerca del Successore e del Predecessore</a></li>
+            <li><a href="#ricerca-successore-caso1" class="sidebar-link">2.3.1. Caso 1: Il nodo ha un sottoalbero destro</a></li>
+            <li><a href="#ricerca-successore-caso2" class="sidebar-link">2.3.2. Caso 2: Il nodo non ha un sottoalbero destro</a></li>
+            <li><a href="#ricerca-successore-pseudo" class="sidebar-link">2.3.3. Pseudocodice di BST-Successor</a></li>
+            <li><a href="#operazione-inserimento" class="sidebar-link">3. Inserimento in un BST</a></li>
+            <li><a href="#inserimento-idea" class="sidebar-link">3.1. Idea dell'Algoritmo</a></li>
+            <li><a href="#inserimento-pseudo" class="sidebar-link">3.2. Pseudocodice di BST-Insert</a></li>
+            <li><a href="#inserimento-esempio" class="sidebar-link">3.3. Esempio di Inserimenti Successivi</a></li>
+            <li><a href="#inserimento-complessita" class="sidebar-link">3.4. Complessità dell'Inserimento</a></li>
+            <li><a href="#esercizi-riflessioni" class="sidebar-link">4. Esercizi e Riflessioni</a></li>
+            <li><a href="#conclusioni" class="sidebar-link">5. Conclusioni</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-recap" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione e Recap sugli Alberi Binari di Ricerca (BST)</h2>
+            <div class="section-content">
+                <p>La professoressa inizia la lezione riprendendo il discorso sugli <strong>Alberi Binari di Ricerca (BST)</strong>. Viene fatto un breve riepilogo della definizione fondamentale:</p>
+                <blockquote>
+                Un BST è un albero binario in cui, per ogni nodo <code>x</code>:
+                <ul>
+                    <li>Tutte le chiavi nel sottoalbero sinistro di <code>x</code> sono <strong>minori</strong> di <code>x.key</code>.</li>
+                    <li>Tutte le chiavi nel sottoalbero destro di <code>x</code> sono <strong>maggiori</strong> di <code>x.key</code>.</li>
+                </ul>
+                </blockquote>
+                <p>La lezione di oggi si concentrerà sulle operazioni fondamentali che si possono eseguire su questa struttura dati, in particolare le operazioni di ricerca e inserimento. Fa riferimento agli appunti "Nota 10 dic 2020 (2).pdf".</p>
+            </div>
+        </article>
+
+        <article id="bst-altezza" class="content-section">
+            <h3 class="subsection-title">1.1. Altezza di un BST</h3>
+            <div class="section-content">
+                <p>Prima di analizzare le operazioni, la professoressa discute l'altezza \(h\) di un BST con \(N\) chiavi. A differenza di strutture come le Heap, un BST non ha vincoli sulla sua "forma" o bilanciamento. Di conseguenza:</p>
+                <ul>
+                    <li><strong>Caso Migliore (Albero Bilanciato):</strong> Se l'albero è ben bilanciato, la sua altezza sarà logaritmica rispetto al numero di nodi. \(h \in \Omega(\log N)\).</li>
+                    <li><strong>Caso Peggiore (Albero Degenere):</strong> Se l'albero degenera in una lista (ad esempio, inserendo elementi già ordinati), la sua altezza sarà lineare. \(h \in O(N)\).</li>
+                </ul>
+                <p>Quindi, in generale, l'altezza \(h\) di un BST con \(N\) nodi è compresa tra \(\Omega(\log N)\) e \(O(N)\).</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Albero Bilanciato (h=O(logN))"
+                            A(k) --> B;
+                            A --> C;
+                        end
+                        subgraph "Albero Degenere (h=O(N))"
+                           D(1) --> E(2);
+                           E(2) --> F(3);
+                           F(3) --> G(...);
+                           G --> H(N);
+                        end
+                    </pre>
+                </div>
+                <p>Questa variabilità nell'altezza avrà un impatto diretto sulla complessità delle operazioni.</p>
+            </div>
+        </article>
+        
+        <article id="bst-operazioni-ricerca" class="content-section">
+            <h2 class="section-title">2. Operazioni di Ricerca sui BST</h2>
+            <div class="section-content">
+                <p>La professoressa inizia l'analisi delle operazioni di ricerca, che sono particolarmente efficienti sui BST grazie alla loro proprietà di ordinamento.</p>
+            </div>
+        </article>
+
+        <article id="ricerca-max-min" class="content-section">
+            <h3 class="subsection-title">2.1. Ricerca del Massimo e del Minimo</h3>
+            <div class="section-content">
+                <p>Trovare l'elemento con la chiave minima o massima in un BST è un'operazione molto semplice.</p>
+                <p><strong>Ricerca del Massimo:</strong></p>
+                <p>Per la proprietà del BST, le chiavi più grandi si trovano sempre nel sottoalbero destro. Per trovare la chiave massima, si deve seguire il percorso più a destra possibile.</p>
+                <ol>
+                    <li>Si parte dalla radice dell'albero.</li>
+                    <li>Si continua a scendere nel figlio <strong>destro</strong>.</li>
+                    <li>Ci si ferma quando si raggiunge un nodo che <strong>non ha un figlio destro</strong> (cioè, il suo puntatore destro è `NIL`). Questo nodo contiene la chiave massima.</li>
+                </ol>
+                 <div class="clarification-box">
+                    <strong>Approfondimento: il Massimo può avere un figlio sinistro?</strong>
+                    <p>Sì. Come sottolineato dalla professoressa, il nodo contenente il valore massimo non deve necessariamente essere una foglia (senza figli). Deve solo non avere un figlio destro. Può tranquillamente avere un figlio sinistro, che conterrà valori maggiori di quelli nel resto del sottoalbero, ma comunque minori del massimo stesso.</p>
+                </div>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        A(10) --> B(5)
+                        A --> C(20)
+                        C --> D(15)
+                        C --> E(Max: 20)
+                        subgraph Legenda
+                           A;B;C;D;E;
+                        end
+                        style E fill:#60a5fa,stroke:#e5e7eb,color:#111827
+                    </pre>
+                    <p>Nell'esempio, partendo da 10 si va a destra (20). Il nodo 20 non ha un figlio destro, quindi è il massimo.</p>
+                </div>
+                
+                <p><strong>Ricerca del Minimo:</strong></p>
+                <p>L'operazione è simmetrica. Per trovare la chiave minima:</p>
+                <ol>
+                    <li>Si parte dalla radice.</li>
+                    <li>Si continua a scendere nel figlio <strong>sinistro</strong>.</li>
+                    <li>Ci si ferma quando si raggiunge un nodo che non ha un figlio sinistro.</li>
+                </ol>
+            </div>
+        </article>
+        
+        <article id="ricerca-max-min-pseudo" class="content-section">
+            <h4 class="subsubsection-title">2.1.1. Pseudocodice e Complessità</h4>
+            <div class="section-content">
+                <p>La professoressa presenta due versioni per la ricerca del massimo: una ricorsiva e una iterativa.</p>
+                <p><strong>Versione Ricorsiva:</strong></p>
+                <pre><code class="language-pseudocode">
+BST-Max(x) // x è il nodo da cui partire
+  if x.right == NIL then
+    return x // Trovato il nodo con chiave massima
+  else
+    return BST-Max(x.right)
+                </code></pre>
+                
+                <p><strong>Versione Iterativa (con ciclo `while`):</strong></p>
+                <pre><code class="language-pseudocode">
+BST-Max-While(T)
+  x = T.root
+  if x == NIL then return NIL // Albero vuoto
+
+  while (x.right != NIL) do
+    x = x.right
+  
+  return x
+                </code></pre>
+                <p><strong>Gestione del Caso Base (Albero Vuoto):</strong> La professoressa sottolinea che queste procedure, per essere robuste, devono gestire il caso in cui l'albero sia vuoto. Nello pseudocodice iterativo, questo è gestito esplicitamente. In quello ricorsivo, la chiamata iniziale (il "main") dovrebbe verificare se <code>T.root</code> è <code>NIL</code> prima di chiamare <code>BST-Max(T.root)</code>.</p>
+                <p><strong>Complessità:</strong></p>
+                <ul>
+                    <li>Il percorso seguito è un singolo ramo dell'albero.</li>
+                    <li>Nel caso peggiore, questo ramo è il più lungo possibile.</li>
+                    <li>La complessità temporale è quindi proporzionale all'altezza dell'albero: \(\Theta(h)\).</li>
+                    <li>Poiché \(h\) può variare da \(\log N\) a \(N\), la complessità in termini di \(N\) è \(O(N)\).</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Confronto con Visita In-Order (domanda di uno studente):</strong>
+                    <p>Uno studente suggerisce di trovare il massimo eseguendo una visita In-Order e prendendo l'ultimo elemento. La professoressa chiarisce che, sebbene corretto, questo approccio avrebbe una complessità \(\Theta(N)\) anche nel caso migliore, perché richiederebbe di visitare tutti i nodi. La ricerca diretta è molto più efficiente, specialmente per alberi bilanciati dove costa solo \(\Theta(\log N)\).</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="ricerca-chiave-specifica" class="content-section">
+            <h3 class="subsection-title">2.2. Ricerca di una Chiave Specifica</h3>
+            <div class="section-content">
+                <p>L'obiettivo è trovare se un nodo con una data chiave <code>k</code> esiste nell'albero e, in caso affermativo, restituire un puntatore a quel nodo.</p>
+                <p><strong>Logica:</strong></p>
+                <ol>
+                    <li>Si parte dalla radice.</li>
+                    <li>In un generico nodo <code>x</code>:
+                        <ul>
+                            <li>Se la chiave cercata <code>k</code> è uguale a <code>x.key</code>, l'elemento è stato trovato.</li>
+                            <li>Se <code>k</code> è <strong>minore</strong> di <code>x.key</code>, si continua la ricerca nel sottoalbero <strong>sinistro</strong>.</li>
+                            <li>Se <code>k</code> è <strong>maggiore</strong> di <code>x.key</code>, si continua la ricerca nel sottoalbero <strong>destro</strong>.</li>
+                        </ul>
+                    </li>
+                    <li>Se durante la discesa si raggiunge un puntatore a <code>NIL</code>, significa che la chiave <code>k</code> non è presente nell'albero.</li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="ricerca-chiave-pseudo" class="content-section">
+            <h4 class="subsubsection-title">2.2.1. Pseudocodice e Complessità</h4>
+            <div class="section-content">
+                <pre><code class="language-pseudocode">
+BST-Search(x, k) // Cerca la chiave k partendo dal nodo x
+  // Caso base: se il nodo è NIL o contiene la chiave, restituisci il nodo
+  if x == NIL or k == x.key then
+    return x
+  
+  // Passo ricorsivo
+  if k < x.key then
+    // Cerca nel sottoalbero sinistro
+    return BST-Search(x.left, k)
+  else
+    // Cerca nel sottoalbero destro
+    return BST-Search(x.right, k)
+                </code></pre>
+                 <div class="correction-box">
+                    <strong>Correzioni e Note dalla Professoressa:</strong>
+                    <ol>
+                        <li><strong>Restituzione dei valori:</strong> Nelle chiamate ricorsive, è fondamentale usare `return BST-Search(...)` per propagare il risultato verso l'alto. Un errore comune è omettere il `return`.</li>
+                        <li><strong>Gestione di NIL (Lazy Evaluation):</strong> La condizione `if x == NIL or k == x.key` funziona perché i linguaggi di programmazione moderni usano la valutazione "short-circuit" per gli operatori logici. Se `x == NIL` è vero, l'espressione `k == x.key` non viene valutata, evitando un errore di accesso a un puntatore nullo.</li>
+                    </ol>
+                </div>
+                <p><strong>Complessità:</strong> Anche in questo caso, l'algoritmo segue un singolo percorso dalla radice verso una foglia (o un nodo intermedio). La complessità è \(\Theta(h)\) nel caso peggiore, che si traduce in \(O(N)\).</p>
+            </div>
+        </article>
+        
+        <article id="ricerca-successore-predecessore" class="content-section">
+            <h3 class="subsection-title">2.3. Ricerca del Successore e del Predecessore</h3>
+            <div class="section-content">
+                <p>Questa è un'operazione più sofisticata. Dato un nodo <code>x</code>, il suo <strong>successore</strong> è il nodo <code>y</code> che ha la più piccola chiave tra tutte quelle maggiori di <code>x.key</code>. In altre parole, è l'elemento che verrebbe subito dopo <code>x</code> in una visita In-Order.</p>
+                <p>Per trovare il successore di un nodo <code>x</code>, si distinguono due casi principali.</p>
+            </div>
+        </article>
+
+        <article id="ricerca-successore-caso1" class="content-section">
+            <h4 class="subsubsection-title">2.3.1. Caso 1: Il nodo <code>x</code> ha un sottoalbero destro non vuoto</h4>
+            <div class="section-content">
+                <p>Se il figlio destro di <code>x</code> non è <code>NIL</code>, allora il successore di <code>x</code> è il nodo con la <strong>chiave minima nel sottoalbero destro di <code>x</code></strong>.</p>
+                <p>Per trovarlo, basta partire dal figlio destro di <code>x</code> (<code>x.right</code>) e scendere sempre a sinistra finché possibile.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        X --> R("x.right");
+                        R --> L1;
+                        L1 --> L2("Successore di x<br/>(minimo del sottoalbero destro)");
+                        L2 --> L2_NIL(NIL);
+                        L2 --> L2_R;
+                        
+                        style X fill:#60a5fa,stroke:#e5e7eb,color:#111827
+                        style L2 fill:#818cf8,stroke:#e5e7eb,color:#111827
+                        style L2_NIL fill:#1f2937,stroke:#9ca3af,stroke-width:1px
+                    </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="ricerca-successore-caso2" class="content-section">
+            <h4 class="subsubsection-title">2.3.2. Caso 2: Il nodo <code>x</code> non ha un sottoalbero destro</h4>
+            <div class="section-content">
+                <p>Se il figlio destro di <code>x</code> è <code>NIL</code>, il successore di <code>x</code> è il suo <strong>più basso antenato (genitore, nonno, ecc.) per il quale <code>x</code> si trova nel sottoalbero sinistro</strong>.</p>
+                <p>Per trovarlo, si risale l'albero da <code>x</code> usando i puntatori <code>parent</code>. Ci si ferma al primo antenato <code>y</code> tale che il nodo da cui si è arrivati (<code>x</code> o uno dei suoi antenati) è il <strong>figlio sinistro</strong> di <code>y</code>.</p>
+                <p><strong>Intuizione:</strong> Finché si risale da un figlio destro, significa che il genitore ha una chiave più piccola ed è già stato visitato nell'In-Order. Il primo "svoltamento a sinistra" che si fa risalendo indica il primo nodo con una chiave più grande.</p>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        Y("Successore di x") --> X_parent;
+                        X_parent --> X;
+                        X_parent -.-> R_child("Altro figlio");
+                        
+                        style Y fill:#818cf8,stroke:#e5e7eb,color:#111827
+                        style X fill:#60a5fa,stroke:#e5e7eb,color:#111827
+                        subgraph "Path di risalita"
+                           X -- "parent" --> X_parent;
+                           X_parent -- "parent" --> Y;
+                        end
+                    </pre>
+                     <p>In questo schema, `X` è figlio di `X_parent`, che a sua volta è figlio sinistro di `Y`. Risalendo da `X`, `Y` è il primo antenato raggiunto da un sottoalbero sinistro.</p>
+                </div>
+                 <p><strong>Caso Limite:</strong> Se si risale fino alla radice e si scopre che <code>x</code> era l'elemento massimo dell'albero (si è sempre risaliti da un figlio destro), il puntatore al genitore diventerà `NIL`. In questo caso, <code>x</code> non ha successore.</p>
+            </div>
+        </article>
+        
+        <article id="ricerca-successore-pseudo" class="content-section">
+            <h4 class="subsubsection-title">2.3.3. Pseudocodice di BST-Successor</h4>
+            <div class="section-content">
+                <pre><code class="language-pseudocode">
+BST-Successor(x)
+  // Caso 1: il nodo x ha un sottoalbero destro
+  if x.right != NIL then
+    return BST-Min(x.right) // Il successore è il minimo del sottoalbero destro
+
+  // Caso 2: il nodo x non ha un sottoalbero destro
+  else
+    y = x.parent // Inizia a risalire dall'antenato
+    // Continua a risalire finché y non è NIL (radice raggiunta)
+    // e finché x è il figlio destro di y.
+    while (y != NIL and x == y.right) do
+      x = y
+      y = y.parent
+    
+    return y // y è il successore (o NIL se x era il massimo)
+                </code></pre>
+                <p><strong>Complessità:</strong> \(\Theta(h)\) o \(O(N)\), poiché si percorre un singolo cammino verso il basso o verso l'alto.</p>
+                <div class="exercise-box">
+                    <strong>Esercizio (dalla Professoressa): Scrivere il codice per BST-Predecessor</strong>
+                    <p><strong>Soluzione (Aggiunta da AI):</strong> La logica è perfettamente simmetrica.</p>
+                     <pre><code class="language-pseudocode">
+BST-Predecessor(x)
+  // Caso 1: il nodo x ha un sottoalbero sinistro
+  if x.left != NIL then
+    return BST-Max(x.left) // Il predecessore è il massimo del sottoalbero sinistro
+
+  // Caso 2: il nodo x non ha un sottoalbero sinistro
+  else
+    y = x.parent
+    // Continua a risalire finché y non è NIL
+    // e finché x è il figlio sinistro di y.
+    while (y != NIL and x == y.left) do
+      x = y
+      y = y.parent
+    
+    return y // y è il predecessore (o NIL se x era il minimo)
+                     </code></pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="operazione-inserimento" class="content-section">
+            <h2 class="section-title">3. Inserimento in un BST (BST-Insert)</h2>
+            <div class="section-content">
+                <p>L'inserimento di un nuovo nodo <code>z</code> in un BST deve preservare la proprietà del BST. Il nuovo nodo verrà sempre inserito come una <strong>foglia</strong>.</p>
+            </div>
+        </article>
+
+        <article id="inserimento-idea" class="content-section">
+            <h3 class="subsection-title">3.1. Idea dell'Algoritmo</h3>
+            <div class="section-content">
+                <ol>
+                    <li><strong>Cerca la Posizione:</strong> Si scende nell'albero partendo dalla radice, come se si stesse cercando la chiave del nuovo nodo <code>z.key</code>.</li>
+                    <li><strong>Mantieni traccia del Genitore:</strong> Durante la discesa, è fondamentale mantenere un puntatore al "genitore" del nodo corrente. Questo perché quando la ricerca termina trovando un puntatore <code>NIL</code>, quel puntatore <code>NIL</code> è la posizione in cui il nuovo nodo <code>z</code> deve essere agganciato, e il puntatore "genitore" ci dice a quale nodo agganciarlo. Si usano due puntatori: <code>x</code> che scende e <code>y</code> che lo segue ("genitore di x").</li>
+                    <li><strong>Aggancia il Nuovo Nodo:</strong> Una volta che <code>x</code> diventa <code>NIL</code>, <code>y</code> punterà al nodo che diventerà il genitore di <code>z</code>. A questo punto:
+                        <ul>
+                            <li>Si imposta <code>z.parent = y</code>.</li>
+                            <li>Si confronta <code>z.key</code> con <code>y.key</code> per decidere se <code>z</code> deve diventare il figlio sinistro o destro di <code>y</code>.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Caso Speciale (Albero Vuoto):</strong> Se l'albero è inizialmente vuoto, <code>y</code> rimarrà <code>NIL</code>. In questo caso, il nuovo nodo <code>z</code> diventa la radice dell'albero.</li>
+                </ol>
+            </div>
+        </article>
+        
+        <article id="inserimento-pseudo" class="content-section">
+            <h3 class="subsection-title">3.2. Pseudocodice di BST-Insert</h3>
+            <div class="section-content">
+                <pre><code class="language-pseudocode">
+BST-Insert(T, z) // T è l'albero, z è il nuovo nodo da inserire
+  y = NIL      // Puntatore al "genitore", che segue x
+  x = T.root   // Puntatore che scende nell'albero
+  
+  // Scendi nell'albero per trovare la posizione di inserimento
+  while (x != NIL) do
+    y = x // Salva il genitore
+    if z.key < x.key then
+      x = x.left
+    else
+      x = x.right
+      
+  // Ora y è il genitore del nuovo nodo z, e x è NIL
+  z.parent = y
+  
+  // Gestisci il caso di albero vuoto
+  if y == NIL then
+    T.root = z // z diventa la radice
+  // Altrimenti, aggancia z a y
+  else if z.key < y.key then
+    y.left = z
+  else
+    y.right = z
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="inserimento-esempio" class="content-section">
+            <h3 class="subsection-title">3.3. Esempio di Inserimenti Successivi</h3>
+            <div class="section-content">
+                <p>La professoressa mostra la costruzione di un BST partendo da un albero vuoto e inserendo la sequenza: <code>5, 20, 30, 15, 2, 10, 12, 18, 40</code>.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        A(5) --> B(2)
+                        A --> C(20)
+                        
+                        C --> D(15)
+                        C --> E(30)
+                        
+                        D --> F(10)
+                        
+                        F --> G(12)
+                        D --> H(18)
+                        
+                        E --> I(40)
+                        
+                        B --> B_NIL_L(NIL); B --> B_NIL_R(NIL);
+                        G --> G_NIL_L(NIL); G --> G_NIL_R(NIL);
+                        H --> H_NIL_L(NIL); H --> H_NIL_R(NIL);
+                        I --> I_NIL_L(NIL); I --> I_NIL_R(NIL);
+
+                        style B_NIL_L fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
+                        style B_NIL_R fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
+                        style G_NIL_L fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
+                        style G_NIL_R fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
+                        style H_NIL_L fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
+                        style H_NIL_R fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
+                        style I_NIL_L fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
+                        style I_NIL_R fill:#1f2937,stroke:#9ca3af,stroke-width:1px;
+                    </pre>
+                    <p>L'albero finale risultante dagli inserimenti sequenziali.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="inserimento-complessita" class="content-section">
+            <h3 class="subsection-title">3.4. Complessità dell'Inserimento</h3>
+            <div class="section-content">
+                <p>L'algoritmo di inserimento esegue una discesa dalla radice fino a una foglia (o una posizione vuota). Il numero di passi è limitato dall'altezza dell'albero.</p>
+                <p>La complessità temporale di <code>BST-Insert</code> è \(\Theta(h)\), che nel caso peggiore è \(O(N)\).</p>
+            </div>
+        </article>
+
+        <article id="esercizi-riflessioni" class="content-section">
+            <h2 class="section-title">4. Esercizi e Riflessioni</h2>
+            <div class="section-content">
+                <div class="exercise-box">
+                    <strong>Esercizio (dalla Professoressa): Riscrivere In-Order in-place</strong>
+                    <p><strong>Testo:</strong> Sfruttando le procedure di ricerca del minimo e del successore, scrivere una versione <strong>in-place</strong> (iterativa) della visita In-Order di un BST, che non usi lo stack di ricorsione.</p>
+                    <p><strong>Soluzione (Aggiunta da AI):</strong></p>
+                    <p>L'idea è di partire dal minimo dell'albero e poi trovare ripetutamente il successore fino a esaurire tutti i nodi.</p>
+                    <pre><code class="language-pseudocode">
+In-Order-Iterative(T)
+  if T.root == NIL then
+    return // Albero vuoto
+
+  // 1. Trova il primo nodo da visitare (il minimo)
+  current = BST-Min(T.root)
+  
+  // 2. Itera finché ci sono nodi da visitare
+  while current != NIL do
+    print(current.key) // Esamina il nodo corrente
+    
+    // 3. Trova il nodo successivo nell'ordine
+    current = BST-Successor(current)
+                    </code></pre>
+                    <p>Questa procedura visita i nodi nell'ordine corretto. La sua complessità totale è la somma dei costi per trovare il minimo e poi N-1 chiamate a `BST-Successor`. Poiché ogni chiamata a `Successor` costa \(O(h)\), la complessità totale nel caso peggiore è \(O(N \cdot h)\). Questo è peggiore del \(\Theta(N)\) della versione ricorsiva. Tuttavia, è un utile esercizio per comprendere le relazioni tra i nodi in un BST.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="conclusioni" class="content-section">
+            <h2 class="section-title">5. Conclusioni</h2>
+            <div class="section-content">
+                <p>La lezione di oggi ha introdotto le operazioni fondamentali di <strong>ricerca</strong> e <strong>inserimento</strong> negli Alberi Binari di Ricerca.</p>
+                <p><strong>Punti Chiave:</strong></p>
+                <ul>
+                    <li>Le operazioni di ricerca (chiave specifica, minimo, massimo, successore, predecessore) e di inserimento in un BST hanno tutte una complessità temporale proporzionale all'altezza dell'albero, \(\Theta(h)\).</li>
+                    <li>Poiché l'altezza di un BST può variare da \(\log N\) a \(N\), queste operazioni hanno una complessità nel caso peggiore di \(O(N)\).</li>
+                    <li>L'inserimento in un BST avviene sempre aggiungendo il nuovo nodo come una foglia, preservando la proprietà del BST.</li>
+                    <li>È possibile implementare le operazioni sia in modo ricorsivo che iterativo. Le versioni iterative sono generalmente più efficienti in termini di spazio (in-place).</li>
+                </ul>
+                <p>La prossima lezione affronterà l'operazione più complessa: la <strong>cancellazione</strong> di un nodo da un BST.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
