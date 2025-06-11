@@ -215,12 +215,12 @@
                 <div class="mermaid-container">
                     <pre class="mermaid">
                     graph LR
-                        P[Preamble<br/>(7 Bytes)] --> SFD[SFD<br/>(1 Byte)];
-                        SFD --> MAC_Dest[MAC Dest.<br/>(6 Bytes)];
-                        MAC_Dest --> MAC_Src[MAC Src.<br/>(6 Bytes)];
-                        MAC_Src --> Type_Len[Type/Length<br/>(2 Bytes)];
-                        Type_Len --> Payload[Payload<br/>(46-1500 Bytes)];
-                        Payload --> CRC[CRC-32<br/>(4 Bytes)];
+                        P["Preamble<br/>(7 Bytes)"] --> SFD["SFD<br/>(1 Byte)"];
+                        SFD --> MAC_Dest["MAC Dest.<br/>(6 Bytes)"];
+                        MAC_Dest --> MAC_Src["MAC Src.<br/>(6 Bytes)"];
+                        MAC_Src --> Type_Len["Type/Length<br/>(2 Bytes)"];
+                        Type_Len --> Payload["Payload<br/>(46-1500 Bytes)"];
+                        Payload --> CRC["CRC-32<br/>(4 Bytes)"];
 
                         style P fill:#60a5fa,stroke:#60a5fa,stroke-width:1px;
                         style SFD fill:#818cf8,stroke:#818cf8,stroke-width:1px;
@@ -796,33 +796,33 @@
                     graph LR
                         A --> S1;
                         B --> S1;
-                        S1 -- Link 1 --> S2;
-                        S2 -- Link 2 --> S3;
-                        S3 -- Link 3 --> S1; /* This is the loop */
+                        S1 -- "Link 1" --> S2;
+                        S2 -- "Link 2" --> S3;
+                        S3 -- "Link 3" --> S1; 
                         C --> S3;
                         D --> S3;
 
                         subgraph "RSTP (Assuming S1 is Root Bridge, Costs Equal)"
-                            S1_Root[S1 (Root Bridge)]
-                            S2_NonRoot[S2 (Non-Root Bridge)]
-                            S3_NonRoot[S3 (Non-Root Bridge)]
+                            S1_Root["S1 (Root Bridge)"]
+                            S2_NonRoot["S2 (Non-Root Bridge)"]
+                            S3_NonRoot["S3 (Non-Root Bridge)"]
 
-                            S1_Root -- RP (Cost 0) --> A_Host[Host A];
-                            S1_Root -- DP (Cost 0) --> B_Host[Host B];
-                            S1_Root -- DP (Link 1) --> S2_NonRoot;
+                            S1_Root -- "RP (Cost 0)" --> A_Host["Host A"];
+                            S1_Root -- "DP (Cost 0)" --> B_Host["Host B"];
+                            S1_Root -- "DP (Link 1)" --> S2_NonRoot;
 
-                            S2_NonRoot -- RP (Link 1) --> S1_Root;
-                            S2_NonRoot -- DP (Link 2) --> S3_NonRoot;
+                            S2_NonRoot -- "RP (Link 1)" --> S1_Root;
+                            S2_NonRoot -- "DP (Link 2)" --> S3_NonRoot;
 
-                            S3_NonRoot -- RP (Link 2) --> S2_NonRoot;
-                            S3_NonRoot -- DP (Cost 0) --> C_Host[Host C];
-                            S3_NonRoot -- DP (Cost 0) --> D_Host[Host D];
-                            S3_NonRoot -- Blocking (Link 3) --- S1_Root; /* This link is blocked */
+                            S3_NonRoot -- "RP (Link 2)" --> S2_NonRoot;
+                            S3_NonRoot -- "DP (Cost 0)" --> C_Host["Host C"];
+                            S3_NonRoot -- "DP (Cost 0)" --> D_Host["Host D"];
+                            S3_NonRoot -- "Blocking (Link 3)" --- S1_Root; 
                         end
                         style S1_Root fill:#60a5fa,stroke:#60a5fa;
                         style S2_NonRoot fill:#818cf8,stroke:#818cf8;
                         style S3_NonRoot fill:#34D399,stroke:#34D399;
-                        linkStyle 5 stroke-dasharray: 5 5; /* Dotted line for blocked link */
+                        linkStyle 5 stroke-dasharray: 5 5; 
                     </pre>
                 </div>
 
@@ -833,10 +833,13 @@
                     <div class="mermaid-container">
                         <pre class="mermaid">
                         graph TD
-                            N1 --- B2 --- B1;
-                            N2 --- B3 --- B1;
-                            N3 --- B4 --- B1;
-                            N4 --- B3;
+                            N1 --> B2;
+                            B2 --> B1;
+                            N2 --> B3;
+                            B3 --> B1;
+                            N3 --> B4;
+                            B4 --> B1;
+                            N4 --> B3;
 
                             style N1 fill:#9ca3af,stroke:#9ca3af;
                             style N2 fill:#9ca3af,stroke:#9ca3af;
@@ -869,7 +872,7 @@
     </main>
 
     <footer>
-        <p>© 2024 Appunti Corso Reti di Calcolatori</p>
+        <p> 2024 Appunti Corso Reti di Calcolatori</p>
     </footer>
 
     <script src="assets/common.js"></script>

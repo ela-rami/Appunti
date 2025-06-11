@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 22: Cancellazione in BST e Esercizi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        .note-title { font-size: 1.05rem; color: var(--accent-secondary); margin-top: 1.2rem; margin-bottom: 0.6rem; font-weight: 600; }
+
+
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+
+        .array-representation table {
+            margin: 0 auto; /* Centra la tabella */
+            border-collapse: collapse;
+            font-family: var(--font-code);
+        }
+        .array-representation th, .array-representation td {
+            border: 1px solid var(--border-soft);
+            padding: 0.5em 0.75em;
+            min-width: 30px; /* Larghezza minima cella */
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .array-representation th { /* Indici */
+            background-color: var(--code-bg);
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .array-representation td { /* Valori */
+             background-color: var(--bg-card);
+             color: var(--text-primary);
+        }
+        
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1); /* Viola chiaro trasparente */
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em;
+            margin: 1.5em 0;
+            border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box { /* Per evidenziare gli esercizi per casa e le loro soluzioni */
+            background-color: rgba(250, 204, 21, 0.1); /* Giallo chiaro trasparente */
+            border-left: 4px solid #FACC15; /* Giallo */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .correction-box { /* Per evidenziare le correzioni alle spiegazioni della prof */
+            background-color: rgba(239, 68, 68, 0.1); /* Rosso chiaro trasparente */
+            border-left: 4px solid #EF4444; /* Rosso */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .correction-box strong { color: #EF4444; }
+
+        .clarification-box { /* Per evidenziare approfondimenti/chiarimenti aggiunti da me */
+            background-color: rgba(52, 211, 153, 0.08); /* Verde acqua chiaro trasparente */
+            border-left: 4px solid #34D399; /* Verde acqua */
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width)));
+                top: 0; 
+                height: 100vh;
+                padding-top: 1.5rem;
+                z-index: 1100;
+                border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 14 dic 2020 (2).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 22: Cancellazione in BST e Esercizi di Riepilogo</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-recap" class="sidebar-link">1. Introduzione e Recap: Operazioni su BST</a></li>
+            <li><a href="#cancellazione-bst" class="sidebar-link">2. Cancellazione in un BST</a></li>
+            <li><a href="#cancellazione-casi" class="sidebar-link">2.1. I Tre Casi della Cancellazione</a></li>
+            <li><a href="#cancellazione-caso1" class="sidebar-link">2.1.1. Caso 1: Il nodo è una foglia</a></li>
+            <li><a href="#cancellazione-caso2" class="sidebar-link">2.1.2. Caso 2: Il nodo ha un solo figlio</a></li>
+            <li><a href="#cancellazione-caso3" class="sidebar-link">2.1.3. Caso 3: Il nodo ha due figli</a></li>
+            <li><a href="#cancellazione-esempio" class="sidebar-link">2.2. Esempio di Cancellazione (Caso 3)</a></li>
+            <li><a href="#cancellazione-alternativa-sbilanciamento" class="sidebar-link">2.3. Un'alternativa da evitare (e perché)</a></li>
+            <li><a href="#cancellazione-pseudo" class="sidebar-link">2.4. Pseudocodice di BST-Delete</a></li>
+            <li><a href="#esercizi-bst" class="sidebar-link">3. Esercizi di Riepilogo sui BST</a></li>
+            <li><a href="#esercizio-sort-con-bst" class="sidebar-link">3.1. Esercizio 1: Ordinare un vettore usando un BST</a></li>
+            <li><a href="#esercizio-ricostruzione-preorder" class="sidebar-link">3.2. Esercizio 2: Ricostruire un BST dalla sua visita Pre-Order</a></li>
+            <li><a href="#esercizio-ricostruzione-logica" class="sidebar-link">3.2.1. Logica della Ricostruzione (Dettaglio)</a></li>
+            <li><a href="#conclusioni" class="sidebar-link">4. Conclusioni e Prossimi Argomenti</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-recap" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione e Recap: Operazioni su BST</h2>
+            <div class="section-content">
+                <p>La professoressa inizia la lezione riprendendo il discorso sugli <strong>Alberi Binari di Ricerca (BST)</strong>, facendo riferimento agli appunti della lezione precedente ("Nota 10 dic 2020 (2).pdf") e introducendo il nuovo set di appunti per la giornata ("Nota 14 dic 2020 (2).pdf").</p>
+                <p><strong>Recap dei Punti Chiave:</strong></p>
+                <ul>
+                    <li>Le operazioni di <strong>ricerca</strong> (chiave specifica, min, max, successore, predecessore) e <strong>inserimento</strong> in un BST sono state analizzate.</li>
+                    <li>Tutte queste operazioni hanno una complessità temporale proporzionale all'altezza dell'albero, \(\Theta(h)\).</li>
+                    <li>Poiché l'altezza \(h\) di un BST con \(N\) nodi può variare da \(\Omega(\log N)\) (caso bilanciato) a \(O(N)\) (caso degenere), la complessità nel caso peggiore è \(O(N)\).</li>
+                </ul>
+                <p>La lezione di oggi si concentrerà sull'ultima e più complessa operazione dinamica: la <strong>cancellazione</strong> di un nodo da un BST, assicurandosi che la proprietà del BST venga preservata.</p>
+            </div>
+        </article>
+
+        <article id="cancellazione-bst" class="content-section">
+            <h2 class="section-title">2. Cancellazione in un BST</h2>
+            <div class="section-content">
+                <p>Il problema è il seguente: dato un BST <code>T</code> e un puntatore a un nodo <code>z</code> da rimuovere, modificare l'albero in modo che la chiave contenuta in <code>z</code> venga eliminata e la struttura risultante sia ancora un BST valido.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                        graph TD
+                            T(Albero T) --> P(Genitore di z);
+                            P --> Z(z, chiave k);
+                            Z --> ZL(Sottoalbero Sinistro);
+                            Z --> ZR(Sottoalbero Destro);
+                            style Z fill:#EF4444,stroke:#e5e7eb,color:#111827
+                    </pre>
+                </div>
+            </div>
+        </article>
+        
+        <article id="cancellazione-casi" class="content-section">
+            <h3 class="subsection-title">2.1. I Tre Casi della Cancellazione</h3>
+            <div class="section-content">
+                <p>La procedura di cancellazione si articola in tre casi, a seconda del numero di figli del nodo <code>z</code> da eliminare.</p>
+            </div>
+        </article>
+
+        <article id="cancellazione-caso1" class="content-section">
+            <h4 class="subsubsection-title">2.1.1. Caso 1: Il nodo <code>z</code> è una foglia (non ha figli)</h4>
+            <div class="section-content">
+                <p>Questo è il caso più semplice. Se il nodo <code>z</code> da cancellare non ha figli (sia il puntatore sinistro che quello destro sono <code>NIL</code>), è sufficiente modificare il puntatore del genitore di <code>z</code> (<code>z.parent</code>) che puntava a <code>z</code>, facendolo puntare a <code>NIL</code>.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Prima della cancellazione"
+                            P1(Parent) --> Z1(z);
+                            Z1 --> NIL_L1(NIL);
+                            Z1 --> NIL_R1(NIL);
+                        end
+                        subgraph "Dopo la cancellazione"
+                            P2(Parent) --> NIL_Z(NIL);
+                        end
+                        style Z1 fill:#EF4444,stroke:#e5e7eb,color:#111827;
+                        style NIL_L1, NIL_R1, NIL_Z fill:#1f2937,stroke:#9ca3af,stroke-width:1px,stroke-dasharray: 3 3;
+                    </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="cancellazione-caso2" class="content-section">
+            <h4 class="subsubsection-title">2.1.2. Caso 2: Il nodo <code>z</code> ha un solo figlio</h4>
+            <div class="section-content">
+                <p>Se <code>z</code> ha un solo figlio (l'altro è <code>NIL</code>), si può "bypassare" il nodo <code>z</code>. Si modifica il puntatore del genitore di <code>z</code> per farlo puntare direttamente all'unico figlio di <code>z</code>. Inoltre, si aggiorna il puntatore <code>parent</code> del figlio di <code>z</code> per farlo puntare al genitore di <code>z</code>.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Prima della cancellazione"
+                            P1(Parent) --> Z1(z);
+                            Z1 --> C1(Figlio Unico);
+                            Z1 --> NIL_R1(NIL);
+                        end
+                        subgraph "Dopo la cancellazione"
+                            P2(Parent) --> C2(Figlio Unico);
+                        end
+                         style Z1 fill:#EF4444,stroke:#e5e7eb,color:#111827;
+                         style NIL_R1 fill:#1f2937,stroke:#9ca3af,stroke-width:1px,stroke-dasharray: 3 3;
+                    </pre>
+                </div>
+                <p><strong>Correttezza:</strong> La professoressa spiega perché questa operazione preserva la proprietà del BST. Se, ad esempio, <code>z</code> era il figlio destro del suo genitore <code>p</code> (quindi <code>z.key > p.key</code>), allora anche l'unico figlio di <code>z</code> e tutto il suo sottoalbero avranno chiavi maggiori di <code>p.key</code>, quindi è corretto "promuovere" il figlio di <code>z</code> a figlio di <code>p</code>.</p>
+            </div>
+        </article>
+
+        <article id="cancellazione-caso3" class="content-section">
+            <h4 class="subsubsection-title">2.1.3. Caso 3: Il nodo <code>z</code> ha due figli</h4>
+            <div class="section-content">
+                <p>Questo è il caso più complesso. Non possiamo semplicemente rimuovere <code>z</code> perché lasceremmo due sottoalberi "orfani".</p>
+                <p><strong>L'Idea Chiave:</strong> L'obiettivo è trovare un altro nodo <code>x</code> nell'albero che possa sostituire fisicamente <code>z</code>, ma la cui rimozione sia semplice (cioè, che ricada nel Caso 1 o nel Caso 2).</p>
+                <p>I candidati ideali per prendere il posto di <code>z</code> (cioè, per sostituire la sua chiave) sono:</p>
+                <ul>
+                    <li>Il <strong>successore</strong> di <code>z</code>.</li>
+                    <li>Il <strong>predecessore</strong> di <code>z</code>.</li>
+                </ul>
+                <p>La professoressa sceglie di usare il <strong>successore</strong> di <code>z</code>, che è il nodo con la chiave minima nel sottoalbero destro di <code>z</code>.</p>
+                <p><strong>Proprietà del Successore (y):</strong> Il successore <code>y</code> di un nodo <code>z</code> che ha un sottoalbero destro:</p>
+                <ul>
+                    <li>Ha la più piccola chiave tra tutte quelle maggiori di <code>z.key</code>, quindi può sostituire <code>z.key</code> mantenendo l'ordinamento.</li>
+                    <li>Essendo il minimo del suo sottoalbero, <strong>non può avere un figlio sinistro</strong>. Pertanto, il successore <code>y</code> avrà al più un figlio (un figlio destro), ricadendo nel Caso 1 o 2 per la sua cancellazione.</li>
+                </ul>
+                <p><strong>La procedura si articola in due passaggi:</strong></p>
+                <ol>
+                    <li><strong>Sostituzione:</strong> Si trova il successore <code>y</code> di <code>z</code>. La chiave di <code>y</code> viene copiata nel nodo <code>z</code>. A questo punto, l'albero contiene due copie della chiave del successore, ma la proprietà del BST (a parte il duplicato) è intatta. L'informazione originale di <code>z</code> è stata logicamente rimossa.</li>
+                    <li><strong>Cancellazione Fisica:</strong> Ora il problema si è ridotto a cancellare il nodo <code>y</code> (che conteneva la chiave del successore), il quale ha al più un figlio. Questa è una cancellazione semplice che ricade nel Caso 1 o nel Caso 2.</li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="cancellazione-esempio" class="content-section">
+            <h3 class="subsection-title">2.2. Esempio di Cancellazione (Caso 3)</h3>
+            <div class="section-content">
+                <p>La professoressa illustra la cancellazione del nodo con chiave 20 dall'albero di esempio.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Albero Iniziale"
+                            A(20) --> B(10);
+                            A --> C(30);
+                            B --> D(12);
+                            D --> D_NIL_L(NIL); D --> D_NIL_R(NIL);
+                            B --> H(8); H --> H_NIL_L(NIL); H --> H_NIL_R(NIL);
+                            B --> I(15); I --> I_NIL_L(NIL); I --> I_NIL_R(NIL);
+                            C --> F(25);
+                            C --> G(40);
+                            F --> F_NIL_L(NIL); F --> F_NIL_R(NIL);
+                            G --> G_NIL_L(NIL); G --> G_NIL_R(NIL);
+                        end
+
+                        subgraph "Passo 1: Trova il Successore di 20"
+                           S(25)
+                        end
+                        
+                        subgraph "Passo 2: Copia la chiave 25 su 20"
+                            A2(25) --> B2(10);
+                            A2 --> C2(30);
+                            C2 --> F2(25);
+                            C2 --> G2(40);
+                        end
+
+                        subgraph "Passo 3: Cancella il nodo originale del successore (25)"
+                           A3(25) --> B3(10);
+                           A3 --> C3(30);
+                           C3 --> G3(40);
+                        end
+
+                        style A fill:#EF4444,stroke:#e5e7eb,color:#111827;
+                        style S fill:#818cf8,stroke:#e5e7eb,color:#111827;
+                        style F fill:#818cf8,stroke:#e5e7eb,color:#111827;
+                        style F2 fill:#EF4444,stroke:#e5e7eb,color:#111827;
+                        style C3, G3, A3, B3, D_NIL_L, D_NIL_R, H_NIL_L, H_NIL_R, I_NIL_L, I_NIL_R, G_NIL_L, G_NIL_R, F_NIL_L, F_NIL_R fill:#1f2937,stroke:#9ca3af,stroke-width:1px,stroke-dasharray: 3 3;
+                    </pre>
+                </div>
+                <ol>
+                    <li>Il nodo da cancellare è 20, che ha due figli (10 e 30). Siamo nel Caso 3.</li>
+                    <li>Si cerca il successore di 20. Si va a destra (su 30) e poi sempre a sinistra. Il minimo del sottoalbero destro è 25. Il successore è il nodo con chiave 25.</li>
+                    <li>Si copia il valore 25 nel nodo che conteneva 20. La radice ora ha chiave 25.</li>
+                    <li>Ora si deve cancellare il nodo che originariamente conteneva 25. Questo nodo è una foglia (Caso 1), quindi viene semplicemente rimosso.</li>
+                </ol>
+                <p>L'albero risultante è un BST valido.</p>
+            </div>
+        </article>
+
+        <article id="cancellazione-alternativa-sbilanciamento" class="content-section">
+            <h3 class="subsection-title">2.3. Un'alternativa da evitare (e perché)</h3>
+            <div class="section-content">
+                <p>Uno studente (nella chat della lezione) propone un'alternativa per la cancellazione nel Caso 3: sostituire il nodo <code>z</code> con il suo figlio destro e poi "riattaccare" il sottoalbero sinistro originale di <code>z</code> nel punto giusto del nuovo sottoalbero (tipicamente come figlio sinistro del nodo minimo del sottoalbero destro promosso).</p>
+                <p>La professoressa concorda che l'operazione è <strong>corretta</strong> (mantiene la proprietà del BST) e ha la <strong>stessa complessità</strong> asintotica.</p>
+                <p><strong>Tuttavia, questa strategia è sconsigliata. Perché?</strong></p>
+                <p>Il problema è che tende a <strong>sbilanciare l'albero</strong>. Promuovendo sempre il sottoalbero destro, si aumenta la profondità sul lato destro e si riduce quella sul lato sinistro. Se si eseguono molte cancellazioni di questo tipo, un albero inizialmente bilanciato può diventare rapidamente degenere, peggiorando le performance di tutte le operazioni successive. La strategia basata sul successore è più "neutra" e ha meno probabilità di degradare la struttura dell'albero in modo sistematico.</p>
+            </div>
+        </article>
+
+        <article id="cancellazione-pseudo" class="content-section">
+            <h3 class="subsection-title">2.4. Pseudocodice di BST-Delete</h3>
+            <div class="section-content">
+                <p>La professoressa organizza lo pseudocodice in modo da unificare la logica dei tre casi per evitare ripetizioni.</p>
+                <pre><code class="language-pseudocode">
+BST-Delete(T, z) // z è il nodo da cancellare
+  
+  // 1. Individua il nodo X che verrà fisicamente rimosso dall'albero.
+  let x;
+  if z.left == NIL or z.right == NIL then
+    x = z;  // Caso 1 o 2: rimuoveremo z stesso.
+  else
+    x = BST-Successor(z); // Caso 3: rimuoveremo il successore di z.
+    
+  // 2. Individua il figlio (al più uno) V del nodo X da rimuovere.
+  let v;
+  if x.left != NIL then
+    v = x.left;
+  else
+    v = x.right;
+
+  // 3. Collega V al genitore di X, bypassando X.
+  if v != NIL then
+    v.parent = x.parent; // Aggiorna il genitore di V
+
+  // Gestisci il caso in cui X era la radice.
+  if x.parent == NIL then
+    T.root = v;
+  // Altrimenti, aggiorna il figlio del genitore di X.
+  else if x == x.parent.left then
+    x.parent.left = v;
+  else
+    x.parent.right = v;
+    
+  // 4. Se eravamo nel Caso 3 (x era il successore di z),
+  //    copia i dati di X nel nodo Z originale.
+  if x != z then
+    z.key = x.key;
+    // ...copia anche altri dati satellite, se presenti.
+                </code></pre>
+                 <div class="clarification-box">
+                    <strong>Spiegazione Dettagliata dello Pseudocodice (dalla prof.ssa):</strong>
+                    <ul>
+                        <li><strong>Passo 1 (Individuare X):</strong> `x` è il nodo che sarà fisicamente "staccato" dalla struttura. Se `z` ha 0 o 1 figlio, `x` è `z` stesso. Se `z` ha 2 figli, `x` è il suo successore.</li>
+                        <li><strong>Passo 2 (Individuare V):</strong> `v` è l'unico figlio (o NIL) di `x`. Sarà `v` a prendere il posto di `x`.</li>
+                        <li><strong>Passo 3 (Bypassare X):</strong> Questa parte "sgancia" `x` dall'albero e "promuove" `v` al suo posto, aggiornando i puntatori del genitore di `x` e del figlio `v`.</li>
+                        <li><strong>Passo 4 (Copiare i dati):</strong> Questo passo è eseguito solo nel Caso 3. La chiave del successore `x` (che è stato appena rimosso fisicamente) viene copiata in `z`, completando la cancellazione logica.</li>
+                    </ul>
+                </div>
+                 <p><strong>Complessità:</strong> Anche la cancellazione ha una complessità temporale di \(\Theta(h)\) o \(O(N)\), poiché le operazioni dominanti (trovare il successore, scendere nell'albero) sono proporzionali all'altezza.</p>
+            </div>
+        </article>
+
+        <article id="esercizi-bst" class="content-section">
+            <h2 class="section-title">3. Esercizi di Riepilogo sui BST</h2>
+            <div class="section-content">
+                <p>La professoressa propone due esercizi per consolidare la comprensione dei BST e delle loro proprietà.</p>
+            </div>
+        </article>
+
+        <article id="esercizio-sort-con-bst" class="content-section">
+            <h3 class="subsection-title">3.1. Esercizio 1: Ordinare un vettore usando un BST (BST-Sort)</h3>
+            <div class="section-content">
+                <p><strong>Testo:</strong> Scrivere una procedura che, dato un vettore di interi <code>A</code>, lo ordini sfruttando un BST.</p>
+                <p><strong>Soluzione (discussa in aula):</strong></p>
+                <ol>
+                    <li>Creare un BST inizialmente vuoto.</li>
+                    <li>Scandire l'array <code>A</code> e inserire ogni elemento nel BST.</li>
+                    <li>Eseguire una visita In-Order del BST e scrivere gli elementi (che verranno prodotti in ordine crescente) di nuovo nell'array <code>A</code>.</li>
+                </ol>
+                <p><strong>Complessità:</strong></p>
+                <ul>
+                    <li><strong>Caso Peggiore:</strong> Se l'array <code>A</code> è già ordinato (o inversamente ordinato), ogni inserimento nel BST costerà \(\Theta(i)\) (dove i è il numero di nodi già presenti). Il costo totale per N inserimenti sarà \(\sum_{i=1}^{N} \Theta(i) = \Theta(N^2)\). La visita In-Order finale costa \(\Theta(N)\). Complessità totale: \(\Theta(N^2)\).</li>
+                    <li><strong>Caso Migliore/Atteso:</strong> Se gli inserimenti producono un albero bilanciato, ogni inserimento costa \(\Theta(\log i)\). Il costo totale degli inserimenti è \(\sum_{i=1}^{N} \Theta(\log i) = \Theta(N \log N)\). Complessità totale: \(\Theta(N \log N)\).</li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="esercizio-ricostruzione-preorder" class="content-section">
+            <h3 class="subsection-title">3.2. Esercizio 2: Ricostruire un BST dalla sua visita Pre-Order</h3>
+            <div class="section-content">
+                <p><strong>Testo:</strong> Dato solo il risultato di una visita Pre-Order di un BST, scrivere una procedura per ricostruire l'albero originale.</p>
+                <p><strong>Differenza con Alberi Binari Generici:</strong> Mentre per un albero binario generico servono sia Pre-Order che In-Order, per un BST la Pre-Order è sufficiente. Perché?</p>
+                <p><strong>Soluzione (discussa in aula):</strong></p>
+                <ol>
+                    <li>Si può ottenere la sequenza In-Order (che è ordinata) semplicemente <strong>ordinando</strong> la sequenza Pre-Order data.</li>
+                    <li>Una volta ottenute entrambe le sequenze (Pre-Order originale e la sua versione ordinata, che è l'In-Order), si può applicare l'algoritmo di ricostruzione standard visto nella lezione precedente.</li>
+                </ol>
+                <p><strong>Complessità:</strong> Il collo di bottiglia è il passo di ordinamento, che costa \(\Theta(N \log N)\). La ricostruzione successiva può essere fatta in \(\Theta(N)\) (con una mappa) o \(\Theta(N^2)\) (con ricerche lineari), ma il costo totale è dominato dall'ordinamento.</p>
+            </div>
+        </article>
+
+        <article id="esercizio-ricostruzione-logica" class="content-section">
+            <h4 class="subsubsection-title">3.2.1. Logica della Ricostruzione (Dettaglio)</h4>
+            <div class="section-content">
+                <p>La professoressa spiega più in dettaglio l'algoritmo di ricostruzione da Pre-Order e In-Order.</p>
+                <p>Dato `P` (Pre-Order) e `I` (In-Order):</p>
+                <ol>
+                    <li>La radice del (sotto)albero è `P[a]`, il primo elemento della sottosequenza Pre-Order.</li>
+                    <li>Si cerca `P[a]` nel vettore In-Order `I` (nella porzione `c..d`). Sia `j` l'indice trovato.</li>
+                    <li>Gli elementi in `I[c..j-1]` costituiscono il sottoalbero sinistro.</li>
+                    <li>Gli elementi in `I[j+1..d]` costituiscono il sottoalbero destro.</li>
+                    <li>Il numero di elementi nel sottoalbero sinistro è `j-c`. Questi corrisponderanno ai prossimi `j-c` elementi in `P`, cioè `P[a+1 ... a+j-c]`.</li>
+                    <li>Si richiama ricorsivamente la procedura per il sottoalbero sinistro e per quello destro, passando le sottosequenze corrette.</li>
+                </ol>
+            </div>
+        </article>
+        
+        <article id="conclusioni" class="content-section">
+            <h2 class="section-title">4. Conclusioni e Prossimi Argomenti</h2>
+            <div class="section-content">
+                <p>La lezione ha completato l'analisi delle operazioni fondamentali sui BST, con un focus sulla procedura di <strong>cancellazione</strong>, che è la più complessa a causa della necessità di preservare la proprietà del BST.</p>
+                <p><strong>Punti Chiave:</strong></p>
+                <ul>
+                    <li>La cancellazione in un BST si gestisce con tre casi a seconda del numero di figli del nodo da rimuovere.</li>
+                    <li>Il caso con due figli viene risolto utilizzando il <strong>successore</strong> (o predecessore) del nodo, riducendo il problema a una cancellazione più semplice.</li>
+                    <li>Tutte le operazioni base sui BST (ricerca, inserimento, cancellazione) hanno una complessità \(\Theta(h)\), che è \(O(N)\) nel caso peggiore.</li>
+                </ul>
+                <p>La professoressa conclude annunciando che il prossimo argomento del corso saranno gli <strong>alberi bilanciati</strong> (come gli alberi Rosso-Neri), strutture dati che modificano i BST per garantire che l'altezza rimanga sempre \(O(\log N)\), portando così tutte le operazioni a una complessità garantita di \(\Theta(\log N)\).</p>
+            </div>
+        </article>
+        
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>

@@ -533,35 +533,31 @@ graph TD
                 <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
 graph TD
-    subgraph "Esempio Successore (Caso 2)"
-        A(20) --> B(8)
-        A --> C(22)
-        B --> D(4)
-        B --> E(12)
-        E --> F(10)
-        E --> G(14)
+    subgraph "Successore (Caso 2: Esempio Semplificato)"
+        A(10) --> B(5);
+        A --> C(15);
+        B --> nil1((NIL));
+        B --> D(7);
 
-        C --> nil1((NIL)); C --> nil2((NIL))
-        D --> nil3((NIL)); D --> nil4((NIL))
-        F --> nil5((NIL)); F --> nil6((NIL))
-        G --> nil7((NIL)); G --> nil8((NIL))
+        C --> nil2((NIL));
+        C --> nil3((NIL));
+        D --> nil4((NIL));
+        D --> nil5((NIL));
     end
 
     %% Stile dei nodi per evidenziare il percorso
-    style G fill:#60a5fa,stroke:#93c5fd,stroke-width:2px,color:#fff;  
-    style E fill:#facc15,stroke:#fde047,color:#111827; 
+    style D fill:#60a5fa,stroke:#93c5fd,stroke-width:2px,color:#fff;  
     style B fill:#facc15,stroke:#fde047,color:#111827; 
-    style A fill:#818cf8,stroke:#a5b4fc,stroke-width:2px,color:#fff;  
+    style A fill:#818cf8,stroke:#a5b4fc,stroke-width:2px,color:#fff; 
 
     classDef nil fill:#1f2937,stroke:#4b5563,stroke-dasharray:5;
-    class nil1,nil2,nil3,nil4,nil5,nil6,nil7,nil8 nil;
+    class nil1,nil2,nil3,nil4,nil5 nil;
                     </pre>
                     <p>
-                        Per trovare il successore del nodo <strong>14</strong> (blu), che non ha un sottoalbero destro, si risale l'albero:
+                        Per trovare il successore del nodo <strong>7</strong> (blu), che non ha un sottoalbero destro, si risale l'albero:
                         <ol style="margin-top: 1rem; margin-left: 2rem;">
-                            <li>Si sale al genitore <strong>12</strong> (giallo). Poiché 14 è un figlio destro, si continua.</li>
-                            <li>Si sale al genitore <strong>8</strong> (giallo). Poiché 12 è un figlio destro, si continua.</li>
-                            <li>Si sale al genitore <strong>20</strong> (viola). Poiché 8 è un figlio <strong>sinistro</strong>, il nodo <strong>20</strong> è il successore.</li>
+                            <li>Si sale al genitore <strong>5</strong> (giallo). Poiché 7 è un figlio destro, si continua a salire.</li>
+                            <li>Si sale al genitore <strong>10</strong> (viola). Poiché 5 è un figlio <strong>sinistro</strong>, questo è il primo "svoltamento a sinistra" che si incontra, quindi <strong>10</strong> è il successore.</li>
                         </ol>
                     </p>
                 </div>
