@@ -830,42 +830,55 @@
                 <div class="exercise-box">
                     <strong>Esercizio d'Esame Esempio (adattato dal 29-01-2024, Domanda 6):</strong>
                     <p>Gli switch della rete a lato implementano l'algoritmo di spanning tree. (a) Ci sono switch che si disattivano? (b) In tale situazione, quali sono i segmenti di rete più distanti, e quanti switch devono attraversare per poter comunicare?</p>
-                    <p><strong>Scenario (Diagramma):</strong></p>
+                    <p><strong>Scenario (Diagramma dell'esame):</strong></p>
                     <div class="mermaid-container">
                         <pre class="mermaid">
                         graph TD
-                            N1 --> B2;
-                            B2 --> B1;
-                            N2 --> B3;
-                            B3 --> B1;
-                            N3 --> B4;
-                            B4 --> B1;
-                            N4 --> B3;
-
-                            style N1 fill:#9ca3af,stroke:#9ca3af;
-                            style N2 fill:#9ca3af,stroke:#9ca3af;
-                            style N3 fill:#9ca3af,stroke:#9ca3af;
-                            style N4 fill:#9ca3af,stroke:#9ca3af;
+                            subgraph "Topologia Fisica"
+                                B1(B1); B2(B2); B3(B3); B4(B4);
+                                N1(LAN N1); N2(LAN N2); N3(LAN N3); N4(LAN N4);
+                            end
+                
+                            %% Connessioni Fisiche
+                            B1 --- N1 --- B2;
+                            B1 --- N2 --- B3;
+                            B2 --- B3;
+                            B2 --- N4 --- B4;
+                            B3 --- B4;
+                            B4 --- N3;
+                
+                            %% Stile del Root Bridge e del link bloccato
                             style B1 fill:#60a5fa,stroke:#60a5fa;
-                            style B2 fill:#818cf8,stroke:#818cf8;
-                            style B3 fill:#34D399,stroke:#34D399;
-                            style B4 fill:#FACC15,stroke:#FACC15;
+                            linkStyle 2 stroke:red,stroke-width:2px,stroke-dasharray: 5 5;
                         </pre>
+                        <p style="font-size:0.9em; text-align:center; color: var(--text-secondary);">
+                            Rappresentazione logica della rete. La linea rossa tratteggiata (B2-B3) indica un esempio di link che verrebbe bloccato da STP per prevenire un loop.
+                        </p>
                     </div>
-                    <p><strong>Assunzione:</strong> Il Root Bridge è B1 (presumibilmente l'ID più basso). Gli altri bridge si connettono a B1. B2 si connette a B1. B3 si connette a B1. B4 si connette a B1. C'è un loop potenziale tra B3 e B4 via N4.</p>
-                    <p><strong>Analisi del Loop e della Disattivazione:</strong> Se c'è un loop tra B3 e B4 (via N4), uno dei due link B3-N4 o B4-N4 deve essere bloccato. Se N4 è solo un host, allora B3 e B4 sono designati per i loro rispettivi collegamenti a B1. La domanda chiede "switch che si disattivano", intendendo porte bloccate. Il link B3-N4 blocca una porta di B3 o B4. La risposta del professore "Sì, B3" suggerisce che B3 è lo switch la cui porta verso N4 (o verso B4 se N4 è il segmento condiviso) è bloccata. O forse, più semplicemente, B3 è quello che si considera "disattivato" dal loop B1-B2-N1-B3-N4-B4-B1.</p>
-                    <p>Considerando la topologia, B1 sarà Root Bridge (ID più basso). B2, B3, B4 sono collegati a B1. Se c'è un segmento N4 e B3 e B4 sono entrambi ad esso, e poi c'è un link tra B3 e B4, si crea un loop. Se B3 e B4 sono collegati direttamente a B1, e poi B3 e B4 sono anche collegati tra loro, uno di questi link tra B3 e B4 (o tra B3/B4 e N4) deve essere disattivato.</p>
-                    <p>La risposta del professore indica **B3** come switch disattivato. Questo implica che una sua porta è stata bloccata per rompere un loop.</p>
-                    <p>Per la distanza, assumiamo che N2 e N3 siano host. I segmenti più distanti sono quelli che devono attraversare la maggior parte degli switch per arrivare a B1 (Root).
-                    *   N1 è collegato a B2.
-                    *   N2 è collegato a B3.
-                    *   N3 è collegato a B4.
-                    *   N4 è collegato a B3.
-                    </p>
-                    <p>Se B1 è il root, e tutti i link hanno costo 1, la distanza di N1 a B1 è 2 (N1-B2-B1). La distanza di N2 a B1 è 2 (N2-B3-B1). La distanza di N3 a B1 è 2 (N3-B4-B1). La distanza di N4 a B1 è 2 (N4-B3-B1).</p>
-                    <p>La risposta del professore indica "N2 e N3". Questo potrebbe riferirsi a host o segmenti collegati a switch che sono più lontani topologicamente nel *disegno specifico del compito* o in una configurazione più complessa. Con la struttura data, N2 e N3 sono host collegati a B3 e B4 che a loro volta sono collegati a B1. Se B3 o B4 fosse il bridge disattivato, il percorso per N2 o N3 potrebbe allungarsi. La risposta "N2 e N3" e "tutti gli switch tranne B3" come numero di hop indica un percorso che attraversa tutti gli switch attivi per raggiungere quei segmenti remoti.</p>
-                    <p><strong>Correzione/Chiarezza:</strong> La risposta del prof indica "Sì, B3" (per switch disattivato) e "N2 e N3, che devono attraversare tutti gli switch tranne B3." Questo significa che il percorso da N2/N3 (host) attraverserà S1, S2, B4 (se N3 è collegato a B4, e S1 è il root, S2 collegato a S1, S3 collegato a S2, B4 collegato a B1, e B3 ha una porta bloccata). La frase "tutti gli switch tranne B3" indica il percorso da questi nodi "remoti" verso il resto della rete attiva.</p>
-                    <p><strong>Risposta:</strong> (a) Sì, B3 (una sua porta è disattivata/bloccata). (b) N2 e N3. Devono attraversare tutti gli switch attivi tranne B3 (implicando un percorso più lungo a causa della disattivazione di B3 o del loop nel diagramma originale).</p>
+                    <p><strong>Analisi e Soluzione:</strong></p>
+                    <p>Per risolvere questo esercizio, dobbiamo applicare i principi dello Spanning Tree Protocol (STP). Assumiamo, come di consueto, che il <strong>Root Bridge</strong> sia lo switch con l'ID più basso (per convenzione B1) e che tutti i link abbiano lo stesso costo.</p>
+                    <ol>
+                        <li>
+                            <strong>(a) Ci sono switch che si "disattivano"?</strong>
+                            <p>Sì. Il termine "disattivare" si riferisce al fatto che STP blocca una o più porte di uno switch per prevenire i loop. Analizzando la topologia, vediamo che ci sono molteplici percorsi ridondanti che formano dei cicli (es. B1-B2-B3-N2-B1).</p>
+                            <ul>
+                                <li>Per rompere il ciclo, STP deve bloccare una porta. Consideriamo il link diretto tra B2 e B3. Entrambi hanno un costo di 1 per raggiungere il Root Bridge (B1), uno via N1 e l'altro via N2.</li>
+                                <li>In questo caso di parità di costo, si usa l'ID dello switch come spareggio. Poiché `ID(B2) < ID(B3)`, la porta di B2 su quel link diventa "Designated" (attiva), mentre la porta dello switch **B3** verso B2 viene **bloccata**.</li>
+                                <li>La risposta del professore "Sì, B3" è un modo sintetico per indicare che è lo switch B3 a subire il blocco di una porta per risolvere il loop.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>(b) Segmenti più distanti e percorso.</strong>
+                            <p>Con le porte bloccate, la rete diventa un albero logico. La risposta del professore indica **N2 e N3** come i segmenti più distanti, e che il loro percorso attraversa "tutti gli switch tranne B3". Verifichiamo questo percorso nella topologia ad albero:</p>
+                            <ol>
+                                <li>Un pacchetto parte da un host in **N2** e arriva a **B1** (che è il Designated Bridge per quel segmento).</li>
+                                <li>B1 deve raggiungere N3. Il percorso più diretto via B3 è interrotto dal blocco della porta B3-B2. Quindi, il percorso attivo passa per B2. B1 inoltra il pacchetto a **B2** (tramite N1).</li>
+                                <li>B2 riceve il pacchetto e, per raggiungere N3, deve passare da B4. Inoltra quindi il pacchetto a **B4** (tramite N4).</li>
+                                <li>B4 riceve il pacchetto e lo consegna finalmente a **N3**.</li>
+                            </ol>
+                            <p>Il percorso attivo risultante è: **N2 → B1 → B2 → B4 → N3**. Questo percorso attraversa 3 switch (B1, B2, B4), che sono esattamente "tutti gli switch (4 in totale) tranne B3", confermando la logica della soluzione.</p>
+                        </li>
+                    </ol>
                 </div>
             </div>
         </article>
