@@ -723,8 +723,8 @@
                 </ol>
 
                 <div class="exercise-box">
-                    <strong>Esercizio d'Esame Esempio (adattato dal 15-07-2024, Domanda 6):</strong>
-                    <p>La rete a lato è composta da switch ad autoapprendimento e che implementano l'algoritmo di spanning tree. Dopo che la rete si è stabilizzata: (a) Se A manda un frame a B, come diventa la tabella di inoltro di S3? (b) Se A manda un frame a F, quali host lo ricevono?</p>
+                    <strong>Esercizio d'Esame Esempio (adattato dal 10-07-2023, Domanda 6):</strong>
+                    <p>La rete a lato è composta da switch ad autoapprendimento. S1 e S2 hanno già completato la loro configurazione, mentre S3 è appena stato resettato. (a) Se A manda un frame a B, come diventa la tabella di inoltro di S3? (b) Se A manda un frame a F, quali host lo ricevono?</p>
                     <p><strong>Scenario (Diagramma):</strong></p>
                     <div class="mermaid-container">
                         <pre class="mermaid">
@@ -734,29 +734,30 @@
                             S1 --- S2;
                             S2 --- S3;
                             C --> S3;
-                            D --> S3;
                             F --> S3;
                         </pre>
                     </div>
-                    <p><strong>Nota:</strong> Per risolvere questa domanda, dobbiamo prima capire come lo Spanning Tree si è stabilizzato. Assumeremo che S1 sia il Root Bridge e che le connessioni siano quelle attive che un normale Spanning Tree stabilirebbe (Es. S1-S2 attivo, S2-S3 potrebbe essere bloccato se c'è un loop via D/C/F).</p>
-                    <p><strong>Assunzione Spanning Tree:</strong> Se S1 è il root, S2 si connette a S1. S3 si connette a S2. Assumiamo che la connessione S2-S3 sia attiva. Se la rete non ha loop e gli switch sono autoapprendenti, le tabelle si popolano.
-                    *   Tabella S1: A->S1 (porta A), B->S1 (porta B), S2->S1 (porta S2).
-                    *   Tabella S3: C->S3 (porta C), D->S3 (porta D), F->S3 (porta F), S2->S3 (porta S2).
-                    </p>
                     <p><strong>Soluzione:</strong></p>
                     <ol>
                         <li>**(a) Se A manda un frame a B, come diventa la tabella di inoltro di S3?**
-                            *   Quando A manda un frame a B, S1 lo riceve. S1 sa che A e B sono sulla stessa porta (o sullo stesso segmento). Quindi S1 non inoltra il frame ad S2.
-                            *   Il frame non raggiunge S3.
-                            *   Di conseguenza, la tabella di inoltro di S3 **non cambia** in seguito a questa trasmissione.
+                            <ul>
+                                <li>Il frame da A a B viene ricevuto da S1.</li>
+                                <li>Poiché S1 ha già completato la sua configurazione, sa che A e B sono sullo stesso segmento (o collegati direttamente a sue porte diverse).</li>
+                                <li>Di conseguenza, S1 **non inoltra** il frame verso S2.</li>
+                                <li>Il frame non raggiungerà mai lo switch S3.</li>
+                                <li><strong>Risposta (a):</strong> La tabella di inoltro di S3 **non cambia** perché il frame non la raggiunge.</li>
+                            </ul>
                         </li>
                         <li>**(b) Se A manda un frame a F, quali host lo ricevono?**
-                            *   Quando A manda un frame a F, S1 lo riceve. F è su una porta collegata a S3. S1 inoltra il frame a S2, S2 lo inoltra a S3.
-                            *   S3 riceve il frame per F. S3 sa che F è sulla sua porta F. Quindi S3 inoltra il frame solo a F.
-                            *   **Risposta:** Solo F riceve il frame. (A e B non ricevono perché non sono destinatari, C e D non ricevono perché S3 non lo inoltra a loro).
+                            <ul>
+                                <li>Il frame da A a F viene ricevuto da S1, che lo inoltra a S2, che a sua volta lo inoltra a S3.</li>
+                                <li>S3 riceve il frame sulla sua porta collegata a S2. Esamina l'indirizzo sorgente e apprende che A è raggiungibile tramite quella porta.</li>
+                                <li>S3 esamina l'indirizzo di destinazione F. Poiché S3 è stato **appena resettato**, la sua tabella è vuota e **non sa dove si trovi F**.</li>
+                                <li>Quando uno switch non conosce la destinazione, esegue il **flooding**: inoltra il frame su **tutte le sue porte**, tranne quella da cui il frame è arrivato.</li>
+                                <li><strong>Risposta (b):</strong> Il frame viene ricevuto da **F** (il destinatario corretto) e da **C** (a causa del flooding).</li>
+                            </ul>
                         </li>
                     </ol>
-                    <p><strong>Risposta:</strong> (a) Non cambia. (b) Solo F.</p>
                 </div>
 
                 <h3>Rapid Spanning Tree Protocol (RSTP)</h3>
