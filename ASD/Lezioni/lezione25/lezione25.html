@@ -217,7 +217,7 @@
     <div class="overlay"></div>
     <header>
         <button class="hamburger-menu" id="hamburger-btn">☰</button>
-        <h1>Lezione 25: RB tree: definizione e proprietà</h1>
+        <h1>RB tree: definizione e proprietà</h1>
         <div></div>
     </header>
 
@@ -331,8 +331,8 @@ graph TD
     A --> C(20);
     B --> D(2);
     B --> E(8);
-    C --> F(30);
     C --> G((NIL));
+    C --> F(30);
     D --> H((NIL));
     D --> I((NIL));
     E --> J((NIL));
@@ -438,11 +438,11 @@ graph TD
                 </ul>
                 <p>Si ottiene quindi la seguente disuguaglianza:</p>
                 <div class="math-block">
-                bh(T) \le h(T) \le 2 \cdot bh(T)
+                \( bh(T) \le h(T) \le 2 \cdot bh(T) \)
                 </div>
                 <p>Questa relazione può anche essere scritta come:</p>
                 <div class="math-block">
-                bh(T) \ge \frac{h(T)}{2}
+                \( bh(T) \ge \frac{h(T)}{2} \)
                 </div>
             </div>
         </article>
@@ -453,7 +453,7 @@ graph TD
                 <p>La professoressa enuncia un lemma chiave per la dimostrazione.</p>
                 <p><strong>Lemma:</strong> Un albero rosso-nero `T` con altezza nera `bh(T)` contiene almeno \(2^{bh(T)} - 1\) nodi interni (cioè nodi con una chiave).</p>
                 <div class="math-block">
-                n_i \ge 2^{bh(T)} - 1
+                \( n_i \ge 2^{bh(T)} - 1 \)
                 </div>
                 <p><strong>Intuizione:</strong> I nodi neri di un RBT formano una struttura simile a un albero binario completo di altezza `bh(T)`. La formula \(2^{h}-1\) è proprio il numero di nodi in un albero binario completo di altezza `h`.</p>
             </div>
@@ -488,11 +488,11 @@ graph TD
 
                 <p>Il numero di nodi interni di `T`, \(n_i(T)\), è dato da:</p>
                 <div class="math-block">
-                n_i(T) = n_i(T_1) + n_i(T_2) + 1
+                \( n_i(T) = n_i(T_1) + n_i(T_2) + 1 \)
                 </div>
                 <p>Applicando l'ipotesi induttiva su `T1` e `T2`:</p>
                 <div class="math-block">
-                n_i(T) \ge (2^{bh(T_1)} - 1) + (2^{bh(T_2)} - 1) + 1 = 2^{bh(T_1)} + 2^{bh(T_2)} - 1
+                \[ n_i(T) \ge (2^{bh(T_1)} - 1) + (2^{bh(T_2)} - 1) + 1 = 2^{bh(T_1)} + 2^{bh(T_2)} - 1 \]
                 </div>
                 <p>Ora, consideriamo la relazione tra `bh(T)` e `bh(T1)` (o `bh(T2)`).
                 <ul>
@@ -501,7 +501,7 @@ graph TD
                 </ul>
                 <p>Quindi, in ogni caso, \(bh(T_1) \ge bh(T) - 1\). Lo stesso vale per `T2`. Sostituendo questo nella disuguaglianza:</p>
                 <div class="math-block">
-                n_i(T) \ge 2^{bh(T)-1} + 2^{bh(T)-1} - 1 = 2 \cdot 2^{bh(T)-1} - 1 = 2^{bh(T)} - 1
+                \[ n_i(T) \ge 2^{bh(T)-1} + 2^{bh(T)-1} - 1 = 2 \cdot 2^{bh(T)-1} - 1 = 2^{bh(T)} - 1 \]
                 </div>
                 <p>La tesi è dimostrata.</p>
                  <div class="clarification-box">
@@ -526,14 +526,16 @@ graph TD
                 </ol>
                 <p>Combinandole:</p>
                 <div class="math-block">
-                n_i \ge 2^{h(T)/2} - 1
+                \( n_i \ge 2^{h(T)/2} - 1 \)
                 </div>
                 <p>Risolvendo per `h(T)` con passaggi algebrici:</p>
-                <p>\(n_i + 1 \ge 2^{h/2} \implies \log_2(n_i + 1) \ge h/2 \implies h \le 2 \log_2(n_i + 1)\)</p>
+                <div class="math-block">
+                \[ n_i + 1 \ge 2^{h/2} \implies \log_2(n_i + 1) \ge h/2 \implies h \le 2 \log_2(n_i + 1) \]
+                </div>
                 <p>Questo dimostra che l'altezza `h` è limitata superiormente da una funzione logaritmica del numero di nodi, ovvero \(h \in O(\log N)\).</p>
                 <p>Poiché per qualsiasi albero binario l'altezza è anche limitata inferiormente da \(\Omega(\log N)\), possiamo concludere che per un RBT:</p>
                 <div class="math-block">
-                h \in \Theta(\log N)
+                \( h \in \Theta(\log N) \)
                 </div>
                 <p>Gli alberi rosso-neri sono quindi effettivamente bilanciati. La costante `2` nella disuguaglianza deriva dalla "regola del rosso": potendo alternare al massimo un nodo rosso e uno nero, il cammino più lungo può avere circa il doppio dei nodi del cammino più corto (solo neri).</p>
             </div>
@@ -587,30 +589,25 @@ graph TD
         <article id="rotazioni-bst" class="content-section">
             <h2 class="section-title">8. Rotazioni nei BST: Left-Rotate e Right-Rotate</h2>
             <div class="section-content">
-                <p>Le rotazioni sono operazioni che modificano la struttura locale di un albero binario preservando la proprietà del BST.</p>
+                <p>Le rotazioni sono operazioni che modificano la struttura locale di un albero binario preservando la proprietà del BST. Consideriamo un nodo `x` e il suo figlio `y` (destro per Left-Rotate, sinistro per Right-Rotate).</p>
                 <h3 class="subsection-title">Left-Rotate(T, x)</h3>
                 <p>Una rotazione a sinistra su un nodo `x` "tira su" il suo figlio destro `y`, facendo "scendere" `x` al suo posto. Il sottoalbero sinistro di `y` (chiamato `beta`) viene riagganciato come figlio destro di `x`.</p>
                 <div class="mermaid-container tree-diagram">
                      <pre class="mermaid">
 graph TD
-    subgraph "Prima della Rotazione (Left-Rotate su x)"
-        P1(parent) --> x
-        x --> alpha("α")
-        x --> y
-        y --> beta("β")
-        y --> gamma("γ")
+    subgraph "Prima: Left-Rotate su x"
+        x --> alpha("α");
+        x --> y;
+        y --> beta("β");
+        y --> gamma("γ");
     end
     
-    subgraph "Dopo la Rotazione"
-        P2(parent) --> y2(y)
-        y2 --> x2(x)
-        y2 --> gamma2("γ")
-        x2 --> alpha2("α")
-        x2 --> beta2("β")
+    subgraph "Dopo: y prende il posto di x"
+        y2(y) --> x2(x);
+        y2 --> gamma2("γ");
+        x2 --> alpha2("α");
+        x2 --> beta2("β");
     end
-
-    linkStyle 0 stroke-width:2px,fill:none,stroke:var(--accent-primary);
-    linkStyle 5 stroke-width:2px,fill:none,stroke:var(--accent-primary);
                      </pre>
                 </div>
                 <p><strong>Condizione:</strong> Per eseguire `Left-Rotate(T, x)`, il figlio destro di `x` (cioè `y`) non deve essere `NIL`.</p>
@@ -645,9 +642,16 @@ graph TD
         A --> X(20);
         B --> C(1);
         B --> D(6);
-        D --> F(β: 7);
+        D --> F(7);
         D --> G(8);
-        G --> H(9)
+        G --> H(9);
+
+        C --> C_L((NIL)); C --> C_R((NIL));
+        F --> F_L((NIL)); F --> F_R((NIL));
+        H --> H_L((NIL)); H --> H_R((NIL));
+        X --> X_L((NIL));
+        X --> THIRTY(30);
+        THIRTY --> T_L((NIL)); THIRTY --> T_R((NIL));
     end
     subgraph "Stato Finale (dopo Left-Rotate(T, 5))"
         A2(10) --> D2(6);
@@ -655,12 +659,19 @@ graph TD
         D2 --> B2(5);
         D2 --> G2(8);
         B2 --> C2(1);
-        B2 --> F2(β: 7);
+        B2 --> F2(7);
         G2 --> H2(9);
+        
+        C2 --> C2_L((NIL)); C2 --> C2_R((NIL));
+        F2 --> F2_L((NIL)); F2 --> F2_R((NIL));
+        H2 --> H2_L((NIL)); H2 --> H2_R((NIL));
+        X2 --> X2_L((NIL));
+        X2 --> THIRTY2(30);
+        THIRTY2 --> T2_L((NIL)); THIRTY2 --> T2_R((NIL));
     end
                      </pre>
                 </div>
-                <p>Il nodo 6 sale al posto del 5. Il 5 scende a sinistra del 6. Il sottoalbero `beta` (radicato in 7) che era a sinistra del 6, viene riagganciato come figlio destro del 5. La rotazione ha parzialmente ribilanciato l'albero, che tendeva ad allungarsi a destra.</p>
+                <p>Il nodo 6 sale al posto del 5. Il 5 scende a sinistra del 6. Il sottoalbero `beta` (in questo caso solo il nodo 7) che era a sinistra del 6, viene riagganciato come figlio destro del 5. La rotazione ha parzialmente ribilanciato l'albero, che tendeva ad allungarsi a destra.</p>
             </div>
         </article>
         
@@ -672,7 +683,7 @@ graph TD
                     <p><strong>Soluzione (Aggiunta da AI):</strong> Di seguito è riportato lo pseudocodice per l'operazione `Left-Rotate`. La procedura `Right-Rotate` è simmetrica.</p>
                     <pre><code class="language-pseudocode">
 Left-Rotate(T, x)
-  // Assumiamo che x.right non sia NIL.
+  // Assumiamo che x.right non sia la foglia NIL.
   y = x.right // Imposta y.
 
   // 1. Sposta il sottoalbero sinistro di y (beta)
@@ -695,7 +706,7 @@ Left-Rotate(T, x)
                     </code></pre>
                     <pre><code class="language-pseudocode">
 Right-Rotate(T, y)
-  // Assumiamo che y.left non sia NIL.
+  // Assumiamo che y.left non sia la foglia NIL.
   x = y.left // Imposta x.
 
   // 1. Sposta il sottoalbero destro di x (beta)
