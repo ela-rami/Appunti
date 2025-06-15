@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 25: RB tree: definizione e proprietà</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 3 mar 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 25: RB tree: definizione e proprietà</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#recap-bst" class="sidebar-link">1. Recap: Limiti dei BST</a></li>
+            <li><a href="#intro-rbt" class="sidebar-link">2. Introduzione agli Alberi Rosso-Neri (RBT)</a></li>
+            <li><a href="#definizione-rbt" class="sidebar-link">3. Definizione Formale di RBT</a></li>
+            <li><a href="#esempio-rbt" class="sidebar-link">4. Esempio e Proprietà dei Cammini Neri</a></li>
+            <li><a href="#ruolo-radice-nera" class="sidebar-link">5. Il Ruolo della Radice Nera</a></li>
+            <li><a href="#prova-bilanciamento" class="sidebar-link">6. Dimostrazione: gli RBT sono Bilanciati</a></li>
+            <li><a href="#definizione-bh" class="sidebar-link">6.1. Definizione: Altezza Nera (bh)</a></li>
+            <li><a href="#relazione-h-bh" class="sidebar-link">6.2. Relazione tra Altezza (h) e Altezza Nera (bh)</a></li>
+            <li><a href="#lemma-nodi" class="sidebar-link">6.3. Lemma sul Numero di Nodi Interni</a></li>
+            <li><a href="#prova-lemma" class="sidebar-link">6.4. Prova del Lemma (per Induzione)</a></li>
+            <li><a href="#teorema-altezza" class="sidebar-link">6.5. Teorema sull'Altezza: h = Θ(log n)</a></li>
+            <li><a href="#necessita-rotazioni" class="sidebar-link">7. La Necessità di Ribilanciare</a></li>
+            <li><a href="#rotazioni-bst" class="sidebar-link">8. Rotazioni nei BST: Left-Rotate e Right-Rotate</a></li>
+            <li><a href="#analisi-rotazioni" class="sidebar-link">8.1. Analisi delle Rotazioni: Costo e Correttezza</a></li>
+            <li><a href="#esempio-rotazione" class="sidebar-link">8.2. Esempio di Left-Rotate</a></li>
+            <li><a href="#esercizio-casa" class="sidebar-link">9. Esercizio per Casa</a></li>
+            <li><a href="#conclusioni" class="sidebar-link">10. Conclusioni</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="recap-bst" class="content-section active-section">
+            <h2 class="section-title">1. Recap: Limiti dei Binary Search Tree (BST)</h2>
+            <div class="section-content">
+                <p>La professoressa inizia la lezione riepilogando i concetti chiave degli <strong>Alberi Binari di Ricerca (BST)</strong>, visti alla fine del semestre precedente.</p>
+                <p>Un BST è un albero binario in cui per ogni nodo `x` con chiave `k`:</p>
+                <ul>
+                    <li>Tutte le chiavi nel suo sottoalbero sinistro sono <strong>minori</strong> di `k`.</li>
+                    <li>Tutte le chiavi nel suo sottoalbero destro sono <strong>maggiori</strong> di `k`.</li>
+                </ul>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+graph TD
+    subgraph "Proprietà di un BST"
+        X(x, chiave k) --> SL(Sottoalbero Sinistro);
+        X --> SR(Sottoalbero Destro);
+        SL -- "chiavi < k" --> X;
+        SR -- "chiavi > k" --> X;
+    end
+    style X fill:#60a5fa,stroke:#e5e7eb,color:#111827
+                    </pre>
+                </div>
+                <p>Le operazioni di <strong>inserimento, ricerca e cancellazione</strong> hanno una complessità di \(O(h)\), dove \(h\) è l'altezza dell'albero.</p>
+                <p>Il problema principale dei BST è che l'albero può diventare <strong>sbilanciato</strong>. In questo caso, l'altezza \(h\) può essere proporzionale al numero di nodi \(N\), portando la complessità nel caso peggiore a \(O(N)\).</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+graph TD
+    subgraph "Albero Sbilanciato (h ≈ N)"
+        A(1) --> B(2);
+        B --> C(3);
+        C --> D(...);
+        D --> E(N);
+    end
+                    </pre>
+                </div>
+                <p>Se, ad esempio, si cerca la chiave N in un albero del genere, il costo è \(\Theta(N)\).</p>
+            </div>
+        </article>
+
+        <article id="intro-rbt" class="content-section">
+            <h2 class="section-title">2. Introduzione agli Alberi Rosso-Neri (RBT)</h2>
+            <div class="section-content">
+                <p>Per risolvere il problema del bilanciamento, la professoressa introduce una nuova struttura dati: gli <strong>Alberi Rosso-Neri (Red-Black Trees, RBT)</strong>. Si tratta di un caso particolare di BST a cui vengono aggiunte delle proprietà.</p>
+                <p><strong>Idea di base:</strong></p>
+                <ul>
+                    <li>Gli RBT sono <strong>BST bilanciati</strong>.</li>
+                    <li>Essere bilanciati significa garantire un'altezza \(h\) dell'ordine di \(\Theta(\log N)\).</li>
+                    <li>Questo bilanciamento è ottenuto grazie all'uso di <strong>colori</strong> (Rosso e Nero) associati a ogni nodo e a operazioni di ribilanciamento chiamate <strong>rotazioni</strong>.</li>
+                    <li>L'obiettivo è ottenere operazioni di inserimento, ricerca e cancellazione con un costo garantito di \(O(\log N)\).</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Nota dalla Professoressa:</strong> Gli alberi rosso-neri sono solo una delle tante tecniche per ottenere BST bilanciati. Esistono molte altre varianti (es. Alberi AVL) che si differenziano principalmente per il modo in cui applicano le rotazioni per mantenere il bilanciamento.
+                </div>
+            </div>
+        </article>
+        
+        <article id="definizione-rbt" class="content-section">
+            <h2 class="section-title">3. Definizione Formale di RBT</h2>
+            <div class="section-content">
+                <p>Un Albero Rosso-Nero `T` è un BST in cui ogni nodo ha un campo aggiuntivo `color` (che può essere `RED` o `BLACK`) e che soddisfa le seguenti proprietà:</p>
+                <ol>
+                    <li><strong>Proprietà delle Foglie:</strong> Le foglie dell'albero sono nodi speciali `NIL` (non contengono chiavi) e sono sempre di colore `BLACK`.</li>
+                    <li><strong>Proprietà del Nodo Rosso:</strong> Ogni nodo di colore `RED` ha sempre e solo figli di colore `BLACK`. (Questo implica che non possono esistere due nodi rossi consecutivi su un cammino dalla radice a una foglia).</li>
+                    <li><strong>Proprietà dei Cammini Neri:</strong> Per ogni nodo `x`, tutti i cammini che vanno da `x` a una delle sue foglie discendenti contengono lo <strong>stesso numero di nodi neri</strong>.</li>
+                    <li><strong>Proprietà della Radice:</strong> La radice dell'albero è sempre `BLACK`.</li>
+                </ol>
+                <div class="note-box">
+                    <strong>La Proprietà della Radice Nera non è indispensabile:</strong> La professoressa specifica che questa condizione è inclusa per seguire il libro di testo (Cormen et al.) e perché semplifica leggermente il codice di alcune operazioni (inserimento o cancellazione), risparmiando qualche test. Un albero che soddisfa le prime tre proprietà ma ha radice rossa può essere facilmente trasformato in un RBT valido ricolorando la radice di nero.
+                </div>
+            </div>
+        </article>
+
+        <article id="esempio-rbt" class="content-section">
+            <h2 class="section-title">4. Esempio e Proprietà dei Cammini Neri</h2>
+            <div class="section-content">
+                <p>La professoressa disegna un esempio di RBT per illustrare le proprietà.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+graph TD
+    A(10) --> B(5);
+    A --> C(20);
+    B --> D(2);
+    B --> E(8);
+    C --> F(30);
+    C --> G((NIL));
+    D --> H((NIL));
+    D --> I((NIL));
+    E --> J((NIL));
+    E --> K((NIL));
+    F --> L((NIL));
+    F --> M((NIL));
+
+    style A fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+    style B fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+    style C fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+    style D fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+    style E fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+    style F fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+    style G,H,I,J,K,L,M fill:#111827,stroke:#9ca3af,stroke-dasharray:5
+                    </pre>
+                </div>
+                <p>In questo albero:</p>
+                <ul>
+                    <li>La radice (10) è nera.</li>
+                    <li>I nodi rossi (5 e 30) hanno figli neri (reali o foglie NIL).</li>
+                    <li>Le foglie NIL sono nere.</li>
+                    <li>La <strong>proprietà dei cammini neri</strong> è soddisfatta. Ad esempio, partendo dalla radice 10 (esclusa), ogni cammino verso una foglia incontra 2 nodi neri.
+                        <ul>
+                            <li>Cammino 10 \(\to\) 5 \(\to\) 2 \(\to\) NIL: i nodi neri sono 2 e la foglia NIL. (Totale: 2)</li>
+                            <li>Cammino 10 \(\to\) 20 \(\to\) NIL: i nodi neri sono 20 e la foglia NIL. (Totale: 2)</li>
+                            <li>Cammino 10 \(\to\) 20 \(\to\) 30 \(\to\) NIL: i nodi neri sono 20 e la foglia NIL. (Totale: 2)</li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="clarification-box">
+                    <strong>Approfondimento: la proprietà dei cammini neri vale per ogni nodo?</strong>
+                    <p>La professoressa solleva una domanda importante: "Se modifico la proprietà e chiedo che sia vera solo per la radice, cambia qualcosa?".</p>
+                    <p>La risposta è <strong>no</strong>. Richiedere che per la radice tutti i cammini verso le foglie abbiano lo stesso numero di nodi neri implica che la proprietà valga anche per ogni altro nodo dell'albero. Se così non fosse, esisterebbe un nodo `x` per cui i cammini discendenti hanno un numero diverso di nodi neri. Questo creerebbe una discrepanza anche nei conteggi dei cammini che partono dalla radice e passano per `x`, violando l'ipotesi iniziale.</p>
+                    <p>Questo significa che per verificare se un albero rispetta questa proprietà, è sufficiente testarla solo a partire dalla radice.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="ruolo-radice-nera" class="content-section">
+            <h2 class="section-title">5. Il Ruolo della Radice Nera</h2>
+            <div class="section-content">
+                <p>La professoressa esplora gli RBT più piccoli possibili per giustificare la quarta proprietà (radice nera).</p>
+                <ul>
+                    <li><strong>Albero con 0 chiavi:</strong> È composto solo da una foglia `NIL`, che è nera. La radice (la foglia stessa) è nera.</li>
+                    <li><strong>Albero con 1 chiave:</strong> È composto da una radice e due foglie `NIL`. Per la quarta proprietà, la radice deve essere nera.</li>
+                </ul>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+graph TD
+    subgraph "RBT con 0 chiavi"
+        A((NIL))
+        style A fill:#111827,stroke:#9ca3af,stroke-dasharray:5
+    end
+    subgraph "RBT con 1 chiave (Valido)"
+        B(5) --> C((NIL))
+        B --> D((NIL))
+        style B fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+        style C,D fill:#111827,stroke:#9ca3af,stroke-dasharray:5
+    end
+    subgraph "NON RBT (radice rossa)"
+        E(5) --> F((NIL))
+        E --> G((NIL))
+        style E fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+        style F,G fill:#111827,stroke:#9ca3af,stroke-dasharray:5
+    end
+                     </pre>
+                </div>
+                <p>Se un albero soddisfa le prime tre proprietà ma ha la radice rossa, non è tecnicamente un RBT secondo la definizione data. Tuttavia, come sottolinea la professoressa, basta una semplice operazione per renderlo valido: <strong>ricolorare la radice di nero</strong>. Questa operazione non viola nessuna delle altre proprietà. La condizione della radice nera è quindi più una convenzione per semplificare il codice che un requisito strutturale fondamentale.</p>
+            </div>
+        </article>
+
+        <article id="prova-bilanciamento" class="content-section">
+            <h2 class="section-title">6. Dimostrazione: gli RBT sono Bilanciati</h2>
+            <div class="section-content">
+                <p>L'obiettivo ora è dimostrare che un RBT con \(N\) nodi ha sempre un'altezza \(h \in \Theta(\log N)\).</p>
+            </div>
+        </article>
+
+        <article id="definizione-bh" class="content-section">
+            <h3 class="subsection-title">6.1. Definizione: Altezza Nera (bh)</h3>
+            <div class="section-content">
+                <p>Per procedere con la dimostrazione, viene introdotto il concetto di <strong>altezza nera (black-height, bh)</strong>.</p>
+                <blockquote>
+                L'altezza nera di un nodo `x`, denotata con `bh(x)`, è il numero di nodi neri su un qualsiasi cammino da `x` a una foglia, <strong>escludendo `x` stesso ma includendo la foglia `NIL`</strong>.
+                </blockquote>
+                <p>L'altezza nera di un intero albero RBT, `bh(T)`, è l'altezza nera della sua radice.</p>
+                <p><strong>Esempi:</strong></p>
+                <ul>
+                    <li>Un albero vuoto (solo la foglia NIL) ha `bh=0` e `h=0`.</li>
+                    <li>Un albero con una radice nera e due foglie ha `bh=1` e `h=1`.</li>
+                    <li>Un albero con radice nera, figlio sinistro rosso e foglie ha `bh=1` e `h=2`.</li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="relazione-h-bh" class="content-section">
+            <h3 class="subsection-title">6.2. Relazione tra Altezza (h) e Altezza Nera (bh)</h3>
+            <div class="section-content">
+                <p>Dalle proprietà degli RBT, si può dedurre una relazione fondamentale tra l'altezza normale `h` e l'altezza nera `bh` di un albero.</p>
+                <ul>
+                    <li>Il cammino più corto possibile da un nodo a una foglia è quello composto solo da nodi neri. In questo caso, \(h \ge bh\).</li>
+                    <li>Il cammino più lungo possibile alterna nodi rossi e neri (un nodo rosso non può avere figli rossi). In questo caso, l'altezza `h` può essere al massimo il doppio dell'altezza nera `bh`.</li>
+                </ul>
+                <p>Si ottiene quindi la seguente disuguaglianza:</p>
+                <div class="math-block">
+                bh(T) \le h(T) \le 2 \cdot bh(T)
+                </div>
+                <p>Questa relazione può anche essere scritta come:</p>
+                <div class="math-block">
+                bh(T) \ge \frac{h(T)}{2}
+                </div>
+            </div>
+        </article>
+
+        <article id="lemma-nodi" class="content-section">
+            <h3 class="subsection-title">6.3. Lemma sul Numero di Nodi Interni</h3>
+            <div class="section-content">
+                <p>La professoressa enuncia un lemma chiave per la dimostrazione.</p>
+                <p><strong>Lemma:</strong> Un albero rosso-nero `T` con altezza nera `bh(T)` contiene almeno \(2^{bh(T)} - 1\) nodi interni (cioè nodi con una chiave).</p>
+                <div class="math-block">
+                n_i \ge 2^{bh(T)} - 1
+                </div>
+                <p><strong>Intuizione:</strong> I nodi neri di un RBT formano una struttura simile a un albero binario completo di altezza `bh(T)`. La formula \(2^{h}-1\) è proprio il numero di nodi in un albero binario completo di altezza `h`.</p>
+            </div>
+        </article>
+
+        <article id="prova-lemma" class="content-section">
+            <h3 class="subsection-title">6.4. Prova del Lemma (per Induzione)</h3>
+            <div class="section-content">
+                <p>La dimostrazione viene fatta per induzione sull'<strong>altezza `h(T)`</strong> dell'albero.</p>
+                <p><strong>Caso Base: `h(T) = 0`</strong></p>
+                <p>L'albero è vuoto (contiene solo la foglia NIL). In questo caso:
+                <ul>
+                    <li>Numero di nodi interni \(n_i = 0\).</li>
+                    <li>Altezza nera `bh(T) = 0`.</li>
+                </ul>
+                La disuguaglianza \(0 \ge 2^0 - 1 = 1 - 1 = 0\) è verificata.
+                </p>
+
+                <p><strong>Passo Induttivo:</strong></p>
+                <p><strong>Ipotesi Induttiva:</strong> La proprietà vale per tutti gli alberi con altezza minore di `k`.</p>
+                <p><strong>Tesi:</strong> La proprietà vale per un albero `T` con altezza `h(T) = k`.</p>
+                <p>Consideriamo un albero `T` di altezza `k`. La sua radice ha due sottoalberi, `T1` e `T2`, che hanno altezza minore di `k` e quindi soddisfano l'ipotesi induttiva.</p>
+                
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+graph TD
+    T(T) --> T1(T1);
+    T --> T2(T2);
+    style T,T1,T2 fill:#1f2937,stroke:#9ca3af,stroke-width:2px;
+                    </pre>
+                </div>
+
+                <p>Il numero di nodi interni di `T`, \(n_i(T)\), è dato da:</p>
+                <div class="math-block">
+                n_i(T) = n_i(T_1) + n_i(T_2) + 1
+                </div>
+                <p>Applicando l'ipotesi induttiva su `T1` e `T2`:</p>
+                <div class="math-block">
+                n_i(T) \ge (2^{bh(T_1)} - 1) + (2^{bh(T_2)} - 1) + 1 = 2^{bh(T_1)} + 2^{bh(T_2)} - 1
+                </div>
+                <p>Ora, consideriamo la relazione tra `bh(T)` e `bh(T1)` (o `bh(T2)`).
+                <ul>
+                    <li>Se la radice di `T1` (figlio di `T`) è <strong>rossa</strong>, allora `bh(T) = bh(T1)`.</li>
+                    <li>Se la radice di `T1` (figlio di `T`) è <strong>nera</strong>, allora `bh(T) = bh(T1) + 1`.</li>
+                </ul>
+                <p>Quindi, in ogni caso, \(bh(T_1) \ge bh(T) - 1\). Lo stesso vale per `T2`. Sostituendo questo nella disuguaglianza:</p>
+                <div class="math-block">
+                n_i(T) \ge 2^{bh(T)-1} + 2^{bh(T)-1} - 1 = 2 \cdot 2^{bh(T)-1} - 1 = 2^{bh(T)} - 1
+                </div>
+                <p>La tesi è dimostrata.</p>
+                 <div class="clarification-box">
+                    <strong>Perché l'induzione è sull'altezza `h` e non sull'altezza nera `bh`?</strong>
+                    <p>La professoressa spiega un punto cruciale: per applicare l'ipotesi induttiva sui sottoalberi `T1` e `T2`, la loro "misura" induttiva deve essere <strong>strettamente minore</strong> di quella dell'albero `T`.</p>
+                    <ul>
+                        <li>Se usiamo l'altezza `h`, è garantito che `h(T1) < h(T)` e `h(T2) < h(T)`.</li>
+                        <li>Se avessimo usato l'altezza nera `bh`, questo non sarebbe garantito. Se un figlio è rosso, `bh(figlio) = bh(padre)`. L'ipotesi induttiva non potrebbe "scattare" tra un padre e un figlio rosso.</li>
+                    </ul>
+                    <p>L'induzione sull'altezza `h` è quindi la scelta corretta e robusta per questo tipo di dimostrazione sugli RBT.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="teorema-altezza" class="content-section">
+            <h3 class="subsection-title">6.5. Teorema sull'Altezza: h = Θ(log n)</h3>
+            <div class="section-content">
+                <p>Ora possiamo combinare i risultati ottenuti:</p>
+                <ol>
+                    <li>Dal lemma: \(n_i \ge 2^{bh(T)} - 1\)</li>
+                    <li>Dalla relazione h-bh: \(bh(T) \ge h(T)/2\)</li>
+                </ol>
+                <p>Combinandole:</p>
+                <div class="math-block">
+                n_i \ge 2^{h(T)/2} - 1
+                </div>
+                <p>Risolvendo per `h(T)` con passaggi algebrici:</p>
+                <p>\(n_i + 1 \ge 2^{h/2} \implies \log_2(n_i + 1) \ge h/2 \implies h \le 2 \log_2(n_i + 1)\)</p>
+                <p>Questo dimostra che l'altezza `h` è limitata superiormente da una funzione logaritmica del numero di nodi, ovvero \(h \in O(\log N)\).</p>
+                <p>Poiché per qualsiasi albero binario l'altezza è anche limitata inferiormente da \(\Omega(\log N)\), possiamo concludere che per un RBT:</p>
+                <div class="math-block">
+                h \in \Theta(\log N)
+                </div>
+                <p>Gli alberi rosso-neri sono quindi effettivamente bilanciati. La costante `2` nella disuguaglianza deriva dalla "regola del rosso": potendo alternare al massimo un nodo rosso e uno nero, il cammino più lungo può avere circa il doppio dei nodi del cammino più corto (solo neri).</p>
+            </div>
+        </article>
+
+        <article id="necessita-rotazioni" class="content-section">
+            <h2 class="section-title">7. La Necessità di Ribilanciare</h2>
+            <div class="section-content">
+                <p>Ora che sappiamo che gli RBT sono bilanciati, dobbiamo capire come mantenere le loro proprietà durante le operazioni di <strong>inserimento</strong> e <strong>cancellazione</strong>.</p>
+                <p>Un semplice inserimento stile BST può violare le proprietà dell'RBT. Esempio: inserire la sequenza `1, 2, 3` in un albero inizialmente vuoto.</p>
+                <ol>
+                    <li><strong>Inserisci 1:</strong> La radice diventa 1 (nero). Albero valido.</li>
+                    <li><strong>Inserisci 2:</strong> 2 viene aggiunto come figlio destro di 1. Per non violare la regola della radice nera, coloriamo 2 di rosso. Albero valido.</li>
+                    <li><strong>Inserisci 3:</strong> 3 viene aggiunto come figlio destro di 2. Ora sorge un problema:
+                        <ul>
+                            <li>Se coloriamo 3 di rosso, violiamo la regola "un nodo rosso non può avere un figlio rosso".</li>
+                            <li>Se coloriamo 3 di nero, violiamo la "proprietà dei cammini neri" (il cammino che passa per 3 ha un nodo nero in più).</li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+graph TD
+    subgraph "Dopo inserimento di 1 e 2"
+        A(1) --> B((NIL))
+        A --> C(2)
+        C --> D((NIL))
+        C --> E((NIL))
+        style A fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+        style C fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+        style B,D,E fill:#111827,stroke:#9ca3af,stroke-dasharray:5
+    end
+    subgraph "Dopo inserimento di 3 (Problema!)"
+        F(1) --> G((NIL))
+        F --> H(2)
+        H --> I((NIL))
+        H --> J(3)
+        J --> K((NIL))
+        J --> L((NIL))
+        style F fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+        style H fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+        style J fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+        style G,I,K,L fill:#111827,stroke:#9ca3af,stroke-dasharray:5
+    end
+                     </pre>
+                </div>
+                 <p>Per risolvere queste violazioni, è necessaria un'operazione che modifichi la struttura dell'albero: la <strong>rotazione</strong>.</p>
+            </div>
+        </article>
+        
+        <article id="rotazioni-bst" class="content-section">
+            <h2 class="section-title">8. Rotazioni nei BST: Left-Rotate e Right-Rotate</h2>
+            <div class="section-content">
+                <p>Le rotazioni sono operazioni che modificano la struttura locale di un albero binario preservando la proprietà del BST.</p>
+                <h3 class="subsection-title">Left-Rotate(T, x)</h3>
+                <p>Una rotazione a sinistra su un nodo `x` "tira su" il suo figlio destro `y`, facendo "scendere" `x` al suo posto. Il sottoalbero sinistro di `y` (chiamato `beta`) viene riagganciato come figlio destro di `x`.</p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+graph TD
+    subgraph "Prima della Rotazione (Left-Rotate su x)"
+        P1(parent) --> x
+        x --> alpha("α")
+        x --> y
+        y --> beta("β")
+        y --> gamma("γ")
+    end
+    
+    subgraph "Dopo la Rotazione"
+        P2(parent) --> y2(y)
+        y2 --> x2(x)
+        y2 --> gamma2("γ")
+        x2 --> alpha2("α")
+        x2 --> beta2("β")
+    end
+
+    linkStyle 0 stroke-width:2px,fill:none,stroke:var(--accent-primary);
+    linkStyle 5 stroke-width:2px,fill:none,stroke:var(--accent-primary);
+                     </pre>
+                </div>
+                <p><strong>Condizione:</strong> Per eseguire `Left-Rotate(T, x)`, il figlio destro di `x` (cioè `y`) non deve essere `NIL`.</p>
+                <h3 class="subsection-title">Right-Rotate(T, y)</h3>
+                <p>La rotazione a destra è l'operazione inversa della rotazione a sinistra. Partendo dalla struttura a destra nel diagramma precedente, `Right-Rotate(T, y)` ripristina la struttura a sinistra.</p>
+            </div>
+        </article>
+
+        <article id="analisi-rotazioni" class="content-section">
+            <h3 class="subsection-title">8.1. Analisi delle Rotazioni: Costo e Correttezza</h3>
+            <div class="section-content">
+                <p><strong>1. Quanto costa una rotazione?</strong></p>
+                <p>Una rotazione modifica solo un numero costante di puntatori (circa 6 puntatori: genitore di x, genitore di y, figlio di x, figlio di y, ecc.). Pertanto, il costo di una rotazione è \(\Theta(1)\).</p>
+                <p><strong>2. Se T è un BST, T' (dopo la rotazione) è ancora un BST?</strong></p>
+                <p><strong>Sì.</strong> La professoressa dimostra graficamente che la proprietà del BST viene mantenuta.
+                Siano `a`, `b`, `c` le chiavi dei nodi `x`, `y` e del sottoalbero `beta`.
+                Nella struttura iniziale, abbiamo \(a < c < b\).
+                Dopo una rotazione a sinistra, `x` (chiave `a`) diventa figlio sinistro di `y` (chiave `b`), il che è corretto.
+                Il sottoalbero `beta` (chiavi `c`), che contiene chiavi maggiori di `a` e minori di `b`, viene spostato come figlio destro di `x`. Questo è corretto, poiché le chiavi `c` sono maggiori di `a`. Rimane anche nel sottoalbero sinistro di `y`, il che è corretto poiché le chiavi `c` sono minori di `b`. Tutte le relazioni di ordinamento sono preservate.</p>
+            </div>
+        </article>
+
+        <article id="esempio-rotazione" class="content-section">
+            <h3 class="subsection-title">8.2. Esempio di Left-Rotate</h3>
+            <div class="section-content">
+                <p>Viene mostrato un esempio di `Left-Rotate` con perno sul nodo con chiave 5.</p>
+                 <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+graph TD
+    subgraph "Stato Iniziale"
+        A(10) --> B(5);
+        A --> X(20);
+        B --> C(1);
+        B --> D(6);
+        D --> F(β: 7);
+        D --> G(8);
+        G --> H(9)
+    end
+    subgraph "Stato Finale (dopo Left-Rotate(T, 5))"
+        A2(10) --> D2(6);
+        A2 --> X2(20);
+        D2 --> B2(5);
+        D2 --> G2(8);
+        B2 --> C2(1);
+        B2 --> F2(β: 7);
+        G2 --> H2(9);
+    end
+                     </pre>
+                </div>
+                <p>Il nodo 6 sale al posto del 5. Il 5 scende a sinistra del 6. Il sottoalbero `beta` (radicato in 7) che era a sinistra del 6, viene riagganciato come figlio destro del 5. La rotazione ha parzialmente ribilanciato l'albero, che tendeva ad allungarsi a destra.</p>
+            </div>
+        </article>
+        
+        <article id="esercizio-casa" class="content-section">
+            <h2 class="section-title">9. Esercizio per Casa</h2>
+            <div class="section-content">
+                <div class="exercise-box">
+                    <strong>Esercizio (dalla Professoressa): Scrivere il codice delle rotazioni.</strong>
+                    <p><strong>Soluzione (Aggiunta da AI):</strong> Di seguito è riportato lo pseudocodice per l'operazione `Left-Rotate`. La procedura `Right-Rotate` è simmetrica.</p>
+                    <pre><code class="language-pseudocode">
+Left-Rotate(T, x)
+  // Assumiamo che x.right non sia NIL.
+  y = x.right // Imposta y.
+
+  // 1. Sposta il sottoalbero sinistro di y (beta)
+  x.right = y.left 
+  if y.left != T.NIL then
+    y.left.parent = x
+
+  // 2. Aggancia il genitore di x a y
+  y.parent = x.parent
+  if x.parent == T.NIL then
+    T.root = y // x era la radice
+  else if x == x.parent.left then
+    x.parent.left = y
+  else
+    x.parent.right = y
+
+  // 3. Metti x come figlio sinistro di y
+  y.left = x
+  x.parent = y
+                    </code></pre>
+                    <pre><code class="language-pseudocode">
+Right-Rotate(T, y)
+  // Assumiamo che y.left non sia NIL.
+  x = y.left // Imposta x.
+
+  // 1. Sposta il sottoalbero destro di x (beta)
+  y.left = x.right
+  if x.right != T.NIL then
+    x.right.parent = y
+
+  // 2. Aggancia il genitore di y a x
+  x.parent = y.parent
+  if y.parent == T.NIL then
+    T.root = x // y era la radice
+  else if y == y.parent.left then
+    y.parent.left = x
+  else
+    y.parent.right = x
+    
+  // 3. Metti y come figlio destro di x
+  x.right = y
+  y.parent = x
+                    </code></pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="conclusioni" class="content-section">
+            <h2 class="section-title">10. Conclusioni</h2>
+            <div class="section-content">
+                <p>La lezione ha introdotto gli <strong>Alberi Rosso-Neri (RBT)</strong> come soluzione al problema del bilanciamento dei BST.</p>
+                <p><strong>Punti Chiave:</strong></p>
+                <ul>
+                    <li>Gli RBT sono BST che mantengono il bilanciamento grazie a <strong>5 proprietà</strong> basate sui colori (Rosso/Nero).</li>
+                    <li>È stato dimostrato rigorosamente che un RBT con `N` nodi ha un'altezza \(h \in \Theta(\log N)\), garantendo così performance logaritmiche per le operazioni di base.</li>
+                    <li>Le operazioni di inserimento e cancellazione possono violare le proprietà RBT. Per ripristinarle, si usano le <strong>rotazioni</strong>.</li>
+                    <li>Le rotazioni (`Left-Rotate` e `Right-Rotate`) sono operazioni a costo costante (\(\Theta(1)\)) che modificano la struttura dell'albero preservando la proprietà del BST.</li>
+                </ul>
+                <p>La prossima lezione mostrerà come utilizzare le rotazioni e le ricolorazioni per gestire le operazioni di inserimento e cancellazione in un Albero Rosso-Nero.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
