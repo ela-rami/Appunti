@@ -247,6 +247,7 @@
                             <li><strong>Spreco di Risorse:</strong> Le risorse rimangono dedicate anche se non utilizzate (es. pause nella conversazione).</li>
                             <li><strong>Jitter Ridotto:</strong> Il ritardo è costante e prevedibile, non c'è varianza nel tempo di arrivo dei pacchetti (questo è il punto chiave spesso testato).</li>
                             <li><strong>Non Robusto ai Guasti:</strong> Se il canale dedicato si guasta, la comunicazione si interrompe.</li>
+                            <li><strong>Assenza di TTL:</strong> Il TTL (Time To Live) è un campo presente nell'intestazione (header) di un pacchetto IP (Livello 3). Il suo scopo principale è evitare che i pacchetti vaghino all'infinito nella rete a causa di errori di configurazione che possono creare dei loop di routing (cicli).</li>
                         </ul>
                     </li>
                 </ul>
@@ -260,6 +261,7 @@
                             <li><strong>Utilizzo Efficiente:</strong> Le risorse del canale sono condivise dinamicamente tra più comunicazioni.</li>
                             <li><strong>Jitter Aumentato:</strong> Il ritardo può variare molto a causa della congestione sulla rete e dei percorsi diversi, aumentando il jitter.</li>
                             <li><strong>Robusto ai Guasti:</strong> Se una parte della rete si guasta, i pacchetti possono essere re-instradati su percorsi alternativi.</li>
+                            <li><strong>TTL:</strong> Presente e utile.</li>
                         </ul>
                     </li>
                 </ul>

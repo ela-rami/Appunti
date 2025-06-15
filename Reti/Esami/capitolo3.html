@@ -115,6 +115,7 @@
                 <ul>
                     <li>**SlotTime:** Tempo minimo di attesa (es. 51.2 µs per 10 Mbps Ethernet).</li>
                     <li>**IPG (InterPacket Gap):** Un breve intervallo di tempo (9.6 µs per 10/100 Mbps Ethernet) che deve essere atteso dopo che il mezzo torna IDLE prima di una nuova trasmissione.</li>
+                    <li>Secondo la soluzione di un esame sembrerebbe che **IPG = 96 bit**.</li>
                     <li>Il tempo di attesa totale dopo una collisione è \( \text{IPG} + k \cdot \text{SlotTime} \).</li>
                 </ul>
 
@@ -244,7 +245,7 @@
                     <li><strong>Payload (46-1500 byte):</strong> Contiene i dati veri e propri (PDU del livello superiore). Se il payload è minore di 46 byte, viene aggiunto **padding** per raggiungere la lunghezza minima del frame (64 byte totale).</li>
                     <li><strong>CRC-32 (4 byte):</strong> Per il rilevamento di errori.</li>
                 </ul>
-                <p><strong>Overhead del Frame:</strong> Preamble + SFD + MAC Dest + MAC Src + Type/Length + CRC-32 = \(7+1+6+6+2+4 = 26\) byte.</p>
+                <p><strong>Overhead del Frame:</strong> Preamble + SFD + MAC Dest + MAC Src + Type/Length + CRC-32 = \(7+1+6+6+2+4 = 26\) byte. Sembrerebbe che secondo alcune soluzione d'esame si debbano sommare anche ulteriori <strong>96 bit del IPG</strong>.</p> 
 
                 <h4>Tipologie di Trasmissione su Ethernet</h4>
                 <ul>
