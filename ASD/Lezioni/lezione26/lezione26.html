@@ -217,7 +217,7 @@
     <div class="overlay"></div>
     <header>
         <button class="hamburger-menu" id="hamburger-btn">☰</button>
-        <h1>Lezione 26: RB tree: inserimento</h1>
+        <h1>Lezione 26: RB tree: Inserimento</h1>
         <div></div>
     </header>
 
@@ -272,14 +272,18 @@
                 <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
 graph TD
-    A(8) --> B(4); A --> C(12);
-    B --> D(2); B --> E(6);
-    C --> F(10); C --> G(14);
-    D --> H(1); D --> I(3);
-    E --> J(5); E --> K(7);
-    F --> L(9); F --> M(11);
-    G --> N(13); G --> O(15);
-    style A,B,C,D,E,F,G,H,I,J,K,L,M,N,O fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+    A(8):::black --> B(4):::black; A --> C(12):::black;
+    B --> D(2):::black; B --> E(6):::black;
+    C --> F(10):::black; C --> G(14):::black;
+    D --> H(1):::black; D --> I(3):::black;
+    E --> J(5):::black; E --> K(7):::black;
+    F --> L(9):::black; F --> M(11):::black;
+    G --> N(13):::black; G --> O(15):::black;
+    H --> H_L((NIL)); H --> H_R((NIL)); I --> I_L((NIL)); I --> I_R((NIL));
+    J --> J_L((NIL)); J --> J_R((NIL)); K --> K_L((NIL)); K --> K_R((NIL));
+    L --> L_L((NIL)); L --> L_R((NIL)); M --> M_L((NIL)); M --> M_R((NIL));
+    N --> N_L((NIL)); N --> N_R((NIL)); O --> O_L((NIL)); O --> O_R((NIL));
                     </pre>
                 </div>
                 <p><strong>Soluzione per bh = 3:</strong></p>
@@ -287,15 +291,19 @@ graph TD
                 <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
 graph TD
-    A(8) --> B(4); A --> C(12);
-    B --> D(2); B --> E(6);
-    C --> F(10); C --> G(14);
-    D --> H(1); D --> I(3);
-    E --> J(5); E --> K(7);
-    F --> L(9); F --> M(11);
-    G --> N(13); G --> O(15);
-    style A,B,C,H,I,J,K,L,M,N,O fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    style D,E,F,G fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+    A(8):::black --> B(4):::black; A --> C(12):::black;
+    B --> D(2):::red; B --> E(6):::red;
+    C --> F(10):::red; C --> G(14):::red;
+    D --> H(1):::black; D --> I(3):::black;
+    E --> J(5):::black; E --> K(7):::black;
+    F --> L(9):::black; F --> M(11):::black;
+    G --> N(13):::black; G --> O(15):::black;
+    H --> H_L((NIL)); H --> H_R((NIL)); I --> I_L((NIL)); I --> I_R((NIL));
+    J --> J_L((NIL)); J --> J_R((NIL)); K --> K_L((NIL)); K --> K_R((NIL));
+    L --> L_L((NIL)); L --> L_R((NIL)); M --> M_L((NIL)); M --> M_R((NIL));
+    N --> N_L((NIL)); N --> N_R((NIL)); O --> O_L((NIL)); O --> O_R((NIL));
                     </pre>
                 </div>
                 <p><strong>Soluzione per bh = 2:</strong></p>
@@ -367,12 +375,16 @@ graph TD
                 <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
 graph TD
-    W("Nonno (w)<br/>BLACK") --> Y("Genitore (y)<br/>RED");
-    W --> Z("Zio (z)");
-    Y --> X("x<br/>RED");
-    X --> X_L((NIL)); X --> X_R((NIL));
-    style W fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    style Y,X fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+    classDef unknown fill:#aaa,stroke:#ccc;
+    W("Nonno (w)"):::black --> Y("Genitore (y)"):::red;
+    W --> Z("Zio (z)"):::unknown;
+    Y --> X("x"):::red;
+    X --> X_L((NIL)); 
+    X --> X_R((NIL));
+    Z --> Z_L((NIL));
+    Z --> Z_R((NIL));
                     </pre>
                 </div>
                 <p>Ci sono tre casi, a seconda del colore dello zio `z`.</p>
@@ -382,13 +394,43 @@ graph TD
         <article id="inserimento-caso1" class="content-section">
             <h3 class="subsubsection-title">4.3.1. Caso 1: Fortunato (Zio Nero e Opposto)</h3>
             <div class="section-content">
-                <p><strong>Condizione:</strong> Lo zio di `x` (`z`) è `BLACK`, e `x` si trova sul lato opposto rispetto allo zio (es. `x` è un figlio sinistro e lo zio è un figlio destro).</p>
+                <p><strong>Condizione:</strong> Lo zio di `x` (`z`) è `BLACK`, e `x` si trova sul lato opposto rispetto allo zio, formando una "linea" con genitore e nonno (es. `x` è figlio sinistro di un genitore che è figlio sinistro).</p>
                 <p><strong>Soluzione:</strong> Questo è il caso base che risolve il problema. Si esegue una singola rotazione sul nonno `w` (per "spostare il peso" verso lo zio) e si ricolorano i nodi `y` e `w`.</p>
-                <ul>
-                    <li>Si esegue `Right-Rotate(T, w)`.</li>
-                    <li>Il nuovo "nonno" (`y`) diventa nero.</li>
-                    <li>I suoi due figli (`x` e `w`) diventano rossi.</li>
-                </ul>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+graph TD
+    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+
+    subgraph "Prima (Violazione Rosso-Rosso)"
+        W(w):::black --> Y(y):::red;
+        W --> Z(z):::black;
+        Y --> X(x):::red;
+        Y --> beta("β"):::black;
+        X --> alpha("α"):::black;
+        X --> gamma("γ"):::black;
+        Z --> delta("δ"):::black;
+        alpha --> a1((NIL)); alpha --> a2((NIL));
+        beta --> b1((NIL)); beta --> b2((NIL));
+        gamma --> c1((NIL)); gamma --> c2((NIL));
+        delta --> d1((NIL)); delta --> d2((NIL));
+    end
+    
+    subgraph "Dopo: Right-Rotate(w) + Ricolora"
+        Y2(y):::black --> X2(x):::red;
+        Y2 --> W2(w):::red;
+        X2 --> alpha2(α):::black;
+        X2 --> gamma2(γ):::black;
+        W2 --> beta2(β):::black;
+        W2 --> Z2(z):::black;
+        Z2 --> delta2(δ):::black;
+        alpha2 --> a1_2((NIL)); alpha2 --> a2_2((NIL));
+        beta2 --> b1_2((NIL)); beta2 --> b2_2((NIL));
+        gamma2 --> c1_2((NIL)); gamma2 --> c2_2((NIL));
+        delta2 --> d1_2((NIL)); delta2 --> d2_2((NIL));
+    end
+                     </pre>
+                </div>
                 <p>Dopo questa operazione, non ci sono più violazioni e la procedura termina.</p>
             </div>
         </article>
@@ -396,13 +438,38 @@ graph TD
         <article id="inserimento-caso2" class="content-section">
             <h3 class="subsubsection-title">4.3.2. Caso 2: Quasi Fortunato (Zio Nero e Stesso Lato)</h3>
             <div class="section-content">
-                <p><strong>Condizione:</strong> Lo zio di `x` (`z`) è `BLACK`, ma `x` si trova sullo stesso lato dello zio (es. `x` è un figlio destro e anche lo zio è figlio destro, oppure entrambi sono figli sinistri).</p>
-                <p><strong>Soluzione:</strong> Questo caso non risolve direttamente il problema, ma lo trasforma nel Caso 1. Si esegue una rotazione sul genitore di `x` (`y`) per allineare `x` sul lato opposto dello zio.</p>
-                <ul>
-                    <li>Si esegue `Left-Rotate(T, y)`.</li>
-                    <li>Il nodo `x` ora è `y`, e il vecchio `y` è il nuovo `x`. La situazione è ora identica a quella del Caso 1.</li>
-                </ul>
-                <p>Dopo questa rotazione, si applica la logica del Caso 1 per risolvere definitivamente il problema.</p>
+                <p><strong>Condizione:</strong> Lo zio di `x` (`z`) è `BLACK`, ma `x` e il suo genitore `y` formano una configurazione a "triangolo" o "ginocchio" (es. `y` è figlio sinistro, `x` è figlio destro).</p>
+                <p><strong>Soluzione:</strong> Questo caso non risolve direttamente il problema, ma lo trasforma nel Caso 1. Si esegue una rotazione sul genitore di `x` (`y`) per allineare `x`, `y` e `w` in una linea.</p>
+                <p><strong>Passo 1: Trasformazione in Caso 1</strong></p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+graph TD
+    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+    subgraph "Prima (Configurazione a Triangolo)"
+        W(w):::black --> Y(y):::red;
+        W --> Z(z):::black;
+        Y --> alpha("α"):::black;
+        Y --> X(x):::red;
+        Z --> Z_L((NIL)); Z --> Z_R((NIL));
+        alpha --> a_L((NIL)); alpha --> a_R((NIL));
+        X --> x_L((NIL)); X --> x_R((NIL));
+    end
+    
+    subgraph "Dopo Left-Rotate(y)"
+        W2(w):::black --> X2(x):::red;
+        W2 --> Z2(z):::black;
+        X2 --> Y2(y):::red;
+        Y2 --> alpha2("α"):::black;
+        Y2 --> y_R((NIL));
+        X2 --> x2_R((NIL));
+        Z2 --> z2_L((NIL)); Z2 --> z2_R((NIL));
+        alpha2 --> a2_L((NIL)); alpha2 --> a2_R((NIL));
+    end
+                     </pre>
+                </div>
+                <p><strong>Passo 2: Applicazione del Caso 1</strong></p>
+                <p>Dopo la prima rotazione, la situazione è diventata identica a quella del Caso 1 (configurazione a linea, zio nero). Si applica quindi la soluzione del Caso 1 (rotazione sul nonno e ricolorazione) per risolvere definitivamente il problema.</p>
             </div>
         </article>
 
@@ -411,6 +478,30 @@ graph TD
             <div class="section-content">
                 <p><strong>Condizione:</strong> Lo zio di `x` (`z`) è `RED`.</p>
                 <p><strong>Soluzione:</strong> In questo caso non si possono fare rotazioni perché non c'è un "lato nero" verso cui spostare il peso. La soluzione è spostare il problema verso l'alto.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+graph TD
+    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+    subgraph "Prima (Zio Rosso)"
+        W(w):::black --> Y(y):::red;
+        W --> Z(z):::red;
+        Y --> X(x):::red;
+        X --> x_L((NIL)); X --> x_R((NIL));
+        Y --> y_R((NIL));
+        Z --> z_L((NIL)); Z --> z_R((NIL));
+    end
+    
+    subgraph "Dopo: Ricolora e sposta il problema"
+        W2(w):::red --> Y2(y):::black;
+        W2 --> Z2(z):::black;
+        Y2 --> X2(x):::red;
+        X2 --> x2_L((NIL)); X2 --> x2_R((NIL));
+        Y2 --> y2_R((NIL));
+        Z2 --> z2_L((NIL)); Z2 --> z2_R((NIL));
+    end
+                    </pre>
+                </div>
                 <ul>
                     <li>Si ricolorano il genitore `y` e lo zio `z` di `BLACK`.</li>
                     <li>Si ricolora il nonno `w` di `RED`.</li>
@@ -424,30 +515,33 @@ graph TD
             <h2 class="section-title">5. Esempio Completo di Inserimento</h2>
             <div class="section-content">
                 <p>La professoressa mostra un esempio passo-passo inserendo la sequenza `5, 7, 9, 6, 5.5`.</p>
-                <ol>
-                    <li><strong>Inserisci 5:</strong> Diventa la radice. Inizialmente rosso, viene ricolorato di nero. <strong>Terminato.</strong></li>
-                    <li><strong>Inserisci 7:</strong> Aggiunto come figlio destro rosso di 5. Nessuna violazione. <strong>Terminato.</strong></li>
-                    <li><strong>Inserisci 9:</strong> Aggiunto come figlio destro rosso di 7. Si crea una violazione rosso-rosso (7 e 9).
-                        <ul>
-                            <li><strong>Identificazione:</strong> `x=9`, `y=7` (genitore), `w=5` (nonno), `z`=figlio sinistro di 5 (foglia `NIL`, quindi nera).</li>
-                            <li><strong>Caso 1:</strong> Zio nero e opposto. Si esegue `Left-Rotate(T, 5)` e si ricolora. 7 diventa la radice nera, con 5 e 9 come figli rossi. <strong>Terminato.</strong></li>
-                        </ul>
-                    </li>
-                    <li><strong>Inserisci 6:</strong> Aggiunto come figlio sinistro rosso di 7. Violazione rosso-rosso (5 e 6).
-                        <ul>
-                            <li><strong>Identificazione:</strong> `x=6`, `y=5`, `w=7`, `z=9`.</li>
-                            <li><strong>Caso 3:</strong> Zio (`z=9`) è rosso. Si ricolorano `y=5` e `z=9` di nero, e `w=7` di rosso. Il problema si sposta su 7.</li>
-                            <li>Poiché 7 è la radice, viene ricolorato di nero. L'altezza nera dell'albero aumenta da 1 a 2. <strong>Terminato.</strong></li>
-                        </ul>
-                    </li>
-                    <li><strong>Inserisci 5.5:</strong> Aggiunto come figlio destro rosso di 5. Violazione rosso-rosso (5 e 5.5).
-                        <ul>
-                             <li><strong>Identificazione:</strong> `x=5.5`, `y=5`, `w=7`, `z=9`. Zio `z=9` è nero.</li>
-                             <li><strong>Caso 2:</strong> `x` e lo zio sono dallo stesso lato (entrambi figli destri dei loro genitori). Si esegue `Left-Rotate(T, 5)`. L'albero si trasforma e ora il problema è sul nodo 5, che è diventato un figlio sinistro, mentre lo zio è un figlio destro.</li>
-                             <li>La situazione è ora quella del <strong>Caso 1</strong>. Si applica `Right-Rotate(T, 7)` e si ricolora. <strong>Terminato.</strong></li>
-                        </ul>
-                    </li>
-                </ol>
+
+                <p><strong>1. Inserisci 5:</strong> Il 5 è la radice. Viene inserito come rosso e poi ricolorato di nero.</p>
+                <div class="mermaid-container tree-diagram"><pre class="mermaid">
+graph TD; classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; A(5):::black-->N1((NIL));A-->N2((NIL));</pre></div>
+                
+                <p><strong>2. Inserisci 7:</strong> Aggiunto come figlio destro rosso di 5. Nessuna violazione.</p>
+                <div class="mermaid-container tree-diagram"><pre class="mermaid">
+graph TD; classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; A(5):::b-->B(7):::r; A-->N1((NIL)); B-->N2((NIL)); B-->N3((NIL));</pre></div>
+
+                <p><strong>3. Inserisci 9:</strong> Aggiunto come figlio destro rosso di 7. Si crea una <strong>violazione rosso-rosso</strong> (7 e 9).<br/>
+                <u>Fixup:</u> `x=9`, genitore `y=7`, nonno `w=5`, zio `z` è la foglia NIL (nera). Siamo nel <strong>Caso 1</strong> (zio nero, configurazione a linea). Eseguiamo `Left-Rotate(5)` e ricoloriamo.</p>
+                <div class="mermaid-container tree-diagram"><pre class="mermaid">
+graph TD; classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; B(7):::b-->A(5):::r; B-->C(9):::r; A-->N1((NIL)); A-->N2((NIL)); C-->N3((NIL)); C-->N4((NIL));</pre></div>
+
+                <p><strong>4. Inserisci 6:</strong> Aggiunto come figlio sinistro di 9 (che è rosso). Violazione rosso-rosso (9 e 6).<br/>
+                <u>Fixup:</u> `x=6`, genitore `y=9`, nonno `w=7`, zio `z=5` (rosso). Siamo nel <strong>Caso 3</strong> (zio rosso). Ricoloriamo `y=9` e `z=5` di nero, e `w=7` di rosso. Il problema si sposta su 7. Poiché 7 è la radice, la ricoloriamo di nero. L'altezza nera (`bh`) aumenta a 2.</p>
+                <div class="mermaid-container tree-diagram"><pre class="mermaid">
+graph TD; classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; B(7):::b-->A(5):::b; B-->C(9):::b; A-->N1((NIL)); A-->N2((NIL)); C-->D(6):::r; C-->N4((NIL)); D-->N5((NIL)); D-->N6((NIL));</pre></div>
+                
+                <p><strong>5. Inserisci 5.5:</strong> Aggiunto come figlio sinistro rosso di 6. Violazione rosso-rosso (6 e 5.5).<br/>
+                <u>Fixup (Step 1 - Caso 2):</u> `x=5.5`, genitore `y=6`(R), nonno `w=9`(B). Lo zio di `x` (figlio destro di 9) è NIL (nero). La configurazione è a triangolo (`y` è figlio sinistro, `x` è figlio sinistro, ma il genitore `y` è figlio sinistro del nonno `w` che è figlio destro... la configurazione è a "ginocchio"). Eseguiamo `Right-Rotate(6)`. 5.5 sale e 6 scende.</p>
+                <div class="mermaid-container tree-diagram"><pre class="mermaid">
+graph TD; classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; B(7):::b-->A(5):::b; B-->C(9):::b; C-->D(5.5):::r; C-->N4((NIL)); D-->E(6):::r; D-->N5((NIL)); A-->N1((NIL)); A-->N2((NIL)); E-->N3((NIL)); E-->N6((NIL));</pre></div>
+                <p><u>Fixup (Step 2 - Caso 1):</u> L'albero è ora in una configurazione a linea. Il problema è tra 9 (nonno), 5.5 (genitore) e 6 (figlio). Eseguiamo `Left-Rotate(9)` e ricoloriamo.</p>
+                <div class="mermaid-container tree-diagram"><pre class="mermaid">
+graph TD; classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; B(7):::b-->A(5):::b; B-->D(5.5):::b; D-->E(6):::r; D-->F(9):::r; A-->N1((NIL)); A-->N2((NIL)); E-->N3((NIL)); E-->N4((NIL)); F-->N5((NIL)); F-->N6((NIL));</pre></div>
+                <p>L'inserimento è terminato. L'albero è un RBT valido.</p>
             </div>
         </article>
 
@@ -466,7 +560,7 @@ graph TD
                     <p>La professoressa spiega che la logica è l'inverso dell'inserimento:</p>
                     <ul>
                         <li>Nell'<strong>inserimento</strong> si crea un "eccesso di peso" (troppi rossi) su un lato, e si cerca di spostarlo verso lo zio.</li>
-                        <li>Nella <strong>cancellazione</strong> si crea una "carenza di peso" (un nero in meno) sul lato dello "zio" (il lato dove è avvenuta la cancellazione), e si cerca di "tirare" peso dal lato dei "nipoti" (il fratello del nodo problematico e i suoi figli) per compensare.</li>
+                        <li>Nella <strong>cancellazione</strong> si crea una "carenza di peso" (un nero in meno) sul lato dove è avvenuta la cancellazione, e si cerca di "tirare" peso dal lato opposto (quello del fratello del nodo problematico) per compensare.</li>
                     </ul>
                     <p>Questa intuizione aiuta a capire che, sebbene i casi siano più numerosi e complessi, l'idea di fondo del ribilanciamento è la stessa.</p>
                 </div>
