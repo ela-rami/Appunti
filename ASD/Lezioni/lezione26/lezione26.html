@@ -516,32 +516,103 @@ graph TD
             <div class="section-content">
                 <p>La professoressa mostra un esempio passo-passo inserendo la sequenza `5, 7, 9, 6, 5.5`.</p>
 
-                <p><strong>1. Inserisci 5:</strong> Il 5 è la radice. Viene inserito come rosso e poi ricolorato di nero.</p>
+                <p><strong>1. Inserisci 5:</strong></p>
+                <p>L'albero è vuoto. Il 5 diventa la radice. Viene inserito come rosso e, poiché è la radice, la procedura di fixup lo ricolora immediatamente di nero.</p>
                 <div class="mermaid-container tree-diagram"><pre class="mermaid">
-graph TD; classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; A(5):::black-->N1((NIL));A-->N2((NIL));</pre></div>
+graph TD; 
+    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+    A(5):::black-->N1((NIL));A-->N2((NIL));
+</pre></div>
                 
-                <p><strong>2. Inserisci 7:</strong> Aggiunto come figlio destro rosso di 5. Nessuna violazione.</p>
+                <p><strong>2. Inserisci 7:</strong></p>
+                <p>Poiché 7 > 5, viene inserito come figlio destro di 5. Viene colorato di rosso. Il suo genitore (5) è nero, quindi non c'è alcuna violazione delle proprietà. L'inserimento termina.</p>
                 <div class="mermaid-container tree-diagram"><pre class="mermaid">
-graph TD; classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; A(5):::b-->B(7):::r; A-->N1((NIL)); B-->N2((NIL)); B-->N3((NIL));</pre></div>
+graph TD; 
+    classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; 
+    classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; 
+    A(5):::b-->N1((NIL)); 
+    A-->B(7):::r; 
+    B-->N2((NIL)); B-->N3((NIL));
+</pre></div>
 
-                <p><strong>3. Inserisci 9:</strong> Aggiunto come figlio destro rosso di 7. Si crea una <strong>violazione rosso-rosso</strong> (7 e 9).<br/>
-                <u>Fixup:</u> `x=9`, genitore `y=7`, nonno `w=5`, zio `z` è la foglia NIL (nera). Siamo nel <strong>Caso 1</strong> (zio nero, configurazione a linea). Eseguiamo `Left-Rotate(5)` e ricoloriamo.</p>
+                <p><strong>3. Inserisci 9:</strong></p>
+                <p>Poiché 9 > 7, viene inserito come figlio destro di 7. Viene colorato di rosso. Ora c'è una <strong>violazione rosso-rosso</strong>: il nodo 9 è rosso e anche suo padre, 7, è rosso.<br/>
+                <u>Fixup:</u> Si attiva la procedura di correzione.
+                <ul>
+                    <li>Nodo problematico `x = 9`.</li>
+                    <li>Genitore `y = 7` (rosso).</li>
+                    <li>Nonno `w = 5` (nero).</li>
+                    <li>Zio `z` = figlio sinistro di 5, che è una foglia `NIL` (nera).</li>
+                </ul>
+                Siamo nel <strong>Caso 1</strong>: lo zio è nero e la configurazione `x-y-w` è una linea retta. Si esegue una `Left-Rotate(5)` e si ricolora.</p>
                 <div class="mermaid-container tree-diagram"><pre class="mermaid">
-graph TD; classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; B(7):::b-->A(5):::r; B-->C(9):::r; A-->N1((NIL)); A-->N2((NIL)); C-->N3((NIL)); C-->N4((NIL));</pre></div>
+graph TD; 
+    classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; 
+    classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; 
+    B(7):::b-->A(5):::r; 
+    B-->C(9):::r; 
+    A-->N1((NIL)); A-->N2((NIL)); 
+    C-->N3((NIL)); C-->N4((NIL));
+</pre></div>
 
-                <p><strong>4. Inserisci 6:</strong> Aggiunto come figlio sinistro di 9 (che è rosso). Violazione rosso-rosso (9 e 6).<br/>
-                <u>Fixup:</u> `x=6`, genitore `y=9`, nonno `w=7`, zio `z=5` (rosso). Siamo nel <strong>Caso 3</strong> (zio rosso). Ricoloriamo `y=9` e `z=5` di nero, e `w=7` di rosso. Il problema si sposta su 7. Poiché 7 è la radice, la ricoloriamo di nero. L'altezza nera (`bh`) aumenta a 2.</p>
+                <p><strong>4. Inserisci 6:</strong></p>
+                <p>Poiché 6 < 7 ma 6 > 5, viene inserito come figlio destro di 5 (che è rosso). Si crea una <strong>violazione rosso-rosso</strong> (5 e 6).<br/>
+                <u>Fixup:</u>
+                <ul>
+                    <li>Nodo problematico `x = 6`.</li>
+                    <li>Genitore `y = 5` (rosso).</li>
+                    <li>Nonno `w = 7` (nero).</li>
+                    <li>Zio `z = 9` (rosso).</li>
+                </ul>
+                Siamo nel <strong>Caso 3</strong> (zio rosso). Si esegue una ricolorazione: i figli del nonno (`y=5` e `z=9`) diventano neri, e il nonno (`w=7`) diventa rosso. Il problema si sposta verso l'alto, su 7. Poiché 7 è la radice, viene immediatamente ricolorato di nero. L'altezza nera (`bh`) dell'albero aumenta da 1 a 2.</p>
                 <div class="mermaid-container tree-diagram"><pre class="mermaid">
-graph TD; classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; B(7):::b-->A(5):::b; B-->C(9):::b; A-->N1((NIL)); A-->N2((NIL)); C-->D(6):::r; C-->N4((NIL)); D-->N5((NIL)); D-->N6((NIL));</pre></div>
+graph TD; 
+    classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; 
+    classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; 
+    B(7):::b-->A(5):::b; 
+    B-->C(9):::b; 
+    A-->N1((NIL)); A-->D(6):::r; 
+    D-->N2((NIL)); D-->N3((NIL)); 
+    C-->N4((NIL)); C-->N5((NIL));
+</pre></div>
                 
-                <p><strong>5. Inserisci 5.5:</strong> Aggiunto come figlio sinistro rosso di 6. Violazione rosso-rosso (6 e 5.5).<br/>
-                <u>Fixup (Step 1 - Caso 2):</u> `x=5.5`, genitore `y=6`(R), nonno `w=9`(B). Lo zio di `x` (figlio destro di 9) è NIL (nero). La configurazione è a triangolo (`y` è figlio sinistro, `x` è figlio sinistro, ma il genitore `y` è figlio sinistro del nonno `w` che è figlio destro... la configurazione è a "ginocchio"). Eseguiamo `Right-Rotate(6)`. 5.5 sale e 6 scende.</p>
+                <p><strong>5. Inserisci 5.5:</strong></p>
+                <p>Poiché 5.5 > 5 ma 5.5 < 6, viene inserito come figlio sinistro di 6 (che è rosso). Si crea una <strong>violazione rosso-rosso</strong> (6 e 5.5).<br/>
+                <u>Fixup (Step 1 - Caso 2):</u>
+                <ul>
+                    <li>Nodo problematico `x = 5.5`.</li>
+                    <li>Genitore `y = 6` (rosso).</li>
+                    <li>Nonno `w = 5` (nero).</li>
+                    <li>Zio `z` = figlio sinistro di 5, che è `NIL` (nero).</li>
+                </ul>
+                Lo zio è nero, ma la configurazione è a "triangolo" (`y` è figlio destro di `w`, `x` è figlio sinistro di `y`). Siamo nel <strong>Caso 2</strong>. Eseguiamo `Right-Rotate(6)`. Il nodo 5.5 sale e 6 scende.</p>
                 <div class="mermaid-container tree-diagram"><pre class="mermaid">
-graph TD; classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; B(7):::b-->A(5):::b; B-->C(9):::b; C-->D(5.5):::r; C-->N4((NIL)); D-->E(6):::r; D-->N5((NIL)); A-->N1((NIL)); A-->N2((NIL)); E-->N3((NIL)); E-->N6((NIL));</pre></div>
-                <p><u>Fixup (Step 2 - Caso 1):</u> L'albero è ora in una configurazione a linea. Il problema è tra 9 (nonno), 5.5 (genitore) e 6 (figlio). Eseguiamo `Left-Rotate(9)` e ricoloriamo.</p>
+graph TD; 
+    classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; 
+    classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; 
+    ROOT(7):::b --> P(5):::b;
+    ROOT --> SIB(9):::b;
+    P --> N1((NIL));
+    P --> X(5.5):::r;
+    X --> N2((NIL));
+    X --> Y(6):::r;
+    Y --> N3((NIL)); Y --> N4((NIL));
+    SIB --> N5((NIL)); SIB --> N6((NIL));
+</pre></div>
+                <p><u>Fixup (Step 2 - Caso 1):</u> La rotazione ha trasformato il problema. La violazione rosso-rosso ora è tra `x=5.5` e il suo genitore `y=5`. Il nonno è 7, e lo zio è 9 (nero). La configurazione è diventata una linea. Siamo nel <strong>Caso 1</strong>. Eseguiamo `Left-Rotate(5)` e ricoloriamo.</p>
                 <div class="mermaid-container tree-diagram"><pre class="mermaid">
-graph TD; classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; B(7):::b-->A(5):::b; B-->D(5.5):::b; D-->E(6):::r; D-->F(9):::r; A-->N1((NIL)); A-->N2((NIL)); E-->N3((NIL)); E-->N4((NIL)); F-->N5((NIL)); F-->N6((NIL));</pre></div>
-                <p>L'inserimento è terminato. L'albero è un RBT valido.</p>
+graph TD; 
+    classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px; 
+    classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px; 
+    ROOT(7):::b --> NEW_P(5.5):::b;
+    ROOT --> SIB(9):::b;
+    NEW_P --> P(5):::r;
+    NEW_P --> X(6):::r;
+    P --> N1((NIL)); P --> N2((NIL));
+    X --> N3((NIL)); X --> N4((NIL));
+    SIB --> N5((NIL)); SIB --> N6((NIL));
+</pre></div>
+                <p>L'inserimento è terminato. L'albero finale è un RBT valido.</p>
             </div>
         </article>
 
