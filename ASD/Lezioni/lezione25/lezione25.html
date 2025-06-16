@@ -595,18 +595,17 @@ graph TD
                 <div class="mermaid-container tree-diagram">
                      <pre class="mermaid">
 graph TD
-    subgraph "Prima: Left-Rotate su x"
-        x --> alpha("α");
-        x --> y;
-        y --> beta("β");
-        y --> gamma("γ");
-    end
-    
     subgraph "Dopo: y prende il posto di x"
         y2(y) --> x2(x);
         y2 --> gamma2("γ");
         x2 --> alpha2("α");
         x2 --> beta2("β");
+    end
+    subgraph "Prima: Left-Rotate su x"
+        x --> alpha("α");
+        x --> y;
+        y --> beta("β");
+        y --> gamma("γ");
     end
                      </pre>
                 </div>
@@ -634,44 +633,7 @@ graph TD
             <h3 class="subsection-title">8.2. Esempio di Left-Rotate</h3>
             <div class="section-content">
                 <p>Viene mostrato un esempio di `Left-Rotate` con perno sul nodo con chiave 5.</p>
-                 <div class="mermaid-container tree-diagram">
-                     <pre class="mermaid">
-graph TD
-    subgraph "Stato Iniziale"
-        A(10) --> B(5);
-        A --> X(20);
-        B --> C(1);
-        B --> D(6);
-        D --> F(7);
-        D --> G(8);
-        G --> H(9);
-
-        C --> C_L((NIL)); C --> C_R((NIL));
-        F --> F_L((NIL)); F --> F_R((NIL));
-        H --> H_L((NIL)); H --> H_R((NIL));
-        X --> X_L((NIL));
-        X --> THIRTY(30);
-        THIRTY --> T_L((NIL)); THIRTY --> T_R((NIL));
-    end
-    subgraph "Stato Finale (dopo Left-Rotate(T, 5))"
-        A2(10) --> D2(6);
-        A2 --> X2(20);
-        D2 --> B2(5);
-        D2 --> G2(8);
-        B2 --> C2(1);
-        B2 --> F2(7);
-        G2 --> H2(9);
-        
-        C2 --> C2_L((NIL)); C2 --> C2_R((NIL));
-        F2 --> F2_L((NIL)); F2 --> F2_R((NIL));
-        H2 --> H2_L((NIL)); H2 --> H2_R((NIL));
-        X2 --> X2_L((NIL));
-        X2 --> THIRTY2(30);
-        THIRTY2 --> T2_L((NIL)); THIRTY2 --> T2_R((NIL));
-    end
-                     </pre>
-                </div>
-                <p>Il nodo 6 sale al posto del 5. Il 5 scende a sinistra del 6. Il sottoalbero `beta` (in questo caso solo il nodo 7) che era a sinistra del 6, viene riagganciato come figlio destro del 5. La rotazione ha parzialmente ribilanciato l'albero, che tendeva ad allungarsi a destra.</p>
+                <p><strong>vedere ultima pagina appunti professoressa(pdf)</strong></p>
             </div>
         </article>
         
