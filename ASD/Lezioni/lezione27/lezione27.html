@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lezione 27: RB tree: cancellazione</title>
+    <title>Lezione 27: RBT tree: cancellazione</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
     <!-- MathJax per rendering formule LaTeX -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -170,11 +170,6 @@
         }
         .clarification-box strong { color: #34D399; }
 
-        .db-node {
-            border: 2px dashed #ef4444 !important; /* Rossa tratteggiata */
-            box-shadow: 0 0 5px #ef4444; /* Ombra rossa */
-        }
-        
         footer {
             text-align: center; padding: 1.5rem; background-color: var(--bg-header);
             color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
@@ -222,7 +217,7 @@
     <div class="overlay"></div>
     <header>
         <button class="hamburger-menu" id="hamburger-btn">☰</button>
-        <h1>Lezione 27: RB tree: cancellazione</h1>
+        <h1>Lezione 27: RBT tree: cancellazione</h1>
         <div></div>
     </header>
 
@@ -233,568 +228,441 @@
         </div>
         <h2>Indice Argomenti</h2>
         <ul>
-            <li><a href="#intro-cancellazione" class="sidebar-link">1. Introduzione alla Cancellazione in RBT</a></li>
-            <li><a href="#trick-double-black" class="sidebar-link">1.1. Il Trucco del "Double Black" (DB)</a></li>
-            <li><a href="#cancellazione-semplice" class="sidebar-link">1.2. Esempi di Cancellazione Semplice</a></li>
-            <li><a href="#cancellazione-fixup" class="sidebar-link">2. Logica del Fixup per la Cancellazione</a></li>
-            <li><a href="#cancellazione-casi" class="sidebar-link">2.1. I Quattro Casi per il Fixup</a></li>
-            <li><a href="#cancellazione-caso1" class="sidebar-link">2.1.1. Caso 1: Fortunato (Nipote Rosso Opposto)</a></li>
-            <li><a href="#cancellazione-caso2" class="sidebar-link">2.1.2. Caso 2: Quasi Fortunato (Nipote Rosso Stesso Lato)</a></li>
-            <li><a href="#cancellazione-caso3" class="sidebar-link">2.1.3. Caso 3: Sfortunato (Nipoti Neri, Fratello Nero)</a></li>
-            <li><a href="#cancellazione-caso4" class="sidebar-link">2.1.4. Caso 4: Antipatico (Fratello Rosso)</a></li>
-            <li><a href="#cancellazione-esempio" class="sidebar-link">2.2. Esempio Completo di Cancellazione</a></li>
-            <li><a href="#complessita-cancellazione" class="sidebar-link">3. Complessità della Cancellazione</a></li>
-            <li><a href="#operazione-join" class="sidebar-link">4. Operazione di Fusione (RBT-Join)</a></li>
-            <li><a href="#join-caso1" class="sidebar-link">4.1. Caso 1: Altezze Nere Uguali</a></li>
-            <li><a href="#join-caso2" class="sidebar-link">4.2. Caso 2: Altezze Nere Diverse</a></li>
-            <li><a href="#complessita-join" class="sidebar-link">4.3. Complessità dell'Operazione Join</a></li>
-            <li><a href="#conclusioni" class="sidebar-link">5. Conclusioni</a></li>
+            <li><a href="#cancellazione-problema" class="sidebar-link">1. Cancellazione in RBT: Il Problema</a></li>
+            <li><a href="#double-black" class="sidebar-link">2. Il Trucco del "Double-Black"</a></li>
+            <li><a href="#cancellazione-semplice" class="sidebar-link">3. Esempi di Cancellazione Semplice</a></li>
+            <li><a href="#fixup-logica" class="sidebar-link">4. Logica del Fixup: Un'Analogia con l'Inserimento</a></li>
+            <li><a href="#fixup-casi" class="sidebar-link">5. I Quattro Casi del Fixup della Cancellazione</a></li>
+            <li><a href="#fixup-caso1" class="sidebar-link">5.1. Caso 1: Fortunato (Nipote Rosso Opposto)</a></li>
+            <li><a href="#fixup-caso2" class="sidebar-link">5.2. Caso 2: Quasi Fortunato (Nipote Rosso dallo Stesso Lato)</a></li>
+            <li><a href="#fixup-caso3" class="sidebar-link">5.3. Caso 3: Sfortunato (Fratello e Nipoti Neri)</a></li>
+            <li><a href="#fixup-caso4" class="sidebar-link">5.4. Caso 4: Antipatico (Fratello Rosso)</a></li>
+            <li><a href="#cancellazione-esempio-complesso" class="sidebar-link">6. Esempio Completo di Cancellazione</a></li>
+            <li><a href="#cancellazione-complessita" class="sidebar-link">7. Analisi della Complessità della Cancellazione</a></li>
+            <li><a href="#rbt-join" class="sidebar-link">8. Operazione di Fusione (RBT-Join)</a></li>
+            <li><a href="#rbt-join-casi" class="sidebar-link">8.1. Casi di Fusione in base all'Altezza Nera</a></li>
+            <li><a href="#rbt-join-complessita" class="sidebar-link">8.2. Complessità della Fusione</a></li>
+            <li><a href="#conclusioni" class="sidebar-link">9. Conclusioni ed Esercizi</a></li>
         </ul>
     </nav>
 
     <main>
-        <article id="intro-cancellazione" class="content-section active-section">
-            <h2 class="section-title">1. Introduzione alla Cancellazione in RBT</h2>
+        <article id="cancellazione-problema" class="content-section active-section">
+            <h2 class="section-title">1. Cancellazione in un RBT: Il Problema Principale</h2>
             <div class="section-content">
-                <p>La professoressa riprende la discussione sulla cancellazione di un nodo da un Albero Rosso-Nero (RBT).</p>
-                <p>Come già accennato nella lezione precedente, se un nodo nero viene eliminato, si crea un problema: la proprietà dei cammini neri viene violata, poiché uno o più cammini perdono un nodo nero.</p>
+                <p>La professoressa introduce la procedura di cancellazione in un Albero Rosso-Nero (RBT), evidenziando subito il problema principale.</p>
+                <p>La prima fase della cancellazione avviene esattamente come in un BST standard. Tuttavia, se il nodo che viene fisicamente rimosso dall'albero è di colore <strong>NERO</strong>, si crea un problema: tutti i cammini che passavano per quel nodo ora hanno un nodo nero in meno. Questo viola la proprietà 3 degli RBT (ogni cammino da un nodo a una foglia discendente deve contenere lo stesso numero di nodi neri).</p>
+                <p>Se il nodo rimosso è ROSSO, non si crea nessuna violazione e la cancellazione termina senza bisogno di correzioni.</p>
             </div>
         </article>
 
-        <article id="trick-double-black" class="content-section">
-            <h3 class="subsection-title">1.1. Il Trucco del "Double Black" (DB)</h3>
+        <article id="double-black" class="content-section">
+            <h2 class="section-title">2. Il Trucco del "Double-Black"</h2>
             <div class="section-content">
-                <p>Per gestire la violazione della proprietà dei cammini neri, viene utilizzato un "trucco": il nodo che sostituisce il nodo nero eliminato viene temporaneamente considerato "double black" (DB).</p>
-                <blockquote>
-                Il nodo che sostituisce quello eliminato conta temporaneamente come <strong>due nodi neri</strong>.
-                </blockquote>
-                <p>Questo nodo non è realmente un colore dell'RBT; è una convenzione per segnare un nodo problematico. Permette di mantenere (a livello di conteggio) la proprietà dei cammini neri, ma introduce un'altra violazione: l'esistenza di un nodo con un colore non definito (né rosso né nero).</p>
-                <div class="mermaid-container tree-diagram">
-                    <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    classDef db fill:#111827,stroke:#ef4444,color:#e5e7eb,stroke-width:2px;
-    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
-
-    P(Parent):::black --> Eliminated(Eliminato):::black;
-    Eliminated --> S(Sostituto):::black;
-    S --> SL((NIL));
-    S --> SR((NIL));
-
-    style S stroke-dasharray: 5 5;
-</pre>
+                <p>Per gestire la violazione causata dalla rimozione di un nodo nero, si utilizza un "trucco". Il nodo che va a sostituire quello eliminato (tipicamente un suo figlio o una foglia NIL) viene considerato <strong>temporaneamente "doppiamente nero" (double-black)</strong>.</p>
+                <div class="note-box">
+                    <strong>Concetto di Double-Black:</strong>
+                    <ul>
+                        <li>Il colore "double-black" non esiste formalmente nella definizione di RBT. È un concetto usato per tenere traccia del nodo problematico.</li>
+                        <li>Un nodo double-black conta come due nodi neri nel calcolo dell'altezza nera.</li>
+                        <li>In questo modo, la proprietà dei cammini neri viene formalmente ripristinata. Tuttavia, si introduce una nuova violazione: ora esiste un nodo che non è né rosso né nero.</li>
+                    </ul>
                 </div>
-                <p>L'obiettivo della procedura di cancellazione è far sì che il nodo double black riassuma un colore lecito (rosso o nero).</p>
-                <p><strong>Cancellazione base (caso semplice):</strong> Se il nodo che diventa `double black` (cioè, il sostituto del nodo eliminato) era originariamente di colore `RED`, allora si può semplicemente ricolorarlo di `BLACK` e il problema è risolto. La procedura termina immediatamente.</p>
-                <div class="clarification-box">
-                    <strong>Nota sull'implementazione:</strong> Il "double black" è un concetto logico. Nel codice, non si attribuisce un colore `DB`. Si tiene semplicemente un puntatore al nodo problematico `x`, e la procedura di `RB-Delete-Fixup` controlla il suo stato e quello dei nodi circostanti. Il primo controllo sarà se `x` (il nodo problematico) è rosso; in tal caso, lo ricolora di nero e termina.
-                </div>
-                <p>Altrimenti, se il nodo double black era originariamente `BLACK` (o `NIL` se era una foglia), si applicano rotazioni e ricolorazioni finché il problema non è risolto o spostato verso l'alto. Se il nodo double black raggiunge la radice, viene semplicemente lasciato nero e la procedura termina.</p>
+                <p>L'obiettivo della procedura di <strong>fixup</strong> della cancellazione è eliminare questo nodo double-black, facendogli riassumere un colore valido (rosso o nero) tramite rotazioni e ricolorazioni, senza violare le altre proprietà dell'albero.</p>
+                
+                <h3 class="subsection-title">Caso Base: Il Nodo Sostituto era Rosso</h3>
+                <p>Esiste un caso base molto semplice che risolve immediatamente il problema. Se il nodo che diventa double-black era originariamente <strong>ROSSO</strong> (ad esempio, un figlio rosso che sostituisce il suo genitore nero rimosso), la soluzione è immediata: <strong>lo si ricolora di NERO e la procedura termina</strong>.</p>
+                <p>In tutti gli altri casi (quando il nodo che diventa double-black era già nero, come una foglia NIL), si deve applicare una procedura di fixup più complessa, basata su rotazioni e ricolorazioni, che o risolve il problema localmente o lo sposta verso l'alto nell'albero.</p>
             </div>
         </article>
 
         <article id="cancellazione-semplice" class="content-section">
-            <h3 class="subsection-title">1.2. Esempi di Cancellazione Semplice</h3>
-            <p>La professoressa illustra alcuni casi di cancellazione che non richiedono complessi fixup.</p>
-            <p><strong>Esempio 1: Cancellazione di un nodo Rosso (foglia)</strong></p>
-            <p>Se la chiave da cancellare si trova in un nodo rosso che è una foglia (o ha figli NIL), basta rimuoverlo. Non si crea alcun problema di altezza nera, poiché un nodo rosso non contribuisce al conteggio dei neri nei cammini.</p>
-            <div class="mermaid-container tree-diagram">
-                <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
-    
-    subgraph "Albero Iniziale"
-        R(Root):::black --> B1(B1):::black;
-        R --> B2(B2):::black;
-        B1 --> R1(R1 - da cancellare):::red;
-        B1 --> R2(R2):::red;
-        R1 --> N1((NIL)); R1 --> N2((NIL));
-        R2 --> N3((NIL)); R2 --> N4((NIL));
-        B2 --> N5((NIL)); B2 --> N6((NIL));
-    end
-    
-    subgraph "Dopo la Cancellazione"
-        R_d(Root):::black --> B1_d(B1):::black;
-        R_d --> B2_d(B2):::black;
-        B1_d --> N1_d((NIL));
-        B1_d --> R2_d(R2):::red;
-        R2_d --> N3_d((NIL)); R2_d --> N4_d((NIL));
-        B2_d --> N5_d((NIL)); B2_d --> N6_d((NIL));
-    end
-    linkStyle 0 stroke:#ef4444,stroke-width:2px,stroke-dasharray: 2 2;
-</pre>
-            </div>
-
-            <p><strong>Esempio 2: Cancellazione di un nodo Nero sostituito da figlio Rosso</strong></p>
-            <p>Se il nodo da cancellare è nero, ma il nodo che lo rimpiazza fisicamente (che è sempre figlio del nodo eliminato, o il suo successore/predecessore con al più un figlio) è rosso, si può semplicemente ricolorare il sostituto di nero.</p>
-            <div class="mermaid-container tree-diagram">
-                <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
-    
-    subgraph "Albero Iniziale"
-        R(Root):::black --> B1(B1):::black;
-        R --> B2(B2):::black;
-        B1 --> B_del(B_del - da cancellare):::black;
-        B_del --> R_child(R_child):::red;
-        B_del --> N_child((NIL));
-        R_child --> RN1((NIL)); R_child --> RN2((NIL));
-        B1 --> N1((NIL));
-        B2 --> N2((NIL)); B2 --> N3((NIL));
-    end
-    
-    subgraph "Dopo la Cancellazione (Sostituzione e Ricolorazione)"
-        R_d(Root):::black --> B1_d(B1):::black;
-        R_d --> B2_d(B2):::black;
-        B1_d --> R_child_d(R_child):::black;
-        R_child_d --> RN1_d((NIL)); R_child_d --> RN2_d((NIL));
-        B1_d --> N1_d((NIL));
-        B2_d --> N2_d((NIL)); B2_d --> N3_d((NIL));
-    end
-    linkStyle 0 stroke:#ef4444,stroke-width:2px,stroke-dasharray: 2 2;
-</pre>
-            </div>
-            
-            <p><strong>Esempio 3: Cancellazione di un nodo con due figli (usando predecessore rosso)</strong></p>
-            <p>La professoressa ripropone un caso BST in cui si usa il predecessore. Se il predecessore è rosso, non si crea problema quando viene rimosso fisicamente. Questo è un caso di "cancellazione semplice".</p>
-            <div class="note-box">
-                <strong>Scelta Predecessore/Successore nella Cancellazione:</strong>
-                <p>Normalmente, negli algoritmi BST, si sceglie di usare sempre o il predecessore o il successore. Tuttavia, negli RBT, se si ha la possibilità di scegliere, si potrebbe optare per il predecessore o successore che sia di colore rosso. Questo perché la rimozione di un nodo rosso non richiede fixup, semplificando la procedura.</p>
-            </div>
-        </article>
-
-        <article id="cancellazione-fixup" class="content-section">
-            <h2 class="section-title">2. Logica del Fixup per la Cancellazione</h2>
+            <h2 class="section-title">3. Esempi di Cancellazione Semplice</h2>
             <div class="section-content">
-                <p>Il vero problema sorge quando un nodo `BLACK` viene rimosso e viene sostituito da un nodo che è anch'esso `BLACK` (o una foglia `NIL`). In questo caso, il nodo sostituto viene contrassegnato come `double black` (DB), e la procedura di `RB-Delete-Fixup` viene invocata.</p>
-                <div class="clarification-box">
-                    <strong>Analogia del "Peso" per la Cancellazione:</strong>
-                    <p>La professoressa spiega che la logica del fixup per la cancellazione è l'inverso di quella per l'inserimento:</p>
-                    <ul>
-                        <li>Nell'<strong>inserimento</strong> si creava un "eccesso di peso" (troppi rossi) su un lato, e si cercava di spostarlo verso lo zio.</li>
-                        <li>Nella <strong>cancellazione</strong> si crea una "carenza di peso" (un nero in meno) sul lato del nodo problematico (quello che è diventato DB). La procedura cerca di "tirare" peso dall'altro lato (quello del fratello del nodo problematico, cioè i "nipoti" del padre del DB) per compensare.</li>
-                    </ul>
-                    <p>Sia `x` il nodo problematico (double black). La soluzione dipende dal colore del suo fratello (sibling).</p>
-                </div>
-            </div>
-        </article>
-
-        <article id="cancellazione-casi" class="content-section">
-            <h3 class="subsection-title">2.1. I Quattro Casi per il Fixup</h3>
-            <div class="section-content">
-                <p>La procedura `RB-Delete-Fixup` considera quattro casi principali, basati sul colore del fratello del nodo problematico (`x`).</p>
-            </div>
-        </article>
-
-        <article id="cancellazione-caso1" class="content-section">
-            <h3 class="subsubsection-title">2.1.1. Caso 1: Fortunato (Nipote Rosso Opposto)</h3>
-            <div class="section-content">
-                <p><strong>Condizione:</strong> Il fratello di `x` (`s`) è `BLACK`, il figlio destro di `s` (`s.right`, nipote di `x`) è `RED`, e `x` è un figlio sinistro (il caso simmetrico è quando `x` è figlio destro e `s.left` è `RED`).</p>
-                <p><strong>Soluzione:</strong> Questo è il caso che risolve il problema. Si esegue una rotazione e si ricolorano i nodi per ripristinare il bilanciamento.</p>
-                <div class="mermaid-container tree-diagram">
-                     <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
-    classDef db fill:#111827,stroke:#ef4444,color:#e5e7eb,stroke-width:2px;
-
-    subgraph "Prima (DB problematico)"
-        P(Parent):::black --> X(x - DB):::db;
-        P --> S(Fratello s):::black;
-        X --> XL((NIL)); X --> XR((NIL));
-        S --> SL(s.left):::black;
-        S --> SR(s.right):::red;
-        SL --> SL_L((NIL)); SL --> SL_R((NIL));
-        SR --> SR_L((NIL)); SR --> SR_R((NIL));
-    end
-    
-    subgraph "Dopo: Left-Rotate(P) + Ricolora"
-        S_new(s):::black --> P_new(Parent):::black;
-        S_new --> SR_new(s.right):::black;
-        P_new --> X_new(x - BLACK):::black;
-        P_new --> SL_new(s.left):::black;
-        X_new --> X_newL((NIL)); X_new --> X_newR((NIL));
-        SL_new --> SL_newL((NIL)); SL_new --> SL_newR((NIL));
-        SR_new --> SR_newL((NIL)); SR_new --> SR_newR((NIL));
-    end
-    style X stroke-dasharray: 5 5;
-    style X_new stroke-dasharray: 0;
-                     </pre>
-                </div>
-                <p>Dopo questa operazione, il nodo `x` non è più double black, e tutte le proprietà sono ripristinate. La procedura termina.</p>
-            </div>
-        </article>
-
-        <article id="cancellazione-caso2" class="content-section">
-            <h3 class="subsubsection-title">2.1.2. Caso 2: Quasi Fortunato (Nipote Rosso Stesso Lato)</h3>
-            <div class="section-content">
-                <p><strong>Condizione:</strong> Il fratello di `x` (`s`) è `BLACK`, il figlio destro di `s` (`s.right`) è `BLACK`, ma il figlio sinistro di `s` (`s.left`, nipote di `x`) è `RED` (e `x` è un figlio sinistro).</p>
-                <p><strong>Soluzione:</strong> Questo caso non risolve direttamente il problema, ma lo trasforma nel Caso 1. Si esegue una rotazione sul fratello `s` per riposizionare il nipote rosso.</p>
-                <div class="mermaid-container tree-diagram">
-                     <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
-    classDef db fill:#111827,stroke:#ef4444,color:#e5e7eb,stroke-width:2px;
-
-    subgraph "Prima (Configurazione a Triangolo)"
-        P(Parent):::black --> X(x - DB):::db;
-        P --> S(Fratello s):::black;
-        X --> XL((NIL)); X --> XR((NIL));
-        S --> SL(s.left):::red;
-        S --> SR(s.right):::black;
-        SL --> SL_L((NIL)); SL --> SL_R((NIL));
-        SR --> SR_L((NIL)); SR --> SR_R((NIL));
-    end
-    
-    subgraph "Dopo: Right-Rotate(S) + Ricolora"
-        P_after(Parent):::black --> X_after(x - DB):::db;
-        P_after --> SL_after(s.left):::black;
-        X_after --> XL_after((NIL)); X_after --> XR_after((NIL));
-        SL_after --> SL_L_after((NIL)); SL_after --> SL_R_after((NIL));
-        SL_after --> S_after(s):::red;
-        S_after --> SR_after(s.right):::black;
-        SR_after --> SR_L_after((NIL)); SR_after --> SR_R_after((NIL));
-    end
-    style X stroke-dasharray: 5 5;
-    style X_after stroke-dasharray: 5 5;
-                     </pre>
-                </div>
-                <p>Dopo questa rotazione, la situazione è ora quella del <strong>Caso 1</strong>, con il nipote rosso correttamente posizionato. Si procede quindi con l'applicazione della logica del Caso 1 per risolvere definitivamente il problema e terminare la procedura.</p>
-            </div>
-        </article>
-
-        <article id="cancellazione-caso3" class="content-section">
-            <h3 class="subsubsection-title">2.1.3. Caso 3: Sfortunato (Nipoti Neri, Fratello Nero)</h3>
-            <div class="section-content">
-                <p><strong>Condizione:</strong> Il fratello di `x` (`s`) è `BLACK`, e entrambi i suoi figli (`s.left` e `s.right`, i nipoti di `x`) sono `BLACK`.</p>
-                <p><strong>Soluzione:</strong> Non è possibile eseguire rotazioni che risolvano direttamente il problema, perché non c'è un nodo rosso da "spostare" senza creare nuove violazioni. La soluzione è spostare il problema verso l'alto.</p>
-                <div class="mermaid-container tree-diagram">
-                    <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
-    classDef db fill:#111827,stroke:#ef4444,color:#e5e7eb,stroke-width:2px;
-    classDef parent_col_unknown fill:#aaa,stroke:#ccc; /* Parent could be red or black */
-
-    subgraph "Prima (Spostare problema verso l'alto)"
-        P(Parent):::parent_col_unknown --> X(x - DB):::db;
-        P --> S(Fratello s):::black;
-        X --> XL((NIL)); X --> XR((NIL));
-        S --> SL(s.left):::black;
-        S --> SR(s.right):::black;
-        SL --> SL_L((NIL)); SL --> SL_R((NIL));
-        SR --> SR_L((NIL)); SR --> SR_R((NIL));
-    end
-    
-    subgraph "Dopo: Ricolora e sposta il problema"
-        P_new(Parent):::black --> X_new(x - BLACK):::black; /* x becomes black, problem moves to P */
-        P_new --> S_new(s):::red; /* S becomes red */
-        X_new --> XL_new((NIL)); X_new --> XR_new((NIL));
-        S_new --> SL_new(s.left):::black;
-        S_new --> SR_new(s.right):::black;
-        SL_new --> SL_newL((NIL)); SL_new --> SL_newR((NIL));
-        SR_new --> SR_newL((NIL)); SR_new --> SR_newR((NIL));
-    end
-    style X stroke-dasharray: 5 5; /* x is DB */
-    style P_new stroke-dasharray: 5 5; /* P could become DB */
-</pre>
-                </div>
-                <ul>
-                    <li>Si ricolora il fratello `s` di `RED`.</li>
-                    <li>Il nodo `x` (double black) diventa semplicemente `BLACK`.</li>
-                    <li>Il problema si sposta sul genitore `P`. Se `P` era rosso, diventa nero e il problema è risolto. Se `P` era nero, diventa `double black`, e la procedura ricomincia dal genitore `P`.</li>
-                </ul>
-                <p>La procedura `Fixup` viene richiamata ricorsivamente (o iterativamente) su `P`. Se `P` è la radice, la si lascia nera e si termina.</p>
-            </div>
-        </article>
-
-        <article id="cancellazione-caso4" class="content-section">
-            <h3 class="subsubsection-title">2.1.4. Caso 4: Antipatico (Fratello Rosso)</h3>
-            <div class="section-content">
-                <p><strong>Condizione:</strong> Il fratello di `x` (`s`) è `RED`.</p>
-                <p><strong>Soluzione:</strong> Un fratello rosso implica che il genitore `P` (che deve essere nero) e i figli di `s` (i nipoti di `x`) sono neri. Si esegue una rotazione per trasformare questo caso in uno dei casi precedenti (Caso 1, 2 o 3).</p>
-                <div class="mermaid-container tree-diagram">
-                     <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
-    classDef db fill:#111827,stroke:#ef4444,color:#e5e7eb,stroke-width:2px;
-
-    subgraph "Prima (Fratello Rosso)"
-        P(Parent):::black --> X(x - DB):::db;
-        P --> S(Fratello s):::red;
-        X --> XL((NIL)); X --> XR((NIL));
-        S --> SL(s.left):::black;
-        S --> SR(s.right):::black;
-        SL --> SL_L((NIL)); SL --> SL_R((NIL));
-        SR --> SR_L((NIL)); SR --> SR_R((NIL));
-    end
-    
-    subgraph "Dopo: Left-Rotate(P) + Ricolora"
-        S_new(s):::black --> P_new(Parent):::red;
-        S_new --> SR_new(s.right):::black;
-        P_new --> X_new(x - DB):::db;
-        P_new --> SL_new(s.left):::black;
-        X_new --> XL_new((NIL)); X_new --> XR_new((NIL));
-        SL_new --> SL_newL((NIL)); SL_new --> SL_newR((NIL));
-        SR_new --> SR_newL((NIL)); SR_new --> SR_newR((NIL));
-    end
-    style X stroke-dasharray: 5 5;
-    style X_new stroke-dasharray: 5 5;
-                     </pre>
-                </div>
-                <ul>
-                    <li>Si ricolora il fratello `s` di `BLACK`.</li>
-                    <li>Si ricolora il genitore `P` di `RED`.</li>
-                    <li>Si esegue una rotazione (es. `Left-Rotate(P)`). Il fratello `s` sale, `P` scende e diventa figlio di `s`.</li>
-                </ul>
-                <p>Dopo questa rotazione, la situazione è ora trasformata e ricade in uno dei Casi 1, 2 o 3, che vengono poi applicati per risolvere il problema.</p>
-            </div>
-        </article>
-        
-        <article id="cancellazione-esempio" class="content-section">
-            <h3 class="subsection-title">2.2. Esempio Completo di Cancellazione</h3>
-            <div class="section-content">
-                <p>La professoressa mostra un esempio di cancellazione della chiave 3 da un RBT specifico.</p>
+                <p>La professoressa mostra alcuni esempi per illustrare i casi in cui la cancellazione non richiede un fixup complesso.</p>
                 
-                <p><strong>Albero Iniziale:</strong></p>
-                <div class="mermaid-container tree-diagram">
-                    <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+                <h3 class="subsection-title">Esempio 1: Cancellare un Nodo Rosso</h3>
+                <p>Se si cancella un nodo rosso che è una foglia, lo si sostituisce semplicemente con una foglia NIL (nera). Nessuna proprietà viene violata, l'altezza nera di tutti i cammini rimane invariata. La procedura termina.</p>
 
-    R(20):::black --> L(10):::red;
-    R --> R_sib(30):::black;
-    L --> LL(3):::black;
-    L --> LR(15):::black;
-    R_sib --> R_sibL(25):::red;
-    R_sib --> R_sibR(40):::black;
-    LL --> LL_L((NIL)); LL --> LL_R((NIL));
-    LR --> LR_L(12):::red; LR --> LR_R(18):::red;
-    LR_L --> LR_L_L((NIL)); LR_L --> LR_L_R((NIL));
-    LR_R --> LR_R_L((NIL)); LR_R --> LR_R_R((NIL));
-    R_sibL --> R_sibL_L((NIL)); R_sibL --> R_sibL_R((NIL));
-    R_sibR --> R_sibR_L((NIL)); R_sibR --> R_sibR_R((NIL));
-</pre>
-                </div>
-                
-                <p><strong>Cancellare la chiave 3:</strong></p>
+                <h3 class="subsection-title">Esempio 2: Sostituzione con un Nodo Rosso</h3>
+                <p>Si vuole cancellare un nodo nero che ha un solo figlio, e questo figlio è rosso.
                 <ol>
-                    <li>Il nodo con chiave 3 è una foglia nera. Viene rimosso e sostituito da una foglia `NIL`. Questa foglia `NIL` diventa il nodo problematico, contrassegnato come `double black`.</li>
-                    <div class="mermaid-container tree-diagram">
-                        <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
-    classDef db fill:#111827,stroke:#ef4444,color:#e5e7eb,stroke-width:2px;
-
-    R(20):::black --> L(10):::red;
-    R --> R_sib(30):::black;
-    L --> DB((DB)):-db;
-    L --> LR(15):::black;
-    R_sib --> R_sibL(25):::red;
-    R_sib --> R_sibR(40):::black;
-    DB --> DB_L((NIL)); DB --> DB_R((NIL));
-    LR --> LR_L(12):::red; LR --> LR_R(18):::red;
-    LR_L --> LR_L_L((NIL)); LR_L --> LR_L_R((NIL));
-    LR_R --> LR_R_L((NIL)); LR_R --> LR_R_R((NIL));
-    R_sibL --> R_sibL_L((NIL)); R_sibL --> R_sibL_R((NIL));
-    R_sibR --> R_sibR_L((NIL)); R_sibR --> R_sibR_R((NIL));
-</pre>
-                    </div>
-
-                    <li><u>Fixup:</u>
-                        <ul>
-                            <li>Nodo problematico `x = DB` (figlio sinistro di 10).</li>
-                            <li>Genitore `P = 10` (rosso).</li>
-                            <li>Fratello `s = 15` (nero).</li>
-                            <li>Nipoti di `x`: `s.left = 12` (rosso), `s.right = 18` (rosso).</li>
-                        </ul>
-                        Siamo nel <strong>Caso 4</strong>: il fratello (`s=15`) è rosso.
-                        Si esegue `Left-Rotate(10)` e si ricolorano: 15 diventa nero, 10 diventa rosso.</li>
-                    <div class="mermaid-container tree-diagram">
-                        <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
-    classDef db fill:#111827,stroke:#ef4444,color:#e5e7eb,stroke-width:2px;
-
-    R(20):::black --> NEW_L(15):::black;
-    R --> R_sib(30):::black;
-    NEW_L --> OLD_L(10):::red;
-    NEW_L --> LR_R(18):::red;
-    OLD_L --> DB((DB)):-db;
-    OLD_L --> LR_L(12):::red;
-    DB --> DB_L((NIL)); DB --> DB_R((NIL));
-    LR_L --> LR_L_L((NIL)); LR_L --> LR_L_R((NIL));
-    LR_R --> LR_R_L((NIL)); LR_R --> LR_R_R((NIL));
-    R_sib --> R_sibL(25):::red;
-    R_sib --> R_sibR(40):::black;
-    R_sibL --> R_sibL_L((NIL)); R_sibL --> R_sibL_R((NIL));
-    R_sibR --> R_sibR_L((NIL)); R_sibR --> R_sibR_R((NIL));
-</pre>
-                    </div>
-
-                    <li><u>Fixup (continuo):</u> Ora il nodo problematico (`x=DB`) è figlio sinistro di 10 (rosso).
-                        <ul>
-                            <li>Nodo problematico `x = DB`.</li>
-                            <li>Genitore `P = 10` (rosso).</li>
-                            <li>Fratello `s = 12` (rosso).</li>
-                            <li>Nipoti di `x`: `s.left = NIL` (nero), `s.right = NIL` (nero).</li>
-                        </ul>
-                        Siamo nel <strong>Caso 3</strong>: il fratello (`s=12`) è nero, e i nipoti sono neri.
-                        Si ricolora il fratello (`s=12`) di rosso. Il nodo `x=DB` diventa nero. Il problema si sposta sul genitore `P=10`.
-                        `P=10` era rosso, quindi ora diventa nero e il problema è risolto.</li>
-                    <div class="mermaid-container tree-diagram">
-                        <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
-    
-    R(20):::black --> L(15):::black;
-    R --> R_sib(30):::black;
-    L --> LL(10):::black;
-    L --> LR(18):::red;
-    LL --> LL_L_new((NIL));
-    LL --> LL_R_new(12):::red;
-    LL_L_new --> LL_L_new_L((NIL)); LL_L_new --> LL_L_new_R((NIL));
-    LL_R_new --> LL_R_new_L((NIL)); LL_R_new --> LL_R_new_R((NIL));
-    LR --> LR_L_new((NIL)); LR --> LR_R_new((NIL));
-    R_sib --> R_sibL(25):::red;
-    R_sib --> R_sibR(40):::black;
-    R_sibL --> R_sibL_L((NIL)); R_sibL --> R_sibL_R((NIL));
-    R_sibR --> R_sibR_L((NIL)); R_sibR --> R_sibR_R((NIL));
-</pre>
-                    </div>
-                </ol>
-                <p>L'albero finale è un RBT valido e bilanciato.</p>
-            </div>
-        </article>
-
-        <article id="complessita-cancellazione" class="content-section">
-            <h2 class="section-title">3. Complessità della Cancellazione</h2>
-            <div class="section-content">
-                <p>La complessità della cancellazione in un RBT è simile a quella dell'inserimento.</p>
-                <ul>
-                    <li><strong>Cancellazione BST iniziale:</strong> Questa parte ha un costo \(O(h)\) per trovare il nodo da eliminare o il suo sostituto.</li>
-                    <li><strong>Fixup:</strong> La procedura di `Fixup` per la cancellazione può comportare una risalita lungo il cammino dalla posizione della cancellazione fino alla radice. Ad ogni passo, si esegue un numero costante di operazioni (rotazioni e ricolorazioni, \(\Theta(1)\)).</li>
-                </ul>
-                <p>Dato che l'altezza dell'albero `h` è \(O(\log N)\), la complessità totale della cancellazione è:</p>
-                <div class="math-block">
-                Costo Cancellazione = \(O(h) = O(\log N)\)
-                </div>
-            </div>
-        </article>
-
-        <article id="operazione-join" class="content-section">
-            <h2 class="section-title">4. Operazione di Fusione (RBT-Join)</h2>
-            <div class="section-content">
-                <p>L'operazione di `RBT-Join` (o `Union`) mira a unire due Alberi Rosso-Neri `T1` e `T2` e una nuova chiave `k` in un unico RBT `T`. Si assume che tutte le chiavi in `T1` siano minori di `k`, e tutte le chiavi in `T2` siano maggiori di `k`.</p>
-                <div class="mermaid-container tree-diagram">
-                    <pre class="mermaid">
-graph TD
-    T1(T1) --> T1_children;
-    T2(T2) --> T2_children;
-    K(k);
-    style T1,T2 fill:#1f2937,stroke:#9ca3af,stroke-width:2px;
-    style K fill:#60a5fa,stroke:#e5e7eb,color:#111827;
-</pre>
-                </div>
-            </div>
-        </article>
-
-        <article id="join-caso1" class="content-section">
-            <h3 class="subsection-title">4.1. Caso 1: Altezze Nere Uguali (bh(T1) = bh(T2))</h3>
-            <div class="section-content">
-                <p>Questo è il caso più semplice. Si può creare una nuova radice con la chiave `k`, farne il figlio sinistro la radice di `T1` e il figlio destro la radice di `T2`. La nuova radice `k` viene colorata di nero.</p>
-                <div class="mermaid-container tree-diagram">
-                    <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    
-    K(k):::black --> T1(T1):::black;
-    K --> T2(T2):::black;
-</pre>
-                </div>
-            </div>
-        </article>
-
-        <article id="join-caso2" class="content-section">
-            <h3 class="subsection-title">4.2. Caso 2: Altezze Nere Diverse (es. bh(T1) > bh(T2))</h3>
-            <div class="section-content">
-                <p>Se le altezze nere sono diverse, non possiamo semplicemente collegare `T1`, `k` e `T2` come nel Caso 1, perché violeremmo la proprietà dei cammini neri.</p>
-                <p><strong>Logica:</strong>
-                <ol>
-                    <li>Si cerca in `T1` il nodo nero più profondo sul cammino più a destra la cui altezza nera sia uguale a `bh(T2)`. Questo nodo può essere una radice di un sottoalbero `T1_prime`.</li>
-                    <li>Si scende sempre a destra in `T1` finché non si trova un nodo `X` che soddisfa la condizione `bh(X) == bh(T2)`.</li>
-                    <li>Si "sfila" il sottoalbero destro di `X`, si crea un nuovo nodo `K` (rosso) con figlio sinistro `X` e figlio destro `T2`.</li>
-                    <li>Si aggancia questo nuovo nodo `K` al genitore di `X`.</li>
-                    <li>Si applica la procedura `RB-Insert-Fixup` (vista nella lezione precedente) sul nodo `K`. Questa procedura si occuperà di eventuali violazioni rosso-rosso, eseguendo rotazioni e ricolorazioni per mantenere le proprietà dell'RBT.</li>
+                    <li>Il nodo nero viene rimosso e sostituito dal suo figlio rosso.</li>
+                    <li>Il figlio rosso che sale diventa temporaneamente <strong>double-black</strong>.</li>
+                    <li>Poiché questo nodo era originariamente rosso, si applica il caso base: lo si ricolora di <strong>nero</strong> e si termina.</li>
                 </ol>
                 </p>
                 <div class="mermaid-container tree-diagram">
                     <pre class="mermaid">
-graph TD
-    classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
-    classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
-
-    subgraph "Prima"
-        Root1(T1 Root):::black --> L1(Left of T1):::black;
-        Root1 --> R1(Rightmost path in T1):::black;
-        R1 --> ...;
-        R1 --> X(Node X):::black; /* bh(X) == bh(T2) */
-        X --> XL(Left of X):::black;
-        X --> XR(Right of X):::black;
-    end
-
-    subgraph "Dopo: RBT-Join"
-        Root1_j(T1 Root):::black --> L1_j(Left of T1):::black;
-        Root1_j --> R1_j(Rightmost path in T1):::black;
-        R1_j --> ...;
-        R1_j --> X_j(Node X):::black;
-        X_j --> XL_j(Left of X):::black;
-        X_j --> K(k):::red; /* New node k */
-        K --> X_j_R(Right of X):::black; /* Old XR becomes X_j_R */
-        K --> T2_j(T2 Root):::black;
-    end
-</pre>
+                    graph TD
+                        classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+                        classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+                        classDef db fill:#581c87,stroke:#a855f7,color:#fff,stroke-width:2px;
+                        subgraph "Prima"
+                            P(P):::black --> Z(K):::black
+                            Z --> C(A):::red
+                            C --> N1((NIL)); C --> N2((NIL));
+                        end
+                        subgraph "Durante (Logica)"
+                           P2(P):::black --> C2(A):::db
+                           C2 --> N3((NIL)); C2 --> N4((NIL));
+                        end
+                        subgraph "Dopo (Finale)"
+                           P3(P):::black --> C3(A):::black
+                           C3 --> N5((NIL)); C3 --> N6((NIL));
+                        end
+                    </pre>
                 </div>
-                <p>Il caso simmetrico (bh(T1) < bh(T2)) viene gestito in modo analogo, cercando il nodo appropriato nel sottoalbero sinistro di `T2`.</p>
+
+                <div class="clarification-box">
+                    <strong>Domanda Studente: È necessario passare per lo stato double-black?</strong>
+                    <p>Uno studente chiede se, a livello di algoritmo, sia necessario assegnare esplicitamente il colore double-black. La professoressa chiarisce:</p>
+                    <ul>
+                        <li>Il "double-black" non è un vero colore da assegnare, ma un <strong>puntatore al nodo problematico</strong> (chiamiamolo `x`).</li>
+                        <li>Il primo controllo della procedura di fixup sarà: "se il nodo puntato da `x` è rosso, ricoloralo di nero e termina".</li>
+                        <li>Quindi, nel codice, non si assegna un nuovo valore al campo colore, ma si gestisce il caso tramite un puntatore e una condizione iniziale.</li>
+                    </ul>
+                </div>
+                
+                <h3 class="subsection-title">Esempio 3: Il Predecessore è Rosso</h3>
+                <p>Si vuole cancellare un nodo nero con due figli, usando il suo predecessore. Se il nodo predecessore è <strong>rosso</strong>, la sua rimozione fisica (essendo una foglia o avendo al più un figlio nero) è banale e non altera le altezze nere dei cammini. La chiave del predecessore viene copiata sul nodo da cancellare logicamente, e l'operazione termina senza creare un double-black.</p>
             </div>
         </article>
 
-        <article id="complessita-join" class="content-section">
-            <h3 class="subsection-title">4.3. Complessità dell'Operazione Join</h3>
+        <article id="fixup-logica" class="content-section">
+            <h2 class="section-title">4. Logica del Fixup: Un'Analogia con l'Inserimento</h2>
             <div class="section-content">
-                <p>La complessità dell'operazione `RBT-Join` è determinata da:</p>
-                <ul>
-                    <li><strong>Ricerca del nodo appropriato:</strong> Si scende in un solo ramo di `T1` o `T2` fino alla profondità desiderata. Questo costa \(O(\max(\text{bh}(T1), \text{bh}(T2)))\).</li>
-                    <li><strong>Applicazione del `RB-Insert-Fixup`:</strong> Una volta agganciato il nuovo nodo `k` e `T2`, la procedura `Fixup` risale verso l'alto, con un costo massimo di \(O(\log N)\).</li>
-                </ul>
-                <p>Poiché l'altezza nera è proporzionale al logaritmo del numero di nodi, la complessità totale dell'operazione `RBT-Join` è:</p>
-                <div class="math-block">
-                Costo Join = \(O(\log N)\)
+                <p>La professoressa introduce un'intuizione fondamentale per comprendere i casi del fixup della cancellazione, presentandoli come l'<strong>inverso logico</strong> del fixup dell'inserimento.</p>
+                <div class="note-box">
+                    <strong>Analogia del "Peso" (Altezza Nera)</strong>
+                    <ul>
+                        <li><strong>Inserimento:</strong> Si crea una violazione "rosso-rosso". Questo significa che sul lato dell'inserimento c'è "troppo peso" (troppi pochi nodi neri rispetto agli altri cammini, o troppi nodi in generale). L'obiettivo è <strong>spostare peso</strong> verso il lato dello <strong>zio</strong>.</li>
+                        <li><strong>Cancellazione:</strong> Si crea un nodo "double-black". Questo significa che su quel lato c'è "troppo poco peso" (manca un nodo nero). L'obiettivo è <strong>prendere peso</strong> dal lato opposto, cioè dal lato del <strong>fratello</strong> del double-black e dei suoi figli (i <strong>nipoti</strong> del double-black).</li>
+                    </ul>
                 </div>
-                <p>Questo è significativamente più efficiente rispetto all'inserimento iterativo di tutte le chiavi di un albero nell'altro, che avrebbe un costo complessivo di \(O(N \log N)\) nel caso peggiore.</p>
+                <p>Mentre nell'inserimento si analizzava il colore dello <strong>zio</strong>, nella cancellazione si analizzano i colori del <strong>fratello</strong> del double-black e dei suoi figli (i <strong>nipoti</strong>).</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+                        classDef db fill:#581c87,stroke:#a855f7,color:#fff,stroke-width:2px;
+                        W(Nonno w) --> DB(DB):::db;
+                        W --> S(Fratello s);
+                        S --> N1(Nipote Lontano);
+                        S --> N2(Nipote Vicino);
+                    </pre>
+                </div>
+                <p>Il caso più fortunato, che permette di risolvere il problema, è quando si può "prendere" un nodo rosso dal lato del fratello (cioè, quando uno dei nipoti è rosso) e spostarlo per bilanciare il "peso" senza creare un nuovo problema.</p>
+                 <div class="clarification-box">
+                    <strong>Domanda Studente: La scelta tra predecessore e successore è fissa?</strong>
+                    <p>Uno studente chiede se la scelta di usare il predecessore (o il successore) sia arbitraria. La professoressa chiarisce:</p>
+                    <ul>
+                        <li>In un'implementazione standard di un BST, la scelta è solitamente fissata nel codice (o si usa sempre il predecessore, o sempre il successore).</li>
+                        <li>Negli esercizi, si segue la convenzione data (es. "usare sempre il predecessore").</li>
+                        <li>Un'implementazione più avanzata per RBT potrebbe controllare i colori di entrambi e scegliere quello più conveniente (es. quello rosso, se esiste) per evitare un fixup complesso.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="fixup-casi" class="content-section">
+            <h2 class="section-title">5. I Quattro Casi del Fixup della Cancellazione</h2>
+            <div class="section-content">
+                <p>La procedura di fixup si articola in quattro casi, basati sui colori del fratello del double-black e dei suoi figli (i nipoti).</p>
+            </div>
+        </article>
+
+        <article id="fixup-caso1" class="content-section">
+            <h3 class="subsection-title">5.1. Caso 1: Fortunato (Nipote Rosso Opposto)</h3>
+            <div class="section-content">
+                <p><strong>Condizione:</strong> Il fratello del double-black (`s`) è nero e il suo figlio "lontano" (opposto al double-black) è <strong>rosso</strong>.</p>
+                <p>Questo è il caso terminale, che risolve il problema con una singola rotazione e una ricolorazione.</p>
+                <p><strong>Azione:</strong></p>
+                <ol>
+                    <li>Si esegue una rotazione sul genitore (`w`) del double-black, "tirando su" il fratello `s`.</li>
+                    <li>Si ricolorano i nodi coinvolti per ripristinare le proprietà. Il nuovo nodo radice del sottoalbero (`s`) prende il colore originale del genitore `w`. Il vecchio genitore `w` e il nipote rosso `x` diventano neri. Il nodo double-black diventa semplicemente nero.</li>
+                </ol>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+                        classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+                        classDef db fill:#581c87,stroke:#a855f7,color:#fff,stroke-width:2px;
+                        classDef any fill:#9ca3af,stroke:#e5e7eb,color:#111827,stroke-dasharray: 2 2;
+                        
+                        subgraph "Prima (DB con nipote opposto rosso)"
+                            W(w):::any --> Z(DB):::db;
+                            W --> S(s):::black;
+                            S --> beta(β):::black;
+                            S --> X(x):::red;
+                        end
+
+                        subgraph "Dopo (Rotazione e Ricolorazione)"
+                            S2(s):::any --> W2(w):::black;
+                            S2 --> X2(x):::black;
+                            W2 --> Z2(z):::black;
+                            W2 --> beta2(β):::black;
+                        end
+                    </pre>
+                </div>
+                <p>La procedura termina. L'altezza nera del sottoalbero problematico è stata aumentata di uno, e le altezze nere altrove sono state preservate.</p>
+            </div>
+        </article>
+
+        <article id="fixup-caso2" class="content-section">
+            <h3 class="subsection-title">5.2. Caso 2: Quasi Fortunato (Nipote Rosso dallo Stesso Lato)</h3>
+            <div class="section-content">
+                <p><strong>Condizione:</strong> Il fratello (`s`) è nero, il nipote lontano è nero, ma il nipote "vicino" (dallo stesso lato del double-black) è <strong>rosso</strong>.</p>
+                <p><strong>Azione:</strong> Questo caso non risolve il problema, ma lo <strong>trasforma nel Caso 1</strong>.</p>
+                <ol>
+                    <li>Si esegue una rotazione sul fratello `s` per portare il nipote rosso in posizione "lontana".</li>
+                    <li>Si ricolorano i nodi coinvolti nella rotazione.</li>
+                    <li>A questo punto, la situazione è diventata quella del Caso 1, e si procede di conseguenza.</li>
+                </ol>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+                        classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+                        classDef db fill:#581c87,stroke:#a855f7,color:#fff,stroke-width:2px;
+                        classDef any fill:#9ca3af,stroke:#e5e7eb,color:#111827,stroke-dasharray: 2 2;
+                        
+                        subgraph "Prima (Nipote vicino rosso)"
+                            W(w):::any --> Z(DB):::db;
+                            W --> S(s):::black;
+                            S --> X(x):::red;
+                            S --> beta(β):::black;
+                        end
+
+                        subgraph "Dopo (Trasformato in Caso 1)"
+                            W2(w):::any --> Z2(DB):::db;
+                            W2 --> X2(x):::black;
+                            X2 --> S2(s):::red;
+                        end
+                    </pre>
+                </div>
+                <p>Dopo questa trasformazione, si applica la procedura del Caso 1 per risolvere definitivamente il problema.</p>
+            </div>
+        </article>
+
+        <article id="fixup-caso3" class="content-section">
+            <h3 class="subsection-title">5.3. Caso 3: Sfortunato (Fratello e Nipoti Neri)</h3>
+            <div class="section-content">
+                <p><strong>Condizione:</strong> Il fratello (`s`) del double-black e entrambi i suoi figli (i nipoti) sono <strong>neri</strong>.</p>
+                <p><strong>Azione:</strong> In questo caso non è possibile "prendere" un nodo rosso per bilanciare. L'unica opzione è <strong>spostare il problema verso l'alto</strong>.</p>
+                <ol>
+                    <li>Si ricolora il fratello `s` di <strong>rosso</strong>. Questo "restituisce" un'unità di altezza nera al sottoalbero del fratello.</li>
+                    <li>Ora entrambi i sottoalberi (quello del double-black e quello del fratello) hanno un'altezza nera ridotta di uno rispetto agli altri.</li>
+                    <li>Il problema della mancanza di un'altezza nera viene quindi passato al genitore `w`, che diventa il nuovo <strong>double-black</strong>.</li>
+                </ol>
+                <p>La procedura di fixup viene richiamata iterativamente sul nuovo double-black `w`. Se `w` era rosso, diventerà nero (caso base) e si termina. Altrimenti, si riapplicano i casi di fixup su `w`.</p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                    graph TD
+                        classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+                        classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+                        classDef db fill:#581c87,stroke:#a855f7,color:#fff,stroke-width:2px;
+                        classDef any fill:#9ca3af,stroke:#e5e7eb,color:#111827,stroke-dasharray: 2 2;
+                        
+                        subgraph "Prima"
+                            W(w):::any --> Z(DB):::db;
+                            W --> S(s):::black;
+                            S --> N1(n1):::black;
+                            S --> N2(n2):::black;
+                        end
+
+                        subgraph "Dopo (Problema spostato in alto)"
+                            W2(w):::db --> Z2(z):::black;
+                            W2 --> S2(s):::red;
+                            S2 --> N1_2(n1):::black;
+                            S2 --> N2_2(n2):::black;
+                        end
+                    </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="fixup-caso4" class="content-section">
+            <h3 class="subsection-title">5.4. Caso 4: Antipatico (Fratello Rosso)</h3>
+            <div class="section-content">
+                <p><strong>Condizione:</strong> Il fratello (`s`) del double-black è <strong>rosso</strong>. (Questo implica che il genitore `w` e i nipoti devono essere neri).</p>
+                <p><strong>Azione:</strong> Questo caso trasforma la situazione in uno dei casi precedenti (1, 2 o 3).</p>
+                <ol>
+                    <li>Si esegue una rotazione sul genitore `w`.</li>
+                    <li>Si ricolorano `w` (che scende) e `s` (che sale).</li>
+                    <li>Dopo la rotazione, il nuovo fratello del double-black sarà uno dei nodi neri (un vecchio nipote).</li>
+                    <li>A questo punto si è ricaduti in uno dei casi 1, 2 o 3 e si può procedere da lì.</li>
+                </ol>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+                        classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+                        classDef db fill:#581c87,stroke:#a855f7,color:#fff,stroke-width:2px;
+                        
+                        subgraph "Prima (Fratello rosso)"
+                            W(w):::black --> Z(DB):::db;
+                            W --> S(s):::red;
+                            S --> N1(n1):::black;
+                            S --> N2(n2):::black;
+                        end
+
+                        subgraph "Dopo (Trasformato)"
+                            S2(s):::black --> W2(w):::red;
+                            S2 --> N2_2(n2):::black;
+                            W2 --> Z2(DB):::db;
+                            W2 --> N1_2(n1):::black;
+                        end
+                    </pre>
+                </div>
+            </div>
+        </article>
+        
+        <article id="cancellazione-esempio-complesso" class="content-section">
+            <h2 class="section-title">6. Esempio Completo di Cancellazione</h2>
+            <div class="section-content">
+                <p>La professoressa svolge un esempio complesso cancellando la chiave <strong>3</strong> da un RBT, mostrando l'applicazione di più casi di fixup in sequenza.</p>
+                <p><strong>1. Stato Iniziale e Cancellazione:</strong> Si cancella il nodo nero `3`. La foglia `NIL` che lo sostituisce diventa <strong>double-black (DB)</strong>.</p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                    graph TD
+                        classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+                        classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+                        classDef db fill:#581c87,stroke:#a855f7,color:#fff,stroke-width:2px;
+                        A(20):::b --> B(10):::r;
+                        A --> G(30):::b;
+                        B --> X(3):::b;
+                        B --> D(15):::b;
+                        D --> E(12):::b; D --> F(18):::b;
+                        G --> H(25):::b; G --> I(40):::b;
+                        
+                        subgraph "Cancellazione del 3"
+                            X(3):::b --> N1((NIL)); X --> N2((NIL));
+                        end
+                        subgraph "Dopo la cancellazione"
+                            B2(10):::r --> Y(DB):::db;
+                        end
+                     </pre>
+                </div>
+                <p><strong>2. Applicazione del Caso 4:</strong> Il DB ha un fratello rosso (15). Si applica una rotazione a sinistra sul genitore (10) e si ricolorano i nodi. Il problema persiste sul DB, ma ora ha un fratello nero.</p>
+                <p><strong>3. Applicazione del Caso 3:</strong> Ora il DB ha un fratello nero (12) e nipoti neri. Non ci sono nodi rossi da "prendere". Si applica il Caso 3: si ricolora il fratello (12) di rosso e si sposta il problema verso l'alto. Il genitore (10) diventa il nuovo DB.</p>
+                <p><strong>4. Risoluzione finale:</strong> Il nuovo DB è sul nodo 10, che è un nodo <strong>rosso</strong>. Si applica il caso base: il nodo rosso che è DB viene semplicemente ricolorato di <strong>nero</strong>. La procedura termina.</p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                     graph TD
+                        classDef b fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+                        classDef r fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+                        subgraph "Albero Finale"
+                            A(20):::b --> B(15):::b;
+                            A --> G(30):::b;
+                            B --> D(10):::b;
+                            B --> F(18):::b;
+                            D --> Y((NIL));
+                            D --> E(12):::r;
+                            G --> H(25):::b;
+                            G --> I(40):::b;
+                        end
+                    </pre>
+                </div>
+                <p>L'albero finale rispetta tutte le proprietà degli RBT.</p>
+            </div>
+        </article>
+
+        <article id="cancellazione-complessita" class="content-section">
+            <h2 class="section-title">7. Analisi della Complessità della Cancellazione</h2>
+            <div class="section-content">
+                <p>La procedura di cancellazione in un RBT ha un costo logaritmico.</p>
+                <ul>
+                    <li><strong>Cancellazione BST:</strong> La fase iniziale (trovare il nodo e il suo successore/predecessore, se necessario) costa \(O(h)\).</li>
+                    <li><strong>Fixup:</strong> La procedura di fixup (casi 1-4) esegue un numero costante di rotazioni e ricolorazioni a ogni passo. Nel caso peggiore (Caso 3), il problema risale l'albero. Il numero di iterazioni è quindi limitato dall'altezza dell'albero, per un costo totale di \(O(h)\).</li>
+                </ul>
+                <p>Poiché in un RBT l'altezza \(h \in \Theta(\log N)\), la complessità totale della cancellazione è:</p>
+                <div class="math-block">
+                Costo Cancellazione = \(O(h) + O(h) = O(h) = O(\log N)\)
+                </div>
+            </div>
+        </article>
+
+        <article id="rbt-join" class="content-section">
+            <h2 class="section-title">8. Operazione di Fusione (RBT-Join)</h2>
+            <div class="section-content">
+                <p>La professoressa introduce un'ultima operazione: la fusione (Join) di due Alberi Rosso-Neri.</p>
+                <p><strong>Problema:</strong> Dati due RBT, `T1` e `T2`, e una chiave `k` tale che tutte le chiavi in `T1` sono minori di `k` e tutte le chiavi in `T2` sono maggiori di `k`, si vuole costruire un unico RBT che contenga tutti gli elementi.</p>
+                <p>La soluzione ovvia di inserire tutti gli elementi di un albero nell'altro sarebbe costosa. Si cerca una soluzione più efficiente.</p>
+            </div>
+        </article>
+
+        <article id="rbt-join-casi" class="content-section">
+            <h3 class="subsection-title">8.1. Casi di Fusione in base all'Altezza Nera</h3>
+            <div class="section-content">
+                <p>La strategia dipende dalla relazione tra le altezze nere (`bh`) di `T1` e `T2`.</p>
+                <p><strong>Caso 1: `bh(T1) == bh(T2)`</strong></p>
+                <p>Questo è il caso più semplice. Si crea un nuovo nodo per la chiave `k`, lo si colora di <strong>nero</strong> e lo si imposta come nuova radice, con `T1` come figlio sinistro e `T2` come figlio destro. L'albero risultante è un RBT valido.</p>
+                
+                <p><strong>Caso 2: `bh(T1) > bh(T2)` (il caso `bh(T2) > bh(T1)` è simmetrico)</strong></p>
+                <ol>
+                    <li>Si scende lungo il <strong>cammino destro</strong> di `T1` (l'albero più alto) finché non si trova un nodo `x` la cui altezza nera è uguale a `bh(T2)`.</li>
+                    <li>Si crea un nuovo nodo per la chiave `k` e lo si colora di <strong>rosso</strong>.</li>
+                    <li>Questo nuovo nodo `k` diventa il genitore di `x` e della radice di `T2`.</li>
+                    <li>Il nuovo sottoalbero (radicato in `k`) viene agganciato al posto di `x` nel suo genitore originale in `T1`.</li>
+                    <li><strong>Possibile Problema:</strong> Se il genitore di `k` (il vecchio genitore di `x`) è anch'esso rosso, si crea una violazione <strong>rosso-rosso</strong>.</li>
+                    <li><strong>Soluzione:</strong> Si risolve questa violazione utilizzando la procedura standard <strong>`RBT-Insert-Fixup`</strong>.</li>
+                </ol>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        classDef black fill:#111827,stroke:#e5e7eb,color:#e5e7eb,stroke-width:2px;
+                        classDef red fill:#ef4444,stroke:#f87171,color:#111827,stroke-width:2px;
+                        subgraph "T1 (bh > bh(T2))"
+                            R1(...) --> ... --> P(p);
+                            P --> X(x):::black;
+                        end
+                        subgraph "T2"
+                            R2(...):::black
+                        end
+                        
+                        subgraph "Join"
+                            K(k):::red --> X2(x):::black;
+                            K --> R2_2(...):::black;
+                        end
+
+                        P -- "aggancia k" --> K
+                    </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="rbt-join-complessita" class="content-section">
+            <h3 class="subsection-title">8.2. Complessità della Fusione</h3>
+            <div class="section-content">
+                <p>Il costo dell'operazione di fusione è logaritmico.</p>
+                <ul>
+                    <li>La discesa nell'albero più alto per trovare il punto di aggancio costa \(O(h_{max})\), dove \(h_{max}\) è l'altezza dell'albero più alto.</li>
+                    <li>L'eventuale `RBT-Insert-Fixup` risale l'albero, costando anch'esso \(O(h_{max})\).</li>
+                </ul>
+                <p>Dato che le altezze sono logaritmiche, il costo totale è:</p>
+                <div class="math-block">
+                Costo Join = \(O(\log N_{max}) + O(\log N_{max}) = O(\log N)\)
+                </div>
+                <p>dove N è il numero totale di nodi.</p>
             </div>
         </article>
 
         <article id="conclusioni" class="content-section">
-            <h2 class="section-title">5. Conclusioni</h2>
+            <h2 class="section-title">9. Conclusioni ed Esercizi</h2>
             <div class="section-content">
-                <p>La lezione ha completato l'analisi delle operazioni fondamentali sugli Alberi Rosso-Neri, focalizzandosi in particolare sulla complessa procedura di **cancellazione** e introducendo l'operazione di **fusione (Join)**.</p>
+                <p>La lezione ha trattato in dettaglio la procedura di <strong>cancellazione</strong> e <strong>fusione</strong> in un Albero Rosso-Nero, completando l'analisi delle operazioni dinamiche su questa struttura dati.</p>
                 <p><strong>Punti Chiave:</strong></p>
                 <ul>
-                    <li>La <strong>cancellazione</strong> di un nodo nero problematico viene gestita tramite un concetto di "double black" e una procedura di `Fixup` che si articola in quattro casi, basati sul colore del fratello del nodo problematico e dei suoi figli.</li>
-                    <li>L'obiettivo del `Fixup` è ripristinare la proprietà dei cammini neri e i colori leciti attraverso rotazioni e ricolorazioni, risolvendo il problema localmente o spostandolo verso l'alto.</li>
-                    <li>Tutte le operazioni dinamiche (`Inserimento`, `Cancellazione`, `Join`) su un RBT hanno una complessità garantita di \(O(\log N)\).</li>
-                    <li>L'operazione `RBT-Join` permette di fondere due RBT e una chiave intermedia in tempo logaritmico.</li>
+                    <li>La cancellazione di un nodo nero introduce il concetto di <strong>double-black</strong> per mantenere temporaneamente le proprietà dell'albero.</li>
+                    <li>La procedura di fixup per la cancellazione si basa su <strong>4 casi</strong> che, tramite rotazioni e ricolorazioni, risolvono il problema o lo spostano verso l'alto.</li>
+                    <li>L'intuizione chiave è che la cancellazione è l'<strong>inverso dell'inserimento</strong>: si cerca di "prendere peso" (nodi rossi) dal lato del fratello/nipoti, invece di "spostare peso" verso lo zio.</li>
+                    <li>Tutte le operazioni (inserimento, cancellazione, fusione) hanno una complessità garantita di \(O(\log N)\).</li>
                 </ul>
-                <p>Queste operazioni garantiscono che gli Alberi Rosso-Neri siano una struttura dati efficiente e robusta per la gestione di collezioni dinamiche di dati, mantenendo sempre un bilanciamento logaritmico.</p>
+                <div class="exercise-box">
+                    <strong>Esercizio per Casa (dalla Professoressa)</strong>
+                    <p>La professoressa consiglia di esercitarsi con le operazioni di inserimento e cancellazione. Suggerisce di utilizzare i <strong>simulatori online</strong> linkati nella pagina e-learning del corso. Questo permette di eseguire le operazioni "sulla carta" e poi verificare la correttezza del risultato osservando la simulazione passo-passo, che mostra anche le rotazioni e ricolorazioni applicate.</p>
+                </div>
             </div>
         </article>
         
