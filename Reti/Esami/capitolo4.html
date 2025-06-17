@@ -650,67 +650,64 @@
                 </ul>
 
                 <div class="exercise-box">
-                    <strong>Esercizio d'Esame Esempio (adattato dal 02-02-2023, Domanda 9):</strong>
-                    <p>I router della rete a lato utilizzano un algoritmo basato sul vettore delle distanza. (a) Si dia la tabella di instradamento di B (b) È possibile che si crei una instabilità per B, a causa di una interruzione di un collegamento (e se sì, quale)?</p>
-                    <p><strong>Scenario (Diagramma con costi in ms):</strong></p>
+                    <strong>Esercizio d'Esame Esempio (adattato dal 17-02-2023, Domanda 9):</strong>
+                    <p>I router della rete a lato utilizzano un algoritmo basato sul vettore delle distanze. (a) Si dia la tabella di instradamento di B. (b) È possibile che si crei una instabilità per B, a causa di una interruzione di un collegamento (e se sì, quale)?</p>
+                    <p><strong>Scenario (Diagramma):</strong></p>
                     <div class="mermaid-container">
                         <pre class="mermaid">
-                        graph LR
-                            A --- 1 --- B;
-                            A --- 4 --- E;
-                            B --- 3 --- C;
-                            B --- 1 --- D;
-                            C --- 1 --- D;
-                            D --- 2 --- E;
+                        graph TD
+                            A ---|1| B;
+                            A ---|1| D;
+                            A ---|2| E;
+                            B ---|1| C;
+                            C ---|2| D;
+                            C ---|4| E;
                         </pre>
                     </div>
-                    <p><strong>Soluzione (a): Tabella di instradamento di B</strong></p>
-                    <p>Assumiamo costi uniformi per semplicità dell'esempio del professore, anche se il diagramma originale ha costi in ms. Se si assume che i costi sono 1 per ogni link per la distanza vettore (come spesso si fa con RIP), o si usano i costi ms per calcolare il percorso minimo. Usiamo i costi in ms dal diagramma e Bellman-Ford.</p>
-                    <p><strong>Tabella iniziale di B (solo vicini):</strong></p>
-                    <div class="array-representation">
-                        <table>
-                            <thead><tr><th>Dest</th><th>Dist</th><th>Next Hop</th></tr></thead>
-                            <tbody>
-                                <tr><td>A</td><td>1</td><td>A</td></tr>
-                                <tr><td>C</td><td>3</td><td>C</td></tr>
-                                <tr><td>D</td><td>1</td><td>D</td></tr>
-                                <tr><td>E</td><td>\(\infty\)</td><td>-</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p>Dopo gli aggiornamenti dai vicini (A, C, D) e l'applicazione di Bellman-Ford:</p>
-                    <ul>
-                        <li>**Verso A:** via A (costo 1).</li>
-                        <li>**Verso C:** via C (costo 3).</li>
-                        <li>**Verso D:** via D (costo 1).</li>
-                        <li>**Verso E:**
-                            *   Via A: Costo(A,E) = Costo(B,A) + Costo(A,E) = 1 + 4 = 5.
-                            *   Via C: Costo(C,E) = Costo(B,C) + Costo(C,D) + Costo(D,E) = 3 + 1 + 2 = 6. (C apprende E via D, D apprende E via D)
-                            *   Via D: Costo(D,E) = Costo(B,D) + Costo(D,E) = 1 + 2 = 3.
-                            Il percorso migliore per E è via D con costo 3.
+                    <p><strong>Soluzione:</strong></p>
+                    <p><strong>(a) Tabella di instradamento di B (finale, dopo la convergenza):</strong></p>
+                    <p>Il router B calcola i percorsi a costo minimo verso tutte le altre destinazioni basandosi sui vettori di distanza ricevuti dai suoi vicini diretti (A e C).</p>
+                    <ol>
+                        <li><strong>Verso A:</strong> Direttamente, costo 1, next hop A.</li>
+                        <li><strong>Verso C:</strong> Direttamente, costo 1, next hop C.</li>
+                        <li><strong>Verso D:</strong>
+                            <ul>
+                                <li>Via A: Costo(B,A) + Costo(A,D) = 1 + 1 = 2.</li>
+                                <li>Via C: Costo(B,C) + Costo(C,D) = 1 + 2 = 3.</li>
+                            </ul>
+                            Il percorso migliore è via A, con costo 2.
                         </li>
-                    </ul>
-                    <p><strong>Tabella finale di B:</strong></p>
-                    <div class="array-representation">
+                        <li><strong>Verso E:</strong>
+                            <ul>
+                                <li>Via A: Costo(B,A) + Costo(A,E) = 1 + 2 = 3.</li>
+                                <li>Via C: Costo(B,C) + Costo(C,E) = 1 + 4 = 5.</li>
+                            </ul>
+                             Il percorso migliore è via A, con costo 3.
+                        </li>
+                    </ol>
+                    <p>La tabella finale per B sarà:</p>
+                     <div class="array-representation">
                         <table>
-                            <thead><tr><th>Dest</th><th>Dist</th><th>Next Hop</th></tr></thead>
+                            <thead><tr><th>Destinazione</th><th>Distanza</th><th>Next Hop</th></tr></thead>
                             <tbody>
                                 <tr><td>A</td><td>1</td><td>A</td></tr>
-                                <tr><td>C</td><td>3</td><td>C</td></tr>
-                                <tr><td>D</td><td>1</td><td>D</td></tr>
-                                <tr><td>E</td><td>3</td><td>D</td></tr>
+                                <tr><td>C</td><td>1</td><td>C</td></tr>
+                                <tr><td>D</td><td>2</td><td>A</td></tr>
+                                <tr><td>E</td><td>3</td><td>A</td></tr>
                             </tbody>
                         </table>
                     </div>
-
-                    <p><strong>Soluzione (b): Instabilità per B</strong></p>
+                    
+                    <p><strong>(b) Possibile instabilità per B:</strong></p>
+                    <p><strong>Sì, è possibile.</strong> L'instabilità tipica del Distance Vector è il "counting to infinity". Questa si verifica quando la notifica di un guasto (bad news) si propaga lentamente.</p>
                     <ul>
-                        <li>**Sì, è possibile** che si crei un'instabilità a causa di un'interruzione.</li>
-                        <li>Se il collegamento **A-E si interrompe** (o A-D), e B si perde la notifica immediata da A (o da D).
-                            *   B potrebbe continuare a credere di raggiungere E via A (o D). A (o D) a sua volta potrebbe crederlo raggiungibile via B (se non usano Split Horizon con Poison Reverse).
-                            *   Questo può portare al problema del "Counting to Infinity", dove A e B (o D e B) si annunciano a vicenda un percorso verso E con un costo crescente, formando un loop finché la distanza non raggiunge il massimo (es. 16 per RIP).</li>
+                        <li>I percorsi di B verso D ed E dipendono dal router A.</li>
+                        <li>Se il collegamento <strong>A-D si interrompe</strong>, A non può più raggiungere D direttamente. Tuttavia, B potrebbe non ricevere subito questa "cattiva notizia".</li>
+                        <li>B continuerebbe ad annunciare ad A di poter raggiungere D con costo 2.</li>
+                        <li>A, vedendo il suo link verso D interrotto, potrebbe erroneamente aggiornare la sua tabella pensando di poter raggiungere D tramite B (con costo 1+2=3), creando un **loop di routing** (B punta ad A per raggiungere D, e A ora punta a B).</li>
+                        <li>Questo innesca il "counting to infinity", dove A e B si scambiano informazioni errate con costi crescenti, finché il costo non raggiunge il valore di "infinito" definito dal protocollo.</li>
                     </ul>
-                    <p><strong>Risposta:</strong> (a) Tabella di B come sopra. (b) Sì, se salta il collegamento A-E o A-D, e B non riceve la notifica, si può creare un counting to infinity.</p>
+                    
                 </div>
 
                 <h3 class="subsection-title" id="link-state-routing">6.2. Link State Routing (OSPF)</h3>
@@ -730,40 +727,42 @@
                 </ul>
 
                 <div class="exercise-box">
-                    <strong>Esercizio d'Esame Esempio (adattato dal 17-02-2023, Domanda 9):</strong>
+                    <strong>Esercizio d'Esame Esempio (adattato dal 02-02-2023, Domanda 9):</strong>
                     <p>I router della rete a lato utilizzano un algoritmo basato sullo stato dei collegamenti; i numeri rappresentano il ritardo in ms introdotto da ogni linea. (a) Quanti pacchetti LSP è necessario salvare in ogni router? (b) Se il router C genera un nuovo pacchetto LSP, quanto tempo è necessario affinché esso raggiunga tutti i router della rete (trascurando il tempo impiegato internamente da ogni router)?</p>
-                    <p><strong>Scenario (Diagramma con nodi A, B, C, D, E e collegamenti):</strong></p>
+                    <p><strong>Scenario (Diagramma):</strong></p>
                     <div class="mermaid-container">
                         <pre class="mermaid">
-                        graph LR
-                            A --- 1 --- B;
-                            A --- 4 --- E;
-                            B --- 3 --- C;
-                            B --- 1 --- D;
-                            C --- 1 --- D;
-                            D --- 2 --- E;
+                        graph TD
+                            A ---|1| E;
+                            A ---|1| D;
+                            A ---|1| B;
+                            A ---|3| C;
+                            E ---|1| C;
+                            D ---|2| C;
+                            B ---|4| C;
                         </pre>
                     </div>
                     <p><strong>Soluzione:</strong></p>
-                    <ol>
-                        <li>**(a) Quanti pacchetti LSP salvare in ogni router?**
-                            *   In Link State, ogni router genera un LSP. Ogni router nella rete deve memorizzare l'LSP generato da *ciascuno* degli altri router per costruire la mappa completa.
-                            *   Nel diagramma ci sono 5 router (A, B, C, D, E).
-                            *   Quindi, ogni router deve salvare 5 pacchetti LSP (il proprio più quello degli altri 4).
-                            **Risposta (a):** 5 pacchetti LSP.
-                        </li>
-                        <li>**(b) Tempo di propagazione LSP:**
-                            *   I pacchetti LSP vengono diffusi tramite "flooding affidabile".
-                            *   Il tempo necessario affinché un pacchetto raggiunga tutti i nodi dipende dal tempo massimo di propagazione attraverso i link della rete.
-                            *   Il percorso più lungo nel grafico è, ad esempio, A-E (costo 4ms) o C-A (costo 3ms via B). Il tempo massimo tra due nodi è circa 4ms.
-                            *   Il flooding garantisce che il pacchetto raggiunga tutti entro il tempo del percorso più lungo.
-                            *   Il problema menziona "trascurando il tempo impiegato internamente da ogni router", focalizzandosi sul tempo di propagazione sui link.
-                            **Risposta (b):** Il tempo necessario è il ritardo massimo di propagazione nel grafo, che è 4ms (es. A-E).
-                            <div class="correction-box">
-                                <strong>Correzione/Chiarezza:</strong> La risposta del prof nell'esame indica: "(a) Per poter applicare Dijkstra bisogna conoscere l'intero grafo, quindi bisogna conoscere lo stato di ogni collegamento. Quindi servono 7 entry. (b) Siccome va in flooding affidabile, bastano 3 ms per arrivare dappertutto." La mia interpretazione del numero di LSP (5) è più corretta basandomi sul concetto di "LSP per ogni router". La risposta del prof "7 entry" potrebbe riferirsi a un numero di link o nodi/link, o a una topologia leggermente diversa considerata. Per il tempo di flooding, la risposta "3 ms" implica che in quella configurazione specifica, il percorso più lungo dal mittente (C) a qualsiasi altro nodo era 3ms (es. C-B-A=4ms, C-D-E=3ms). Nel mio diagramma A-E è 4ms. Il concetto di base è che il tempo di flooding è dettato dalla massima distanza di propagazione.
-                            </div>
-                        </li>
-                    </ol>
+                    <p><strong>(a) Quanti pacchetti LSP è necessario salvare in ogni router?</strong></p>
+                    <p>In un algoritmo Link State, ogni router deve avere una mappa completa della topologia per eseguire Dijkstra. Ci sono due modi di interpretare la domanda:</p>
+                    <ul>
+                        <li><strong>LSP per router:</strong> Ogni router (A, B, C, D, E) genera il proprio LSP. Per avere la mappa completa, ogni router deve memorizzare <strong>5 LSP</strong>, uno per ogni router nella rete.</li>
+                        <li><strong>Entry per collegamento:</strong> La soluzione del professore ("servono 7 entry") si riferisce al numero di collegamenti nel grafo. Per conoscere l'intero grafo, bisogna conoscere lo stato di tutti i <strong>7 link</strong> (A-E, A-D, A-B, A-C, E-C, D-C, B-C).</li>
+                    </ul>
+                    <p><strong>Risposta (a):</strong> Seguendo l'interpretazione del professore, sono necessarie <strong>7 entry</strong>, una per ogni collegamento della rete.</p>
+
+                    <p><strong>(b) Tempo di propagazione dell'LSP da C:</strong></p>
+                    <p>L'LSP viene diffuso tramite **flooding affidabile**. Questo significa che quando un router riceve un LSP, lo inoltra immediatamente su tutte le altre sue interfacce. Il tempo totale affinché l'LSP raggiunga tutti i router è determinato dal percorso a costo (ritardo) massimo che l'informazione deve percorrere partendo da C.</p>
+                    <p>Analizziamo come l'LSP di C si propaga:</p>
+                    <ul>
+                        <li><strong>Tempo 1 ms:</strong> C invia l'LSP. Dopo 1 ms, il pacchetto raggiunge <strong>E</strong>.</li>
+                        <li><strong>Tempo 2 ms:</strong> C invia l'LSP. Dopo 2 ms, il pacchetto raggiunge <strong>D</strong>. Nello stesso istante, E (che lo ha ricevuto a t=1ms) lo propaga ad A. Quindi l'LSP raggiunge <strong>A</strong> (via E) con un ritardo totale di 1 ms (C-E) + 1 ms (E-A) = 2 ms.</li>
+                        <li><strong>Tempo 3 ms:</strong> C invia l'LSP. Dopo 3 ms, il pacchetto raggiunge <strong>A</strong> direttamente. Nello stesso istante, A (che lo ha ricevuto a t=2ms) lo propaga a B. Quindi, l'LSP raggiunge <strong>B</strong> (via A) con un ritardo totale di 2 ms (per arrivare ad A) + 1 ms (A-B) = **3 ms**.</li>
+                        <li><strong>Tempo 4 ms:</strong> Il link diretto C-B ha un ritardo di 4 ms. Tuttavia, grazie al flooding, B riceve l'informazione prima (a 3 ms) attraverso il percorso alternativo C → E → A → B.</li>
+                    </ul>
+                    <p>Di conseguenza, il tempo massimo necessario affinché tutti i router della rete ricevano l'LSP generato da C è di 3 ms.</p>
+                    
+                    <p><strong>Risposta (b):</strong> Bastano **3 ms** perché l'informazione, propagandosi tramite flooding su tutti i percorsi disponibili, raggiunga anche il nodo B attraverso il percorso più veloce (C-E-A-B), che impiega 3 ms, prima che arrivi tramite il link diretto più lento (C-B) da 4 ms.</p>
                 </div>
 
                 <h3 class="subsection-title" id="inter-domain-routing-bgp">6.3. Inter-Domain Routing (BGP)</h3>
