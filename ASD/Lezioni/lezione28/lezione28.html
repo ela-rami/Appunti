@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 28: Esercizi RBT e Introduzione ai B-Tree</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 17 mar 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 28: Esercizi RBT e Introduzione ai B-Tree</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#recap-rbt-join" class="sidebar-link">1. Recap: Fusione di RBT</a></li>
+            <li><a href="#esercizi-rbt" class="sidebar-link">2. Esercizi di Costruzione di RBT</a></li>
+            <li><a href="#costruzione-generica" class="sidebar-link">2.1. Da un Vettore Generico</a></li>
+            <li><a href="#costruzione-ordinata" class="sidebar-link">2.2. Da un Vettore Ordinato</a></li>
+            <li><a href="#confronto-strutture" class="sidebar-link">3. Confronto tra Strutture Dati</a></li>
+            <li><a href="#rbt-vs-array" class="sidebar-link">3.1. RBT vs. Vettore Ordinato</a></li>
+            <li><a href="#rbt-vs-heap" class="sidebar-link">3.2. RBT vs. Min-Heap</a></li>
+            <li><a href="#applicazioni-rbt" class="sidebar-link">4. Applicazioni degli RBT</a></li>
+            <li><a href="#intro-btree" class="sidebar-link">5. Introduzione ai B-Tree</a></li>
+            <li><a href="#motivazioni-btree" class="sidebar-link">5.1. Motivazioni: Dati su Memoria Secondaria</a></li>
+            <li><a href="#analogia-indice-libro" class="sidebar-link">5.2. Analogia: L'Indice di un Libro</a></li>
+            <li><a href="#definizione-formale-btree" class="sidebar-link">6. Definizione Formale di B-Tree</a></li>
+            <li><a href="#struttura-nodo-btree" class="sidebar-link">6.1. Struttura di un Nodo</a></li>
+            <li><a href="#proprieta-btree" class="sidebar-link">6.2. Proprietà Fondamentali</a></li>
+            <li><a href="#esempi-btree" class="sidebar-link">7. Esempi di B-Tree</a></li>
+            <li><a href="#esempio-t2" class="sidebar-link">7.1. Esempio con Grado t=2</a></li>
+            <li><a href="#esempio-t3" class="sidebar-link">7.2. Esempio con Grado t=3</a></li>
+            <li><a href="#analisi-proprieta-btree" class="sidebar-link">8. Analisi delle Proprietà dei B-Tree</a></li>
+            <li><a href="#altezza-btree" class="sidebar-link">8.1. Altezza di un B-Tree</a></li>
+            <li><a href="#analisi-complessita-btree" class="sidebar-link">8.2. Analisi della Complessità: I/O vs. CPU</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="recap-rbt-join" class="content-section active-section">
+            <h2 class="section-title">1. Recap: Fusione di Alberi Rosso-Neri</h2>
+            <div class="section-content">
+                <p>La professoressa inizia la lezione con un breve riepilogo dell'ultima operazione vista sugli Alberi Rosso-Neri: la <strong>fusione (Join)</strong> di due RBT `T1` e `T2` tramite una chiave intermedia `k`.</p>
+                <p>Viene ricordato che questa operazione ha una complessità di \(O(\log N)\), dove N è il numero totale di chiavi. La complessità è \(O\) e non \(\Theta\) perché, nel caso fortunato in cui i due alberi abbiano altezze simili, l'operazione è molto veloce.</p>
+            </div>
+        </article>
+
+        <article id="esercizi-rbt" class="content-section">
+            <h2 class="section-title">2. Esercizi di Costruzione di RBT</h2>
+            <div class="section-content">
+                <p>Vengono proposti due esercizi sulla costruzione di un RBT a partire da un vettore di `N` chiavi.</p>
+            </div>
+        </article>
+        
+        <article id="costruzione-generica" class="content-section">
+            <h3 class="subsection-title">2.1. Esercizio 1: Costruire un RBT da un Vettore Generico</h3>
+            <div class="section-content">
+                <p><strong>Problema:</strong> Come costruire un RBT contenente `N` chiavi memorizzate in un vettore generico (non ordinato) `A`?</p>
+                <p><strong>Soluzione e Complessità:</strong> L'approccio più semplice è inserire le chiavi una alla volta. Poiché ogni inserimento in un RBT costa \(O(\log i)\) (dove `i` è il numero di nodi già presenti), il costo totale è \(\sum_{i=1}^{N} O(\log i) = O(N \log N)\).</p>
+                <div class="note-box">
+                    <strong>Non si può fare meglio di \(O(N \log N)\)</strong>
+                    <p>La professoressa spiega che non è possibile ottenere una complessità migliore nel caso peggiore. Se esistesse un algoritmo di costruzione con complessità \(o(N \log N)\), si potrebbe usare per ordinare un vettore più velocemente del limite inferiore teorico. Basterebbe:</p>
+                    <ol>
+                        <li>Costruire l'RBT dal vettore in tempo \(o(N \log N)\).</li>
+                        <li>Eseguire una visita In-Order dell'RBT per recuperare le chiavi in ordine in tempo \(\Theta(N)\).</li>
+                    </ol>
+                    <p>Questo creerebbe un algoritmo di ordinamento basato su confronti con complessità \(o(N \log N)\), contraddicendo il limite inferiore noto di \(\Omega(N \log N)\).</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="costruzione-ordinata" class="content-section">
+            <h3 class="subsection-title">2.2. Esercizio 2: Costruire un RBT da un Vettore Ordinato</h3>
+            <div class="section-content">
+                <p><strong>Problema:</strong> Come costruire un RBT se il vettore `A` è già ordinato?</p>
+                <p>In questo caso, avendo più informazioni, si può ottenere una complessità migliore: \(\Theta(N)\).</p>
+                <p><strong>Idea 1 (Approccio ricorsivo diretto):</strong></p>
+                <p>Si potrebbe pensare di usare un approccio "divide et impera":</p>
+                <ol>
+                    <li>Scegliere l'elemento mediano del vettore come radice.</li>
+                    <li>Chiamare ricorsivamente la procedura sulla metà sinistra del vettore per costruire il sottoalbero sinistro.</li>
+                    <li>Chiamare ricorsivamente la procedura sulla metà destra per costruire il sottoalbero destro.</li>
+                </ol>
+                <p>Tuttavia, come sottolinea la professoressa, questo approccio presenta delle difficoltà: non è garantito che i due sottoalberi ricorsivi abbiano la stessa altezza nera, rendendo il bilanciamento e la colorazione dei nodi non banale.</p>
+                
+                <p><strong>Idea 2 (Approccio basato su RBT-Join):</strong></p>
+                <p>La professoressa propone una soluzione più elegante che sfrutta l'operazione `RBT-Join` vista in precedenza.</p>
+                <ol>
+                    <li>Si sceglie l'elemento mediano `k` come chiave di fusione.</li>
+                    <li>Si costruisce ricorsivamente un RBT `T1` dalla prima metà del vettore.</li>
+                    <li>Si costruisce ricorsivamente un RBT `T2` dalla seconda metà.</li>
+                    <li>Si fondono `T1` e `T2` usando `k` con l'operazione `RBT-Join`.</li>
+                </ol>
+                <p>La complessità di questo approccio è descritta dalla seguente equazione di ricorrenza:</p>
+                <div class="math-block">
+                \(T(N) = 2 \cdot T(N/2) + O(\log N)\)
+                </div>
+                <p>Dove \(O(\log N)\) è il costo dell'operazione di `RBT-Join`.</p>
+                <div class="exercise-box">
+                    <strong>Soluzione della Ricorrenza (Aggiunta AI)</strong>
+                    <p>L'equazione \(T(N) = 2 \cdot T(N/2) + O(\log N)\) può essere risolta con il Teorema Master. Siamo nel caso in cui \(a=2, b=2\), quindi \(\log_b a = \log_2 2 = 1\). La funzione \(f(N) = O(\log N)\) è asintoticamente più piccola di \(N^{\log_b a} = N^1\). Pertanto, ci troviamo nel <strong>primo caso</strong> del Teorema Master, che stabilisce che la soluzione è \(T(N) = \Theta(N^{\log_b a}) = \Theta(N)\).</p>
+                    <p>Questo conferma che la costruzione di un RBT da un vettore ordinato può essere eseguita in tempo lineare.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="confronto-strutture" class="content-section">
+            <h2 class="section-title">3. Confronto tra Strutture Dati</h2>
+            <div class="section-content">
+                <p>Alla luce della possibilità di convertire un vettore ordinato in un RBT in tempo lineare e viceversa (tramite visita In-Order), la professoressa avvia una riflessione sul confronto tra diverse strutture dati.</p>
+            </div>
+        </article>
+
+        <article id="rbt-vs-array" class="content-section">
+            <h3 class="subsection-title">3.1. RBT vs. Vettore Ordinato</h3>
+            <div class="section-content">
+                <p><strong>Vettore Ordinato (Struttura Dati Statica):</strong></p>
+                <ul>
+                    <li><strong>Vantaggi:</strong> Molto efficiente per ricerche (es. ricerca binaria in \(O(\log N)\)).</li>
+                    <li><strong>Svantaggi:</strong> Le operazioni di inserimento e cancellazione sono costose (\(O(N)\)), in quanto richiedono di spostare elementi. Richiede di pre-allocare la memoria e gestirne un eventuale sovradimensionamento.</li>
+                </ul>
+                <p><strong>Albero Rosso-Nero (Struttura Dati Dinamica):</strong></p>
+                <ul>
+                    <li><strong>Vantaggi:</strong> Tutte le operazioni di base (ricerca, inserimento, cancellazione, min, max, successore...) hanno un costo garantito di \(O(\log N)\). È una struttura pienamente dinamica, che cresce e decresce in modo efficiente.</li>
+                    <li><strong>Svantaggi:</strong> Più complesso da implementare.</li>
+                </ul>
+                <p><strong>Quando usare quale?</strong> Il vettore ordinato è ideale se il set di dati è prevalentemente statico e le operazioni di modifica sono rare. L'RBT è la scelta superiore quando si prevedono frequenti inserimenti e cancellazioni.</p>
+            </div>
+        </article>
+
+        <article id="rbt-vs-heap" class="content-section">
+            <h3 class="subsection-title">3.2. RBT vs. Min-Heap</h3>
+            <div class="section-content">
+                <p>La professoressa pone un'altra domanda interessante: quando preferire un RBT a una Min-Heap, e viceversa?</p>
+                <p>Analizziamo i costi delle operazioni comuni:</p>
+                <ul>
+                    <li><strong>Inserimento:</strong> \(O(\log N)\) per entrambe.</li>
+                    <li><strong>Cancellazione di un elemento arbitrario:</strong> \(O(\log N)\) per entrambe (nell'Heap richiede prima di trovare l'elemento, che potrebbe costare \(O(N)\) se non se ne conosce la posizione, ma assumendo di averla, il fixup è logaritmico).</li>
+                    <li><strong>Cancellazione del Minimo:</strong> \(O(\log N)\) per entrambe (nella Min-Heap la ricerca è \(O(1)\) ma il ripristino è \(O(\log N)\); nell'RBT la ricerca è \(O(\log N)\) e la cancellazione anche).</li>
+                </ul>
+                <p>Apparentemente i costi sono simili. Allora, qual è la differenza?</p>
+                <ul>
+                    <li><strong>Min-Heap:</strong> Ottimizzata per trovare ed estrarre l'elemento minimo. Non supporta in modo efficiente altre ricerche (es. trovare il massimo, un elemento qualsiasi, un successore). La sua implementazione standard con array richiede di pre-allocare la memoria.</li>
+                    <li><strong>RBT:</strong> È una struttura dati molto più generale. Supporta efficientemente un'ampia gamma di operazioni di ricerca basate sull'ordinamento (min, max, successore, predecessore, range query) tutte in \(O(\log N)\). È una struttura dati pienamente dinamica che non richiede stime a priori sulla dimensione.</li>
+                </ul>
+                <p>In conclusione, la Min-Heap è una struttura specializzata (una coda di priorità). L'RBT è un dizionario ordinato molto più versatile e potente.</p>
+            </div>
+        </article>
+
+        <article id="applicazioni-rbt" class="content-section">
+            <h2 class="section-title">4. Applicazioni degli Alberi Rosso-Neri</h2>
+            <div class="section-content">
+                <p>La professoressa conclude la discussione sugli RBT sottolineando che, nonostante la loro apparente complessità, sono estremamente efficienti e molto utilizzati in pratica grazie alle buone costanti moltiplicative nascoste nella notazione asintotica.</p>
+                <p>Alcuni esempi di applicazioni reali includono:</p>
+                <ul>
+                    <li><strong>Scheduler dei Sistemi Operativi:</strong> Per gestire i processi in base alla loro priorità.</li>
+                    <li><strong>Database:</strong> Per implementare indici e gestire il versioning.</li>
+                    <li>Molte implementazioni di <strong>mappe e insiemi ordinati</strong> nelle librerie standard dei linguaggi di programmazione (es. `std::map` in C++, `TreeMap` in Java).</li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="intro-btree" class="content-section">
+            <h2 class="section-title">5. Introduzione ai B-Tree</h2>
+            <div class="section-content">
+                <p>La lezione passa a un nuovo argomento: i <strong>B-Tree</strong>. I B-Tree sono presentati come una generalizzazione dei BST e degli RBT, ma progettati per uno scenario completamente diverso.</p>
+            </div>
+        </article>
+        
+        <article id="motivazioni-btree" class="content-section">
+            <h3 class="subsection-title">5.1. Motivazioni: Dati su Memoria Secondaria</h3>
+            <div class="section-content">
+                <p>La caratteristica fondamentale che definisce i B-Tree è che sono progettati per gestire <strong>grandi quantità di dati che non possono risiedere interamente nella memoria centrale (RAM)</strong>. L'intera struttura dati si trova su una <strong>memoria secondaria</strong> (es. hard disk, SSD).</p>
+                <p>In ogni istante, solo una piccola e limitata quantità di nodi del B-Tree può essere caricata in RAM per essere elaborata.</p>
+                <p>Esempi tipici di sistemi che utilizzano B-Tree e le loro varianti (come B+ Tree, Quad Tree) includono:</p>
+                <ul>
+                    <li><strong>Database</strong></li>
+                    <li><strong>File System</strong></li>
+                    <li><strong>Sistemi di mappatura geografica</strong> (es. navigatori)</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="analogia-indice-libro" class="content-section">
+            <h3 class="subsection-title">5.2. Analogia: L'Indice di un Libro</h3>
+            <div class="section-content">
+                <p>Per dare un'intuizione sulla struttura di un B-Tree, la professoressa usa l'analogia dell'<strong>indice analitico di un libro</strong> di testo voluminoso (come il Cormen).</p>
+                <p>Un indice ha una struttura gerarchica ad albero:</p>
+                <ul>
+                    <li>La radice è il libro stesso.</li>
+                    <li>I suoi figli sono i capitoli.</li>
+                    <li>I figli dei capitoli sono i paragrafi, e così via.</li>
+                </ul>
+                <p>Da questa analogia emergono alcune proprietà chiave dei B-Tree:</p>
+                <ol>
+                    <li><strong>Numero variabile di figli:</strong> Un nodo (es. un capitolo) può avere un numero di figli (paragrafi) diverso da un altro.</li>
+                    <li><strong>Ordinamento tra i figli:</strong> I figli di un nodo sono ordinati (es. i capitoli sono in ordine numerico).</li>
+                    <li><strong>Le foglie sono tutte allo stesso livello:</strong> La struttura è bilanciata. Nell'indice, si arriva sempre al livello più basso (il numero di pagina) dopo aver attraversato lo stesso numero di livelli gerarchici (capitolo -> paragrafo -> pagina).</li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>B-Tree vs. B+ Tree</strong>
+                    <p>La professoressa nota che l'analogia dell'indice, in cui l'informazione finale (il numero di pagina) si trova solo nelle foglie, descrive più accuratamente una variante chiamata <strong>B+ Tree</strong>. Nei B-Tree standard, che verranno studiati nel corso, le informazioni utili possono trovarsi anche nei nodi interni.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="definizione-formale-btree" class="content-section">
+            <h2 class="section-title">6. Definizione Formale di B-Tree</h2>
+            <div class="section-content">
+                <p>Viene presentata la definizione formale di un <strong>B-Tree di grado `t`</strong>, dove `t` è un intero \(\ge 2\).</p>
+            </div>
+        </article>
+        
+        <article id="struttura-nodo-btree" class="content-section">
+            <h3 class="subsection-title">6.1. Struttura di un Nodo</h3>
+            <div class="section-content">
+                <p>Ogni nodo `x` di un B-Tree contiene le seguenti informazioni:</p>
+                <ul>
+                    <li><code>n[x]</code>: Un intero che indica il <strong>numero di chiavi</strong> attualmente memorizzate nel nodo.</li>
+                    <li><code>key[x]</code>: Un vettore (sovradimensionato a `2t-1`) che contiene le <code>n[x]</code> chiavi in ordine crescente.</li>
+                    <li><code>leaf[x]</code>: Un booleano che è `true` se `x` è una foglia, `false` altrimenti.</li>
+                    <li><code>c[x]</code>: Un vettore (sovradimensionato a `2t`) che contiene gli <code>n[x]+1</code> puntatori ai figli di `x`.</li>
+                </ul>
+                 <div class="note-box">
+                    <strong>Notazione Semplificata</strong>
+                    <p>Per semplicità, e per allinearsi al libro di testo, la i-esima chiave verrà indicata come `x.key_i` e l'i-esimo figlio come `x.c_i`.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="proprieta-btree" class="content-section">
+            <h3 class="subsection-title">6.2. Proprietà Fondamentali</h3>
+            <div class="section-content">
+                <p>Un B-Tree deve soddisfare le seguenti proprietà:</p>
+                <ol>
+                    <li><strong>Numero di chiavi:</strong>
+                        <ul>
+                            <li>Ogni nodo, tranne la radice, deve avere un numero di chiavi compreso tra `t-1` e `2t-1`.</li>
+                            <li>La radice può avere da `1` a `2t-1` chiavi. (Questo permette all'albero di crescere partendo da pochi elementi).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Ordinamento interno:</strong> Le chiavi all'interno di un nodo sono memorizzate in ordine crescente: `key_1 < key_2 < ... < key_{n[x]}`.</li>
+                    <li><strong>Relazione tra chiavi e figli:</strong> Per ogni nodo interno, il puntatore al figlio `c_i` punta a un sottoalbero le cui chiavi `k` sono comprese tra `key_{i-1}` e `key_i`.
+                        <div class="mermaid-container tree-diagram">
+                            <pre class="mermaid">
+                            graph TD
+                                A(key_i-1) -- ... --> B(key_i)
+                                A -- "puntatore c_i" --> C((Sottoalbero i))
+                                C -- chiavi > key_i-1 --> A
+                                C -- chiavi < key_i --> B
+                            </pre>
+                        </div>
+                    </li>
+                    <li><strong>Foglie allo stesso livello:</strong> Tutte le foglie si trovano alla stessa profondità (altezza). Questa è la proprietà che garantisce il bilanciamento.</li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="esempi-btree" class="content-section">
+            <h2 class="section-title">7. Esempi di B-Tree</h2>
+            <div class="section-content">
+                 <p>Vengono mostrati esempi per diversi valori del grado `t`.</p>
+            </div>
+        </article>
+        
+        <article id="esempio-t2" class="content-section">
+            <h3 class="subsection-title">7.1. Esempio con Grado t=2</h3>
+            <div class="section-content">
+                 <p>Per \(t=2\):</p>
+                <ul>
+                    <li>Numero massimo di chiavi per nodo: \(2t-1 = 3\).</li>
+                    <li>Numero minimo di chiavi (non-radice): \(t-1 = 1\).</li>
+                </ul>
+                <p>Ogni nodo (tranne la radice) contiene da 1 a 3 chiavi e di conseguenza da 2 a 4 figli.</p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            Root("20, 40") --> A("5, 9, 15")
+                            Root --> B("30")
+                            Root --> C("50, 60")
+                            
+                            A --> A1("1, 2")
+                            A --> A2("6")
+                            A --> A3("12")
+                            A --> A4("18")
+
+                            B --> B1("25")
+                            B --> B2("33, 38")
+
+                            C --> C1("45")
+                            C --> C2("55")
+                            C --> C3("70, 80, 90")
+                     </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="esempio-t3" class="content-section">
+            <h3 class="subsection-title">7.2. Esempio con Grado t=3</h3>
+            <div class="section-content">
+                 <p>Per \(t=3\):</p>
+                <ul>
+                    <li>Numero massimo di chiavi per nodo: \(2t-1 = 5\).</li>
+                    <li>Numero minimo di chiavi (non-radice): \(t-1 = 2\).</li>
+                </ul>
+                <p>Ogni nodo (tranne la radice) contiene da 2 a 5 chiavi.</p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            Root("100") --> A("..., ...")
+                            Root --> B("..., ..., ..., ...")
+                            
+                            A --> A1("..., ...")
+                            A --> A2("..., ...")
+                            A --> A3("..., ...")
+                            
+                            B --> B1("..., ...")
+                            B --> B2("..., ..., ...")
+                            B --> B3("..., ...")
+                            B --> B4("..., ...")
+                            B --> B5("..., ..., ...")
+                     </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="analisi-proprieta-btree" class="content-section">
+            <h2 class="section-title">8. Analisi delle Proprietà dei B-Tree</h2>
+            <div class="section-content">
+                <p>La professoressa analizza alcune proprietà quantitative fondamentali dei B-Tree, in particolare la loro altezza.</p>
+            </div>
+        </article>
+        
+        <article id="altezza-btree" class="content-section">
+            <h3 class="subsection-title">8.1. Altezza di un B-Tree</h3>
+            <div class="section-content">
+                <p>Per determinare l'altezza massima di un B-Tree con `N` chiavi, si considera il caso in cui l'albero è il più "sparso" possibile. Questo si ottiene riempiendo ogni nodo con il numero minimo di chiavi consentito.</p>
+                <ul>
+                    <li><strong>Radice:</strong> 1 chiave (e 2 figli).</li>
+                    <li><strong>Livello 1:</strong> 2 nodi, ciascuno con `t-1` chiavi (e `t` figli).</li>
+                    <li><strong>Livello 2:</strong> `2*t` nodi, ciascuno con `t-1` chiavi.</li>
+                    <li><strong>Livello `i`:</strong> `2*t^(i-1)` nodi, ciascuno con `t-1` chiavi.</li>
+                </ul>
+                <p>Sommando il numero di chiavi su tutti i livelli da 0 a `h-1` si ottiene `N`:</p>
+                <div class="math-block">
+                    \[ N = 1 + \sum_{i=1}^{h-1} 2 \cdot t^{i-1} \cdot (t-1) \]
+                </div>
+                <p>Risolvendo questa sommatoria (che è una serie geometrica), si arriva a una relazione tra `N` e `h`:</p>
+                <div class="math-block">
+                    \[ N = 2 \cdot t^h - 1 \]
+                </div>
+                <p>Da cui si ricava l'altezza `h`:</p>
+                <div class="math-block">
+                    \[ h = \log_t \frac{N+1}{2} \]
+                </div>
+                <p>Questo dimostra che l'altezza di un B-Tree è limitata superiormente dal logaritmo in base `t` del numero di nodi. Quindi, \( h \in O(\log_t N) \). L'altezza è estremamente bassa, specialmente per valori di `t` grandi, che è esattamente l'obiettivo dei B-Tree.</p>
+                 <div class="clarification-box">
+                    <strong>Perché manteniamo la base `t` nel logaritmo?</strong>
+                    <p>La professoressa spiega che, sebbene nella notazione asintotica le basi dei logaritmi siano equivalenti a meno di una costante, nel contesto dei B-Tree è fondamentale mantenere esplicita la dipendenza da `t`. Questo perché `t` è un parametro chiave legato alle performance del sistema (quanti dati possono stare in un blocco di disco). Un `t` grande riduce drasticamente l'altezza dell'albero e, di conseguenza, il numero di accessi al disco necessari, che è l'operazione più costosa.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="analisi-complessita-btree" class="content-section">
+            <h3 class="subsection-title">8.2. Analisi della Complessità: I/O vs. CPU</h3>
+            <div class="section-content">
+                <p>A causa della natura dei B-Tree (dati su disco), l'analisi della complessità delle operazioni deve distinguere due costi:</p>
+                <ol>
+                    <li><strong>Costo di I/O (Lettura/Scrittura):</strong> Il costo associato al trasferimento di nodi (blocchi di dati) dalla memoria secondaria (lenta) alla memoria centrale (veloce).</li>
+                    <li><strong>Costo di CPU:</strong> Il costo delle operazioni eseguite sui nodi una volta che sono in RAM (es. ricerca binaria all'interno del vettore di chiavi di un nodo).</li>
+                </ol>
+                <p><strong>L'obiettivo primario nella progettazione di algoritmi per B-Tree è minimizzare il numero di operazioni di I/O</strong>, poiché sono di ordini di grandezza più costose delle operazioni di CPU.</p>
+                <p>Quando si confrontano due procedure, si valuta prima il loro costo di I/O. A parità di ordine di grandezza, si arriva a considerare anche le costanti moltiplicative, data l'elevata importanza di ridurre gli accessi al disco.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
