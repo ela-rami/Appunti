@@ -256,45 +256,46 @@
                 </ul>
 
                 <div class="exercise-box">
-                    <strong>Esercizio d'Esame Esempio (adattato dal 15-07-2024, Domanda 16):</strong>
-                    <p>Un flusso di dati M = M1, M2, . . . viene cifrato usando AES in modalità CBC. Ogni messaggio corrisponde ad un blocco. (a) Si dia la definizione ricorrente dei messaggi cifrati. (b) Cosa succede se durante la trasmissione i blocchi 2 e 3 vengono scambiati, ossia al destinatario arriva la sequenza C1, C3, C2, C4, . . . , e il destinatario non sa riordinarli?</p>
+                    <strong>Esercizio d'Esame Esempio (adattato dal 19-02-2024, Domanda 16):</strong>
+                    <p>Un flusso di messaggi M = M1, M2, ... viene cifrato con un cifrario a blocchi EK in modalità CBC. Ogni messaggio corrisponde ad un blocco. (a) Si dia la definizione ricorrente dei messaggi cifrati, ossia: C_i = ... (b) Cosa succede se durante la trasmissione i blocchi 2 e 3 vengono scambiati, ossia al destinatario arriva la sequenza C1, C3, C2, C4, ..., e il destinatario non sa riordinarli?</p>
                     <p><strong>Soluzione:</strong></p>
                     <ul>
-                        <li>(a) In modalità CBC, il blocco di ciphertext \(C_i\) è generato cifrando il risultato della combinazione (XOR) del blocco di testo in chiaro \(M_i\) con il blocco di ciphertext precedente \(C_{i-1}\). Il primo blocco \(C_1\) usa un Initialization Vector (IV) al posto di \(C_0\).
-                            La definizione ricorrente è:
+                        <li>(a) In modalità CBC, il blocco di ciphertext \(C_i\) è generato cifrando il risultato della combinazione (XOR) del blocco di testo in chiaro \(M_i\) con il blocco di ciphertext precedente \(C_{i-1}\). Il primo blocco usa un Initialization Vector (IV). La definizione ricorrente è:
                             <div class="math-block">
-                                $$ C_i = E_K(M_i \oplus C_{i-1}) $$
+                                $$ C_i = E_K(M_i \oplus C_{i-1}) \quad \text{(con } C_0 = \text{IV)} $$
                             </div>
-                            (dove \(C_0 = \text{IV}\)).
+                            La formula per la decifratura è:
+                            <div class="math-block">
+                                $$ M_i = D_K(C_i) \oplus C_{i-1} $$
+                            </div>
                         </li>
-                        <li>(b) Se la sequenza ricevuta è C1, C3, C2, C4... (cioè C2 e C3 scambiati), e il destinatario non sa riordinarli (TCP fornisce l'ordine, ma questa è una domanda sulla crittografia del blocco in sé):
-                            *   La decifratura di C1 sarà corretta.
-                            *   Quando si tenta di decifrare C3 (che dovrebbe essere C2): la decifratura di C3 userà C1. Ciò produrrà un blocco di testo in chiaro \(M'_3\) **sbagliato** perché la \(C_2\) usata per decifrare \(C_3\) (cioè \(C_1\)) è sbagliata.
-                            *   Quando si tenta di decifrare C2 (che dovrebbe essere C3): la decifratura di C2 userà \(C_3\). Anche questo produrrà un blocco \(M'_2\) **sbagliato** perché la \(C_i\) usata per decifrare \(C_2\) (cioè \(C_3\)) è sbagliata.
-                            *   Quando si tenta di decifrare C4: userà C2. Poiché C2 è già sbagliato, anche \(M'_4\) sarà **sbagliato**.
-                            *   **In CBC, un errore (o dislocazione) in un blocco di ciphertext si propaga ai blocchi successivi.** Tutti i blocchi da quello scambiato in poi risulteranno decifrati in modo errato. Questo a causa della dipendenza "a catena" tra i blocchi.
+                        <li>(b) Se il destinatario riceve la sequenza C1, C3, C2, ..., lo scambio dei blocchi C2 e C3 corromperà la decifratura a catena.
+                            <ul>
+                                <li><strong>Decifratura di C1:</strong> \(M_1 = D_K(C_1) \oplus \text{IV}\). Questo blocco verrà decifrato correttamente.</li>
+                                <li><strong>Decifratura di C3 (al posto di C2):</strong> Il destinatario calcola \(M'_2 = D_K(C_3) \oplus C_1\). Poiché sta usando \(D_K(C_3)\) invece di \(D_K(C_2)\), il risultato \(M'_2\) sarà completamente errato (spazzatura).</li>
+                                <li><strong>Decifratura di C2 (al posto di C3):</strong> Il destinatario calcola \(M'_3 = D_K(C_2) \oplus C_3\). Anche qui, sta usando il blocco di ciphertext precedente sbagliato (C3 invece di C2). Il risultato \(M'_3\) sarà completamente errato.</li>
+                                <li><strong>Decifratura di C4:</strong> Il destinatario calcola \(M'_4 = D_K(C_4) \oplus C_2\). Poiché il blocco precedente C2 è corretto (è solo fuori posto), la decifratura del **blocco M4 sarà corretta**. L'errore in CBC si propaga per un solo blocco successivo.</li>
+                            </ul>
+                             <div class="correction-box">
+                                <strong>Correzione/Chiarimento:</strong> Un errore in un blocco di ciphertext \(C_i\) in CBC corrompe completamente la decifratura del blocco di testo in chiaro corrispondente \(M_i\) e causa un errore di un singolo blocco (corrispondente in dimensione) nel blocco successivo \(M_{i+1}\). In questo caso, lo scambio è un errore più complesso che corrompe M2 e M3, ma la catena di decifratura si "risincronizza" da M4 in poi, perché C4 viene decifrato usando il blocco C2 (che è il blocco corretto che avrebbe dovuto precedere C3, ma ora precede C4). Questa è una sottigliezza: la risposta più sicura è che M2 e M3 sono corrotti. 
+                            </div>
                         </li>
                     </ul>
-                    <p><strong>Risposta:</strong> (a) \( C_i = E_K(M_i \oplus C_{i-1}) \), con \(C_0 = \text{IV}\). (b) I blocchi M2, M3, M4 (e tutti i successivi) verranno decifrati in modo errato a causa della propagazione dell'errore (dislocazione).</p>
                 </div>
 
                 <div class="exercise-box">
-                    <strong>Esercizio d'Esame Esempio (adattato dal 04-09-2023, Domanda 16):</strong>
-                    <p>Un flusso di dati M = M1, M2, . . . viene cifrato usando AES in modalità OFB, ossia \(R_{i+1} = E_K(R_i)\) e \(C_i = M_i \oplus R_{i+1}\). \(R_0\) viene inizializzato con un valore IV. (a) Quale vulnerabilità ci può essere se due flussi di dati si cifrano usando la stessa K e lo stesso IV? (b) Come si può evitare tale pericolo, se IV è generato casualmente (e non si può escludere che si ripeta)?</p>
+                    <strong>Esercizio d'Esame Esempio (adattato dal 16-09-2024, Domanda 16):</strong>
+                    <p>Un flusso di dati M = M1, M2,... viene cifrato usando AES in modalità OFB, ossia \(R_{i+1} = E_K(R_i)\) e \(C_i = M_i \oplus R_{i+1}\). Ro viene inizializzato con un valore IV. (a) Quale vulnerabilità ci può essere se due flussi di dati si cifrano usando la stessa K e lo stesso IV? (b) Come si può evitare tale pericolo, se IV è generato casualmente (e non si può escludere che si ripeta)?</p>
                     <p><strong>Soluzione:</strong></p>
                     <ul>
-                        <li>(a) Se due flussi di dati \(M\) e \(M'\) vengono cifrati usando la **stessa chiave \(K\) e lo stesso Initialization Vector (IV)** in modalità OFB, allora il keystream \(R_1, R_2, \dots\) generato sarà esattamente lo stesso per entrambi.
-                            Avremo: \(C_i = M_i \oplus R_i\) e \(C'_i = M'_i \oplus R_i\).
-                            Se un attaccante intercetta entrambi i ciphertext \(C\) e \(C'\), può calcolare:
+                        <li>(a) Se due flussi di dati, \(M\) e \(M'\), vengono cifrati usando la **stessa chiave K e lo stesso IV**, allora il keystream generato (\(R_1, R_2, ...\)) sarà **identico** per entrambi i flussi. Di conseguenza, un attaccante che intercetta i due testi cifrati, \(C\) e \(C'\), può calcolare il loro XOR:
                             <div class="math-block">
-                                $$ C_i \oplus C'_i = (M_i \oplus R_i) \oplus (M'_i \oplus R_i) $$
-                                $$ C_i \oplus C'_i = M_i \oplus M'_i $$
+                                $$ C_i \oplus C'_i = (M_i \oplus R_i) \oplus (M'_i \oplus R_i) = M_i \oplus M'_i $$
                             </div>
-                            Questo significa che l'attaccante ottiene l'XOR dei due testi in chiaro. Se uno dei due testi in chiaro è noto (o se l'attaccante può indovinarlo o ha un dizionario), può facilmente recuperare l'altro testo in chiaro. Questa è una grave vulnerabilità, nota come **"attacco del keystream uguale"**.
+                            L'attaccante ottiene l'XOR dei due testi in chiaro. Se uno dei due testi è noto o può essere indovinato (es. un header di file, testo standard), l'attaccante può facilmente recuperare l'altro testo in chiaro. Questa è una vulnerabilità catastrofica nota come **attacco del keystream riutilizzato**.
                         </li>
-                        <li>(b) Per evitare questa vulnerabilità, la regola fondamentale è **non riutilizzare mai la stessa coppia (chiave, IV)**. Se l'IV è generato casualmente, ma non si può escludere che si ripeta (es. spazio degli IV troppo piccolo rispetto al numero di connessioni), allora l'IV dovrebbe essere combinato con altri elementi (es. un contatore o un valore unico per sessione) o la chiave stessa dovrebbe essere modificata periodicamente (es. per ogni sessione). Questo è il concetto alla base delle **chiavi di sessione** (session keys) generate in modo fresco e unico per ogni nuova comunicazione.</li>
+                        <li>(b) La regola fondamentale è che la coppia **(Chiave, IV) non deve mai essere riutilizzata**. Se c'è il rischio che l'IV casuale si ripeta (es. per il paradosso del compleanno), la soluzione più sicura è garantire che la **chiave di cifratura K sia unica per ogni sessione di comunicazione**. Invece di usare una chiave master statica, si usa un protocollo di scambio chiavi (come Diffie-Hellman) per generare una **chiave di sessione** "fresca" e temporanea per ogni nuova connessione. In questo modo, anche se per pura sfortuna due sessioni diverse usassero lo stesso IV, le chiavi K sarebbero diverse, e quindi anche i keystream generati sarebbero diversi.</li>
                     </ul>
-                    <p><strong>Risposta:</strong> (a) Se K e IV sono uguali per due flussi, si ottiene \(M \oplus M'\) dal ciphertext \(C \oplus C'\), permettendo di recuperare i testi in chiaro se uno è noto o indovinabile. (b) Bisogna cambiare la chiave periodicamente (es. per ogni sessione) o garantire che la coppia (chiave, IV) sia unica. Si usano **chiavi di sessione** "fresche".</p>
                 </div>
             </div>
         </article>
@@ -420,7 +421,7 @@
                         A -- Calculate K = yB^a mod p --> K_Alice[Shared Key K];
                         B -- Calculate K = yA^b mod p --> K_Bob[Shared Key K];
 
-                        K_Alice --- K_Bob; /* Indicates they derive the same key */
+                        K_Alice --- K_Bob; 
                         style A_Secret fill:#FACC15,stroke:#FACC15,stroke-width:1px;
                         style B_Secret fill:#FACC15,stroke:#FACC15,stroke-width:1px;
                         style K_Alice fill:#34D399,stroke:#34D399,stroke-width:1px;
@@ -440,7 +441,7 @@
                 <p><strong>Soluzione:</strong> L'autenticazione è necessaria. Si possono usare firme digitali (RSA) per firmare le chiavi parziali Diffie-Hellman scambiate, o utilizzare un protocollo che integra DH con meccanismi di autenticazione come TLS/SSL.</p>
 
                 <div class="exercise-box">
-                    <strong>Esercizio d'Esame Esempio (adattato dal 15-07-2024, Domanda 18):</strong>
+                    <strong>Esercizio d'Esame Esempio (adattato dal 17-06-2024, Domanda 18):</strong>
                     <p>Il protocollo a lato è una variante dello scambio chiavi Diffie-Hellman, dove \(y_A, y_B\) sono le mezze chiavi pubbliche di A e B, rispettivamente. (a) Si descriva come viene calcolata la chiave condivisa di sessione \(K_S\). (b) Completare il protocollo nelle parti mancanti (i ". . . ") in modo da rendere lo scambio robusto agli attacchi MITM. Si assuma che A e B abbiano precondiviso anche una chiave master \(K\) e possano usare una funzione hash robusta \(H\).</p>
                     <p><strong>Passaggi iniziali del protocollo dato:</strong><br>
                     1. A \(\rightarrow\) B : \(y_A\)<br>
@@ -605,33 +606,33 @@
                 </ol>
                 <div class="mermaid-container">
                     <pre class="mermaid">
-                    graph LR
-                        subgraph "Mittente (Alice)"
-                            M_Alice[Messaggio M] --> H_Alice[Hash H(M)];
-                            H_Alice --> S_Alice[Sign H(M) with Private Key d];
-                            S_Alice --> Signature[Signature S];
-                        end
-
-                        subgraph "Canale Non Sicuro"
-                            M_S[M, S];
-                        end
-
-                        subgraph "Destinatario (Bob)"
-                            M_Bob[Messaggio M];
-                            S_Bob[Signature S];
-                            S_Bob --> Verify_S[Verify S with Public Key e];
-                            Verify_S --> H_Prime[H'(M)];
-                            M_Bob --> H_Bob[Hash H(M)];
-                            H_Prime -- Compare --> H_Bob;
-                            H_Bob -- Equal? --> Valid[Firma Valida];
-                            H_Bob -- Not Equal? --> Invalid[Firma Non Valida];
-                        end
-
-                        M_Alice --> M_S;
-                        Signature --> M_S;
-                        M_S --> M_Bob;
-                        M_S --> S_Bob;
-                    </pre>
+                        graph LR
+                            subgraph "Mittente (Alice)"
+                                M_Alice["Messaggio M"] --> H_Alice["Hash H(M)"];
+                                H_Alice --> S_Alice["Sign H(M) with Private Key d"];
+                                S_Alice --> Signature["Signature S"];
+                            end
+                        
+                            subgraph "Canale Non Sicuro"
+                                M_S["M, S"];
+                            end
+                        
+                            subgraph "Destinatario (Bob)"
+                                M_Bob["Messaggio M"];
+                                S_Bob["Signature S"];
+                                S_Bob --> Verify_S["Verify S with Public Key e"];
+                                Verify_S --> H_Prime["H'(M)"];
+                                M_Bob --> H_Bob["Hash H(M)"];
+                                H_Prime -- Compare --> H_Bob;
+                                H_Bob -- Equal? --> Valid["Firma Valida"];
+                                H_Bob -- Not Equal? --> Invalid["Firma Non Valida"];
+                            end
+                        
+                            M_Alice --> M_S;
+                            Signature --> M_S;
+                            M_S --> M_Bob;
+                            M_S --> S_Bob;
+                        </pre>
                 </div>
 
                 <h4>Proprietà Garantite dalla Firma Digitale</h4>
@@ -802,19 +803,37 @@
                 </div>
 
                 <div class="exercise-box">
-                    <strong>Esercizio d'Esame Esempio (adattato dal 15-07-2024, Domanda 17):</strong>
-                    <p>Nel protocollo a lato, \(P_{RB}\) è la chiave privata di B, \(T\) è un timestamp generato da A, e \(H\) è una funzione di hash scelta a priori. (a) Il messaggio M è puntuale (ossia non soggetto ad attacchi replay) per A? (b) B è autenticato per A? Si motivino le risposte.</p>
+                    <strong>Esercizio d'Esame Esempio (adattato dal 17-06-2024, Domanda 17):</strong>
+                    <p>Nel protocollo a lato, \(PR_B\) è la chiave privata di B, \(T\) è un timestamp generato da A, e \(H\) è una funzione di hash scelta a priori.</p>
                     <p><strong>Protocollo dato:</strong><br>
-                    1. A \(\rightarrow\) S : A, B, \(\{H(M), T\}_{K_A}\)<br>
-                    2. S \(\rightarrow\) A : \(\{H(M), T\}_{K_B}\)<br>
-                    3. A \(\rightarrow\) B : A, M, \(\{H(M), T\}_{K_B}\)<br>
+                    1. A → B : T<br>
+                    2. B → A : M, \(E_{PR_B}(H(M, T))\)<br>
                     </p>
+                    <p>(a) Il messaggio M è puntuale (ossia non soggetto ad attacchi replay) per A? (b) B è autenticato per A? Si motivino le risposte.</p>
                     <p><strong>Soluzione:</strong></p>
                     <ul>
-                        <li>(a) **Sì, il messaggio M è puntuale per A.** Il messaggio \(M\) è associato al timestamp \(T\). Se A verifica che \(T\) è attuale (non troppo vecchio) e che non è stato manipolato (grazie alla firma), A può essere certo che M è "fresco" e non un replay.</li>
-                        <li>(b) **No, B non è autenticato per A.** A riceve nel passo 3 un messaggio che include \(\{H(M), T\}_{K_B}\). Questa è la firma di B su \(H(M)\) e \(T\). A può verificarla usando la chiave pubblica di B. Tuttavia, il messaggio \(M\) e il timestamp \(T\) sono generati da A (o da una terza parte che li ha trasmessi). Non c'è un elemento generato da B o una sfida da A a cui B risponde con un segreto di B. Quindi, A non ha prova che B sia attivo e abbia generato il messaggio.</li>
+                        <li>
+                            <strong>(a) Sì, il messaggio M è puntuale (protetto da replay) per A.</strong>
+                            <p>Il protocollo utilizza un meccanismo di <strong>sfida-risposta (challenge-response)</strong>.
+                            <ol>
+                                <li>Nel passo 1, A invia a B una "sfida" sotto forma di un timestamp fresco, \(T\).</li>
+                                <li>Nel passo 2, B include questo stesso timestamp \(T\) all'interno della firma digitale (\(E_{PR_B}(H(M, T))\)).</li>
+                            </ol>
+                            Quando A riceve il messaggio, può verificare che il timestamp \(T\) nella firma decifrata sia lo stesso che aveva inviato lui poco prima. Poiché A ha generato \(T\) al momento, sa che la risposta di B è "fresca" e creata specificamente in risposta alla sua sfida. Questo impedisce a un attaccante di riutilizzare una vecchia risposta di B.
+                            </p>
+                        </li>
+                        <li>
+                            <strong>(b) Sì, B è autenticato per A.</strong>
+                            <p>L'autenticazione è garantita dalla <strong>firma digitale</strong>.
+                            <ol>
+                                <li>Nel passo 2, B invia una firma generata con la sua **chiave privata** (\(PR_B\)).</li>
+                                <li>A può usare la **chiave pubblica** di B (che si presume conosca) per decifrare la firma e verificare l'hash.</li>
+                            </ol>
+                            Poiché solo il vero B possiede la chiave privata \(PR_B\), solo lui può aver creato quella firma. Verificando la firma con successo, A ha la prova crittografica che il messaggio proviene effettivamente da B.
+                            </p>
+                        </li>
                     </ul>
-                    <p><strong>Risposta:</strong> (a) Sì, per via del timestamp T. (b) No, perché A non ha una sfida a B per autenticarlo.</p>
+                    <p><strong>Risposta:</strong> (a) Sì, perché il timestamp T, generato da A, funge da nonce/sfida, garantendo la freschezza della risposta. (b) Sì, perché B firma la sua risposta con la sua chiave privata, dimostrando la propria identità.</p>
                 </div>
             </div>
         </article>

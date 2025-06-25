@@ -477,50 +477,49 @@
                 <p>Il termine \((\text{LastByteSent} - \text{LastByteAcked})\) rappresenta i byte già inviati ma non ancora riscontrati. Il mittente invia solo se `EffectiveWindow > 0`.</p>
 
                 <div class="exercise-box">
-                    <strong>Esercizio d'Esame Esempio (adattato dal 04-09-2023, Domanda 13):</strong>
-                    <p>Una socket TCP ha un buffer di uscita di dimensione MaxSendBuffer=10000 byte. Ad un dato istante, le sue variabili di stato sono LastByteAcked=1999, LastByteSent=6999, LastByteWritten=9999. (a) Quanti byte possono essere immediatamente inviati alla controparte? (b) Quanti byte può ancora produrre l'applicazione, prima di bloccarsi (supponendo che nel frattempo non venga ricevuto alcun Acknowledgment dalla controparte)?</p>
+                    <strong>Esercizio d'Esame Esempio (adattato dal 02-02-2023, Domanda 13)</strong>
+                    <p>Una socket TCP ha un buffer di uscita di dimensione MaxSendBuffer=12000 byte. Ad un dato istante, le sue variabili di stato sono LastByteAcked=1000, LastByteSent=3000, LastByteWritten=7000. Le ultime informazioni ricevute dalla controparte dicevano che AdvertisedWindow=2000.</p>
+                    <p>(a) Quanti byte possono essere immediatamente inviati alla controparte?</p>
+                    <p>(b) Quanti byte può ancora produrre l'applicazione, prima di bloccarsi (supponendo che nel frattempo non venga ricevuto alcun Acknowledgment dalla controparte)?</p>
+                    
                     <p><strong>Soluzione:</strong></p>
-                    <ul>
-                        <li>(a) **Byte inviabili alla controparte (Finestra Effettiva):**
-                            L'informazione sul buffer del ricevitore è data dalla `AdvertisedWindow`. Se non specificata, assumiamo sia grande e che il limite sia solo dal buffer del mittente, o che si chieda quanti byte possono essere inviati *sotto i vincoli del mittente*. Dagli appunti del tuo amico, l'AdvertisedWindow è il limite per il mittente. L'esercizio non dà `AdvertisedWindow` né `MaxRecvBuffer`, ma il prof negli appelli simili spesso la specifica o si deduce. Nel caso specifico, la soluzione del prof dice: "Le ultime informazioni ricevute dalla controparte dicevano che AdvertisedWindow=2000". Usiamo questo valore.
-                            `AdvertisedWindow = 2000`.
-                            `LastByteSent = 6999`.
-                            `LastByteAcked = 1999`.
-                            `EffectiveWindow = AdvertisedWindow - (LastByteSent - LastByteAcked)`
-                            `EffectiveWindow = 2000 - (6999 - 1999) = 2000 - 5000 = -3000`.
-                            Un valore negativo significa che la finestra è chiusa o che il mittente ha inviato troppo. Questo non ha senso.
-                            **Riesaminiamo la domanda e la soluzione del prof:**
-                            La risposta del prof per (a) è "Le ultime informazioni ricevute dalla controparte dicevano che AdvertisedWindow=2000, ma da allora sono stati spediti 3000-1000=2000 byte, quindi non si può spedire nessun altro byte." Questa frase si riferisce a uno scenario diverso.
-
-                            **Consideriamo il caso in cui viene dato LastByteAcked=1000, AdvertisedWindow=4000, LastByteSent=3000, LastByteWritten=4000 (questo da un esame del 15-07-2024, Domanda 13):**
-                            *   `AdvertisedWindow = 4000`
-                            *   `LastByteSent = 3000`
-                            *   `LastByteAcked = 1000`
-                            *   Byte inviati ma non riscontrati = `LastByteSent - LastByteAcked = 3000 - 1000 = 2000` byte.
-                            *   Byte che possono essere immediatamente inviati = `AdvertisedWindow - (LastByteSent - LastByteAcked) = 4000 - 2000 = 2000` byte.
-                            *   **Risposta (a):** 2000 byte.
-
-                            **Ora torniamo all'esercizio originale (04-09-2023) con: LastByteAcked=1999, LastByteSent=6999, LastByteWritten=9999. Qui MaxSendBuffer=10000.**
-                            *   L'esercizio NON fornisce `AdvertisedWindow`. Senza di essa, non possiamo calcolare `EffectiveWindow` che è il limite dal ricevitore.
-                            *   Assumendo che la domanda si concentri sul buffer del mittente (MaxSendBuffer) e il limite imposto dal receiver non sia più stringente del buffer del mittente.
-                            *   Spazio occupato nel buffer di invio: `LastByteSent - LastByteAcked = 6999 - 1999 = 5000` byte.
-                            *   Byte ancora inviabili dal buffer del mittente: `MaxSendBuffer - (LastByteSent - LastByteAcked) = 10000 - 5000 = 5000` byte.
-                            *   **Risposta (a) del prof è "Non si può spedire nessun altro byte" e dice "Le ultime informazioni ricevute dalla controparte dicevano che AdvertisedWindow=2000, ma da allora sono stati spediti 3000-1000=2000 byte".** Questa è una spiegazione che si riferisce a dati *diversi* da quelli forniti nella domanda.
-                            *   Se usiamo i dati forniti *nella domanda originale* (1999, 6999), senza `AdvertisedWindow` esplicita, e assumendo un `AdvertisedWindow` tale che `EffectiveWindow` non sia negativa: La domanda chiede quanti byte possono essere immediatamente inviati. I byte inviati ma non riscontrati sono 5000. Se `AdvertisedWindow` fosse 2000 (come nell'esempio del prof per altro compito), allora `EffectiveWindow` sarebbe negativa. C'è un'ambiguità o un dato mancante nella domanda per poterla risolvere con l'AdvertisedWindow. La domanda "Quanti byte possono essere immediatamente inviati alla controparte?" di solito implica `EffectiveWindow`.
-                            *   **Conclusione:** Per questa specifica domanda (04-09-2023, D13a), senza l'AdvertisedWindow, la risposta esatta è difficile. Se si assume che il limite sia solo il buffer del mittente, la risposta sarebbe 5000 byte. Se è zero, `AdvertisedWindow` deve essere <= `LastByteSent - LastByteAcked`.
-
-                        </li>
-                        <li>(b) **Byte che l'applicazione può ancora produrre nel buffer del mittente:**
-                            Buffer di uscita del mittente: `MaxSendBuffer = 10000` byte.
-                            Byte già scritti dall'applicazione nel buffer: `LastByteWritten = 9999`.
-                            Spazio libero nel buffer di uscita per l'applicazione = `MaxSendBuffer - LastByteWritten = 10000 - 9999 = 1` byte.
-                            L'applicazione può produrre solo 1 byte in più prima di bloccarsi.
-                            **Risposta (b):** 1 byte.
-                            <div class="correction-box">
-                                <strong>Correzione/Chiarezza:</strong> La risposta del prof per (b) è "sono 4999 byte da 7000 a 11999, più 1001 da 0 a 1000, quindi 6000 byte in tutto." Questa si riferisce a uno scenario completamente diverso. La mia analisi è basata sulle variabili fornite e sulla logica del buffer produttore-consumatore.
+                    
+                    <p><strong>(a) Calcolo dei byte immediatamente inviabili (EffectiveWindow)</strong></p>
+                    <p>Il mittente può inviare dati solo se c'è spazio sia nella finestra annunciata dal ricevitore (`AdvertisedWindow`) sia nel proprio buffer di invio. La quantità di dati che può essere inviata è limitata dalla `EffectiveWindow`, che tiene conto dei dati già "in volo" (inviati ma non ancora riscontrati).</p>
+                    <ol>
+                        <li><strong>Dati "in volo":</strong> Calcoliamo quanti byte sono stati inviati ma non hanno ancora ricevuto un ACK.
+                            <div class="math-block">
+                                $$ \text{Dati in volo} = \text{LastByteSent} - \text{LastByteAcked} = 3000 - 1000 = 2000 \text{ byte} $$
                             </div>
                         </li>
-                    </ul>
+                        <li><strong>Finestra effettiva:</strong> Calcoliamo lo spazio rimanente nella finestra del ricevitore.
+                            <div class="math-block">
+                                $$ \text{EffectiveWindow} = \text{AdvertisedWindow} - \text{Dati in volo} = 2000 - 2000 = 0 \text{ byte} $$
+                            </div>
+                        </li>
+                    </ol>
+                    <p>Poiché la finestra effettiva è 0, il mittente non può inviare immediatamente nessun altro byte. Deve attendere un ACK che "apra" la finestra.</p>
+                    <p><strong>Risposta (a): 0 byte.</strong></p>
+                
+                    <p><strong>(b) Calcolo dei byte che l'applicazione può ancora scrivere nel buffer</strong></p>
+                    <p>L'applicazione scrive dati nel buffer di uscita del mittente (`MaxSendBuffer`). Si blocca quando questo buffer è pieno. Dobbiamo calcolare lo spazio libero in questo buffer.</p>
+                    <ol>
+                        <li><strong>Spazio occupato nel buffer:</strong> Lo spazio occupato è dato dalla differenza tra l'ultimo byte scritto dall'applicazione e l'ultimo byte che è stato riscontrato (poiché i byte riscontrati possono essere rimossi dal buffer).
+                            <div class="math-block">
+                                $$ \text{Spazio Occupato} = \text{LastByteWritten} - \text{LastByteAcked} = 7000 - 1000 = 6000 \text{ byte} $$
+                            </div>
+                        </li>
+                        <li><strong>Spazio libero nel buffer:</strong> Calcoliamo lo spazio rimanente nel buffer di invio.
+                            <div class="math-block">
+                                $$ \text{Spazio Libero} = \text{MaxSendBuffer} - \text{Spazio Occupato} = 12000 - 6000 = 6000 \text{ byte} $$
+                            </div>
+                        </li>
+                    </ol>
+                    <p>L'applicazione può quindi scrivere altri 6000 byte nel buffer prima di essere bloccata.</p>
+                    <p><strong>Risposta (b): 6000 byte.</strong></p>
+                    <div class="clarification-box">
+                        <strong>Nota di Chiarezza:</strong> La soluzione originale del professore per questo esercizio era: "(a) ... non si può spedire nessun altro byte. (b) sono 4999 byte da 7000 a 11999, più 1001 da 0 a 1000, quindi 6000 byte in tutto." La mia spiegazione segue la stessa logica ma la articola in modo più chiaro e formale, usando le formule corrette. Il calcolo del professore per la parte (b) usa un approccio basato sul buffer circolare, che porta allo stesso risultato (5000 byte rimanenti + 1000 byte liberati dagli ACK).
+                    </div>
                 </div>
 
                 <h4 class="subsubsection-title" id="silly-window-nagle">Silly Window Syndrome e Algoritmo di Nagle</h4>
@@ -536,7 +535,7 @@
                 </ul>
 
                 <div class="exercise-box">
-                    <strong>Esercizio d'Esame Esempio (adattato dal 19-02-2024, Domanda 13):</strong>
+                    <strong>Esercizio d'Esame Esempio (adattato dal 04-09-2023, Domanda 13):</strong>
                     <p>Un processo sta inviando dati ad un altro processo, attraverso una connessione TCP con MSS=1460 byte e RTT=30ms. Se il processo sender scrive nella socket un buffer di 200 byte ogni 5 ms, qual è la dimensione del payload segmenti inviati? Si spieghi il motivo.</p>
                     <p><strong>Soluzione:</strong></p>
                     <ol>
