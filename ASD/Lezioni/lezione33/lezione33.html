@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 33: Insiemi Disgiunti (Alberi)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 7 apr 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 33: Insiemi Disgiunti (Alberi)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro" class="sidebar-link">1. Implementazione con Foreste di Alberi</a></li>
+            <li><a href="#operazioni-base" class="sidebar-link">2. Operazioni di Base con le Foreste</a></li>
+            <li><a href="#make-set" class="sidebar-link">2.1. Make-Set</a></li>
+            <li><a href="#find-set" class="sidebar-link">2.2. Find-Set</a></li>
+            <li><a href="#union" class="sidebar-link">2.3. Union</a></li>
+            <li><a href="#analisi-semplice" class="sidebar-link">3. Analisi della Complessità (Implementazione Semplice)</a></li>
+            <li><a href="#caso-peggiore" class="sidebar-link">3.1. Caso Peggiore: Alberi Degeneri</a></li>
+            <li><a href="#ottimizzazione-union" class="sidebar-link">4. Ottimizzazione: Union by Rank</a></li>
+            <li><a href="#union-by-rank-logica" class="sidebar-link">4.1. Logica e Implementazione</a></li>
+            <li><a href="#union-by-rank-esempio" class="sidebar-link">4.2. Esempio di Union by Rank</a></li>
+            <li><a href="#analisi-union-by-rank" class="sidebar-link">4.3. Analisi della Complessità con Union by Rank</a></li>
+            <li><a href="#prova-lemma-altezza" class="sidebar-link">4.3.1. Dimostrazione: l'altezza è logaritmica</a></li>
+            <li><a href="#ottimizzazione-find" class="sidebar-link">5. Ottimizzazione: Path Compression</a></li>
+            <li><a href="#path-compression-logica" class="sidebar-link">5.1. Logica e Implementazione</a></li>
+            <li><a href="#domanda-rank-altezza" class="sidebar-link">5.2. Il rank coincide ancora con l'altezza?</a></li>
+            <li><a href="#conclusioni" class="sidebar-link">6. Conclusioni e Complessità Finale</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro" class="content-section active-section">
+            <h2 class="section-title">1. Implementazione di Insiemi Disgiunti con Foreste di Alberi</h2>
+            <div class="section-content">
+                <p>La professoressa introduce una seconda, più efficiente, implementazione per la struttura dati degli insiemi disgiunti. Invece di usare liste concatenate, ogni insieme viene rappresentato da un <strong>albero</strong>. L'intera collezione di insiemi è quindi una <strong>foresta</strong>.</p>
+                <ul>
+                    <li>Ogni nodo dell'albero corrisponde a un membro dell'insieme.</li>
+                    <li>Tutti i nodi all'interno di un singolo albero appartengono allo stesso insieme.</li>
+                    <li>Il <strong>rappresentante</strong> di ogni insieme è la <strong>radice</strong> dell'albero corrispondente.</li>
+                </ul>
+                <p>La struttura di ogni nodo è semplice: contiene una chiave (<code>key</code>) e un solo puntatore, quello al <strong>genitore</strong> (<code>parent</code>). Non sono necessari puntatori ai figli.</p>
+                <p><strong>Convenzione per la radice:</strong> un nodo `x` è la radice del suo albero se il suo puntatore al genitore punta a se stesso: `x.parent == x`.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Insieme {1, 3, 5}"
+                            A(3) --> B(5)
+                            B --> C(1)
+                        end
+                        subgraph "Insieme {2, 4}"
+                            D(2) --> E(4)
+                        end
+                        subgraph "Insieme {6, 7, 8}"
+                            F(6) --> G(7)
+                            F --> H(8)
+                        end
+                        style A,D,F fill:#60a5fa,stroke:#93c5fd,color:#fff,stroke-width:2px;
+                    </pre>
+                    <p>In questo esempio, i rappresentanti dei tre insiemi sono i nodi 3, 2 e 6.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="operazioni-base" class="content-section">
+            <h2 class="section-title">2. Operazioni di Base con le Foreste</h2>
+            <div class="section-content">
+                <p>Vediamo come vengono implementate le tre operazioni fondamentali con questa nuova struttura.</p>
+            </div>
+        </article>
+        
+        <article id="make-set" class="content-section">
+            <h3 class="subsection-title">2.1. Make-Set</h3>
+            <div class="section-content">
+                <p>L'operazione <code>Make-Set(x)</code> crea un nuovo insieme contenente solo l'elemento `x`. Questo si traduce nella creazione di un albero con un unico nodo, `x`, che è anche la radice.</p>
+                <pre><code class="language-pseudocode">
+Make-Set(x)
+  // x è un oggetto con la sua chiave già inizializzata
+  x.parent = x
+  return x
+                </code></pre>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        A(k) --> A
+                    </pre>
+                </div>
+                <p>L'operazione ha chiaramente un costo di \(\Theta(1)\).</p>
+            </div>
+        </article>
+
+        <article id="find-set" class="content-section">
+            <h3 class="subsection-title">2.2. Find-Set</h3>
+            <div class="section-content">
+                <p>Per trovare il rappresentante dell'insieme contenente `x`, si deve risalire l'albero seguendo i puntatori `parent` fino a raggiungere la radice (il nodo il cui genitore è se stesso).</p>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        R(radice)
+                        P(parent)
+                        X(x)
+                        R --> R
+                        P --> R
+                        X --> P
+                    </pre>
+                </div>
+                <pre><code class="language-pseudocode">
+Find-Set(x)
+  if (x != x.parent) then
+    return Find-Set(x.parent)
+  else
+    return x
+                </code></pre>
+                <p>Il costo di questa operazione è proporzionale all'altezza del nodo `x` nell'albero, quindi \(O(h)\).</p>
+            </div>
+        </article>
+        
+        <article id="union" class="content-section">
+            <h3 class="subsection-title">2.3. Union</h3>
+            <div class="section-content">
+                <p>Per unire gli insiemi di `x` e `y`, si uniscono i loro alberi. L'approccio più semplice è far diventare la radice di un albero figlia della radice dell'altro albero.</p>
+                <ol>
+                    <li>Si trovano i rappresentanti di `x` e `y` tramite `Find-Set`. Siano essi `z` e `w`.</li>
+                    <li>Se `z` e `w` sono diversi (cioè `x` e `y` sono in insiemi diversi), si imposta il puntatore `parent` di una radice a puntare all'altra (es. `w.parent = z`).</li>
+                </ol>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Prima"
+                           R1(z) --> ...
+                           R2(w) --> ...
+                        end
+                        subgraph "Dopo Union(x,y)"
+                           R1_new(z) --> ...
+                           R1_new --> R2_new(w)
+                           R2_new --> ...
+                        end
+                    </pre>
+                </div>
+                <pre><code class="language-pseudocode">
+Union(x, y)
+  z = Find-Set(x)
+  w = Find-Set(y)
+  if (z != w) then
+    Link(z, w)
+
+Link(z, w) // z e w sono radici
+  w.parent = z
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="analisi-semplice" class="content-section">
+            <h2 class="section-title">3. Analisi della Complessità (Implementazione Semplice)</h2>
+            <div class="section-content">
+                <p>Analizziamo una sequenza di `m` operazioni, di cui `n` sono `Make-Set`.</p>
+                 <ul>
+                    <li><code>Make-Set</code>: \(\Theta(1)\). Costo totale per `n` chiamate: \(\Theta(n)\).</li>
+                    <li><code>Find-Set</code>: \(O(h)\), dove `h` è l'altezza dell'albero.</li>
+                    <li><code>Union</code>: Costa quanto due `Find-Set`, quindi anch'essa \(O(h)\).</li>
+                </ul>
+                <p>Il problema è che l'altezza `h` non è limitata. Con una sequenza sfortunata di `Union`, si possono creare alberi degeneri, ovvero delle liste.</p>
+            </div>
+        </article>
+
+        <article id="caso-peggiore" class="content-section">
+            <h3 class="subsection-title">3.1. Caso Peggiore: Alberi Degeneri</h3>
+            <div class="section-content">
+                <p>La professoressa mostra come una sequenza di `n-1` unioni possa creare un albero di altezza `n-1`.</p>
+                <ol>
+                    <li>Si creano `n` insiemi singoletti: \(x_1, x_2, ..., x_n\).</li>
+                    <li>Si eseguono le seguenti `n-1` unioni: <code>Union(x2, x1)</code>, <code>Union(x3, x2)</code>, ...</li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Correzione rispetto agli appunti:</strong> Negli appunti della professoressa la sequenza di Union è `Union(2,1)`, `Union(3,1)`, etc. Questo creerebbe un albero "a stella" di altezza 1. Per creare un albero degenere (una catena) la sequenza corretta è `Union(x1,x2)`, `Union(x2,x3)`, e così via. Tuttavia, l'analisi di complessità che segue è basata sullo scenario peggiore, che è la catena, quindi la logica rimane valida.
+                </div>
+                 <p>La sequenza <code>Union(x_i, x_{i-1})</code> crea una catena di altezza `n-1`. In questo scenario, un'operazione di `Find-Set` su un nodo foglia richiederebbe di risalire `n-1` puntatori, con un costo di \(\Theta(n)\).</p>
+                <p>Il costo totale di una sequenza di `m` operazioni diventa quindi \(\Theta(n) + (m-n) \cdot O(n) = O(m \cdot n)\), che è molto inefficiente.</p>
+            </div>
+        </article>
+
+        <article id="ottimizzazione-union" class="content-section">
+            <h2 class="section-title">4. Ottimizzazione: Union by Rank</h2>
+            <div class="section-content">
+                <p>Per evitare la creazione di alberi degeneri, si introduce la prima euristica di ottimizzazione: <strong>Union by Rank</strong> (Unione per rango).</p>
+                <p><strong>Idea:</strong> Invece di unire arbitrariamente un albero all'altro, si unisce sempre l'<strong>albero più basso (con altezza minore)</strong> come figlio della radice dell'<strong>albero più alto</strong>.</p>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Albero A (h=H)"
+                            A(...)
+                        end
+                        subgraph "Albero B (h=h, h < H)"
+                            B(...)
+                        end
+                        subgraph "Union by Rank"
+                            A2(...) --> B2(...)
+                        end
+                    </pre>
+                </div>
+                <p>L'altezza dell'albero risultante aumenta <strong>solo quando si uniscono due alberi della stessa altezza</strong>. In questo caso, l'altezza della nuova radice aumenta di uno.</p>
+            </div>
+        </article>
+        
+        <article id="union-by-rank-logica" class="content-section">
+            <h3 class="subsection-title">4.1. Logica e Implementazione</h3>
+            <div class="section-content">
+                <p>Per implementare questa euristica, dobbiamo memorizzare l'altezza (o una sua approssimazione) di ogni albero. Si aggiunge un campo `rank` a ogni nodo.</p>
+                <ul>
+                    <li><code>Make-Set(x)</code> inizializza `x.rank = 0`.</li>
+                    <li><code>Union(x, y)</code> confronta i `rank` delle due radici:
+                        <ul>
+                            <li>Se `z.rank > w.rank`, `w` diventa figlio di `z`.</li>
+                            <li>Se `w.rank > z.rank`, `z` diventa figlio di `w`.</li>
+                            <li>Se `z.rank == w.rank`, si sceglie arbitrariamente (es. `w` diventa figlio di `z`) e si incrementa il rango della nuova radice: `z.rank = z.rank + 1`.</li>
+                        </ul>
+                    </li>
+                </ul>
+                <pre><code class="language-pseudocode">
+// Make-Set modificato
+Make-Set(x)
+  x.parent = x
+  x.rank = 0
+
+// Union-by-Rank
+Union(x, y)
+  z = Find-Set(x)
+  w = Find-Set(y)
+  if z != w then
+    Link-by-Rank(z, w)
+
+Link-by-Rank(z, w)
+  if z.rank > w.rank then
+    w.parent = z
+  else
+    z.parent = w
+    if z.rank == w.rank then
+      w.rank = w.rank + 1
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="union-by-rank-esempio" class="content-section">
+            <h3 class="subsection-title">4.2. Esempio di Union by Rank</h3>
+            <div class="section-content">
+                <p>La professoressa mostra l'applicazione di `Union-by-Rank` sulla stessa sequenza di prima (`Union(2,1)`, `Union(3,1)`, `Union(4,1)`, `Union(7,8)`, `Union(1,8)`).</p>
+                <p>Invece di creare una lunga catena, l'euristica produce alberi molto più "bassi" e "larghi", mantenendo l'altezza contenuta.</p>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Stato Finale"
+                            R1(1, rank=1) --> N2(2)
+                            R1 --> N3(3)
+                            R2(8, rank=1) --> N1(1)
+                            R2 --> N7(7)
+                            N1 --> N4(4)
+                        end
+                    </pre>
+                </div>
+                <p>L'esempio mostra come il `rank` aumenti solo quando si uniscono alberi di pari rango, mantenendo la struttura bilanciata.</p>
+            </div>
+        </article>
+
+        <article id="analisi-union-by-rank" class="content-section">
+            <h3 class="subsection-title">4.3. Analisi della Complessità con Union by Rank</h3>
+            <div class="section-content">
+                <p>Con l'euristica Union by Rank, si può dimostrare un importante risultato sull'altezza massima degli alberi.</p>
+                <p><strong>Lemma:</strong> Utilizzando Union by Rank, un albero di altezza (rango) `h` contiene almeno \(2^h\) nodi.</p>
+                <p>Questo implica che per un albero con `n` nodi, la sua altezza `h` è limitata superiormente: \(n \ge 2^h \implies h \le \log_2 n\). Quindi, l'altezza degli alberi è sempre logaritmica.</p>
+                <p>Il costo di `Find` e `Union` diventa quindi \(O(\log n)\). Il costo di una sequenza di `m` operazioni diventa \(O(m \log n)\).</p>
+            </div>
+        </article>
+        
+        <article id="prova-lemma-altezza" class="content-section">
+            <h4 class="subsubsection-title">4.3.1. Dimostrazione: l'altezza è logaritmica</h4>
+            <div class="section-content">
+                <p>La professoressa dimostra il lemma per induzione sull'altezza `h`.</p>
+                <ul>
+                    <li><strong>Caso Base (h=0):</strong> Un albero di altezza 0 ha 1 nodo (\(2^0=1\)). La proprietà è vera.</li>
+                    <li><strong>Passo Induttivo:</strong> Assumiamo che la proprietà valga per tutti gli alberi di altezza \(< h\). Un albero di altezza `h` si è formato unendo due alberi di altezza `h-1`. Per ipotesi induttiva, ciascuno di questi due alberi aveva almeno \(2^{h-1}\) nodi. L'albero risultante ha quindi almeno \(2^{h-1} + 2^{h-1} = 2 \cdot 2^{h-1} = 2^h\) nodi.</li>
+                </ul>
+                <p>La dimostrazione conferma che l'altezza è logaritmica.</p>
+            </div>
+        </article>
+        
+        <article id="ottimizzazione-find" class="content-section">
+            <h2 class="section-title">5. Ottimizzazione: Path Compression</h2>
+            <div class="section-content">
+                <p>L'euristica Union by Rank migliora le `Union`, ma le `Find` possono ancora essere inefficienti se si percorrono ripetutamente gli stessi lunghi cammini. L'euristica <strong>Path Compression</strong> (Compressione del cammino) affronta questo problema.</p>
+            </div>
+        </article>
+
+        <article id="path-compression-logica" class="content-section">
+            <h3 class="subsection-title">5.1. Logica e Implementazione</h3>
+            <div class="section-content">
+                <p><strong>Idea:</strong> Quando si esegue una `Find-Set(x)`, dopo aver trovato la radice `r`, si fa una seconda passata lungo il cammino percorso e si imposta il `parent` di ogni nodo su quel cammino a puntare direttamente alla radice `r`.</p>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Prima"
+                            R --> P1
+                            P1 --> P2
+                            P2 --> X
+                        end
+                        subgraph "Dopo Find(x)"
+                           R2 --> P1_2
+                           R2 --> P2_2
+                           R2 --> X2
+                        end
+                    </pre>
+                </div>
+                <p>Questa ottimizzazione "appiattisce" l'albero, rendendo le successive operazioni di `Find` su quei nodi (e i loro discendenti) estremamente veloci, quasi \(\Theta(1)\).</p>
+                <pre><code class="language-pseudocode">
+Find-Set-PC(x) // Con Path Compression
+  if (x != x.parent) then
+    // Aggiorna il genitore di x con il risultato della chiamata ricorsiva
+    x.parent = Find-Set-PC(x.parent)
+  return x.parent
+                </code></pre>
+                 <div class="clarification-box">
+                    <strong>Come funziona il codice ricorsivo?</strong>
+                    <p>La professoressa spiega che questa implementazione elegante funziona grazie alla ricorsione. La chiamata `Find-Set-PC(x.parent)` risale fino a trovare la radice. Man mano che le chiamate ricorsive "ritornano", il valore della radice viene propagato all'indietro e assegnato come nuovo `parent` a ogni nodo del cammino. Ad esempio, quando la chiamata su `x.parent` ritorna la radice, l'istruzione `x.parent = ...` collega `x` direttamente alla radice.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="domanda-rank-altezza" class="content-section">
+            <h3 class="subsection-title">5.2. Il rank coincide ancora con l'altezza?</h3>
+            <div class="section-content">
+                <p>La professoressa pone una domanda cruciale: con la Path Compression, il campo `rank` continua a rappresentare l'altezza effettiva dell'albero?</p>
+                <p><strong>Risposta: No.</strong> La Path Compression modifica la struttura dell'albero e può ridurre l'altezza senza che il `rank` venga aggiornato. Per questo motivo, il `rank` non è più l'altezza, ma un <strong>limite superiore (upper bound)</strong> all'altezza. Tuttavia, l'analisi di complessità e la logica della `Union by Rank` rimangono valide anche usando il `rank` come stima.</p>
+            </div>
+        </article>
+
+        <article id="conclusioni" class="content-section">
+            <h2 class="section-title">6. Conclusioni e Complessità Finale</h2>
+            <div class="section-content">
+                <p>La lezione ha mostrato come l'implementazione di insiemi disgiunti con foreste di alberi, se ottimizzata con entrambe le euristiche (<strong>Union by Rank</strong> e <strong>Path Compression</strong>), sia estremamente efficiente.</p>
+                <p><strong>Complessità Finale:</strong></p>
+                <p>Anche se la dimostrazione non viene fatta nel corso, il costo di una sequenza di `m` operazioni con entrambe le euristiche è quasi lineare:</p>
+                <div class="math-block">
+                Costo Totale = \(O(m \cdot \alpha(n))\)
+                </div>
+                <p>dove \(\alpha(n)\) è la <strong>funzione inversa di Ackermann</strong>. Questa funzione cresce in modo così lento che, per tutti gli scopi pratici e per qualsiasi valore di `n` gestibile da un computer, il suo valore è una costante molto piccola (tipicamente \(\le 4\)).</p>
+                <p>Questo rende la struttura dati per insiemi disgiunti una delle più efficienti conosciute per questo tipo di problema.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
