@@ -495,18 +495,91 @@ B-Tree-Insert-Not-Full(x, k, t)
         </article>
         
         <article id="cancellazione-esempio" class="content-section">
-            <h3 class="subsection-title">3.4. Esempio di Cancellazione</h3>
+            <h3 class="subsection-title">3.4. Esempi di Cancellazione</h3>
             <div class="section-content">
-                <p>La professoressa mostra un esempio di cancellazione della chiave <strong>2</strong> da un B-Tree.</p>
+                <p>La strategia di cancellazione preventiva è potente ma può essere complessa da visualizzare. Vediamo due esempi distinti che illustrano le due principali tecniche di ribilanciamento: «rubare» da un fratello e «fondere» due fratelli.</p>
+                <p>Useremo un B‑Tree di grado <strong>t = 2</strong>, dove ogni nodo (diverso dalla radice) deve avere almeno <strong>t − 1 = 1</strong> chiave.</p>
+        
+                <!-- -------------------------------------------------------------- -->
+                <!-- CASO 1 · BORROW / ROTAZIONE                                   -->
+                <!-- -------------------------------------------------------------- -->
+                <h4 class="subsubsection-title">Caso 1: «Rubare» una chiave da un Fratello (Rotazione)</h4>
+                <p><strong>Situazione:</strong> Dobbiamo scendere in un nodo <code>y</code> che ha il numero minimo di chiavi (<code>t − 1</code>), mentre un suo fratello adiacente <code>z</code> possiede almeno <code>t</code> chiavi (più del minimo).</p>
+                <p><strong>Obiettivo:</strong> Cancellare la chiave <strong>20</strong> dall’albero seguente.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                        graph TD
+                            R("10") --> C1("4, 5")
+                            R --> C2("20")
+                    </pre>
+                </div>
                 <ol>
-                    <li>Si parte dalla radice `[3, 10]`. La chiave 2 è minore di 3, quindi si deve scendere nel primo figlio `[1, 2]`.</li>
-                    <li>Prima di scendere, si nota che il figlio di destinazione `[1, 2]` ha `t-1=1` chiave (per `t=2`). Non si può scendere.</li>
-                    <li>Si guarda il fratello adiacente, `[4, 8]`. Questo ha più di `t-1` chiavi, quindi si può "rubare".</li>
-                    <li>Si esegue la rotazione: il `3` scende dalla radice, il `4` sale dal fratello. La radice diventa `[4, 10]` e i figli `[1, 2, 3]` e `[8]`.</li>
-                    <li>Ora si può scendere nel nodo `[1, 2, 3]`, che non è più al minimo. Si rimuove il 2.</li>
+                    <li><strong>Passo 1: Discesa e controllo preventivo.</strong> Partiamo dalla radice <code>[10]</code>. Poiché <code>20 &gt; 10</code>, dovremmo scendere nel figlio destro <code>[20]</code>. Questo nodo ha una sola chiave, esattamente il minimo (<code>t − 1 = 1</code>); prima di scendere dobbiamo riequilibrarlo. Il suo fratello sinistro <code>[4, 5]</code> possiede 2 chiavi (<code>≥ t</code>) e può cederne una.</li>
+                    <li><strong>Passo 2: Rotazione (borrow).</strong>
+                        <ul>
+                            <li>La chiave separatrice <code>10</code> scende dal padre nel nodo «povero» <code>[20]</code>.</li>
+                            <li>La chiave più vicina del fratello «ricco» (<code>5</code>) sale per occupare il posto lasciato da <code>10</code> nella radice.</li>
+                            <li>Il nodo <code>[4, 5]</code> perde la chiave <code>5</code>.</li>
+                        </ul>
+                        L’albero diventa:
+                        <div class="mermaid-container tree-diagram">
+                            <pre class="mermaid">
+                                graph TD
+                                    R_new("5") --> C1_new("4")
+                                    R_new --> C2_new("10, 20")
+                            </pre>
+                        </div>
+                    </li>
+                    <li><strong>Passo 3: Cancellazione finale.</strong> Dalla nuova radice <code>[5]</code> scendiamo nel figlio destro <code>[10, 20]</code>. Questo nodo è una foglia con due chiavi (> minimo), quindi possiamo rimuovere in sicurezza <code>20</code>; il nodo diventa <code>[10]</code>.</li>
                 </ol>
+                <p><strong>Albero finale:</strong></p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                        graph TD
+                            R_final("5") --> C1_final("4")
+                            R_final --> C2_final("10")
+                    </pre>
+                </div>
+        
+                <!-- -------------------------------------------------------------- -->
+                <!-- CASO 2 · MERGE                                                -->
+                <!-- -------------------------------------------------------------- -->
+                <h4 class="subsubsection-title">Caso 2: Fondere un Nodo con un Fratello (Merge)</h4>
+                <p><strong>Situazione:</strong> Stiamo per scendere in un nodo <code>y</code> che ha <code>t − 1</code> chiavi, e anche il suo fratello adiacente <code>z</code> è al minimo.</p>
+                <p><strong>Obiettivo:</strong> Cancellare la chiave <strong>5</strong> dall’albero seguente.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                        graph TD
+                            R("10") --> C1("5")
+                            R --> C2("20")
+                    </pre>
+                </div>
+                <ol>
+                    <li><strong>Passo 1: Discesa e controllo preventivo.</strong> Dalla radice <code>[10]</code> vogliamo scendere nel figlio sinistro <code>[5]</code>. Poiché sia <code>[5]</code> sia il fratello destro <code>[20]</code> hanno una sola chiave (il minimo), non è possibile prendere in prestito: dobbiamo fondere.</li>
+                    <li><strong>Passo 2: Fusione (merge).</strong>
+                        <ul>
+                            <li>La chiave separatrice <code>10</code> scende nel nuovo nodo fuso.</li>
+                            <li>I nodi <code>[5]</code>, <code>10</code> e <code>[20]</code> si combinano in <code>[5, 10, 20]</code>.</li>
+                            <li>La radice originale si svuota; il nodo fuso diventa la nuova radice e l’altezza dell’albero diminuisce di 1.</li>
+                        </ul>
+                        <div class="mermaid-container tree-diagram">
+                            <pre class="mermaid">
+                                graph TD
+                                    R_new("5, 10, 20")
+                            </pre>
+                        </div>
+                    </li>
+                    <li><strong>Passo 3: Cancellazione finale.</strong> L’albero ora è formato da un solo nodo non al minimo, dunque possiamo rimuovere direttamente la chiave <code>5</code>. La nuova radice diventa <code>[10, 20]</code>.</li>
+                </ol>
+                <p><strong>Albero finale:</strong></p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                        graph TD
+                            R_final("10, 20")
+                    </pre>
+                </div>
             </div>
-        </article>
+        </article>        
         
         <article id="cancellazione-complessita" class="content-section">
             <h3 class="subsection-title">3.5. Complessità della Cancellazione</h3>
