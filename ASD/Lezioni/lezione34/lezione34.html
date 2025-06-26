@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 34: Analisi Insiemi Disgiunti e Esercizi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 14 apr 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 34: Analisi Insiemi Disgiunti e Esercizi</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#recap" class="sidebar-link">1. Recap: Insiemi Disgiunti con Alberi</a></li>
+            <li><a href="#analisi-costi" class="sidebar-link">2. Analisi della Complessità con Euristiche</a></li>
+            <li><a href="#confronto-costi" class="sidebar-link">2.1. Confronto tra Costo con Union-by-Rank e Costo Finale</a></li>
+            <li><a href="#relazione-rank-altezza" class="sidebar-link">2.2. Relazione tra Rank e Altezza effettiva</a></li>
+            <li><a href="#path-compression-inplace" class="sidebar-link">3. Esercizio: Find-Set con Path Compression in-place</a></li>
+            <li><a href="#esercizi-riepilogo" class="sidebar-link">4. Esercizi di Riepilogo</a></li>
+            <li><a href="#esercizio-1" class="sidebar-link">4.1. Esercizio 1: Compito del 23/06/17</a></li>
+            <li><a href="#esercizio-costo-lineare" class="sidebar-link">4.2. Esercizio 2: Analisi del "Costo Lineare"</a></li>
+            <li><a href="#esercizio-media" class="sidebar-link">4.3. Esercizio 3: Calcolo della Media</a></li>
+            <li><a href="#esercizio-somma" class="sidebar-link">4.4. Esercizio 4: Calcolo della Somma</a></li>
+            <li><a href="#conclusioni" class="sidebar-link">5. Conclusioni</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="recap" class="content-section active-section">
+            <h2 class="section-title">1. Recap: Insiemi Disgiunti con Alberi</h2>
+            <div class="section-content">
+                <p>La professoressa inizia la lezione riepilogando l'implementazione degli insiemi disgiunti tramite foreste di alberi e le due euristiche di ottimizzazione viste nella lezione precedente:</p>
+                <ul>
+                    <li><strong>Union by Rank:</strong> Durante un'operazione di `Union`, si aggancia sempre l'albero con rango (altezza approssimata) minore a quello con rango maggiore. Questo garantisce che l'altezza degli alberi rimanga logaritmica.</li>
+                    <li><strong>Path Compression:</strong> Durante un'operazione di `Find-Set(x)`, tutti i nodi sul cammino da `x` alla radice vengono agganciati direttamente alla radice stessa, appiattendo l'albero.</li>
+                </ul>
+                <p>Era stata presentata anche la versione ricorsiva della `Find-Set` con Path Compression.</p>
+                <pre><code class="language-pseudocode">
+Find-Set-PC(x)
+  if (x != x.parent) then
+    x.parent = Find-Set-PC(x.parent)
+  return x.parent
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="analisi-costi" class="content-section">
+            <h2 class="section-title">2. Analisi della Complessità con Euristiche</h2>
+            <div class="section-content">
+                <p>La lezione prosegue con l'analisi del costo di una sequenza di `m` operazioni (di cui `n` sono `Make-Set`) quando si utilizzano entrambe le euristiche.</p>
+                <div class="note-box">
+                    <strong>Risultato Finale (senza dimostrazione formale):</strong>
+                    <p>La professoressa enuncia il risultato finale, la cui dimostrazione formale è complessa e non viene trattata nel corso:</p>
+                    <p>Il costo di una sequenza di `m` operazioni (con `n` `Make-Set`), utilizzando sia `Union by Rank` che `Path Compression`, è:</p>
+                    <div class="math-block">
+                    Costo Totale = \(O(m \cdot \alpha(m, n))\)
+                    </div>
+                    <p>dove \(\alpha(m, n)\) è la <strong>funzione inversa di Ackermann</strong>.</p>
+                </div>
+                <p>La funzione di Ackermann cresce in modo estremamente rapido, molto più di una funzione esponenziale. Di conseguenza, la sua inversa \(\alpha\) cresce in modo <strong>estremamente lento</strong>. Per qualsiasi valore pratico di `m` e `n`, il valore di \(\alpha(m, n)\) è una costante molto piccola (tipicamente \(\le 4\)).</p>
+                <p>Questo significa che il costo totale è quasi lineare rispetto a `m`, cioè \(O(m)\).</p>
+            </div>
+        </article>
+        
+        <article id="confronto-costi" class="content-section">
+            <h3 class="subsection-title">2.1. Confronto tra Costo con Union-by-Rank e Costo Finale</h3>
+            <div class="section-content">
+                <p>Viene fatto un confronto tra il costo ottenuto con la sola `Union by Rank` e quello con entrambe le euristiche.</p>
+                <ul>
+                    <li><strong>Solo Union by Rank:</strong> Il costo era \(O(m \log n)\).</li>
+                    <li><strong>Union by Rank + Path Compression:</strong> Il costo è \(O(m \cdot \alpha(m, n))\), che è praticamente \(O(m)\).</li>
+                </ul>
+                <p>La professoressa spiega l'intuizione dietro questo risultato. Nella migliore delle ipotesi, ogni operazione costa \(\Omega(1)\), quindi una sequenza di `m` operazioni deve costare almeno \(\Omega(m)\). Il risultato ottenuto con entrambe le euristiche è quindi molto vicino al limite inferiore teorico, rendendo questa implementazione estremamente efficiente.</p>
+            </div>
+        </article>
+        
+        <article id="relazione-rank-altezza" class="content-section">
+            <h3 class="subsection-title">2.2. Relazione tra Rank e Altezza effettiva</h3>
+            <div class="section-content">
+                <p>Viene ripreso un punto importante già accennato: la differenza tra `rank` e altezza effettiva quando si usa la Path Compression.</p>
+                <ul>
+                    <li><strong>Senza Path Compression:</strong> `rank` è esattamente l'altezza dell'albero.</li>
+                    <li><strong>Con Path Compression:</strong> Il `rank` diventa una <strong>stima per eccesso</strong> dell'altezza. La Path Compression può ridurre l'altezza di un albero, ma il `rank` non viene ricalcolato (sarebbe troppo costoso).</li>
+                </ul>
+                <div class="clarification-box">
+                    <strong>Perché non si ricalcola il rank?</strong>
+                    <p>Ricalcolare il rank dopo ogni `Find` con Path Compression richiederebbe di visitare l'intero sottoalbero per trovare la nuova altezza massima. Questo annullerebbe i benefici della Path Compression, portando il costo di una singola `Find` a \(O(n)\).</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="path-compression-inplace" class="content-section">
+            <h2 class="section-title">3. Esercizio: Find-Set con Path Compression in-place</h2>
+            <div class="section-content">
+                <div class="exercise-box">
+                    <strong>Esercizio (dal compito del 22/01/2020):</strong>
+                    <p>Scrivere una versione <strong>in-place</strong> (cioè non ricorsiva) della procedura `Find-Set` con Path Compression.</p>
+                    <p><strong>Soluzione (discussa in aula):</strong></p>
+                    <p>Poiché la versione ricorsiva esegue due passate logiche (una in salita per trovare la radice, una in discesa per aggiornare i puntatori), la versione iterativa (in-place) dovrà simulare questo comportamento.</p>
+                    <ol>
+                        <li><strong>Prima Passata (Trovare la radice):</strong> Si parte dal nodo `x` e si risale l'albero con un ciclo `while` seguendo i puntatori `parent`, fino a trovare la radice. Si usa un puntatore ausiliario `y` per questa operazione.</li>
+                        <li><strong>Seconda Passata (Aggiornare i puntatori):</strong> Si riparte dal nodo `x` originale e si risale nuovamente. In questa seconda passata, per ogni nodo visitato, si imposta il suo `parent` a puntare direttamente alla radice trovata al passo precedente.</li>
+                    </ol>
+                    <pre><code class="language-pseudocode">
+Find-PC-while(x)
+  // 1. Trova la radice
+  y = x
+  while (y != y.parent) do
+    y = y.parent
+  // Ora y punta alla radice
+  
+  // 2. Comprimi il cammino
+  // z è un puntatore temporaneo per non perdere il cammino
+  while (x != y) do
+    z = x.parent
+    x.parent = y
+    x = z
+  
+  return y
+                    </code></pre>
+                    <p><strong>Complessità:</strong> Anche questa versione ha lo stesso costo asintotico di quella ricorsiva, ovvero \(O(h)\) per la singola operazione, ma ha il vantaggio di non usare lo stack di sistema, rendendola in-place.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizi-riepilogo" class="content-section">
+            <h2 class="section-title">4. Esercizi di Riepilogo</h2>
+            <div class="section-content">
+                <p>La professoressa discute una serie di esercizi tratti da compiti d'esame passati per consolidare i concetti.</p>
+            </div>
+        </article>
+
+        <article id="esercizio-1" class="content-section">
+            <h3 class="subsection-title">4.1. Esercizio 1: Compito del 23/06/17</h3>
+            <div class="section-content">
+                <p><strong>Testo:</strong> Si chiede di mostrare lo stato della foresta di insiemi disgiunti dopo una sequenza di operazioni `Make-Set` e `Union`, utilizzando le euristiche di `Union by Rank` e `Path Compression`.</p>
+                <p><strong>Convenzione:</strong> Se due alberi da unire hanno lo stesso rango, la radice con la chiave maggiore diventa la nuova radice.</p>
+                <p><strong>Soluzione (discussa in aula):</strong> La professoressa esegue passo passo le operazioni, mostrando l'evoluzione della foresta. I punti salienti sono:</p>
+                <ul>
+                    <li>Le `Make-Set` creano 10 alberi, ognuno con un solo nodo di rango 0.</li>
+                    <li>Le prime `Union` (es. `Union(2,1)`) uniscono alberi di rango 0, creando alberi di rango 1.</li>
+                    <li>Quando si esegue `Union(1,3)`, si deve prima fare `Find-Set(1)` (che trova radice 2) e `Find-Set(3)` (che trova radice 4). Poiché i ranghi sono uguali (entrambi 1), la radice maggiore (4) diventa la nuova radice dell'albero unito, che avrà rango 2.</li>
+                    <li>Durante le `Find`, la Path Compression appiattisce i cammini. Ad esempio, dopo `Find(3)`, il nodo 3 viene collegato direttamente alla sua radice.</li>
+                </ul>
+                <p>Questo esercizio meccanico serve a verificare la comprensione delle due euristiche e del loro impatto sulla struttura degli alberi.</p>
+            </div>
+        </article>
+
+        <article id="esercizio-costo-lineare" class="content-section">
+            <h3 class="subsection-title">4.2. Esercizio 2: Analisi del "Costo Lineare"</h3>
+            <div class="section-content">
+                <p><strong>Testo:</strong> Si considera una sequenza particolare di `m` operazioni: prima tutte le `Make-Set`, poi tutte le `Union` (assumendo costo \(\Theta(1)\)), e infine tutte le `Find`.</p>
+                <p><strong>Domanda:</strong> Qual è il costo di questa sequenza?</p>
+                <p><strong>Analisi (discussa in aula):</strong></p>
+                <ul>
+                    <li>Le `n` `Make-Set` costano \(\Theta(n)\).</li>
+                    <li>Le `u` `Union` (con \(u \le n-1\)) costano \(\Theta(u)\).</li>
+                    <li>Il costo delle `f` `Find` è più complesso. La professoressa propone un'analisi semplificata:
+                        <ul>
+                            <li>La <strong>prima volta</strong> che si esegue una `Find` su un nodo `x`, il costo è \(O(\log n)\) (perché l'albero è bilanciato grazie a Union-by-Rank). Questa `Find` esegue anche la Path Compression.</li>
+                            <li>Tutte le <strong>successive</strong> `Find` su quello stesso nodo `x` costeranno \(\Theta(1)\), perché `x` è ora collegato direttamente alla radice.</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>Il costo totale delle `Find` può essere visto come la somma dei costi delle prime `Find` per ogni nodo (\(n \cdot O(\log n)\)) più il costo delle restanti `f-n` `Find` (\((f-n) \cdot \Theta(1)\)).</p>
+                <p>Il costo totale della sequenza diventa quindi: \(O(n) + O(u) + O(n \log n) + O(f-n)\). Poiché \(m = n+u+f\), questo si semplifica in:</p>
+                <div class="math-block">
+                Costo Totale = \(O(m + n \log n)\)
+                </div>
+                 <div class="clarification-box">
+                    <strong>Correzione e Approfondimento:</strong> Durante la lezione emerge un dibattito sulla correttezza di un'analisi più semplice che portava a un costo lineare \(O(m)\). La professoressa riconosce che quella prima analisi era fallace. L'analisi basata sul costo della "prima find" è più robusta e porta a \(O(m+n\log n)\), che è comunque un risultato notevolmente migliore di quello senza Path Compression. Il risultato quasi lineare \(O(m \cdot \alpha(m, n))\) è il più preciso, ma la sua dimostrazione è complessa.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-media" class="content-section">
+            <h3 class="subsection-title">4.3. Esercizio 3: Calcolo della Media</h3>
+            <div class="section-content">
+                 <div class="exercise-box">
+                    <strong>Esercizio (dal compito del 18/06/18):</strong>
+                    <p>Estendere la struttura dati per supportare un'operazione `Mean(x)` che calcola la media delle chiavi nell'insieme di `x`.</p>
+                    <p><strong>Soluzione (discussa in aula):</strong></p>
+                    <p>Bisogna aggiungere informazioni ai nodi per calcolare la media in modo efficiente. Ci sono due approcci equivalenti:</p>
+                    <ol>
+                        <li><strong>Memorizzare somma e lunghezza:</strong> Si aggiungono due campi al rappresentante di ogni insieme: `sum` (la somma delle chiavi) e `length` (il numero di elementi).
+                            <ul>
+                                <li><code>Make-Set(x)</code>: inizializza `sum = x.key` e `length = 1`.</li>
+                                <li><code>Union</code>: quando si uniscono due insiemi, il nuovo rappresentante aggiorna la sua somma (`sum = sum_z + sum_w`) e la sua lunghezza (`length = length_z + length_w`).</li>
+                                <li><code>Mean(x)</code>: esegue `Find-Set(x)` per trovare il rappresentante `r` e calcola `r.sum / r.length`.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Memorizzare media e lunghezza:</strong> Si aggiungono i campi `mean` e `length`. L'aggiornamento della media nella `Union` è più complesso: `new_mean = (mean_z * length_z + mean_w * length_w) / (length_z + length_w)`.</li>
+                    </ol>
+                    <p>Entrambi gli approcci non alterano la complessità asintotica delle operazioni di base.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="esercizio-somma" class="content-section">
+            <h3 class="subsection-title">4.4. Esercizio 4: Calcolo della Somma</h3>
+            <div class="section-content">
+                <div class="exercise-box">
+                    <strong>Esercizio (dal compito del 21/06/16):</strong>
+                    <p>Simile al precedente, ma si chiede di implementare un'operazione `Sum(x)`.</p>
+                    <p><strong>Soluzione (discussa in aula):</strong></p>
+                    <p>La professoressa chiede di valutare quale implementazione di base (liste o alberi) sia migliore per questo problema.</p>
+                    <ul>
+                        <li><strong>Con Liste (+ Weighted Union):</strong> Si aggiunge un campo `sum` al rappresentante. I costi sono dominati dalle `Union`, quindi il costo totale è \(O(m + n \log n)\).</li>
+                        <li><strong>Con Alberi (+ euristiche):</strong> Si aggiunge un campo `sum` alla radice. La logica è la stessa. Il costo totale è \(O(m \cdot \alpha(m, n))\).</li>
+                    </ul>
+                    <p>L'implementazione basata su alberi è asintoticamente migliore, specialmente quando il numero di operazioni `m` non è molto più grande di `n`.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="conclusioni" class="content-section">
+            <h2 class="section-title">5. Conclusioni</h2>
+            <div class="section-content">
+                <p>Questa lezione ha concluso la discussione sugli insiemi disgiunti, mostrando come l'implementazione basata su foreste di alberi, combinata con le euristiche di <strong>Union by Rank</strong> e <strong>Path Compression</strong>, porti a una struttura dati estremamente efficiente, con una complessità quasi lineare per una sequenza di `m` operazioni.</p>
+                <p>Sono stati analizzati diversi esercizi per applicare i concetti e confrontare le performance delle diverse implementazioni e ottimizzazioni.</p>
+                <div class="exercise-box">
+                    <strong>Spunto di riflessione finale (dalla Professoressa):</strong>
+                    <p>Come si potrebbe modificare la struttura per "disfare" le operazioni di Union e recuperare lo stato di un insieme in un momento precedente?</p>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
