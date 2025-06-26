@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 31: Insiemi Disgiunti (Liste)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 31 mar 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 31: Insiemi Disgiunti (Liste)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro" class="sidebar-link">1. Insiemi Disgiunti: Definizione</a></li>
+            <li><a href="#operazioni-base" class="sidebar-link">2. Operazioni Fondamentali</a></li>
+            <li><a href="#applicazione-esempio" class="sidebar-link">3. Applicazione: Componenti Connesse di un Grafo</a></li>
+            <li><a href="#analisi-complessita" class="sidebar-link">4. Strategia di Analisi della Complessità</a></li>
+            <li><a href="#implementazione-liste" class="sidebar-link">5. Implementazione con Liste Concatenate</a></li>
+            <li><a href="#liste-find" class="sidebar-link">5.1. Ottimizzare l'operazione Find</a></li>
+            <li><a href="#liste-union" class="sidebar-link">5.2. Ottimizzare l'operazione Union</a></li>
+            <li><a href="#implementazione-liste-codice" class="sidebar-link">5.3. Pseudocodice (Liste con ottimizzazioni)</a></li>
+            <li><a href="#analisi-liste-semplici" class="sidebar-link">5.4. Analisi dei Costi (Liste semplici)</a></li>
+            <li><a href="#liste-caso-peggiore" class="sidebar-link">5.5. Caso Peggiore per l'implementazione con Liste</a></li>
+            <li><a href="#weighted-union" class="sidebar-link">6. Euristiche di Ottimizzazione: Weighted-Union</a></li>
+            <li><a href="#weighted-union-codice" class="sidebar-link">6.1. Pseudocodice con Weighted-Union</a></li>
+            <li><a href="#analisi-weighted-union" class="sidebar-link">6.2. Analisi della Complessità con Weighted-Union</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro" class="content-section active-section">
+            <h2 class="section-title">1. Insiemi Disgiunti: Definizione</h2>
+            <div class="section-content">
+                <p>La professoressa introduce un nuovo argomento: le strutture dati per la gestione di <strong>insiemi disgiunti</strong>. Si tratta di una struttura dati che mantiene una collezione di insiemi dinamici \(\mathcal{S} = \{S_1, S_2, ..., S_m\}\).</p>
+                <p>Ogni insieme \(S_i\) contiene un certo numero di oggetti (o record) e la collezione soddisfa due proprietà fondamentali:</p>
+                <ol>
+                    <li><strong>Disgiunzione:</strong> Due insiemi distinti non hanno elementi in comune. Formalmente, \(S_i \cap S_j = \emptyset\) se \(i \neq j\).</li>
+                    <li><strong>Non vuoti:</strong> Ogni insieme \(S_i\) non è vuoto.</li>
+                </ol>
+                <p>Ogni insieme è identificato da un <strong>rappresentante</strong>, che è uno degli elementi dell'insieme stesso, scelto arbitrariamente.</p>
+            </div>
+        </article>
+        
+        <article id="operazioni-base" class="content-section">
+            <h2 class="section-title">2. Operazioni Fondamentali</h2>
+            <div class="section-content">
+                <p>Su questa collezione di insiemi si vogliono eseguire tre operazioni principali:</p>
+                <ul>
+                    <li><code>Make-Set(x)</code>: Crea un nuovo insieme il cui unico membro (e quindi anche rappresentante) è l'oggetto `x`. Si assume che `x` non sia già presente in altri insiemi.</li>
+                    <li><code>Find-Set(x)</code>: Restituisce un puntatore al rappresentante dell'insieme (unico) che contiene `x`.</li>
+                    <li><code>Union(x, y)</code>: Unisce i due insiemi (che devono essere disgiunti) che contengono `x` e `y` in un nuovo singolo insieme. Il vecchio insieme viene distrutto. Il rappresentante del nuovo insieme unito sarà uno dei rappresentanti dei due insiemi originali.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="applicazione-esempio" class="content-section">
+            <h2 class="section-title">3. Applicazione: Componenti Connesse di un Grafo</h2>
+            <div class="section-content">
+                <p>Un'applicazione classica per questa struttura dati è il calcolo delle <strong>componenti connesse</strong> di un grafo non orientato \(G = (V, E)\).</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph LR
+                        subgraph "Grafo G"
+                            A --- B;
+                            B --- C;
+                            A --- C;
+                            A --- D;
+                            E --- F;
+                            G;
+                        end
+                        subgraph "Componenti Connesse"
+                            subgraph CC1
+                                A1(A) --- B1(B);
+                                B1 --- C1(C);
+                                A1 --- C1;
+                                A1 --- D1(D);
+                            end
+                            subgraph CC2
+                                E1(E) --- F1(F);
+                            end
+                             subgraph CC3
+                                G1(G);
+                            end
+                        end
+                    </pre>
+                </div>
+                <p>L'algoritmo per trovare le componenti connesse usando insiemi disgiunti è il seguente:</p>
+                <ol>
+                    <li><strong>Inizializzazione:</strong> Per ogni vertice `v` nel grafo, si esegue <code>Make-Set(v)</code>. Inizialmente, ogni vertice è una componente connessa a sé stante.</li>
+                    <li><strong>Elaborazione degli archi:</strong> Per ogni arco `(u, v)` nel grafo:
+                        <ul>
+                            <li>Si controlla se `u` e `v` appartengono già alla stessa componente: <code>if Find-Set(u) != Find-Set(v)</code>.</li>
+                            <li>Se non lo sono, si uniscono le loro componenti: <code>Union(u, v)</code>.</li>
+                        </ul>
+                    </li>
+                </ol>
+                <p>Alla fine del processo, gli insiemi rimanenti rappresentano le componenti connesse del grafo.</p>
+            </div>
+        </article>
+
+        <article id="analisi-complessita" class="content-section">
+            <h2 class="section-title">4. Strategia di Analisi della Complessità</h2>
+            <div class="section-content">
+                <p>La professoressa spiega che, per questo tipo di struttura dati, analizzare il costo della singola operazione può essere fuorviante. Invece, si adotta un approccio di <strong>analisi ammortizzata</strong> sul costo di una sequenza di operazioni.</p>
+                <p>Si analizzerà il costo di una sequenza di <strong>`m` operazioni</strong> (Make, Union, Find) di cui <strong>`n` sono operazioni `Make-Set`</strong>.</p>
+                <div class="note-box">
+                    <strong>Relazioni tra le operazioni:</strong>
+                    <ul>
+                        <li>Il numero totale di operazioni `m` deve essere almeno `n` (\(m \ge n\)).</li>
+                        <li>Il numero di operazioni di `Union` non può superare `n-1`, perché ogni `Union` riduce di uno il numero di insiemi, e si parte da `n` insiemi creati con `Make-Set`.</li>
+                    </ul>
+                </div>
+                <p>L'obiettivo è determinare la complessità totale in funzione di `m` e `n`, per capire come le diverse implementazioni gestiscono il costo distribuito su una sequenza di comandi.</p>
+            </div>
+        </article>
+
+        <article id="implementazione-liste" class="content-section">
+            <h2 class="section-title">5. Implementazione con Liste Concatenate</h2>
+            <div class="section-content">
+                <p>La prima implementazione discussa rappresenta ogni insieme come una <strong>lista concatenata</strong>. Ogni nodo della lista rappresenta un oggetto dell'insieme.</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                    graph LR
+                        S1_H(S1 Head) --> X11(x11) --> X12(x12) --> ... --> X1j(x1j) --> NIL;
+                    </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="liste-find" class="content-section">
+            <h3 class="subsection-title">5.1. Ottimizzare l'operazione Find</h3>
+            <div class="section-content">
+                <p>Se si avesse solo un puntatore al successivo (`next`), l'operazione `Find-Set(x)` sarebbe molto costosa. Dato un puntatore a un elemento `x` nel mezzo di una lista, per trovare il rappresentante (il primo elemento) bisognerebbe scandire tutte le liste.</p>
+                <p><strong>Soluzione:</strong> si aggiunge a ogni oggetto (nodo della lista) un <strong>puntatore al rappresentante</strong> dell'insieme. Questo puntatore, che chiamiamo `rep` (o `head`), punta direttamente al primo elemento della lista.</p>
+                <div class="mermaid-container">
+                     <pre class="mermaid">
+                    graph TD
+                        subgraph "Lista per l'insieme Si"
+                            direction LR
+                            H(xi1 - Rep) --> N1(xi2) --> N2(xi3) --> N_last(...)
+                            N1 -- rep --> H
+                            N2 -- rep --> H
+                            N_last -- rep --> H
+                        end
+                    </pre>
+                </div>
+                <p>Con questa modifica, `Find-Set(x)` diventa un'operazione a costo costante, \(\Theta(1)\), perché basta leggere il valore del puntatore `x.rep`.</p>
+            </div>
+        </article>
+
+        <article id="liste-union" class="content-section">
+            <h3 class="subsection-title">5.2. Ottimizzare l'operazione Union</h3>
+            <div class="section-content">
+                <p>L'operazione `Union(x, y)` richiede di unire due liste. L'approccio più semplice è l'<strong>append</strong>: si attacca la lista di `y` alla fine della lista di `x`.</p>
+                <p><strong>Problemi:</strong></p>
+                <ol>
+                    <li>Per trovare la fine della lista di `x` e collegarvi l'inizio della lista di `y`, si deve scandire l'intera lista di `x`.</li>
+                    <li>Dopo aver unito le liste, si devono aggiornare i puntatori `rep` di <strong>tutti</strong> gli elementi della (ex) lista di `y` perché puntino al nuovo rappresentante (la testa della lista di `x`).</li>
+                </ol>
+                <p>Il costo sarebbe quindi \(O(|S_x| + |S_y|)\).</p>
+                <p><strong>Soluzione per l'append:</strong> Per evitare la prima scansione, si può aggiungere al rappresentante di ogni lista un puntatore all'<strong>ultimo elemento</strong> della lista, che chiamiamo `last` (o `tail`).</p>
+                 <div class="mermaid-container">
+                     <pre class="mermaid">
+                    graph TD
+                        subgraph "Lista per Sx"
+                            direction LR
+                            Hx(Rep. x) -- next --> ... --> Lx(Last x)
+                            Hx -- last --> Lx
+                        end
+                         subgraph "Lista per Sy"
+                            direction LR
+                            Hy(Rep. y) -- next --> ... --> Ly(Last y)
+                            Hy -- last --> Ly
+                        end
+                    </pre>
+                </div>
+                <p>Con questo puntatore `last`, l'unione fisica delle liste (<code>Sx.last.next = Sy.head</code>) diventa \(\Theta(1)\). Tuttavia, rimane il problema di dover aggiornare tutti i puntatori `rep` della seconda lista. Il costo della `Union` è quindi dominato da questa operazione e rimane proporzionale alla lunghezza della seconda lista.</p>
+            </div>
+        </article>
+
+        <article id="implementazione-liste-codice" class="content-section">
+            <h3 class="subsection-title">5.3. Pseudocodice (Liste con ottimizzazioni)</h3>
+            <div class="section-content">
+                <p>Di seguito lo pseudocodice per le operazioni di base, assumendo che ogni oggetto `x` abbia i campi `key`, `next`, `rep`, e che il rappresentante abbia anche un campo `last`.</p>
+                
+                <p><strong>Make-Set(x)</strong></p>
+                <pre><code class="language-pseudocode">
+Make-Set(x)
+  // x è un oggetto con la chiave già inizializzata.
+  x.rep = x    // x è il rappresentante di se stesso
+  x.next = NIL
+  x.last = x   // x è anche l'ultimo della lista
+  return x
+                </code></pre>
+
+                <p><strong>Find-Set(x)</strong></p>
+                <pre><code class="language-pseudocode">
+Find-Set(x)
+  return x.rep
+                </code></pre>
+                
+                <p><strong>Union(x, y) e Link(z, w)</strong></p>
+                <p>L'operazione di `Union` prima trova i rappresentanti e poi, se sono diversi, delega il lavoro a una procedura `Link`.</p>
+                <pre><code class="language-pseudocode">
+Union(x, y)
+  z = Find-Set(x)
+  w = Find-Set(y)
+  if (z != w) then
+    Link(z, w)
+
+Link(z, w)  // Concatena la lista di w alla fine di quella di z
+  // Aggiorna puntatore dell'ultimo di z
+  z.last.next = w
+  
+  // Aggiorna l'ultimo della nuova lista
+  z.last = w.last
+
+  // Aggiorna i rappresentanti di tutti gli elementi della (ex) lista di w
+  current = w
+  while (current != NIL) do
+    current.rep = z
+    current = current.next
+                </code></pre>
+            </div>
+        </article>
+        
+        <article id="analisi-liste-semplici" class="content-section">
+            <h3 class="subsection-title">5.4. Analisi dei Costi (Liste semplici)</h3>
+            <div class="section-content">
+                <p>Analizziamo il costo di una sequenza di `m` operazioni, di cui `n` `Make-Set`.</p>
+                <ul>
+                    <li>`Make-Set`: \(\Theta(1)\). Costo totale per `n` chiamate: \(\Theta(n)\).</li>
+                    <li>`Find-Set`: \(\Theta(1)\). Costo totale per `f = m-n-u` chiamate: \(\Theta(m-n-u)\).</li>
+                    <li>`Union(x, y)`: Il costo è dominato da `Link(z, w)`, che a sua volta dipende dalla lunghezza della seconda lista. Il costo di una `Union` è \(\Theta(|S_w|)\).</li>
+                </ul>
+                <p>Il costo totale della sequenza è quindi \(\Theta(m) + \text{costo totale delle Union}\).</p>
+            </div>
+        </article>
+        
+        <article id="liste-caso-peggiore" class="content-section">
+            <h3 class="subsection-title">5.5. Caso Peggiore per l'implementazione con Liste</h3>
+            <div class="section-content">
+                <p>La professoressa illustra una sequenza di operazioni che porta al caso peggiore per la `Union`.</p>
+                <ol>
+                    <li>Si creano `n` insiemi singoletti: \(x_1, x_2, ..., x_n\). Costo: \(\Theta(n)\).</li>
+                    <li>Si eseguono le seguenti `n-1` unioni:
+                        <ul>
+                            <li><code>Union(x2, x1)</code>: unisce la lista di `x1` a quella di `x2`. Costo \(\Theta(1)\). Ora \(S_{x2}=\{x2,x1\}\).</li>
+                            <li><code>Union(x3, x2)</code>: unisce la lista di `x2` (lunga 2) a quella di `x3`. Costo \(\Theta(2)\).</li>
+                            <li><code>Union(x4, x3)</code>: unisce la lista di `x3` (lunga 3) a quella di `x4`. Costo \(\Theta(3)\).</li>
+                            <li>...</li>
+                            <li><code>Union(xn, xn-1)</code>: unisce una lista lunga `n-1` a una lunga 1. Costo \(\Theta(n-1)\).</li>
+                        </ul>
+                    </li>
+                </ol>
+                <p>Il costo totale delle `n-1` unioni è \(\sum_{i=1}^{n-1} \Theta(i) = \Theta(n^2)\).</p>
+                <p>Quindi, una sequenza di `m` operazioni nel caso peggiore costa \(\Theta(m+n^2)\). Il costo ammortizzato di una singola operazione è \(\Theta(n)\).</p>
+            </div>
+        </article>
+        
+        <article id="weighted-union" class="content-section">
+            <h2 class="section-title">6. Euristiche di Ottimizzazione: Weighted-Union</h2>
+            <div class="section-content">
+                <p>Per evitare il caso peggiore, si introduce un'euristica chiamata <strong>Weighted-Union</strong> (Unione Ponderata).</p>
+                <p><strong>Idea:</strong> Invece di unire sempre la seconda lista alla prima, si unisce sempre la <strong>lista più corta</strong> a quella <strong>più lunga</strong>.</p>
+                <p>Per implementare questa euristica, è necessario mantenere traccia della lunghezza di ogni lista. Si aggiunge un campo `length` al rappresentante di ogni lista.</p>
+            </div>
+        </article>
+
+        <article id="weighted-union-codice" class="content-section">
+            <h3 class="subsection-title">6.1. Pseudocodice con Weighted-Union</h3>
+            <div class="section-content">
+                <p>La procedura `Make-Set` deve inizializzare `x.length = 1`.</p>
+                <p>La procedura `Union` viene modificata per confrontare le lunghezze prima di chiamare `Link`.</p>
+                 <pre><code class="language-pseudocode">
+Weighted-Union(x, y)
+  z = Find-Set(x)
+  w = Find-Set(y)
+  if (z != w) then
+    if (z.length >= w.length) then
+      Link(z, w)  // Unisci w a z
+    else
+      Link(w, z)  // Unisci z a w
+                </code></pre>
+                <p>La procedura `Link(z, w)` (che ora assume che la lista di `w` sia quella più corta) deve anche aggiornare la lunghezza della lista risultante:</p>
+                <pre><code class="language-pseudocode">
+Link(z, w) // w è la lista più corta
+  // ... (collegamento e aggiornamento dei rep come prima)
+  z.last.next = w
+  z.last = w.last
+  z.length = z.length + w.length // Aggiorna la lunghezza
+
+  current = w
+  while (current != NIL) do
+    current.rep = z
+    current = current.next
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="analisi-weighted-union" class="content-section">
+            <h3 class="subsection-title">6.2. Analisi della Complessità con Weighted-Union</h3>
+            <div class="section-content">
+                <p>L'analisi ora si concentra sul numero di volte che il puntatore `rep` di un qualsiasi elemento `x` può essere modificato.</p>
+                <ol>
+                    <li>Il puntatore `x.rep` viene modificato solo quando la lista in cui si trova `x` viene unita a un'altra lista (e messa per seconda).</li>
+                    <li>Con la Weighted-Union, questo accade solo se la lista di `x` è più corta o uguale in lunghezza all'altra lista.</li>
+                    <li>Pertanto, quando `x.rep` cambia, la dimensione del nuovo insieme risultante è <strong>almeno il doppio</strong> della dimensione del vecchio insieme in cui si trovava `x`.</li>
+                </ol>
+                <p>Quante volte può raddoppiare la dimensione di un insieme che contiene `x`? Se si parte con un insieme di dimensione 1, dopo la prima modifica `x` sarà in un insieme di dimensione \(\ge 2\), dopo la seconda \(\ge 4\), dopo la k-esima \(\ge 2^k\). Poiché la dimensione massima dell'insieme è `n`, si ha \(2^k \le n\), che implica \(k \le \log_2 n\).</p>
+                <p><strong>Conclusione:</strong> Il puntatore `rep` di un singolo elemento `x` può essere aggiornato al più \(\log n\) volte.</p>
+                <p>Poiché ci sono `n` elementi in totale, il numero complessivo di aggiornamenti dei puntatori `rep` (che è il costo dominante delle `Union`) su tutta la sequenza di `m` operazioni è al più \(O(n \log n)\).</p>
+                <p>Il costo totale della sequenza di `m` operazioni con la Weighted-Union è quindi:</p>
+                <div class="math-block">
+                Costo Totale = \(O(m + n \log n)\)
+                </div>
+                <p>Questo è un miglioramento significativo rispetto a \(O(m + n^2)\).</p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
