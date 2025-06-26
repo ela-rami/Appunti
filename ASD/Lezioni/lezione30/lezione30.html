@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 30: B-Tree: Inserimento e Cancellazione</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 24 mar 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 30: B-Tree: Inserimento e Cancellazione</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#recap-inserimento-btree" class="sidebar-link">1. Recap: Inserimento nei B-Tree</a></li>
+            <li><a href="#btree-insert-code" class="sidebar-link">2. Pseudocodice di B-Tree-Insert</a></li>
+            <li><a href="#gestione-radice-piena" class="sidebar-link">2.1. Gestione del Caso Speciale: Radice Piena</a></li>
+            <li><a href="#insert-not-full" class="sidebar-link">2.2. Procedura Ausiliaria: B-Tree-Insert-Not-Full</a></li>
+            <li><a href="#insert-complessita" class="sidebar-link">2.3. Analisi della Complessità dell'Inserimento</a></li>
+            <li><a href="#cancellazione-btree" class="sidebar-link">3. Cancellazione in un B-Tree</a></li>
+            <li><a href="#cancellazione-idea" class="sidebar-link">3.1. Idea Generale e Strategia Preventiva</a></li>
+            <li><a href="#cancellazione-tecniche" class="sidebar-link">3.2. Tecniche di Ribilanciamento: "Rubare" e "Fondere"</a></li>
+            <li><a href="#cancellazione-casi-dettaglio" class="sidebar-link">3.3. I 3 Casi della Cancellazione da un Nodo Interno</a></li>
+            <li><a href="#cancellazione-esempio" class="sidebar-link">3.4. Esempio di Cancellazione</a></li>
+            <li><a href="#cancellazione-complessita" class="sidebar-link">3.5. Complessità della Cancellazione</a></li>
+            <li><a href="#conclusione-btree" class="sidebar-link">4. Conclusioni sui B-Tree</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="recap-inserimento-btree" class="content-section active-section">
+            <h2 class="section-title">1. Recap: Inserimento nei B-Tree</h2>
+            <div class="section-content">
+                <p>La professoressa inizia la lezione riepilogando la strategia di inserimento in un B-Tree, introdotta nella lezione precedente. La chiave di questa strategia è evitare risalite nell'albero, che sarebbero costose in termini di accessi al disco.</p>
+                <p><strong>Strategia di Inserimento (Split Preventivo):</strong></p>
+                <ol>
+                    <li>Si scende dalla radice verso la foglia appropriata per l'inserimento.</li>
+                    <li>Durante la discesa, <strong>ogni volta che si incontra un nodo pieno</strong> (con `2t-1` chiavi), lo si divide (splitta) immediatamente.</li>
+                    <li>Questa operazione di `split` garantisce che il genitore del nodo splittato non sia pieno (perché sarebbe stato splittato al passo precedente), quindi può accogliere la chiave mediana promossa.</li>
+                    <li>Grazie a questa strategia, quando si arriva alla foglia di destinazione, si ha la garanzia che non sia piena e possa accogliere la nuova chiave.</li>
+                </ol>
+                <p>Era già stata scritta e analizzata la procedura ausiliaria `B-Tree-Split`.</p>
+                <div class="note-box">
+                    <strong>Assunzione sulle Chiavi:</strong> Per tutta la discussione, si assume che la chiave `k` da inserire non sia già presente nell'albero. Nei sistemi reali (es. database), le chiavi primarie sono uniche. Se le chiavi potessero essere duplicate, una soluzione comune è associare a ogni chiave una lista di elementi, invece di duplicare i nodi.
+                </div>
+            </div>
+        </article>
+
+        <article id="btree-insert-code" class="content-section">
+            <h2 class="section-title">2. Pseudocodice di B-Tree-Insert</h2>
+            <div class="section-content">
+                <p>La procedura di inserimento principale, `B-Tree-Insert`, funge da "wrapper" che gestisce il caso speciale della radice e poi delega il lavoro a una procedura ricorsiva ausiliaria.</p>
+            </div>
+        </article>
+        
+        <article id="gestione-radice-piena" class="content-section">
+            <h3 class="subsection-title">2.1. Gestione del Caso Speciale: Radice Piena</h3>
+            <div class="section-content">
+                <p>L'unico momento in cui l'altezza di un B-Tree può aumentare è quando la radice è piena e viene splittata.</p>
+                <p>Se la radice `r` è piena (`r.n = 2t-1`):</p>
+                <ol>
+                    <li>Si crea un nuovo nodo `s`, che diventerà la nuova radice.</li>
+                    <li>`s` non è una foglia e ha `s.n = 0` chiavi.</li>
+                    <li>L'unico figlio di `s` viene impostato a puntare alla vecchia radice `r`.</li>
+                    <li>Si esegue `B-Tree-Split(s, r, 1, t)`. Questo divide la vecchia radice `r` e promuove la sua chiave mediana in `s`.</li>
+                    <li>Ora la nuova radice `s` non è piena, e si può procedere con l'inserimento normale.</li>
+                </ol>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                        graph TD
+                            subgraph "Prima: Radice r piena"
+                                R("...")
+                                style R fill:#ef4444
+                            end
+
+                            subgraph "Durante: Creazione nuova radice s"
+                                S(" ") --> R2("...")
+                                style R2 fill:#ef4444
+                            end
+                            
+                            subgraph "Dopo lo Split"
+                                S_final("mediana") --> R_left("prime t-1 chiavi")
+                                S_final --> R_right("ultime t-1 chiavi")
+                            end
+                    </pre>
+                </div>
+                <p>Dopo questo passo, o se la radice non era inizialmente piena, si chiama la procedura ricorsiva `B-Tree-Insert-Not-Full` sulla radice (che ora è garantita non essere piena).</p>
+                
+                <pre><code class="language-pseudocode">
+B-Tree-Insert(T, k)
+  r = T.root
+  if r.n == 2*t - 1 then // Radice piena
+    // Crea una nuova radice s
+    s = Allocate-New-Node(t)
+    T.root = s
+    s.leaf = false
+    s.n = 0
+    s.c_1 = r
+    // Splitta la vecchia radice r
+    B-Tree-Split(s, r, 1, t)
+    // Chiama la procedura di inserimento sulla nuova radice (non piena)
+    B-Tree-Insert-Not-Full(s, k, t)
+  else // Radice non piena
+    B-Tree-Insert-Not-Full(r, k, t)
+                </code></pre>
+            </div>
+        </article>
+        
+        <article id="insert-not-full" class="content-section">
+            <h3 class="subsection-title">2.2. Procedura Ausiliaria: B-Tree-Insert-Not-Full</h3>
+            <div class="section-content">
+                <p>Questa procedura ricorsiva gestisce l'inserimento in un nodo `x` che è garantito <strong>non essere pieno</strong>. Precondizioni: `x.n < 2t-1` e `x` è già in RAM.</p>
+                
+                <p><strong>Caso 1: `x` è una foglia</strong></p>
+                <p>Se `x` è una foglia, si inserisce direttamente la chiave `k` nel vettore delle chiavi di `x`, mantenendo l'ordinamento. Questo richiede di spostare a destra le chiavi maggiori di `k`. Infine, si incrementa `x.n` e si scrive il nodo `x` modificato su disco (`Disk-Write(x)`).</p>
+
+                <p><strong>Caso 2: `x` non è una foglia</strong></p>
+                <ol>
+                    <li>Si individua l'indice `i` del figlio in cui si deve scendere per inserire `k`.</li>
+                    <li>Si legge dal disco il figlio `y = x.c_i`.</li>
+                    <li><strong>Controllo preventivo:</strong> Se il figlio `y` è pieno (`y.n == 2t-1`), si esegue `B-Tree-Split(x, y, i, t)`. Dopo lo split, si deve ricontrollare se scendere nel figlio `i` o nel nuovo figlio `i+1`.</li>
+                    <li>Una volta individuato il figlio corretto in cui scendere (che ora è garantito non essere pieno), si richiama ricorsivamente `B-Tree-Insert-Not-Full` su quel figlio.</li>
+                </ol>
+
+                <pre><code class="language-pseudocode">
+B-Tree-Insert-Not-Full(x, k, t)
+  // i = indice dell'ultima chiave
+  i = x.n 
+  if x.leaf then
+    // Caso 1: x è una foglia. Inserisci k in x.
+    while (i >= 1 and k < x.key_i) do
+      x.key_{i+1} = x.key_i // Sposta a destra
+      i = i - 1
+    x.key_{i+1} = k
+    x.n = x.n + 1
+    Disk-Write(x)
+  else
+    // Caso 2: x non è una foglia. Trova il figlio giusto in cui scendere.
+    while (i >= 1 and k < x.key_i) do
+      i = i - 1
+    i = i + 1 // i ora è l'indice del figlio in cui scendere
+    
+    // Leggi il figlio dal disco
+    y = Disk-Read(x.c_i)
+
+    if y.n == 2*t - 1 then // Figlio pieno? Splittalo!
+      B-Tree-Split(x, y, i, t)
+      // Dopo lo split, la mediana di y è salita in x.key_i.
+      // Dobbiamo decidere se scendere a sinistra o a destra di questa nuova chiave.
+      if k > x.key_i then
+        i = i + 1
+    
+    // Chiama ricorsivamente sul figlio appropriato (che ora non è pieno).
+    // Nota: il puntatore al figlio i-esimo potrebbe essere cambiato dopo lo split.
+    child_to_insert = Disk-Read(x.c_i) 
+    B-Tree-Insert-Not-Full(child_to_insert, k, t)
+                </code></pre>
+                 <div class="clarification-box">
+                    <strong>Rileggere il figlio dopo lo split?</strong>
+                    <p>La professoressa nota che dopo l'operazione di `B-Tree-Split`, i nodi `x` e `y` vengono riscritti su disco. Sebbene l'implementazione in RAM di `x` venga aggiornata, quella di `y` potrebbe non essere più consistente. Per sicurezza, nello pseudocodice rilegge il figlio `x.c_i` prima della chiamata ricorsiva per assicurarsi di lavorare sulla versione più aggiornata del nodo.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="insert-complessita" class="content-section">
+            <h3 class="subsection-title">2.3. Analisi della Complessità dell'Inserimento</h3>
+            <div class="section-content">
+                <p>L'analisi della complessità segue la stessa logica della ricerca.</p>
+                 <ul>
+                    <li><strong>Costo di Read/Write:</strong> Durante la discesa si esegue una `Disk-Read` per ogni livello. Gli `split` aggiungono un numero costante di `Disk-Write` (3 per la precisione). La complessità totale di I/O è dominata dalla discesa.
+                    <div class="math-block">
+                        Costo I/O = \(O(h) = O(\log_t N)\)
+                    </div>
+                    </li>
+                    <li><strong>Costo di CPU:</strong> Su ogni nodo visitato, si eseguono operazioni il cui costo è \(O(t)\) (scansioni, split). Questo viene fatto per ogni nodo lungo il cammino.
+                    <div class="math-block">
+                        Costo CPU = \(O(h \cdot t) = O(t \cdot \log_t N)\)
+                    </div>
+                    </li>
+                </ul>
+                <p>La complessità è la stessa della ricerca, confermando l'efficienza della struttura.</p>
+            </div>
+        </article>
+
+        <article id="cancellazione-btree" class="content-section">
+            <h2 class="section-title">3. Cancellazione in un B-Tree</h2>
+            <div class="section-content">
+                <p>La cancellazione è l'operazione più complessa. La professoressa ne delinea l'idea intuitiva e la strategia, senza scrivere il codice completo.</p>
+            </div>
+        </article>
+        
+        <article id="cancellazione-idea" class="content-section">
+            <h3 class="subsection-title">3.1. Idea Generale e Strategia Preventiva</h3>
+            <div class="section-content">
+                 <p>La cancellazione presenta un problema opposto a quello dell'inserimento: se si rimuove una chiave da un nodo che ha già il numero minimo di chiavi (`t-1`), il nodo diventa "sotto-riempito" (underflow), violando le proprietà del B-Tree.</p>
+                 <p>Analogamente all'inserimento, si adotta una strategia preventiva per evitare risalite:</p>
+                 <blockquote>
+                Durante la discesa per trovare la chiave da cancellare, <strong>ogni volta che si sta per scendere in un nodo che ha il numero minimo di chiavi (`t-1`), si esegue un'operazione per "arricchirlo"</strong>, assicurandosi che abbia almeno `t` chiavi prima di scendervi.
+                </blockquote>
+                <p>Questa strategia garantisce che, quando si arriva al nodo contenente la chiave da cancellare, si possa rimuoverla senza creare un underflow.</p>
+            </div>
+        </article>
+
+        <article id="cancellazione-tecniche" class="content-section">
+            <h3 class="subsection-title">3.2. Tecniche di Ribilanciamento: "Rubare" e "Fondere"</h3>
+            <div class="section-content">
+                <p>Per arricchire un nodo `y` con `t-1` chiavi, si guarda ai suoi fratelli adiacenti (sinistro e destro).</p>
+                <p><strong>1. "Rubare" una chiave (Rotazione)</strong></p>
+                <p>Se un fratello adiacente ha <strong>almeno `t` chiavi</strong> (quindi non è al minimo), si può "rubare" una chiave. Questa operazione è l'inverso dello split:</p>
+                <ul>
+                    <li>Una chiave dal fratello "ricco" viene spostata.</li>
+                    <li>La chiave separatrice dal nodo genitore scende nel nodo `y`.</li>
+                    <li>La chiave "rubata" sale al posto della chiave del genitore.</li>
+                    <li>Viene spostato anche un figlio appropriato.</li>
+                </ul>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                        graph TD
+                            subgraph "Prima"
+                                X("..., a, ...") --> Y("...")
+                                X --> Z("b, ...")
+                            end
+                            subgraph "Dopo: y ruba da z"
+                                X_new("..., b, ...") --> Y_new("..., a")
+                                X_new --> Z_new("...")
+                            end
+                            style Y fill:#facc15
+                            style Z fill:#22c55e
+                    </pre>
+                </div>
+                
+                <p><strong>2. Fondere i nodi (Merge)</strong></p>
+                <p>Se entrambi i fratelli adiacenti sono anch'essi al minimo (`t-1` chiavi), non si può rubare. In questo caso, si <strong>fondono</strong> il nodo `y` con uno dei suoi fratelli.</p>
+                <ul>
+                    <li>Il nodo `y` e un suo fratello (es. `z`) vengono uniti in un unico nodo.</li>
+                    <li>La chiave separatrice dal genitore `x` scende e viene inserita tra le chiavi di `y` e `z`.</li>
+                    <li>Il risultato è un nuovo nodo che contiene `(t-1) + 1 + (t-1) = 2t-1` chiavi, ovvero un nodo pieno.</li>
+                </ul>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                        graph TD
+                            subgraph "Prima"
+                                X("..., a, ...") --> Y("t-1 chiavi")
+                                X --> Z("t-1 chiavi")
+                            end
+                            subgraph "Dopo: y e z si fondono"
+                                X_new("...") --> YZ("chiavi di y, a, chiavi di z")
+                            end
+                             style Y,Z fill:#facc15
+                             style YZ fill:#22c55e
+                    </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="cancellazione-casi-dettaglio" class="content-section">
+            <h3 class="subsection-title">3.3. I 3 Casi della Cancellazione da un Nodo Interno</h3>
+            <div class="section-content">
+                <p>Una volta raggiunto (con la garanzia che non sia al minimo) il nodo `x` che contiene la chiave `k` da cancellare, si procede in modo simile alla cancellazione da un BST:</p>
+                <ol>
+                    <li><strong>Se `x` è una foglia:</strong> Si rimuove semplicemente `k` da `x`.</li>
+                    <li><strong>Se `x` non è una foglia:</strong>
+                        <ul>
+                            <li>Si trova il predecessore (o successore) di `k`. Questo si troverà in un nodo foglia.</li>
+                            <li>Si sostituisce `k` con il suo predecessore/successore.</li>
+                            <li>Ora il problema è ridotto a cancellare il predecessore/successore dal suo nodo foglia originale.</li>
+                        </ul>
+                    </li>
+                </ol>
+                <p>La procedura ricorsiva di discesa garantisce che anche la foglia da cui si cancella il predecessore/successore abbia almeno `t` chiavi.</p>
+                
+                <p>La logica della cancellazione si articola quindi in questi 3 casi principali, gestiti durante la discesa:</p>
+                <ol>
+                    <li><strong>La chiave `k` è nel nodo corrente `x`, che è una foglia.</strong> Si rimuove `k`. (Caso terminale).</li>
+                    <li><strong>La chiave `k` è nel nodo corrente `x`, che è un nodo interno.</strong> Si gestisce con predecessore/successore, come descritto sopra.</li>
+                    <li><strong>La chiave `k` non è in `x`.</strong> Si individua il figlio `y` in cui scendere. Prima di scendere, si verifica se `y` ha `t-1` chiavi. Se sì, si applica una delle tecniche di ribilanciamento (rubare o fondere) e poi si prosegue la discesa.</li>
+                </ol>
+            </div>
+        </article>
+        
+        <article id="cancellazione-esempio" class="content-section">
+            <h3 class="subsection-title">3.4. Esempio di Cancellazione</h3>
+            <div class="section-content">
+                <p>La professoressa mostra un esempio di cancellazione della chiave <strong>2</strong> da un B-Tree.</p>
+                <ol>
+                    <li>Si parte dalla radice `[3, 10]`. La chiave 2 è minore di 3, quindi si deve scendere nel primo figlio `[1, 2]`.</li>
+                    <li>Prima di scendere, si nota che il figlio di destinazione `[1, 2]` ha `t-1=1` chiave (per `t=2`). Non si può scendere.</li>
+                    <li>Si guarda il fratello adiacente, `[4, 8]`. Questo ha più di `t-1` chiavi, quindi si può "rubare".</li>
+                    <li>Si esegue la rotazione: il `3` scende dalla radice, il `4` sale dal fratello. La radice diventa `[4, 10]` e i figli `[1, 2, 3]` e `[8]`.</li>
+                    <li>Ora si può scendere nel nodo `[1, 2, 3]`, che non è più al minimo. Si rimuove il 2.</li>
+                </ol>
+            </div>
+        </article>
+        
+        <article id="cancellazione-complessita" class="content-section">
+            <h3 class="subsection-title">3.5. Complessità della Cancellazione</h3>
+            <div class="section-content">
+                 <p>La complessità della cancellazione è analoga a quella di ricerca e inserimento.</p>
+                <ul>
+                    <li><strong>Costo di I/O:</strong> La discesa richiede \(O(h)\) letture. Le operazioni di fusione o rotazione richiedono un numero costante di letture/scritture.
+                    <div class="math-block">
+                        Costo I/O = \(O(h) = O(\log_t N)\)
+                    </div>
+                    </li>
+                    <li><strong>Costo di CPU:</strong> Ogni passo della discesa comporta operazioni su nodi di dimensione `t`.
+                    <div class="math-block">
+                        Costo CPU = \(O(h \cdot t) = O(t \cdot \log_t N)\)
+                    </div>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="conclusione-btree" class="content-section">
+            <h2 class="section-title">4. Conclusioni sui B-Tree</h2>
+            <div class="section-content">
+                 <p>La lezione conclude la trattazione dei B-Tree, evidenziando come tutte le operazioni fondamentali (ricerca, inserimento, cancellazione) mantengano una complessità logaritmica, ottimizzata per minimizzare gli accessi al disco.</p>
+                 <div class="exercise-box">
+                    <strong>Esercizio/Riflessione (dalla Professoressa): Legame tra B-Tree e RBT</strong>
+                    <p>La professoressa lascia come spunto di riflessione il legame tra i B-Tree e gli Alberi Rosso-Neri.</p>
+                    <p><strong>Soluzione (Aggiunta AI):</strong> Esiste una forte corrispondenza tra i B-Tree di grado `t=2` (chiamati anche alberi 2-3-4) e gli Alberi Rosso-Neri. È possibile "convertire" un albero 2-3-4 in un RBT e viceversa. L'idea è che i nodi rossi in un RBT possono essere "fusi" con i loro genitori neri per formare i nodi con 2 o 3 chiavi di un albero 2-3-4. Le operazioni di split e fusione nei B-Tree corrispondono alle rotazioni e ricolorazioni negli RBT. Questo mostra che gli RBT sono, in un certo senso, una rappresentazione binaria dei B-Tree di grado 2.</p>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
