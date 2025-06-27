@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 37: Analisi e Correttezza della Visita BFS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 23 apr 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 37: Analisi e Correttezza della Visita BFS</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#recap-bfs" class="sidebar-link">1. Recap della Visita BFS</a></li>
+            <li><a href="#complessita-bfs" class="sidebar-link">2. Analisi della Complessità di BFS</a></li>
+            <li><a href="#complessita-matrici" class="sidebar-link">2.1. Caso Matrici di Adiacenza</a></li>
+            <li><a href="#complessita-liste" class="sidebar-link">2.2. Caso Liste di Adiacenza</a></li>
+            <li><a href="#correttezza-bfs" class="sidebar-link">3. Correttezza della Visita BFS</a></li>
+            <li><a href="#def-distanza" class="sidebar-link">3.1. Definizione Formale di Distanza</a></li>
+            <li><a href="#proprieta-distanza" class="sidebar-link">3.2. Proprietà della Distanza e Primo Lemma</a></li>
+            <li><a href="#proprieta-coda" class="sidebar-link">3.3. Proprietà della Coda durante la Visita</a></li>
+            <li><a href="#bfs-tree" class="sidebar-link">4. Il BFS-Tree</a></li>
+            <li><a href="#esercizio-cammino" class="sidebar-link">5. Esercizio: Trovare il Cammino Minimo</a></li>
+            <li><a href="#esercizio-cicli" class="sidebar-link">6. Esercizio: Decidere se un Grafo è Ciclico</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="recap-bfs" class="content-section active-section">
+            <h2 class="section-title">1. Recap della Visita BFS</h2>
+            <div class="section-content">
+                <p>La professoressa inizia riepilogando la visita in ampiezza (BFS). La BFS esplora un grafo partendo da un nodo sorgente `s`, procedendo per "livelli" a distanza crescente. Per gestire l'esplorazione, la BFS utilizza tre strutture dati ausiliarie:</p>
+                <ul>
+                    <li>Un vettore <strong>`color`</strong> per marcare lo stato di ogni nodo (BIANCO, GRIGIO, NERO).</li>
+                    <li>Un vettore <strong>`d`</strong> per memorizzare la distanza minima (in numero di archi) da `s`.</li>
+                    <li>Un vettore <strong>`pi` (\(\pi\))</strong> per memorizzare il predecessore di ogni nodo nell'albero di visita, permettendo di ricostruire i cammini minimi.</li>
+                </ul>
+                <p>Inoltre, si avvale di una <strong>coda `Q` (FIFO)</strong> per gestire l'ordine di visita dei nodi scoperti.</p>
+                <pre><code class="language-pseudocode">
+BFS(G, s)
+  // 1. Inizializzazione
+  for each u in G.V do
+    color[u] = BIANCO
+    d[u] = +∞
+    pi[u] = NIL
+  
+  // 2. Setup del nodo sorgente
+  color[s] = GRIGIO
+  d[s] = 0
+  pi[s] = NIL
+  
+  Q = Ø 
+  Enqueue(Q, s)
+  
+  // 3. Ciclo principale della visita
+  while (Q is not empty) do
+    u = head(Q) 
+    
+    for each v in Adj[u] do
+      if (color[v] == BIANCO) then
+        color[v] = GRIGIO
+        d[v] = d[u] + 1
+        pi[v] = u
+        Enqueue(Q, v)
+      
+    color[u] = NERO
+    Dequeue(Q)
+                </code></pre>
+                 <div class="note-box">
+                    <strong>Nodi Raggiungibili:</strong>
+                    <p>La professoressa chiarisce che la BFS visita solo i nodi <strong>raggiungibili</strong> dalla sorgente `s`. Eventuali nodi in componenti connesse diverse da quella di `s` rimarranno bianchi, con distanza \(+\infty\) e predecessore NIL.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="complessita-bfs" class="content-section">
+            <h2 class="section-title">2. Analisi della Complessità di BFS</h2>
+            <div class="section-content">
+                <p>L'analisi della complessità viene suddivisa in base alla rappresentazione del grafo utilizzata.</p>
+                <p>Il ciclo di inizializzazione ha un costo di \(\Theta(|V|)\). Le operazioni di `Enqueue` e `Dequeue` su una coda standard hanno costo \(\Theta(1)\). La parte cruciale dell'analisi riguarda i cicli `while` e `for` annidati.</p>
+                <p>Grazie all'uso dei colori, ogni nodo viene inserito in coda (e quindi estratto) al più una volta. Questo garantisce che il corpo del ciclo `while` venga eseguito al più \(|V|\) volte.</p>
+            </div>
+        </article>
+
+        <article id="complessita-matrici" class="content-section">
+            <h3 class="subsection-title">2.1. Caso Matrici di Adiacenza</h3>
+            <div class="section-content">
+                <p>Se il grafo è rappresentato da una matrice di adiacenza, il ciclo `for each v in Adj[u]` viene implementato scandendo l'intera riga `u` della matrice per trovare gli archi uscenti. Questa operazione ha un costo di \(\Theta(|V|)\).</p>
+                <p>Poiché questo avviene per ogni nodo `u` estratto dalla coda (al più \(|V|\) volte), la complessità totale dei cicli è \(O(|V| \cdot |V|) = O(|V|^2)\).</p>
+                <p>Il costo totale della BFS con matrici di adiacenza è quindi:</p>
+                <div class="math-block">
+                Costo = \(O(|V|^2)\)
+                </div>
+            </div>
+        </article>
+
+        <article id="complessita-liste" class="content-section">
+            <h3 class="subsection-title">2.2. Caso Liste di Adiacenza</h3>
+            <div class="section-content">
+                <p>Con le liste di adiacenza, il ciclo `for` scandisce solo i nodi effettivamente presenti nella lista di adiacenza di `u`. Il suo costo è \(\Theta(\text{grado}(u))\).</p>
+                <p>Il costo totale di tutti i cicli `for` eseguiti durante la visita è la somma delle lunghezze delle liste di adiacenza di tutti i nodi visitati. Poiché ogni nodo viene visitato al più una volta, ogni lista di adiacenza viene scandita al più una volta. La somma delle lunghezze di tutte le liste di adiacenza è \(\Theta(|E|)\).</p>
+                <p>Il costo totale della BFS con liste di adiacenza è dato dalla somma del costo di inizializzazione e del costo di scansione di tutte le liste:</p>
+                <div class="math-block">
+                Costo = \(\Theta(|V| + |E|)\)
+                </div>
+                 <div class="clarification-box">
+                    <strong>Confronto e Conclusione:</strong>
+                    <p>La complessità \(\Theta(|V| + |E|)\) è asintoticamente migliore di \(O(|V|^2)\), dato che \(|E|\) è al massimo \(O(|V|^2)\). Le liste di adiacenza sono quindi preferibili per la BFS, specialmente per i grafi sparsi.</p>
+                    <p>La ragione è che la rappresentazione più compatta in spazio (liste) permette anche un risparmio in tempo, perché l'algoritmo non deve perdere tempo a scandire gli "zeri" (archi non esistenti) come avviene nella matrice.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="correttezza-bfs" class="content-section">
+            <h2 class="section-title">3. Correttezza della Visita BFS</h2>
+            <div class="section-content">
+                <p>Per dimostrare la correttezza della BFS, bisogna provare che, al termine della procedura, per ogni nodo `v` raggiungibile da `s`:</p>
+                <ul>
+                    <li><code>d[v]</code> contiene effettivamente la distanza del cammino minimo, \(\delta(s, v)\).</li>
+                    <li><code>pi[v]</code> è il predecessore di `v` su un cammino minimo da `s` a `v`.</li>
+                </ul>
+                <p>La professoressa non svolge la dimostrazione formale completa, ma ne illustra gli ingredienti chiave.</p>
+            </div>
+        </article>
+
+        <article id="def-distanza" class="content-section">
+            <h3 class="subsection-title">3.1. Definizione Formale di Distanza</h3>
+            <div class="section-content">
+                <p>Vengono introdotte le definizioni formali necessarie:</p>
+                <ul>
+                    <li><strong>Cammino:</strong> Un cammino da un nodo `s` a un nodo `v` è una sequenza di archi contigui \((s, u_1), (u_1, u_2), \dots, (u_{k-1}, v)\).</li>
+                    <li><strong>Lunghezza di un cammino:</strong> È il numero di archi nella sequenza. Un cammino vuoto da `s` a `s` ha lunghezza 0.</li>
+                </ul>
+                <p>La <strong>distanza del cammino minimo \(\delta(s, v)\)</strong> è definita come:</p>
+                <div class="math-block">
+                \( \delta(s, v) = \begin{cases} l & \text{se esiste un cammino di lunghezza } l \text{ e non ne esiste uno di lunghezza } < l \\ +\infty & \text{se non esiste alcun cammino da } s \text{ a } v \end{cases} \)
+                </div>
+                <div class="note-box">
+                    <strong>Grafi orientati vs. non orientati:</strong>
+                    <p>Nei grafi orientati, \(\delta(s, v) \neq \delta(v, s)\) in generale. Nei grafi non orientati, le due distanze sono sempre uguali.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="proprieta-distanza" class="content-section">
+            <h3 class="subsection-title">3.2. Proprietà della Distanza e Primo Lemma</h3>
+            <div class="section-content">
+                <p>Una proprietà fondamentale della distanza, simile alla disuguaglianza triangolare, è che per ogni arco \((u, v) \in E\):</p>
+                <div class="math-block">
+                \(\delta(s, v) \le \delta(s, u) + 1\)
+                </div>
+                <p>Questo significa che la distanza minima per arrivare a `v` non può essere maggiore della distanza per arrivare a `u` più l'arco da `u` a `v`.</p>
+                
+                <p>Usando questa proprietà, si può dimostrare un primo lemma per induzione sul numero di iterazioni del ciclo `while`:</p>
+                <p><strong>Lemma:</strong> Al termine della BFS, per ogni nodo `v`, il valore calcolato `d[v]` è una stima per eccesso della distanza reale: \(d[v] \ge \delta(s, v)\).
+                </p>
+                <p>Questo lemma ci dice che la visita calcola la lunghezza di un qualche cammino, ma non ancora che sia il più corto. Per completare la dimostrazione, bisogna provare che \(d[v] \le \delta(s, v)\), e per farlo è necessario analizzare il comportamento della coda `Q`.</p>
+            </div>
+        </article>
+
+        <article id="proprieta-coda" class="content-section">
+            <h3 class="subsection-title">3.3. Proprietà della Coda durante la Visita</h3>
+            <div class="section-content">
+                <p>La proprietà più importante della coda `Q` durante l'esecuzione della BFS è la seguente:</p>
+                <p><strong>Proposizione:</strong> Se in un qualsiasi istante la coda `Q` contiene i nodi \([u_1, u_2, \dots, u_k]\) (con \(u_1\) in testa), allora valgono le seguenti proprietà:</p>
+                <ol>
+                    <li>Tutti i nodi \(u_1, \dots, u_k\) sono di colore GRIGIO.</li>
+                    <li>Le loro distanze calcolate `d` sono ordinate in modo non decrescente:
+                        <div class="math-block">
+                        \( d[u_1] \le d[u_2] \le \dots \le d[u_k] \)
+                        </div>
+                    </li>
+                    <li>La differenza tra la distanza massima e minima nella coda è al più 1:
+                        <div class="math-block">
+                        \( d[u_k] \le d[u_1] + 1 \)
+                        </div>
+                    </li>
+                </ol>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            subgraph Livello l
+                                direction LR
+                                A((u_i)) --- B((...))
+                            end
+                            subgraph Livello l+1
+                                direction LR
+                                C((u_j)) --- D((...))
+                            end
+                            A --> C
+
+                            subgraph "Contenuto della Coda Q"
+                                direction LR
+                                B -- in coda --> C
+                                style B,C fill:#4b5563
+                            end
+                     </pre>
+                </div>
+                <p>Questa proprietà significa che la coda `Q` contiene sempre nodi che si trovano al più su due "livelli" di distanza adiacenti. La si dimostra per induzione sul numero di operazioni (`Enqueue`/`Dequeue`) eseguite sulla coda, verificando che sia le estrazioni che gli inserimenti preservano le tre condizioni.</p>
+                <p>Questa proprietà è cruciale per dimostrare che la BFS esplora il grafo correttamente livello per livello, garantendo che i cammini trovati siano i più corti.</p>
+            </div>
+        </article>
+
+        <article id="bfs-tree" class="content-section">
+            <h2 class="section-title">4. Il BFS-Tree</h2>
+            <div class="section-content">
+                <p>La professoressa formalizza la definizione dell'albero di visita costruito dalla BFS, chiamato <strong>BFS-Tree</strong> e indicato come \(G_\pi\).</p>
+                <p>Dato un grafo \(G=(V, E)\) e una sorgente `s`, il BFS-Tree \(G_\pi = (V_\pi, E_\pi)\) è definito come:</p>
+                <ul>
+                    <li>\(V_\pi = \{ v \in V \mid \text{al termine di BFS, color}[v] = \text{NERO} \}\). Sono tutti i nodi raggiungibili da `s`.</li>
+                    <li>\(E_\pi = \{ (\pi[v], v) \mid v \in V_\pi \setminus \{s\} \}\). È l'insieme degli archi che collegano un nodo al suo predecessore, come calcolato dalla visita.</li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="esercizio-cammino" class="content-section">
+            <h2 class="section-title">5. Esercizio: Trovare il Cammino Minimo</h2>
+            <div class="section-content">
+                <div class="exercise-box">
+                    <strong>Esercizio:</strong> Dato un grafo `G` e due nodi `s` e `v`, restituire un cammino di lunghezza minima da `s` a `v`.
+                    
+                    <p><strong>Soluzione (discussa in aula):</strong></p>
+                    <ol>
+                        <li>Eseguire `BFS(G, s)` per calcolare il vettore dei predecessori `pi`.</li>
+                        <li>Partire dal nodo di destinazione `v` e risalire l'albero di visita usando il vettore `pi` fino a raggiungere la sorgente `s`.</li>
+                        <li>Mentre si risale, inserire i nodi in testa a una lista per ottenere il cammino nell'ordine corretto.</li>
+                    </ol>
+                    <pre><code class="language-pseudocode">
+Cammino-Minimo(G, s, v)
+  // 1. Esegui la visita
+  pi = BFS(G, s) // Assumiamo che BFS restituisca il vettore pi
+
+  // 2. Ricostruisci il cammino
+  L = Ø      // Lista vuota
+  u = v
+  while (u != NIL) do
+    Insert-in-testa(L, u)
+    u = pi[u]
+  
+  return L
+                    </code></pre>
+                    <p><strong>Complessità:</strong> Il costo è dominato dalla chiamata a `BFS`. La ricostruzione del cammino ha un costo lineare nella lunghezza del cammino stesso, che è al più \(O(|V|)\).</p>
+                    <ul>
+                        <li>Con Matrici: \(O(|V|^2) + O(|V|) = O(|V|^2)\)</li>
+                        <li>Con Liste: \(\Theta(|V|+|E|) + O(|V|) = \Theta(|V|+|E|)\)</li>
+                    </ul>
+                     <p><strong>Riflessione:</strong> Per calcolare un singolo cammino minimo, è necessario calcolare l'intero albero di visita da `s`. Asintoticamente, calcolare un cammino minimo costa quanto calcolarli tutti dalla stessa sorgente, poiché non si sa a priori quale sia la "direzione giusta" da esplorare.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="esercizio-cicli" class="content-section">
+            <h2 class="section-title">6. Esercizio: Decidere se un Grafo è Ciclico</h2>
+            <div class="section-content">
+                <p>La professoressa introduce un nuovo problema per introdurre la prossima visita (DFS): decidere se un grafo `G` contiene un ciclo.</p>
+                
+                <h4 class="subsubsection-title">Definizioni</h4>
+                <ul>
+                    <li><strong>Cammino semplice:</strong> Un cammino in cui i nodi interni (tutti tranne il primo e l'ultimo) non si ripetono.</li>
+                    <li><strong>Ciclo semplice:</strong> Un cammino semplice in cui il primo e l'ultimo nodo coincidono.</li>
+                    <li>Un grafo contiene un ciclo se e solo se contiene un ciclo semplice.</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Cicli nei grafi non orientati:</strong>
+                    <p>In un grafo non orientato, un cammino come `s -> v -> s` che usa lo stesso arco due volte (andata e ritorno) <strong>non</strong> è considerato un ciclo valido ai fini di questa discussione.</p>
+                </div>
+
+                <h4 class="subsubsection-title">Idea per la Ricerca di Cicli con BFS (per Grafi Non Orientati)</h4>
+                <p>Durante una visita BFS, un ciclo viene rilevato quando, esplorando i vicini di un nodo grigio `u`, si incontra un vicino `v` che è <strong>già GRIGIO</strong>.</p>
+                <p>Tuttavia, bisogna fare attenzione: se `v` è il predecessore di `u` (\(v = \pi[u]\)), questo arco fa parte dell'albero di visita e non indica un ciclo. Un ciclo è presente se si trova un arco da un nodo `u` a un vicino `v` tale che:</p>
+                <ol>
+                    <li><code>color[v]</code> è GRIGIO (o comunque non BIANCO).</li>
+                    <li>`v` <strong>non</strong> è il predecessore di `u` (\(v \neq \pi[u]\)).</li>
+                </ol>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                        graph TD
+                            S --> A;
+                            S --> B;
+                            A --> C;
+                            B --> C;
+
+                            subgraph Legenda
+                                S(S - Grigio) -- scopre --> A(A - Grigio);
+                                S -- scopre --> B(B - Grigio);
+                                A(A - Grigio) -- scopre --> C(C - Grigio);
+                                B(B - Grigio) -- trova --> C(C - Già Grigio);
+                                style B,C fill:#4b5563
+                                linkStyle 3 stroke:red,stroke-width:2px,stroke-dasharray: 5 5;
+                            end
+                    </pre>
+                </div>
+                <div class="exercise-box">
+                    <strong>Spunti di riflessione per la prossima lezione:</strong>
+                    <ul>
+                        <li><strong>Grafi non connessi:</strong> Come si modifica l'algoritmo se il grafo ha più componenti connesse? (Risposta: si deve iterare su tutti i vertici del grafo e, se un vertice è ancora BIANCO, far partire una nuova BFS da lì).</li>
+                        <li><strong>Grafi orientati:</strong> Questa tecnica per rilevare cicli funziona anche per i grafi orientati? (La professoressa lascia la domanda aperta, anticipando che la DFS sarà uno strumento più adatto per questo). Un ciclo come \(u \leftrightarrow v\) è un ciclo in un grafo orientato, e la logica basata sui predecessori potrebbe non essere sufficiente.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
