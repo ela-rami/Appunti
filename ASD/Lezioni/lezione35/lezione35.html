@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 35: Grafi: Introduzione</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 16 apr 2021 (2).pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 35: Introduzione ai Grafi</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro" class="sidebar-link">1. Panoramica sui Grafi</a></li>
+            <li><a href="#definizione-formale" class="sidebar-link">2. Definizione Formale di Grafo</a></li>
+            <li><a href="#alberi-vs-grafi" class="sidebar-link">3. Alberi come Caso Particolare di Grafi</a></li>
+            <li><a href="#memorizzazione" class="sidebar-link">4. Memorizzazione dei Grafi</a></li>
+            <li><a href="#matrice-adiacenza" class="sidebar-link">4.1. Rappresentazione 1: Matrice di Adiacenza</a></li>
+            <li><a href="#liste-adiacenza" class="sidebar-link">4.2. Rappresentazione 2: Liste di Adiacenza</a></li>
+            <li><a href="#spazio-e-operazioni" class="sidebar-link">5. Analisi e Problemi di Base</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro" class="content-section active-section">
+            <h2 class="section-title">1. Panoramica sui Grafi</h2>
+            <div class="section-content">
+                <p>La professoressa introduce l'ultima parte del corso, dedicata ai <strong>grafi</strong>, una struttura dati più sofisticata. I grafi si suddividono in due macro-categorie, che a loro volta si dividono internamente:</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        A(GRAFI) --> B(Non Pesati);
+                        A --> C(Pesati);
+
+                        subgraph " "
+                            direction LR
+                            B --> B1(Orientati);
+                            B --> B2(Non Orientati);
+                        end
+
+                        subgraph " "
+                            direction LR
+                            C --> C1(Orientati);
+                            C --> C2(Non Orientati);
+                        end
+                    </pre>
+                </div>
+                <p>Il percorso di studio seguirà una roadmap precisa:</p>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Grafi Non Pesati"
+                            Visite --> BFS(BFS per cammini minimi)
+                            Visite --> DFS(DFS per ricerca di cicli)
+                            DFS --> TopoSort(Topological Sort per DAG)
+                            DFS --> SCC(Componenti Fortemente Connesse)
+                        end
+                        subgraph "Grafi Pesati"
+                            P(Problemi Principali) --> MST(Minimum Spanning Tree)
+                            P --> ShortestPaths(Cammini di Peso Minimo)
+                        end
+                    </pre>
+                </div>
+                 <p>Si inizierà con i grafi <strong>non pesati</strong>, studiando le <strong>visite</strong> (BFS e DFS), procedure che scandiscono tutti i nodi della struttura. La BFS (Breadth-First Search) è legata al calcolo di cammini con il numero minimo di archi. La DFS (Depth-First Search) è utile per la ricerca di cicli e porta a concetti come il <strong>Topological Sort</strong> (per grafi orientati aciclici, o DAG) e le <strong>Componenti Fortemente Connesse</strong>.</p>
+                 <p>Successivamente, si affronteranno i grafi <strong>pesati</strong>, analizzando due problemi fondamentali ma distinti: il calcolo del <strong>Minimum Spanning Tree (MST)</strong> e la ricerca dei <strong>cammini di peso minimo</strong>.</p>
+                 <div class="note-box">
+                    <strong>Applicazione del Topological Sort:</strong>
+                    <p>La professoressa menziona che il Topological Sort ha applicazioni pratiche, ad esempio, nei sistemi operativi, come confermato da docenti di altri corsi.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="definizione-formale" class="content-section">
+            <h2 class="section-title">2. Definizione Formale di Grafo</h2>
+            <div class="section-content">
+                <p>Un grafo è una struttura dati definita da una coppia di insiemi: \(G = (V, E)\).</p>
+                <ul>
+                    <li><strong>V</strong> è l'insieme dei <strong>nodi</strong> (o vertici).</li>
+                    <li><strong>E</strong> è l'insieme degli <strong>archi</strong> (o spigoli).</li>
+                </ul>
+                <p>La natura degli archi definisce il tipo di grafo:</p>
+                <ul>
+                    <li><strong>Grafo Non Orientato:</strong> Un arco è un <strong>insieme non ordinato</strong> di due nodi, denotato come \(\{u, v\}\). L'arco connette `u` e `v` senza una direzione specifica, e può essere percorso in entrambi i versi.</li>
+                    <li><strong>Grafo Orientato:</strong> Un arco è una <strong>coppia ordinata</strong> di nodi, denotata come \((u, v)\). L'arco va da `u` (origine) a `v` (destinazione), quindi l'arco \((u, v)\) è diverso dall'arco \((v, u)\).</li>
+                </ul>
+                <p>Visivamente, la differenza è la seguente:</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Grafo Non Orientato"
+                            A --- B;
+                            B --- D;
+                            A --- C;
+                            C --- D;
+                            style D fill:#f9d423
+                        end
+                        subgraph "Grafo Orientato"
+                            U(u) --> V(v);
+                            V --> W(w);
+                            W --> U;
+                        end
+                    </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="alberi-vs-grafi" class="content-section">
+            <h2 class="section-title">3. Alberi come Caso Particolare di Grafi</h2>
+            <div class="section-content">
+                <p>La professoressa introduce una caratterizzazione fondamentale che lega alberi e grafi, definendo gli "alberi liberi" (alberi senza una radice predefinita).</p>
+                <blockquote>
+                Un albero è un grafo <strong>non orientato, connesso e aciclico</strong>.
+                </blockquote>
+                <p>Analizziamo i termini:</p>
+                <ul>
+                    <li><strong>Ciclo:</strong> È una sequenza di archi contigui che parte da un nodo e torna allo stesso nodo. Nel grafo non orientato dell'esempio precedente, il percorso `B-D-C-A-B` è un ciclo. Un grafo <strong>aciclico</strong> non contiene cicli.</li>
+                    <li><strong>Connesso (per grafi non orientati):</strong> Un grafo è connesso se, per ogni coppia di nodi `u` e `v`, esiste almeno un cammino (una sequenza di archi contigui) che li collega.</li>
+                </ul>
+                 <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            subgraph "Grafo non orientato, connesso e aciclico (un albero libero)"
+                                R(r) --- F1;
+                                F1 --- F21;
+                                F1 --- F22;
+                                F22 --- L1;
+                                R --- F3;
+                            end
+                     </pre>
+                </div>
+                 <p>Questo tipo di grafo è un <strong>albero libero</strong> perché non ha una radice designata. Tuttavia, scegliendo un qualsiasi nodo come radice (es. `r`), la struttura gerarchica emerge naturalmente. Questo tipo di albero, come quelli visti per gli insiemi disgiunti, ha due proprietà notevoli:</p>
+                 <ol>
+                    <li>Non c'è un numero massimo di figli per un nodo.</li>
+                    <li>Non c'è un ordinamento intrinseco tra i figli di un nodo (non esiste un "figlio sinistro" o "destro" predefinito).</li>
+                 </ol>
+                 <div class="note-box">
+                    <strong>Analogia con una mappa stradale:</strong>
+                    <p>Un grafo può essere pensato come una mappa, dove i <strong>nodi</strong> sono le città e gli <strong>archi</strong> sono le strade. Se il grafo è orientato, le strade possono avere sensi unici. Se è pesato, ogni strada ha una lunghezza o un tempo di percorrenza associato.</p>
+                </div>
+                <div class="clarification-box">
+                    <strong>Connessione nei Grafi Orientati:</strong>
+                    <p>Uno studente chiede se la definizione di "connesso" si applichi anche ai grafi orientati. La professoressa chiarisce che per i grafi orientati la nozione è più complessa e si parlerà di <strong>forte connessione</strong>, un concetto che verrà affrontato in seguito.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="memorizzazione" class="content-section">
+            <h2 class="section-title">4. Memorizzazione dei Grafi</h2>
+            <div class="section-content">
+                <p>Ogni volta che si introduce una nuova struttura dati, sorgono due domande fondamentali, che devono essere considerate simultaneamente per ottenere un design efficiente:</p>
+                <ol>
+                    <li><strong>Come si memorizza la struttura?</strong> (Come la si rende concreta?)</li>
+                    <li><strong>Quali sono le operazioni di base?</strong></li>
+                </ol>
+                <p>Per i grafi, l'operazione di base fondamentale è la <strong>visita</strong>: una procedura che scandisce tutti i nodi del grafo, idealmente accedendo alle informazioni di ciascun nodo una sola volta per elaborarli. Questo è analogo alle visite in-order, pre-order e post-order viste per gli alberi.</p>
+                <p>Esistono due modi principali per rappresentare un grafo in memoria.</p>
+            </div>
+        </article>
+
+        <article id="matrice-adiacenza" class="content-section">
+            <h3 class="subsection-title">4.1. Rappresentazione 1: Matrice di Adiacenza</h3>
+            <div class="section-content">
+                <p>La prima proposta è utilizzare una <strong>matrice di adiacenza</strong>, indicata come \(M_G\). Questa è una matrice booleana quadrata di dimensione \(|V| \times |V|\).</p>
+                <p>Per convenzione, si assume che i nodi siano numerati da 1 a \(N = |V|\).</p>
+                <p>L'elemento della matrice in posizione \((i, j)\) è definito come:</p>
+                <div class="math-block">
+                \( M_G[i, j] = \begin{cases} 1 & \text{se l'arco } (i, j) \in E \\ 0 & \text{altrimenti} \end{cases} \)
+                </div>
+                <p><strong>Esempio (Grafo Non Orientato):</strong></p>
+                <p>Consideriamo il seguente grafo non orientato:</p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            A("1") --- B("2");
+                            A --- C("3");
+                            A --- D("5");
+                            C --- D;
+                            D --- E("4");
+                            F("6");
+                     </pre>
+                </div>
+                <p>La sua matrice di adiacenza \(M_G\) sarà (mostrando solo la prima riga per esempio):</p>
+                <pre><code>
+Riga 1: [0, 1, 1, 0, 1, 0]
+// Archi: (1,2), (1,3), (1,5)
+                </code></pre>
+                <p><strong>Proprietà della Matrice di Adiacenza:</strong></p>
+                <ul>
+                    <li><strong>Grafo Non Orientato:</strong> La matrice è <strong>simmetrica</strong> rispetto alla diagonale principale. Se esiste un arco \(\{1, 2\}\), allora \(M_G[1, 2] = 1\) e \(M_G[2, 1] = 1\). Inoltre, la diagonale è sempre zero, poiché non si considerano archi da un nodo a se stesso (self-loop).</li>
+                    <li><strong>Grafo Orientato:</strong> La matrice non è necessariamente simmetrica. Può avere valori sulla diagonale \((M_G[i, i] = 1)\) se sono presenti self-loop. Qualsiasi matrice booleana quadrata può rappresentare un grafo orientato.</li>
+                </ul>
+                <div class="clarification-box">
+                    <strong>Matrice di Archi vs. Matrice di Cammini</strong>
+                    <p>La professoressa chiarisce che la matrice di adiacenza rappresenta solo gli archi (cammini di lunghezza 1). Un valore zero in \(M_G[i, j]\) non implica che il nodo `j` sia irraggiungibile da `i`, ma solo che non è raggiungibile con un singolo arco. I cammini di lunghezza 0 (da un nodo a se stesso) sarebbero rappresentati dalla matrice identità.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="liste-adiacenza" class="content-section">
+            <h3 class="subsection-title">4.2. Rappresentazione 2: Liste di Adiacenza</h3>
+            <div class="section-content">
+                <p>La seconda rappresentazione, le <strong>liste di adiacenza</strong>, nasce dall'osservazione che la matrice di adiacenza può essere molto "sparsa" (piena di zeri) se il numero di archi è basso. Invece di memorizzare un'intera riga della matrice, si può memorizzare solo una lista degli indici di colonna dove il valore è 1.</p>
+                <p>La struttura è un vettore (o array) \(L_G\) di liste, di dimensione \(|V|\).</p>
+                <blockquote>
+                \(L_G[i]\) è la lista concatenata di tutti i nodi `j` tali che esiste un arco da `i` a `j`.
+                </blockquote>
+                <p><strong>Esempio (Grafo Orientato):</strong></p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            A("1") --> E("5");
+                            A --> F("6");
+                            B("2") --> A;
+                            C("3") --> C;
+                            C --> B;
+                            D("4") --> F;
+                     </pre>
+                </div>
+                <p>La sua rappresentazione con liste di adiacenza sarebbe:</p>
+                <ul>
+                    <li><code>L_G[1]</code>: -> 5 -> 6 -> NIL</li>
+                    <li><code>L_G[2]</code>: -> 1 -> NIL</li>
+                    <li><code>L_G[3]</code>: -> 3 -> 2 -> NIL</li>
+                    <li><code>L_G[4]</code>: -> 6 -> NIL</li>
+                    <li>... e così via.</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Implementazione con Puntatori:</strong>
+                    <p>La professoressa sottolinea che \(L_G\) è un vettore di puntatori. Ogni elemento \(L_G[i]\) non contiene la lista, ma l'indirizzo di memoria del primo nodo della lista concatenata corrispondente.</p>
+                </div>
+                <p><strong>Proprietà delle Liste di Adiacenza:</strong></p>
+                <ul>
+                    <li><strong>Ordine non garantito:</strong> L'ordine dei nodi all'interno di una lista di adiacenza non è specificato. `L_G[1]` potrebbe essere `5 -> 6` o `6 -> 5`. La rappresentazione non è unica.</li>
+                    <li><strong>Grafi non orientati:</strong> Se esiste un arco non orientato \(\{u, v\}\), il nodo `v` apparirà nella lista di adiacenza di `u`, e il nodo `u` apparirà nella lista di adiacenza di `v`.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="spazio-e-operazioni" class="content-section">
+            <h2 class="section-title">5. Analisi e Problemi di Base</h2>
+            <div class="section-content">
+                <p>La professoressa conclude la lezione analizzando lo spazio occupato e ponendo alcune domande per stimolare la riflessione su quale rappresentazione sia migliore per quali operazioni.</p>
+                
+                <h4 class="subsubsection-title">Complessità Spaziale</h4>
+                <ul>
+                    <li><strong>Matrice di Adiacenza:</strong> Usa sempre \(\Theta(|V|^2)\) spazio, indipendentemente dal numero di archi.</li>
+                    <li><strong>Liste di Adiacenza:</strong> La professoressa lascia questa come domanda.</li>
+                </ul>
+                <div class="clarification-box">
+                    <strong>Approfondimento: Spazio delle Liste di Adiacenza</strong>
+                    <p>La dimensione delle liste di adiacenza dipende sia dal numero di vertici che dal numero di archi.</p>
+                    <ul>
+                        <li>Il vettore di liste occupa \(\Theta(|V|)\) spazio.</li>
+                        <li>La somma delle lunghezze di tutte le liste di adiacenza è:
+                            <ul>
+                                <li>\(\Theta(|E|)\) per un <strong>grafo orientato</strong> (ogni arco compare una volta).</li>
+                                <li>\(\Theta(2|E|) = \Theta(|E|)\) per un <strong>grafo non orientato</strong> (ogni arco compare due volte).</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <p>Pertanto, la complessità spaziale totale delle liste di adiacenza è \(\Theta(|V| + |E|)\). Questa rappresentazione è molto più efficiente in termini di spazio per i <strong>grafi sparsi</strong>, dove \(|E|\) è molto più piccolo di \(|V|^2\).</p>
+                </div>
+
+                <h4 class="subsubsection-title">Problemi di Base</h4>
+                <p>Vengono posti i seguenti problemi per confrontare le due rappresentazioni.</p>
+                <div class="exercise-box">
+                    <strong>Esercizi (posti dalla Professoressa) e Soluzioni</strong>
+                    
+                    <p><strong>1. Decidere se l'arco \((i, j)\) appartiene a \(E\).</strong></p>
+                    <ul>
+                        <li><strong>Matrice:</strong> \(\Theta(1)\). Si accede direttamente all'elemento \(M_G[i, j]\).</li>
+                        <li><strong>Liste:</strong> \(O(\text{grado}(i))\). Nel caso peggiore, bisogna scandire tutta la lista di adiacenza del nodo `i` per vedere se contiene `j`. Il grado di un nodo è il numero di archi uscenti.</li>
+                    </ul>
+
+                    <p><strong>2. Contare gli archi uscenti dal nodo `i`.</strong></p>
+                    <ul>
+                        <li><strong>Matrice:</strong> \(\Theta(|V|)\). Bisogna scandire tutta la riga `i` e contare gli 1.</li>
+                        <li><strong>Liste:</strong> \(O(\text{grado}(i))\). Bisogna percorrere la lista \(L_G[i]\) e contarne gli elementi. Se la lunghezza della lista fosse memorizzata a parte (un'ottimizzazione comune), il costo sarebbe \(\Theta(1)\).</li>
+                    </ul>
+
+                    <p><strong>3. Contare gli archi entranti nel nodo `i`.</strong></p>
+                    <ul>
+                        <li><strong>Matrice:</strong> \(\Theta(|V|)\). Bisogna scandire tutta la colonna `j` e contare gli 1.</li>
+                        <li><strong>Liste:</strong> \(\Theta(|V| + |E|)\). Questa è l'operazione più inefficiente con le liste di adiacenza standard. Non avendo puntatori "all'indietro", bisogna scandire <strong>tutte le liste</strong> per vedere quante volte `i` compare come destinazione. Per risolvere questo problema, a volte si memorizza un secondo set di liste di adiacenza per gli archi "invertiti".</li>
+                    </ul>
+
+                    <p><strong>4. Calcolare il grafo \(G'=(V, E')\) dei cammini di lunghezza \(\le 2\).</strong>
+                    <br>Un arco \((u, v)\) è in \(E'\) se:
+                    <ol>
+                        <li>\((u, v)\) è in \(E\) (cammino di lunghezza 1).</li>
+                        <li>Esiste un nodo `w` tale che \((u, w) \in E\) e \((w, v) \in E\) (cammino di lunghezza 2).</li>
+                        <li>\(u = v\) (cammino di lunghezza 0).</li>
+                    </ol>
+                    </p>
+                    <ul>
+                        <li><strong>Matrice:</strong> Il modo più elegante è usare l'algebra delle matrici. Sia \(M\) la matrice di adiacenza. La matrice dei cammini di lunghezza 2 è \(M^2\) (prodotto di matrici). La matrice dei cammini di lunghezza 0 è la matrice identità \(I\). La matrice di adiacenza di \(G'\) è la versione booleana di \(I + M + M^2\). Il costo è dominato dal prodotto di matrici, che con l'algoritmo standard è \(\Theta(|V|^3)\).</li>
+                        <li><strong>Liste:</strong> Si può costruire \(E'\) iterativamente. Per ogni nodo `u`, si scorre la sua lista di adiacenza per trovare i vicini `w`. Per ogni `w`, si scorre la sua lista di adiacenza per trovare i nodi `v`. Ogni coppia `(u, v)` trovata è un arco in \(E'\). Bisogna poi aggiungere anche gli archi originali e i self-loop. Il costo è \(\sum_{u \in V} \sum_{w \in L_G[u]} \text{grado}(w)\). Questo è difficile da analizzare in modo compatto, ma è più efficiente di \(\Theta(|V|^3)\) per grafi sparsi.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
