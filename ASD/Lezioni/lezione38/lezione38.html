@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 38: Visita in Profondità (DFS)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 28 apr 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 38: Visita in Profondità (DFS)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#recap-cicli-bfs" class="sidebar-link">1. Limiti della BFS nella Ricerca di Cicli</a></li>
+            <li><a href="#intro-dfs" class="sidebar-link">2. Introduzione alla Visita in Profondità (DFS)</a></li>
+            <li><a href="#meccanica-dfs" class="sidebar-link">2.1. Idea e Meccanica della Visita</a></li>
+            <li><a href="#esempio-dfs" class="sidebar-link">2.2. Esempio Dettagliato di DFS</a></li>
+            <li><a href="#implementazione-dfs" class="sidebar-link">3. Implementazione della DFS</a></li>
+            <li><a href="#dfs-pseudocodice" class="sidebar-link">3.1. Pseudocodice di DFS e DFS-visit</a></li>
+            <li><a href="#complessita-dfs" class="sidebar-link">3.2. Analisi della Complessità</a></li>
+            <li><a href="#proprieta-dfs" class="sidebar-link">4. Proprietà della DFS</a></li>
+            <li><a href="#proprieta-pi" class="sidebar-link">4.1. Proprietà del Vettore dei Predecessori (π)</a></li>
+            <li><a href="#proprieta-tempi" class="sidebar-link">4.2. Proprietà dei Tempi di Visita (Teorema delle Parentesi)</a></li>
+            <li><a href="#proprieta-discendenti" class="sidebar-link">4.3. Proprietà dei Discendenti e Teorema del Cammino Bianco</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="recap-cicli-bfs" class="content-section active-section">
+            <h2 class="section-title">1. Limiti della BFS nella Ricerca di Cicli</h2>
+            <div class="section-content">
+                <p>La professoressa inizia riprendendo il problema della ricerca di cicli in un grafo. Era stato suggerito di usare la visita BFS e di cercare archi che collegano nodi "grigi" a nodi "non bianchi" (grigi o neri), escludendo gli archi che tornano al predecessore.</p>
+                <p>Mentre questo approccio funziona per i grafi <strong>non orientati</strong>, mostra i suoi limiti nei grafi <strong>orientati</strong>. Vengono presentati due grafi orientati, uno aciclico e uno ciclico, che la BFS non riesce a distinguere.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Grafo Aciclico"
+                            S1(S) --> A1(A)
+                            B1(B) --> A1
+                        end
+                        subgraph "Grafo Ciclico"
+                            S2(S) --> A2(A)
+                            A2 --> B2(B)
+                            B2 --> S2
+                        end
+                    </pre>
+                </div>
+                <p>In entrambi i casi, la BFS produce una sequenza di scoperte simile, che culmina nell'individuare un arco da un nodo grigio a un nodo già nero, senza però poter determinare se questo chiuda un ciclo. La BFS, esplorando per livelli, non è strutturata per seguire la "direzione" dei cammini, rendendola inadatta a questo scopo nei grafi orientati.</p>
+            </div>
+        </article>
+        
+        <article id="intro-dfs" class="content-section">
+            <h2 class="section-title">2. Introduzione alla Visita in Profondità (DFS)</h2>
+            <div class="section-content">
+                <p>Per superare i limiti della BFS, viene introdotta una nuova strategia di visita: la <strong>DFS (Depth-First Search)</strong>, o visita in profondità. È lo strumento ideale per la ricerca di cicli e per problemi correlati.</p>
+                <p>L'idea fondamentale è opposta a quella della BFS: invece di esplorare "in ampiezza", la DFS cerca di andare <strong>il più in profondità possibile</strong> lungo un cammino. Quando un cammino si esaurisce (raggiunge un nodo da cui non si possono scoprire nuovi nodi), l'algoritmo esegue un <strong>backtracking</strong>, torna indietro al nodo precedente e prova a esplorare un altro cammino in profondità.</p>
+                <div class="clarification-box">
+                    <strong>Analogia con le visite su alberi:</strong>
+                    <ul>
+                        <li>La <strong>BFS</strong> è una generalizzazione di una visita per livelli.</li>
+                        <li>La <strong>DFS</strong> è una generalizzazione di una visita in pre-ordine (o post-ordine), che esplora completamente un sottoalbero prima di passare al successivo.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        
+        <article id="meccanica-dfs" class="content-section">
+            <h3 class="subsection-title">2.1. Idea e Meccanica della Visita</h3>
+            <div class="section-content">
+                <p>La DFS utilizza meccanismi simili alla BFS, ma con alcune importanti differenze:</p>
+                <ul>
+                    <li><strong>Colori:</strong> Si usano ancora i colori BIANCO, GRIGIO e NERO per tracciare lo stato dei nodi.</li>
+                    <li><strong>Predecessori (\(\pi\)):</strong> Si mantiene un vettore \(\pi\) per costruire l'albero (o la foresta) di visita DFS.</li>
+                    <li><strong>Visita Globale:</strong> A differenza della BFS vista finora (che partiva da una sorgente `s`), la DFS è progettata per visitare l'intero grafo. Se, dopo aver esplorato tutti i nodi raggiungibili da un punto di partenza, rimangono nodi bianchi, la visita riparte da uno di essi.</li>
+                    <li><strong>Timestamps:</strong> La DFS introduce una novità cruciale: i <strong>tempi di visita</strong> (timestamps). Si usa un contatore globale `time` per annotare per ogni nodo `u`:
+                        <ul>
+                            <li><strong>`i[u]` (o `d[u]` in alcuni testi):</strong> Il tempo di <strong>scoperta</strong> (discovery time), ovvero quando `u` diventa grigio.</li>
+                            <li><strong>`f[u]` (o `finish[u]`):</strong> Il tempo di <strong>fine visita</strong> (finish time), ovvero quando `u` diventa nero dopo che tutti i suoi discendenti sono stati esplorati.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="esempio-dfs" class="content-section">
+            <h3 class="subsection-title">2.2. Esempio Dettagliato di DFS</h3>
+            <div class="section-content">
+                <p>Viene illustrata una visita DFS sul seguente grafo:</p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            A --> B;
+                            A --> C;
+                            A --> D;
+                            B --> A;
+                            C --> E;
+                            D --> F;
+                            F --> E;
+                            G;
+                     </pre>
+                </div>
+                <p>La visita procede come segue (assumendo di partire dal nodo A e di esplorare gli adiacenti in ordine alfabetico):</p>
+                <ol>
+                    <li><strong>time=1:</strong> Si parte da <strong>A</strong>. A diventa GRIGIO. <code>i[A]=1</code>.</li>
+                    <li>Si esplora A. Il primo vicino è B. B è bianco.
+                        <ul>
+                            <li><strong>time=2:</strong> Si visita <strong>B</strong>. B diventa GRIGIO. <code>i[B]=2</code>, <code>π[B]=A</code>.</li>
+                            <li>B ha un solo vicino, A, che è già grigio. B non ha altri cammini da esplorare.</li>
+                            <li><strong>time=3:</strong> B ha finito. B diventa NERO. <code>f[B]=3</code>. Si fa backtracking ad A.</li>
+                        </ul>
+                    </li>
+                    <li>Si continua ad esplorare A. Il prossimo vicino è C. C è bianco.
+                        <ul>
+                            <li><strong>time=4:</strong> Si visita <strong>C</strong>. C diventa GRIGIO. <code>i[C]=4</code>, <code>π[C]=A</code>.</li>
+                            <li>C ha un vicino, E. E è bianco.
+                                <ul>
+                                    <li><strong>time=5:</strong> Si visita <strong>E</strong>. E diventa GRIGIO. <code>i[E]=5</code>, <code>π[E]=C</code>.</li>
+                                    <li>E non ha vicini.</li>
+                                    <li><strong>time=6:</strong> E ha finito. E diventa NERO. <code>f[E]=6</code>. Backtrack a C.</li>
+                                </ul>
+                            </li>
+                            <li>C non ha altri vicini bianchi.</li>
+                            <li><strong>time=7:</strong> C ha finito. C diventa NERO. <code>f[C]=7</code>. Backtrack ad A.</li>
+                        </ul>
+                    </li>
+                    <li>Si continua ad esplorare A. Il prossimo vicino è D. D è bianco.
+                         <ul>
+                            <li><strong>time=8:</strong> Si visita <strong>D</strong>. D diventa GRIGIO. <code>i[D]=8</code>, <code>π[D]=A</code>.</li>
+                            <li>D ha un vicino, F. F è bianco.
+                                <ul>
+                                    <li><strong>time=9:</strong> Si visita <strong>F</strong>. F diventa GRIGIO. <code>i[F]=9</code>, <code>π[F]=D</code>.</li>
+                                    <li>F ha un vicino, E, che è già nero. Si ignora.</li>
+                                    <li><strong>time=10:</strong> F ha finito. F diventa NERO. <code>f[F]=10</code>. Backtrack a D.</li>
+                                </ul>
+                            </li>
+                            <li>D non ha altri vicini bianchi.</li>
+                            <li><strong>time=11:</strong> D ha finito. D diventa NERO. <code>f[D]=11</code>. Backtrack ad A.</li>
+                        </ul>
+                    </li>
+                    <li>A non ha altri vicini bianchi.
+                        <li><strong>time=12:</strong> A ha finito. A diventa NERO. <code>f[A]=12</code>.</li>
+                    </li>
+                    <li>La visita da A è terminata. Il ciclo principale della DFS controlla se ci sono altri nodi bianchi. Trova <strong>G</strong>.</li>
+                    <li><strong>time=13:</strong> Si parte da G. G diventa GRIGIO. <code>i[G]=13</code>, <code>π[G]=NIL</code>.</li>
+                    <li>G non ha vicini.
+                        <li><strong>time=14:</strong> G ha finito. G diventa NERO. <code>f[G]=14</code>.</li>
+                    </li>
+                </ol>
+                <p>La visita è completa. Tutti i nodi sono stati visitati.</p>
+            </div>
+        </article>
+
+        <article id="implementazione-dfs" class="content-section">
+            <h2 class="section-title">3. Implementazione della DFS</h2>
+            <div class="section-content">
+                <p>La natura "in profondità" e di "backtracking" della DFS si presta perfettamente a un'implementazione <strong>ricorsiva</strong>. La pila (stack) necessaria per il backtracking è gestita implicitamente dal call stack del linguaggio di programmazione.</p>
+            </div>
+        </article>
+        
+        <article id="dfs-pseudocodice" class="content-section">
+            <h3 class="subsection-title">3.1. Pseudocodice di DFS e DFS-visit</h3>
+            <div class="section-content">
+                <p>L'algoritmo si compone di una procedura principale (`DFS`) e di una procedura ausiliaria ricorsiva (`DFS-visit`).</p>
+                <pre><code class="language-pseudocode">
+// Procedura Principale
+DFS(G)
+  for each vertex u in G.V do
+    color[u] = BIANCO
+    pi[u] = NIL
+  
+  time = 0
+  
+  for each vertex u in G.V do
+    if color[u] == BIANCO then
+      // Se trovo un nodo non ancora visitato,
+      // faccio partire una nuova visita da lì.
+      time = DFS-visit(G, u, time)
+
+// Procedura Ricorsiva Ausiliaria
+DFS-visit(G, u, time)
+  // Scopri il nodo u
+  color[u] = GRIGIO
+  time = time + 1
+  i[u] = time
+  
+  // Esplora i vicini
+  for each v in G.Adj[u] do
+    if color[v] == BIANCO then
+      pi[v] = u
+      time = DFS-visit(G, v, time)
+      
+  // Finisci la visita di u
+  color[u] = NERO
+  time = time + 1
+  f[u] = time
+  
+  return time
+                </code></pre>
+                 <div class="clarification-box">
+                    <strong>Correzione rispetto alla trascrizione:</strong>
+                    <p>Nella trascrizione, la professoressa menziona di inizializzare `time` a 1 e poi assegnare `i[u] = time` e incrementare. Lo pseudocodice qui presentato segue la convenzione del libro di testo Cormen, che incrementa prima `time` e poi assegna. Entrambi gli approcci sono validi, purché coerenti. Ad esempio, `time = 0; ...; time++; i[u] = time;` è equivalente a `time = 1; ...; i[u] = time; time++;`. L'importante è che ogni assegnazione di tempo consumi un "tick" univoco dell'orologio.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="complessita-dfs" class="content-section">
+            <h3 class="subsection-title">3.2. Analisi della Complessità</h3>
+            <div class="section-content">
+                <p>La complessità della DFS si analizza in modo simile alla BFS. Le procedure di inizializzazione nel ciclo principale di `DFS` costano \(\Theta(|V|)\).</p>
+                <p>La procedura `DFS-visit` viene chiamata esattamente una volta per ogni vertice del grafo, grazie al controllo sul colore bianco. All'interno di tutte le chiamate a `DFS-visit`, il ciclo `for` che scandisce le adiacenze viene eseguito cumulativamente per tutti i nodi.</p>
+                <ul>
+                    <li><strong>Matrici di Adiacenza:</strong> Per ogni nodo, si scandisce un'intera riga della matrice, costo \(\Theta(|V|)\). Complessità totale: \(\Theta(|V|) + \Theta(|V|^2) = \mathbf{\Theta(|V|^2)}\).</li>
+                    <li><strong>Liste di Adiacenza:</strong> La somma delle scansioni di tutte le liste di adiacenza è \(\Theta(|E|)\). Complessità totale: \(\Theta(|V|) + \Theta(|E|) = \mathbf{\Theta(|V|+|E|)}\).</li>
+                </ul>
+                <p>La complessità è identica a quella della BFS, ma questa volta è \(\Theta\) invece di \(O\), perché la DFS, per sua natura, visita sempre l'intero grafo per assicurarsi che nessun nodo venga tralasciato.</p>
+            </div>
+        </article>
+
+        <article id="proprieta-dfs" class="content-section">
+            <h2 class="section-title">4. Proprietà della DFS</h2>
+            <div class="section-content">
+                <p>La DFS genera una serie di proprietà strutturali molto utili per risolvere problemi sui grafi. Queste proprietà derivano principalmente dal vettore dei predecessori \(\pi\) e dai tempi di visita.</p>
+            </div>
+        </article>
+
+        <article id="proprieta-pi" class="content-section">
+            <h3 class="subsection-title">4.1. Proprietà del Vettore dei Predecessori (π)</h3>
+            <div class="section-content">
+                <p>Al termine della visita, il vettore \(\pi\) definisce una <strong>foresta di alberi di visita (DFS Forest)</strong>. Non si ottiene un singolo albero, perché la visita potrebbe ripartire più volte da nodi bianchi diversi.</p>
+                <p>I nodi con \(\pi[u] = \text{NIL}\) sono le radici degli alberi in questa foresta. Essi corrispondono ai nodi da cui la procedura `DFS-visit` è stata chiamata direttamente dalla procedura principale `DFS`.</p>
+                <div class="clarification-box">
+                    <strong>Connessione e Foresta DFS (per grafi non orientati):</strong>
+                    <p>In un grafo <strong>non orientato</strong>, la foresta DFS contiene un unico albero se e solo se il grafo è <strong>connesso</strong>. Il numero di alberi nella foresta corrisponde al numero di componenti connesse del grafo.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="proprieta-tempi" class="content-section">
+            <h3 class="subsection-title">4.2. Proprietà dei Tempi di Visita (Teorema delle Parentesi)</h3>
+            <div class="section-content">
+                <p>I tempi di scoperta `i[u]` e di fine visita `f[u]` per ogni nodo `u` definiscono un intervallo `[i[u], f[u]]` durante il quale il nodo `u` è GRIGIO.</p>
+                <p><strong>Teorema delle Parentesi:</strong> Per ogni coppia di nodi `u` e `v`, i loro intervalli di tempo sono o <strong>completamente disgiunti</strong>, oppure uno è <strong>interamente contenuto</strong> nell'altro. Non possono mai sovrapporsi parzialmente.</p>
+                <div class="math-block">
+                Dati `u, v`, si verifica solo una di queste tre condizioni:
+                <ol>
+                    <li>\( [i[u], f[u]] \cap [i[v], f[v]] = \emptyset \)</li>
+                    <li>\( [i[u], f[u]] \subset [i[v], f[v]] \)</li>
+                    <li>\( [i[v], f[v]] \subset [i[u], f[u]] \)</li>
+                </ol>
+                </div>
+                <p>Questa proprietà è una conseguenza diretta della natura ricorsiva (e quindi basata su stack) della visita: se `DFS-visit(v)` viene chiamata mentre `DFS-visit(u)` è in esecuzione, la chiamata a `v` deve terminare prima che la chiamata a `u` possa terminare.</p>
+                 <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    gantt
+                        title Struttura a Parentesi dei Tempi DFS
+                        dateFormat x
+                        axisFormat %S
+                        section Nodo u
+                        Intervallo u: 2, 11
+                        section Nodo v (discendente di u)
+                        Intervallo v: 4, 7
+                        section Nodo w (disgiunto)
+                        Intervallo w: 13, 16
+                    </pre>
+                 </div>
+            </div>
+        </article>
+
+        <article id="proprieta-discendenti" class="content-section">
+            <h3 class="subsection-title">4.3. Proprietà dei Discendenti e Teorema del Cammino Bianco</h3>
+            <div class="section-content">
+                <p>Il teorema delle parentesi ci fornisce un modo semplice per identificare le relazioni antenato-discendente nella foresta DFS:</p>
+                <p><strong>Corollario (Proprietà dei discendenti):</strong> Un nodo `u` è un discendente di un nodo `v` nella foresta DFS se e solo se l'intervallo di `u` è contenuto nell'intervallo di `v`: \( [i[u], f[u]] \subset [i[v], f[v]] \).</p>
+                
+                <p>Una proprietà più profonda, che lega la struttura della foresta ai colori del grafo in un dato istante, è il <strong>Teorema del Cammino Bianco</strong>.</p>
+                <p><strong>Teorema del Cammino Bianco:</strong> Un nodo `u` è un discendente di un nodo `v` nella foresta DFS se e solo se, al tempo `i[v]` (istante in cui `v` viene scoperto), esiste un cammino da `v` a `u` composto <strong>interamente da nodi bianchi</strong>.</p>
+                <div class="note-box">
+                    <strong>Controesempio e Chiarimento:</strong>
+                    <p>Non basta che `u` sia bianco e raggiungibile da `v` al tempo `i[v]`. Se il cammino da `v` a `u` contiene un nodo intermedio che è già GRIGIO, non è garantito che `u` diventi discendente di `v`. L'altro nodo grigio potrebbe "raggiungere" `u` per primo, rendendolo suo discendente.</p>
+                </div>
+                <p>Questo teorema è fondamentale per comprendere come la DFS costruisce la sua foresta e sarà molto utile per gli algoritmi basati su di essa.</p>
+                <div class="clarification-box">
+                    <strong>Domanda da uno studente su B-Tree e ricorsione:</strong>
+                    <p>Uno studente ha chiesto se l'uso della ricorsione nella ricerca su B-Tree non sia un problema, dato che si vuole minimizzare la memoria usata. La professoressa concorda che è un'osservazione corretta. Sebbene per semplicità didattica l'algoritmo possa essere presentato in forma ricorsiva, in un'implementazione reale si userebbe una versione iterativa (con un ciclo `while`) per evitare di occupare lo stack con l'intero cammino, garantendo così che solo un nodo alla volta risieda in memoria.</p>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
