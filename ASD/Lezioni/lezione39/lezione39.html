@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 39: Applicazioni della DFS - Cicli e Ordinamento Topologico</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 30 apr 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 39: Applicazioni della DFS</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#recap-dfs" class="sidebar-link">1. Recap DFS e Esercizio di Visita</a></li>
+            <li><a href="#classificazione-archi" class="sidebar-link">2. Classificazione degli Archi in una DFS</a></li>
+            <li><a href="#back-edge" class="sidebar-link">2.1. Back-Edge e Ricerca di Cicli</a></li>
+            <li><a href="#forward-cross-edge" class="sidebar-link">2.2. Forward-Edge e Cross-Edge</a></li>
+            <li><a href="#dag-topological-sort" class="sidebar-link">3. Grafi Orientati Aciclici (DAG) e Ordinamento Topologico</a></li>
+            <li><a href="#definizione-toposort" class="sidebar-link">3.1. Definizione e Applicazioni</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="recap-dfs" class="content-section active-section">
+            <h2 class="section-title">1. Recap DFS e Esercizio di Visita</h2>
+            <div class="section-content">
+                <p>La professoressa inizia riepilogando le proprietà della visita DFS, in particolare il Teorema delle Parentesi e il Teorema del Cammino Bianco, per poi svolgere un esercizio completo di esecuzione della visita su un grafo orientato.</p>
+                <div class="exercise-box">
+                    <strong>Esercizio: Esecuzione di una Visita DFS</strong>
+                    <p>Dato il seguente grafo orientato e l'ordine degli archi nelle liste di adiacenza, eseguire una visita DFS completa, annotando i vettori \(\pi\), `color`, `i` e `f`.</p>
+                    <p><strong>Grafo di Partenza:</strong></p>
+                    <div class="mermaid-container tree-diagram">
+                        <pre class="mermaid">
+                        graph TD
+                            1 --> 5; 1 --> 2;
+                            2 --> 4;
+                            3 --> 2; 3 --> 4; 3 --> 1;
+                            5 --> 3;
+                            6 --> 5;
+                            7 --> 6;
+                        </pre>
+                    </div>
+                    <p><strong>Ordine Liste di Adiacenza:</strong></p>
+                    <ul>
+                        <li><code>Adj[1]</code>: (5, 2)</li>
+                        <li><code>Adj[3]</code>: (2, 4, 1)</li>
+                    </ul>
+                    <p><strong>Tracciamento della Visita (Pila delle chiamate e risultati finali):</strong></p>
+                    <ol>
+                        <li><strong>DFS-visit(G, 1):</strong> i[1]=1. Esplora 5.</li>
+                        <li><strong>DFS-visit(G, 5):</strong> i[5]=2, π[5]=1. Esplora 3.</li>
+                        <li><strong>DFS-visit(G, 3):</strong> i[3]=3, π[3]=5. Esplora 2.</li>
+                        <li><strong>DFS-visit(G, 2):</strong> i[2]=4, π[2]=3. Esplora 4.</li>
+                        <li><strong>DFS-visit(G, 4):</strong> i[4]=5, π[4]=2. Lista adiacenza vuota. Chiude 4: f[4]=6. Backtrack a 2.</li>
+                        <li>In 2, finita la lista. Chiude 2: f[2]=7. Backtrack a 3.</li>
+                        <li>In 3, esplora 4 (già nero) e 1 (già grigio). Finita la lista. Chiude 3: f[3]=8. Backtrack a 5.</li>
+                        <li>In 5, finita la lista. Chiude 5: f[5]=9. Backtrack a 1.</li>
+                        <li>In 1, esplora 2 (già nero). Finita la lista. Chiude 1: f[1]=10.</li>
+                        <li><strong>Ritorno a DFS:</strong> Il ciclo principale continua. 2,3,4,5 sono neri. Trova 6 bianco.</li>
+                        <li><strong>DFS-visit(G, 6):</strong> i[6]=11. Esplora 5 (nero). Finita la lista. Chiude 6: f[6]=12.</li>
+                        <li><strong>Ritorno a DFS:</strong> Trova 7 bianco.</li>
+                        <li><strong>DFS-visit(G, 7):</strong> i[7]=13. Esplora 6 (nero). Finita la lista. Chiude 7: f[7]=14.</li>
+                    </ol>
+                    <p><strong>Risultato finale:</strong> Si ottiene una foresta DFS con tre radici (1, 6, 7). L'albero con radice 1 è una catena: 1 -> 5 -> 3 -> 2 -> 4.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="classificazione-archi" class="content-section">
+            <h2 class="section-title">2. Classificazione degli Archi in una DFS</h2>
+            <div class="section-content">
+                <p>Durante una visita DFS, quando si esplora un arco \((u, v)\), il nodo `u` è sempre GRIGIO. Il colore del nodo `v` in quell'istante permette di classificare l'arco in una di tre categorie, ognuna con un significato strutturale preciso.</p>
+                <ul>
+                    <li><strong>Da GRIGIO a BIANCO:</strong> Questo arco porta alla scoperta di un nuovo nodo. Questi archi sono chiamati <strong>archi dell'albero</strong> (o di visita) e formano la foresta DFS.</li>
+                    <li><strong>Da GRIGIO a GRIGIO:</strong> Questo arco collega il nodo corrente `u` a un suo antenato `v` nella foresta di visita. Questi sono chiamati <strong>Back-Edge</strong> (archi all'indietro).</li>
+                    <li><strong>Da GRIGIO a NERO:</strong> Questo arco collega il nodo corrente `u` a un nodo `v` già completamente visitato. A seconda della relazione tra `u` e `v` nella foresta, si distinguono in due sottocasi.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="back-edge" class="content-section">
+            <h3 class="subsection-title">2.1. Back-Edge e Ricerca di Cicli</h3>
+            <div class="section-content">
+                <p>La scoperta di un arco da un nodo grigio `u` a un altro nodo grigio `v` è l'indicatore chiave della presenza di un ciclo in un grafo.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        A(u - grigio) --> B(..grigio..);
+                        B --> C(v - grigio);
+                        C -.-> A;
+                        linkStyle 2 stroke:red,stroke-width:2px,stroke-dasharray: 5 5;
+                    </pre>
+                </div>
+                <p><strong>Teorema:</strong> Un grafo `G` (orientato o non orientato) contiene un ciclo se e solo se una visita DFS su `G` trova almeno un <strong>back-edge</strong>.</p>
+                <p><strong>Dimostrazione (idea):</strong></p>
+                <ul>
+                    <li><strong>(Ciclo \(\implies\) Back-Edge):</strong> Se esiste un ciclo, sia `u` il primo nodo del ciclo a essere scoperto (diventa grigio). Per il Teorema del Cammino Bianco, tutti gli altri nodi del ciclo diventeranno suoi discendenti nella foresta DFS. L'ultimo arco del ciclo, che torna a `u`, collegherà un discendente di `u` (che sarà grigio) a `u` stesso (ancora grigio), formando un back-edge.</li>
+                    <li><strong>(Back-Edge \(\implies\) Ciclo):</strong> Un back-edge \((u, v)\) collega un nodo `u` a un suo antenato `v`. Il cammino da `v` a `u` nell'albero di visita, seguito dall'arco \((u, v)\), forma un ciclo.</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Numero di Cicli vs. Numero di Back-Edge:</strong>
+                    <p>La professoressa sottolinea che <strong>non c'è una corrispondenza 1-a-1</strong> tra il numero di back-edge e il numero di cicli. Un singolo back-edge può essere condiviso da più cicli, e un grafo con un numero esponenziale di cicli (come un grafo completo) avrà al più \(O(|V|^2)\) archi, e quindi al più \(O(|V|^2)\) back-edge.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="forward-cross-edge" class="content-section">
+            <h3 class="subsection-title">2.2. Forward-Edge e Cross-Edge</h3>
+            <div class="section-content">
+                <p>Gli archi da un nodo GRIGIO a un nodo NERO si dividono in due categorie, distinguibili usando i tempi di visita.</p>
+                <p><strong>Forward-Edge (Arco in avanti):</strong></p>
+                <ul>
+                    <li>È un arco \((u, v)\) da un nodo `u` a un suo <strong>discendente</strong> `v` nella foresta DFS.</li>
+                    <li><strong>Condizione:</strong> Si rileva un arco da `u` (grigio) a `v` (nero) e \( i[u] < i[v] \). Questa condizione, grazie al Teorema delle Parentesi, implica che \(v\) è un discendente di \(u\).</li>
+                </ul>
+                 <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            u --> v;
+                            linkStyle 0 stroke:red,stroke-width:2px,stroke-dasharray: 5 5;
+                            subgraph "Albero DFS"
+                                u_t(u) --> a(..) --> v_t(v);
+                            end
+                     </pre>
+                 </div>
+                <p><strong>Cross-Edge (Arco di attraversamento):</strong></p>
+                <ul>
+                    <li>È un arco \((u, v)\) che collega due nodi `u` e `v` che non hanno una relazione antenato-discendente. Può collegare rami diversi dello stesso albero di visita o due alberi di visita diversi.</li>
+                    <li><strong>Condizione:</strong> Si rileva un arco da `u` (grigio) a `v` (nero) e \( i[v] < i[u] \). Questo implica che l'intervallo di `v` è terminato prima che iniziasse quello di `u`, quindi non possono essere correlati come antenato-discendente.</li>
+                </ul>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            subgraph "Albero 1"
+                                R1 --> u;
+                            end
+                            subgraph "Albero 2"
+                                R2 --> v;
+                            end
+                             u --> v;
+                             linkStyle 2 stroke:red,stroke-width:2px,stroke-dasharray: 5 5;
+                     </pre>
+                 </div>
+                 <div class="clarification-box">
+                    <strong>Dipendenza dall'ordine di visita:</strong>
+                    <p>La classificazione di un arco non di albero come Forward o Cross può dipendere dall'ordine in cui i vicini di un nodo vengono esplorati. Lo stesso arco nello stesso grafo può essere classificato diversamente in due visite DFS diverse.</p>
+                 </div>
+            </div>
+        </article>
+
+        <article id="dag-topological-sort" class="content-section">
+            <h2 class="section-title">3. Grafi Orientati Aciclici (DAG) e Ordinamento Topologico</h2>
+            <div class="section-content">
+                <p>La professoressa introduce un'importante classe di grafi: i <strong>Grafi Orientati Aciclici</strong>, o <strong>DAG (Directed Acyclic Graph)</strong>.</p>
+                <p>Questi grafi sono più semplici dei grafi con cicli perché, non potendo "tornare indietro", inducono una nozione di "stratificazione" o "ordinamento" tra i nodi.</p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            A --> B;
+                            A --> C;
+                            B --> D;
+                            C --> D;
+                            C --> E;
+                     </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="definizione-toposort" class="content-section">
+            <h3 class="subsection-title">3.1. Definizione e Applicazioni</h3>
+            <div class="section-content">
+                <p>Un <strong>ordinamento topologico (topological sort)</strong> di un DAG è un ordinamento lineare di tutti i suoi vertici tale che per ogni arco orientato \((u, v)\) dal vertice `u` al vertice `v`, `u` viene prima di `v` nell'ordinamento.</p>
+                <p>Formalmente, è un ordinamento `<` sui nodi tale che:</p>
+                <div class="math-block">
+                Se \((u, v) \in E \implies u < v\)
+                </div>
+                <p><strong>Esempio:</strong></p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                        graph TD
+                            D --> A;
+                            B --> C;
+                            A --> C;
+                    </pre>
+                </div>
+                <ul>
+                    <li>L'ordinamento `D < A < B < C` è un ordinamento topologico valido.</li>
+                    <li>L'ordinamento `D < B < A < C` è un altro ordinamento topologico valido.</li>
+                    <li>L'ordinamento `A < B < C < D` <strong>non</strong> è valido, perché esiste l'arco \((D, A)\) ma `D` non viene prima di `A`.</li>
+                </ul>
+                <p><strong>Applicazioni:</strong></p>
+                <p>L'ordinamento topologico è fondamentale per risolvere problemi di pianificazione con vincoli di precedenza. Un esempio classico è la gestione delle <strong>dipendenze software</strong>: prima di installare un pacchetto `C`, è necessario installare i pacchetti `A` e `B` da cui dipende. Il grafo delle dipendenze deve essere un DAG, e l'ordine di installazione segue un ordinamento topologico.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
