@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 41: Algoritmo SCC e Proprietà degli Alberi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 12 mag 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 41: Algoritmo SCC e Proprietà degli Alberi</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#recap-scc" class="sidebar-link">1. Recap: Componenti Fortemente Connesse (SCC)</a></li>
+            <li><a href="#proprieta-scc" class="sidebar-link">1.1. Proprietà delle SCC e della Foresta DFS</a></li>
+            <li><a href="#logica-scc" class="sidebar-link">1.2. Logica dell'Algoritmo di Kosaraju</a></li>
+            <li><a href="#algo-kosaraju" class="sidebar-link">2. L'Algoritmo di Kosaraju</a></li>
+            <li><a href="#analisi-complessita" class="sidebar-link">2.1. Analisi della Complessità</a></li>
+            <li><a href="#domande-e-esempi" class="sidebar-link">2.2. Domande di Riepilogo e Esempio</a></li>
+            <li><a href="#altro-algoritmo" class="sidebar-link">2.3. L'Algoritmo di Tarjan</a></li>
+            <li><a href="#esercizio-nodi-colorati" class="sidebar-link">3. Esercizio: Cicli con Nodi Colorati</a></li>
+            <li><a href="#grafi-non-orientati-alberi" class="sidebar-link">4. Grafi Non Orientati e Alberi</a></li>
+            <li><a href="#proprieta-alberi" class="sidebar-link">4.1. Proprietà Equivalenti degli Alberi</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="recap-scc" class="content-section active-section">
+            <h2 class="section-title">1. Recap: Componenti Fortemente Connesse (SCC)</h2>
+            <div class="section-content">
+                <p>La professoressa inizia la lezione riepilogando l'argomento delle Componenti Fortemente Connesse (SCC) in un grafo orientato. Vengono ribaditi i concetti chiave:</p>
+                <ul>
+                    <li>Le SCC formano una partizione dei vertici del grafo.</li>
+                    <li>Il <strong>grafo delle componenti</strong>, \(G_{SCC}\), dove ogni nodo rappresenta una SCC, è sempre un <strong>DAG</strong> (Grafo Orientato Aciclico).</li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="proprieta-scc" class="content-section">
+            <h3 class="subsection-title">1.1. Proprietà delle SCC e della Foresta DFS</h3>
+            <div class="section-content">
+                <p>Viene ripresa la discussione sul legame tra la foresta generata da una visita DFS e le SCC del grafo.</p>
+                <ul>
+                    <li><strong>Proprietà 1:</strong> Tutti i nodi di una singola SCC si trovano nello stesso albero della foresta di visita DFS. Una SCC non può essere "spezzata" tra due alberi diversi della foresta.</li>
+                    <li><strong>Proprietà 2:</strong> Ogni albero della foresta di visita DFS è un'unione disgiunta di una o più SCC.</li>
+                </ul>
+                <p>La professoressa illustra con un esempio come, a seconda del nodo di partenza della visita, la foresta DFS risultante possa cambiare. Se la visita parte da un nodo in una SCC "sorgente" (senza archi entranti da altre SCC), si genera un unico albero che contiene l'intero grafo. Se invece si parte da una SCC "intermedia", la visita esplora solo quella componente e le successive, lasciando le componenti "precedenti" da visitare in seguito, generando così più alberi.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Grafo delle SCC"
+                            C1 --> C2 --> C3;
+                        end
+                        subgraph "Caso 1: DFS parte da C1"
+                            T1("T1 (C1 U C2 U C3)");
+                        end
+                        subgraph "Caso 2: DFS parte da C2"
+                            T1_2("T1' (C2 U C3)");
+                            T2_2("T2' (C1)");
+                            T2_2 -- "cross-edge" --> T1_2;
+                        end
+                    </pre>
+                </div>
+                <p>Da questa analisi emerge una proprietà fondamentale:</p>
+                <blockquote>
+                Il nodo con il <strong>tempo di fine visita più alto</strong> in una DFS appartiene sempre a una SCC che è una <strong>sorgente</strong> nel grafo delle componenti \(G_{SCC}\) (cioè non ha archi entranti da altre SCC).
+                </blockquote>
+            </div>
+        </article>
+
+        <article id="logica-scc" class="content-section">
+            <h3 class="subsection-title">1.2. Logica dell'Algoritmo di Kosaraju</h3>
+            <div class="section-content">
+                <p>Questa proprietà è la chiave per l'algoritmo di calcolo delle SCC. L'idea è di usare il grafo trasposto \(G^T\) (dove tutti gli archi sono invertiti).</p>
+                <ul>
+                    <li>Le SCC di \(G^T\) sono identiche a quelle di \(G\).</li>
+                    <li>Una SCC sorgente in \(G\) (senza archi entranti) diventa una SCC <strong>pozzo</strong> in \(G^T\) (senza archi uscenti).</li>
+                </ul>
+                <p>Se identifichiamo un nodo `x` appartenente a una SCC sorgente di `G` (usando il massimo tempo di fine visita della prima DFS), possiamo essere certi che una visita su \(G^T\) partendo da `x` esplorerà <strong>esattamente e soltanto</strong> i nodi della sua SCC, poiché non ci sono archi uscenti da quella componente in \(G^T\).</p>
+                <p>Questo processo può essere iterato. Dopo aver identificato e "rimosso" la prima SCC, si cerca il nodo con il tempo di fine visita più alto tra quelli rimanenti. Questo nodo apparterrà a una SCC sorgente del grafo residuo, e così via.</p>
+            </div>
+        </article>
+
+        <article id="algo-kosaraju" class="content-section">
+            <h2 class="section-title">2. L'Algoritmo di Kosaraju</h2>
+            <div class="section-content">
+                <p>Sulla base della logica descritta, si definisce l'<strong>Algoritmo di Kosaraju</strong> per trovare le componenti fortemente connesse.</p>
+                <ol>
+                    <li><strong>Passo 1:</strong> Esegui `DFS(G)` per calcolare i tempi di fine visita `f[u]` per ogni vertice `u`.</li>
+                    <li><strong>Passo 2:</strong> Calcola il grafo trasposto \(G^T\).</li>
+                    <li><strong>Passo 3:</strong> Esegui `DFS(G^T)`, ma con una modifica: il ciclo principale della visita deve considerare i vertici in ordine <strong>decrescente</strong> dei loro tempi di fine visita calcolati al passo 1.</li>
+                    <li><strong>Risultato:</strong> Gli alberi della foresta generata dalla seconda DFS (quella su \(G^T\)) sono esattamente le Componenti Fortemente Connesse di `G`.</li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="analisi-complessita" class="content-section">
+            <h3 class="subsection-title">2.1. Analisi della Complessità</h3>
+            <div class="section-content">
+                <p>La complessità dell'algoritmo è la somma dei costi dei suoi tre passi:</p>
+                <ul>
+                    <li><strong>DFS(G):</strong> \(\Theta(|V|+|E|)\)</li>
+                    <li><strong>Calcolo di \(G^T\):</strong> \(\Theta(|V|+|E|)\) (si scandiscono tutte le liste di adiacenza di G per costruire quelle di \(G^T\)).</li>
+                    <li><strong>DFS(\(G^T\)):</strong> \(\Theta(|V|+|E|)\)</li>
+                </ul>
+                <p>La complessità totale dell'algoritmo di Kosaraju è quindi \(\mathbf{\Theta(|V|+|E|)}\).</p>
+            </div>
+        </article>
+
+        <article id="domande-e-esempi" class="content-section">
+            <h3 class="subsection-title">2.2. Domande di Riepilogo e Esempio</h3>
+            <div class="section-content">
+                <p>La professoressa chiarisce alcuni punti sull'algoritmo:</p>
+                <ul>
+                    <li><strong>Come si trovano gli archi del grafo delle componenti \(G_{SCC}\)?</strong> Essi corrispondono agli <strong>archi di attraversamento (cross-edge)</strong> trovati durante la seconda visita DFS (quella su \(G^T\)), che vanno reinvertiti.</li>
+                    <li><strong>Che tipo di archi si trovano durante la seconda DFS?</strong> Si troveranno <em>archi di visita</em> (che formano le SCC), <em>back-edge</em> (che formano i cicli interni a una SCC), <em>archi in avanti</em> (anch'essi interni a una SCC) e <em>cross-edge</em> (che collegano SCC diverse).</li>
+                </ul>
+                <p>Viene poi svolto un esempio completo passo-passo, mostrando l'esecuzione della prima DFS, il calcolo dei tempi di fine, la costruzione del grafo trasposto e l'esecuzione della seconda DFS nell'ordine corretto, che genera come alberi le SCC del grafo originale.</p>
+            </div>
+        </article>
+
+        <article id="altro-algoritmo" class="content-section">
+            <h3 class="subsection-title">2.3. L'Algoritmo di Tarjan</h3>
+            <div class="section-content">
+                <p>La professoressa menziona che l'algoritmo di Kosaraju viene talvolta confuso con un altro algoritmo, quello di <strong>Tarjan</strong>. L'algoritmo di Tarjan è più complesso da capire ma ha il vantaggio di calcolare le SCC con <strong>una sola visita DFS</strong>, senza la necessità di calcolare il grafo trasposto. Sebbene la complessità asintotica sia la stessa, quello di Tarjan può essere leggermente più efficiente in pratica.</p>
+            </div>
+        </article>
+
+        <article id="esercizio-nodi-colorati" class="content-section">
+            <h2 class="section-title">3. Esercizio: Cicli con Nodi Colorati</h2>
+            <div class="section-content">
+                <div class="exercise-box">
+                    <strong>Esercizio:</strong> Dato un grafo `G` i cui nodi sono colorati di ROSSO o VERDE, progettare due algoritmi per:
+                    <ol>
+                        <li>Decidere se esiste un ciclo composto <strong>solo da nodi verdi</strong>.</li>
+                        <li>Decidere se esiste un ciclo che contiene <strong>almeno un nodo verde</strong>.</li>
+                    </ol>
+                    <p><strong>Soluzione (discussa in aula):</strong></p>
+                    <p><strong>Punto 1 (solo nodi verdi):</strong></p>
+                    <p>Si esegue una visita DFS modificata che considera solo il sottografo indotto dai nodi verdi. Durante la visita, si esplorano solo archi che collegano nodi verdi. Se si trova un back-edge, esiste un ciclo di soli nodi verdi. Complessità: \(O(|V|+|E|)\) (O-grande perché potremmo non visitare l'intero grafo).</p>
+                    
+                    <p><strong>Punto 2 (almeno un nodo verde):</strong></p>
+                    <p>Questo è più complesso. L'approccio più efficiente è:</p>
+                    <ol>
+                        <li>Calcolare tutte le SCC del grafo G usando l'algoritmo di Kosaraju. Complessità: \(\Theta(|V|+|E|)\).</li>
+                        <li>Iterare su tutte le SCC trovate. Per ogni SCC, verificare se contiene almeno un nodo verde.</li>
+                        <li>Se una SCC contiene un nodo verde, bisogna verificare se quella SCC rappresenta un ciclo. Una SCC rappresenta un ciclo se:
+                            <ul>
+                                <li>Contiene <strong>più di un nodo</strong>.</li>
+                                <li>Contiene <strong>un solo nodo</strong>, ma quel nodo ha un <strong>self-loop</strong>.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Se si trova una SCC che contiene un nodo verde e soddisfa una di queste due condizioni, allora esiste un ciclo con almeno un nodo verde. La complessità totale è dominata dal calcolo delle SCC, quindi \(\Theta(|V|+|E|)\).</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="grafi-non-orientati-alberi" class="content-section">
+            <h2 class="section-title">4. Grafi Non Orientati e Alberi</h2>
+            <div class="section-content">
+                <p>La lezione si sposta sui grafi non orientati, riprendendo il concetto di <strong>albero</strong>. Per un grafo non orientato, le componenti connesse sono semplicemente gli alberi della foresta generata da una DFS completa.</p>
+                <p>Viene ribadita la definizione formale di albero:</p>
+                <blockquote>
+                Un <strong>albero</strong> è un grafo non orientato, <strong>connesso</strong> e <strong>aciclico</strong>.
+                </blockquote>
+                <p>Questo tipo di albero è anche detto <strong>albero libero</strong>, in quanto non ha una radice predefinita. Scegliendo una qualsiasi radice, si ottiene la struttura gerarchica a cui si è abituati. L'obiettivo di molti algoritmi su grafi è estrarre uno "scheletro" aciclico, ovvero un albero, per poter applicare ragionamenti induttivi.</p>
+            </div>
+        </article>
+        
+        <article id="proprieta-alberi" class="content-section">
+            <h3 class="subsection-title">4.1. Proprietà Equivalenti degli Alberi</h3>
+            <div class="section-content">
+                <p>La professoressa enuncia una proposizione fondamentale che elenca diverse caratterizzazioni equivalenti di un albero per un grafo non orientato \(G=(V, E)\). Le seguenti affermazioni sono equivalenti:</p>
+                <ol>
+                    <li><strong>G è un albero</strong> (connesso e aciclico).</li>
+                    <li>Per ogni coppia di nodi `u, v`, <strong>esiste un unico cammino</strong> che li collega.</li>
+                    <li>G è connesso e, se si rimuove un qualsiasi arco, <strong>diventa sconnesso</strong>.</li>
+                    <li>G è connesso e ha esattamente <strong>\(|E| = |V| - 1\) archi</strong>.</li>
+                    <li>G è aciclico e ha esattamente <strong>\(|E| = |V| - 1\) archi</strong>.</li>
+                    <li>G è aciclico e, se si aggiunge un qualsiasi arco, <strong>diventa ciclico</strong>.</li>
+                </ol>
+                <p>Queste proprietà descrivono un albero come una struttura "minimale" per la connessione e "massimale" per l'aciclicità. La loro dimostrazione verrà affrontata nella prossima lezione.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>

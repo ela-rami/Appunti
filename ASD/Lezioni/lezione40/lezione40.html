@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 40: Ordinamento Topologico e Componenti Fortemente Connesse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 5 mag 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 40: Ordinamento Topologico e Componenti Fortemente Connesse</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#recap-dag" class="sidebar-link">1. Ordinamento Topologico di un DAG</a></li>
+            <li><a href="#verifica-dag" class="sidebar-link">1.1. Verifica se un Grafo è un DAG</a></li>
+            <li><a href="#algoritmo-toposort" class="sidebar-link">1.2. Algoritmo per l'Ordinamento Topologico</a></li>
+            <li><a href="#intro-scc" class="sidebar-link">2. Grafi Ciclici e Componenti Fortemente Connesse</a></li>
+            <li><a href="#idea-scc" class="sidebar-link">2.1. Idea Intuitiva: Cluster di Nodi</a></li>
+            <li><a href="#def-scc" class="sidebar-link">2.2. Definizione Formale di SCC</a></li>
+            <li><a href="#grafo-scc" class="sidebar-link">2.3. Il Grafo delle Componenti Fortemente Connesse</a></li>
+            <li><a href="#algoritmo-scc" class="sidebar-link">3. Algoritmo per il Calcolo delle SCC</a></li>
+            <li><a href="#idea-algo-scc" class="sidebar-link">3.1. Idea dell'Algoritmo</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="recap-dag" class="content-section active-section">
+            <h2 class="section-title">1. Ordinamento Topologico di un DAG</h2>
+            <div class="section-content">
+                <p>La professoressa inizia riepilogando la definizione di <strong>ordinamento topologico</strong> per un Grafo Orientato Aciclico (DAG): un ordinamento lineare dei nodi tale che, se esiste un arco \((u,v)\), `u` deve precedere `v` nell'ordinamento.</p>
+                <p>Vengono posti due problemi chiave da risolvere:</p>
+                <ol>
+                    <li>Come verificare se un grafo orientato è un DAG?</li>
+                    <li>Se è un DAG, come calcolarne un ordinamento topologico?</li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="verifica-dag" class="content-section">
+            <h3 class="subsection-title">1.1. Verifica se un Grafo è un DAG</h3>
+            <div class="section-content">
+                <p>La soluzione a questo problema si basa su una proprietà fondamentale della visita DFS, discussa nella lezione precedente:</p>
+                <blockquote>
+                Un grafo G è aciclico se e solo se una visita DFS su G <strong>non trova alcun back-edge</strong> (archi da un nodo grigio a un altro nodo grigio).
+                </blockquote>
+                <p>Per implementare questa verifica, è sufficiente modificare leggermente la procedura `DFS-visit` per controllare il colore dei nodi adiacenti. Se si incontra un vicino `v` che è GRIGIO, significa che è stato trovato un back-edge e quindi il grafo è ciclico.</p>
+                <pre><code class="language-pseudocode">
+DFS-visit-Cyclic(G, u, time)
+  // ... (color[u] = GRIGIO, ecc.)
+  
+  for each v in G.Adj[u] do
+    if color[v] == BIANCO then
+      // ... (chiamata ricorsiva)
+    else if color[v] == GRIGIO then
+      // Trovato un back-edge!
+      print("Grafo è ciclico")
+      // Opzionalmente, interrompere la visita
+  
+  // ... (color[u] = NERO, ecc.)
+                </code></pre>
+                <p>La complessità di questa verifica rimane la stessa della DFS standard: \(\Theta(|V|+|E|)\) con liste di adiacenza e \(\Theta(|V|^2)\) con matrici.</p>
+            </div>
+        </article>
+        
+        <article id="algoritmo-toposort" class="content-section">
+            <h3 class="subsection-title">1.2. Algoritmo per l'Ordinamento Topologico</h3>
+            <div class="section-content">
+                <p>Una volta verificato che il grafo è un DAG, si può procedere al calcolo di un suo ordinamento topologico. Vengono discussi due approcci.</p>
+                
+                <h4 class="subsubsection-title">Approccio 1: Cancellazione Iterativa dei Nodi (Algoritmo di Kahn)</h4>
+                <p>Questo approccio si basa sulla proprietà che <strong>ogni DAG ha almeno un nodo senza archi uscenti</strong> (un "pozzo") e almeno un nodo senza archi entranti (una "sorgente").</p>
+                <ol>
+                    <li>Trova un nodo `x` senza archi uscenti. Questo nodo può essere messo per ultimo nell'ordinamento topologico.</li>
+                    <li>Rimuovi `x` e tutti i suoi archi entranti dal grafo.</li>
+                    <li>Il grafo rimanente è ancora un DAG. Ripeti il processo, trovando il nuovo "ultimo" nodo e aggiungendolo in penultima posizione nell'ordinamento.</li>
+                    <li>Continua finché tutti i nodi sono stati ordinati.</li>
+                </ol>
+                <p>Un'implementazione naive di questo metodo (che cerca ogni volta il nodo da rimuovere) sarebbe inefficiente. Un'implementazione più furba (nota come <strong>algoritmo di Kahn</strong>) precalcola i gradi entranti di tutti i nodi e usa una coda per gestire i nodi con grado entrante zero, ottenendo una complessità di \(\Theta(|V|+|E|)\).</p>
+                
+                <h4 class="subsubsection-title">Approccio 2: Sfruttare la DFS (Algoritmo di Cormen)</h4>
+                <p>Un approccio più diretto ed elegante sfrutta i risultati della visita DFS.</p>
+                <p>L'osservazione chiave è che in un DAG, il primo nodo a terminare la visita (cioè ad essere colorato di NERO) è un nodo che non ha archi uscenti verso nodi non ancora visitati. Più in generale:</p>
+                <blockquote>
+                Quando un nodo `u` diventa nero, tutti i nodi che `u` può raggiungere sono già stati completamente visitati (e sono quindi già neri).
+                </blockquote>
+                <p>Questo suggerisce che i nodi che finiscono per primi sono quelli che devono stare più avanti nell'ordinamento topologico. Pertanto, l'algoritmo è sorprendentemente semplice:</p>
+                
+                <p><strong>Algoritmo Topological-Sort:</strong></p>
+                <ol>
+                    <li>Esegui una visita `DFS` sul grafo `G` per calcolare i tempi di fine visita `f[u]` per tutti i vertici.</li>
+                    <li>Man mano che ogni vertice `u` viene terminato (diventa nero), inseriscilo in <strong>testa</strong> a una lista concatenata `L`.</li>
+                    <li>Alla fine della DFS, la lista `L` conterrà i vertici in ordine topologico.</li>
+                </ol>
+
+                <pre><code class="language-pseudocode">
+// Procedura principale
+Topological-Sort(G)
+  L = Ø // Lista vuota
+  // Esegui una DFS modificata per popolare la lista L
+  DFS-TS(G, L) 
+  return L
+
+// DFS principale modificata
+DFS-TS(G, L)
+  // ... (inizializzazione colori, pi, time)
+  for each u in G.V do
+    if color[u] == BIANCO then
+      DFS-visit-TS(G, u, time, L)
+
+// DFS-visit modificata
+DFS-visit-TS(G, u, time, L)
+  // ... (codice standard di DFS-visit)
+  
+  // Quando un nodo ha finito, inseriscilo in testa alla lista
+  color[u] = NERO
+  time = time + 1
+  f[u] = time
+  Insert-in-testa(L, u) // L'unica modifica!
+                </code></pre>
+                <p>La complessità di questo algoritmo è la stessa di una DFS: \(\Theta(|V|+|E|)\).</p>
+            </div>
+        </article>
+
+        <article id="intro-scc" class="content-section">
+            <h2 class="section-title">2. Grafi Ciclici e Componenti Fortemente Connesse</h2>
+            <div class="section-content">
+                <p>Dopo aver gestito il caso "semplice" dei DAG, la lezione si sposta sui grafi orientati che contengono cicli. In questi grafi non è possibile definire un ordinamento topologico globale. Tuttavia, è possibile recuperare una struttura "aciclica" a un livello più alto di astrazione.</p>
+            </div>
+        </article>
+
+        <article id="idea-scc" class="content-section">
+            <h3 class="subsection-title">2.1. Idea Intuitiva: Cluster di Nodi</h3>
+            <div class="section-content">
+                <p>L'idea è di "raggruppare" i nodi che appartengono a cicli. Se si considerano tutti i nodi all'interno di un ciclo come un unico "macro-nodo" o "cluster", le connessioni tra questi cluster formano una struttura aciclica.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph Cluster C1
+                            A1 --- B1 --- C1 --- A1
+                        end
+                        subgraph Cluster C2
+                            D2 --- E2 --- D2
+                        end
+                        subgraph Cluster C3
+                            F3 --- G3 --- H3 --- F3
+                        end
+                        A1 --> D2
+                        C1 --> E2
+                        E2 --> F3
+                    </pre>
+                </div>
+                <p>Questi "cluster" sono formalmente noti come <strong>Componenti Fortemente Connesse</strong>.</p>
+            </div>
+        </article>
+        
+        <article id="def-scc" class="content-section">
+            <h3 class="subsection-title">2.2. Definizione Formale di SCC</h3>
+            <div class="section-content">
+                <p>In un grafo orientato `G`, una <strong>Componente Fortemente Connessa (SCC - Strongly Connected Component)</strong> è un <strong>insieme massimale</strong> di nodi `C` tale che per ogni coppia di nodi `u, v` in `C`, `u` è raggiungibile da `v` e `v` è raggiungibile da `u`.</p>
+                <p>L'aggettivo "massimale" è cruciale: significa che non si può aggiungere nessun altro nodo a `C` senza violare la proprietà di mutua raggiungibilità.</p>
+                <p>Le componenti fortemente connesse formano una <strong>partizione</strong> dell'insieme dei vertici `V`. Questo significa che ogni nodo del grafo appartiene esattamente a una e una sola SCC.</p>
+            </div>
+        </article>
+        
+        <article id="grafo-scc" class="content-section">
+            <h3 class="subsection-title">2.3. Il Grafo delle Componenti Fortemente Connesse</h3>
+            <div class="section-content">
+                <p>Una volta identificate le SCC, si può costruire il <strong>grafo delle componenti</strong>, \(G_{SCC}\).</p>
+                <ul>
+                    <li>I <strong>vertici</strong> di \(G_{SCC}\) sono le componenti fortemente connesse stesse (C1, C2, ...).</li>
+                    <li>Esiste un <strong>arco</strong> da una componente Ci a una Cj se e solo se nel grafo originale `G` esiste almeno un arco da un nodo di Ci a un nodo di Cj.</li>
+                </ul>
+                <p><strong>Proprietà fondamentale:</strong> Il grafo delle componenti \(G_{SCC}\) è <strong>sempre un DAG</strong>. Se contenesse un ciclo, per definizione, tutte le componenti su quel ciclo sarebbero mutuamente raggiungibili e dovrebbero essere state fuse in un'unica componente più grande, contraddicendo la massimalità.</p>
+                <p>Poiché \(G_{SCC}\) è un DAG, su di esso si può applicare l'ordinamento topologico, rivelando la struttura gerarchica del grafo originale.</p>
+            </div>
+        </article>
+
+        <article id="algoritmo-scc" class="content-section">
+            <h2 class="section-title">3. Algoritmo per il Calcolo delle SCC</h2>
+            <div class="section-content">
+                <p>La sfida ora è trovare un algoritmo efficiente per identificare le SCC di un grafo `G`.</p>
+            </div>
+        </article>
+
+        <article id="idea-algo-scc" class="content-section">
+            <h3 class="subsection-title">3.1. Idea dell'Algoritmo</h3>
+            <div class="section-content">
+                <p>L'algoritmo, sorprendentemente elegante, sfrutta due visite DFS e le proprietà dei tempi di fine visita.</p>
+                <ol>
+                    <li><strong>Prima DFS:</strong> Esegui una visita `DFS(G)` per calcolare i tempi di fine visita `f[u]` per tutti i nodi `u`.</li>
+                    <li><strong>Grafo Trasposto:</strong> Calcola il grafo trasposto \(G^T\), che è `G` con tutti gli archi invertiti. Questa operazione ha costo \(\Theta(|V|+|E|)\).</li>
+                    <li><strong>Seconda DFS:</strong> Esegui una visita `DFS` su \(G^T\), ma con una modifica cruciale: il ciclo principale che itera sui vertici deve processarli in ordine <strong>decrescente</strong> dei loro tempi di fine visita calcolati al passo 1.</li>
+                    <li><strong>Risultato:</strong> Gli alberi generati dalla foresta DFS della seconda visita sono esattamente le componenti fortemente connesse del grafo originale `G`.</li>
+                </ol>
+                <p>L'intuizione (che verrà approfondita nella prossima lezione) risiede nel fatto che la radice dell'ultimo albero visitato nella prima DFS (il nodo `u` con il tempo di fine visita più alto) appartiene a una SCC "sorgente" nel grafo delle componenti. Invertendo gli archi, questa SCC sorgente diventa una SCC "pozzo" in \(G^T\). Facendo partire la seconda DFS da `u`, essa esplorerà esattamente tutti i nodi di quella SCC e non potrà "uscire" verso altre componenti, poiché non ci sono archi uscenti da una componente pozzo.</p>
+                 <div class="exercise-box">
+                    <strong>Spunti di riflessione per la prossima lezione:</strong>
+                    <p>La professoressa lascia come spunto la riflessione sul perché questo algoritmo funzioni. In particolare:</p>
+                    <ul>
+                        <li>Perché concentrarsi sul nodo `u` con il tempo di fine visita più alto nella prima DFS?</li>
+                        <li>Come garantisce la seconda visita su \(G^T\) di identificare correttamente i confini di una SCC?</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
