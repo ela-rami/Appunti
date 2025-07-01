@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 43: Algoritmo di Kruskal per l'MST</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 19 mag 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 43: Algoritmo di Kruskal per l'MST</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#teorema-safe-edge" class="sidebar-link">1. Dimostrazione del Teorema degli Archi Sicuri</a></li>
+            <li><a href="#corollario-componenti" class="sidebar-link">2. Corollario sulle Componenti Connesse</a></li>
+            <li><a href="#algoritmo-kruskal" class="sidebar-link">3. L'Algoritmo di Kruskal</a></li>
+            <li><a href="#idea-kruskal" class="sidebar-link">3.1. Idea dell'Algoritmo</a></li>
+            <li><a href="#esempio-kruskal" class="sidebar-link">3.2. Esempio di Esecuzione</a></li>
+            <li><a href="#implementazione-kruskal" class="sidebar-link">3.3. Implementazione Efficiente con Insiemi Disgiunti</a></li>
+            <li><a href="#pseudocodice-kruskal" class="sidebar-link">3.4. Pseudocodice di Kruskal</a></li>
+            <li><a href="#analisi-complessita" class="sidebar-link">3.5. Analisi della Complessità</a></li>
+            <li><a href="#osservazioni-kruskal" class="sidebar-link">3.6. Osservazioni Finali su Kruskal</a></li>
+            <li><a href="#algoritmo-prim" class="sidebar-link">4. Introduzione all'Algoritmo di Prim</a></li>
+            <li><a href="#idea-prim" class="sidebar-link">4.1. Idea dell'Algoritmo</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="teorema-safe-edge" class="content-section active-section">
+            <h2 class="section-title">1. Dimostrazione del Teorema degli Archi Sicuri</h2>
+            <div class="section-content">
+                <p>La professoressa riprende la dimostrazione del teorema fondamentale per gli algoritmi greedy per l'MST.</p>
+                <p><strong>Teorema:</strong> Sia `A` un sottoinsieme degli archi di un MST `T`. Sia \((S, V \setminus S)\) un taglio che rispetta `A`. Se \(\{u, v\}\) è un arco leggero che attraversa il taglio, allora \(\{u, v\}\) è sicuro per `A`.</p>
+                <p><strong>Dimostrazione (idea):</strong></p>
+                <p>L'obiettivo è dimostrare che l'insieme \(A \cup \{\{u, v\}\}\) è un sottoinsieme di qualche MST \(T'\). Ci sono due casi:</p>
+                <ol>
+                    <li><strong>Caso 1: L'arco leggero \(\{u, v\}\) è già in T.</strong> In questo caso, \(A \cup \{\{u, v\}\}\) è banalmente un sottoinsieme di T, quindi \(\{u, v\}\) è sicuro.</li>
+                    <li><strong>Caso 2: L'arco leggero \(\{u, v\}\) non è in T.</strong> Questo è il caso più interessante. Poiché T è uno spanning tree, esiste un unico cammino in T che collega `u` e `v`. Aggiungendo l'arco \(\{u, v\}\) a T, si crea un ciclo. Poiché `u` e `v` sono in partizioni diverse del taglio, questo cammino deve attraversare il taglio almeno una volta. Sia \(\{x, y\}\) un arco su questo cammino che attraversa il taglio.</li>
+                </ol>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            subgraph "Partizione S"
+                                u;
+                                x;
+                            end
+                            subgraph "Partizione V-S"
+                                v;
+                                y;
+                            end
+                            
+                            u --"arco leggero {u,v} (peso k')"--> v;
+                            u --"cammino in T"--> x;
+                            x --"arco {x,y} in T (peso k)"--> y;
+                            y --"cammino in T"--> v;
+
+                            linkStyle 2 stroke:red,stroke-width:2px;
+                            linkStyle 0 stroke:blue,stroke-width:2px,stroke-dasharray: 5 5;
+                     </pre>
+                 </div>
+                 <p>Ora usiamo il lemma della lezione precedente: costruiamo un nuovo albero \(T' = (T \setminus \{\{x, y\}\}) \cup \{\{u, v\}\}\). Sappiamo che \(T'\) è ancora uno spanning tree. Dobbiamo dimostrare che è anche <em>minimo</em>.</p>
+                 <p>Calcoliamo il peso di \(T'\):</p>
+                 <div class="math-block">
+                 \( W(T') = W(T) - W(\{x, y\}) + W(\{u, v\}) \)
+                 </div>
+                 <p>Dato che \(\{u, v\}\) è un arco <em>leggero</em> per il taglio, il suo peso è il minimo tra tutti gli archi che lo attraversano. Poiché anche \(\{x, y\}\) attraversa lo stesso taglio, deve valere:</p>
+                 <div class="math-block">
+                 \( W(\{u, v\}) \le W(\{x, y\}) \)
+                 </div>
+                 <p>Di conseguenza, \(W(T') \le W(T)\). Poiché `T` era un MST (quindi di peso minimo), l'unica possibilità è che \(W(T') = W(T)\). Pertanto, anche \(T'\) è un MST.</p>
+                 <p>Abbiamo così costruito un MST \(T'\) che contiene \(A \cup \{\{u, v\}\}\), dimostrando che l'arco \(\{u, v\}\) è sicuro per `A`. <strong>Q.E.D.</strong></p>
+            </div>
+        </article>
+        
+        <article id="corollario-componenti" class="content-section">
+            <h2 class="section-title">2. Corollario sulle Componenti Connesse</h2>
+            <div class="section-content">
+                <p>Dal teorema principale deriva un corollario molto utile per la progettazione degli algoritmi.</p>
+                <p><strong>Corollario:</strong> Sia `A` un sottoinsieme degli archi di un MST. Se \(\{u,v\}\) è un arco di peso minimo che collega due componenti connesse diverse formate dagli archi in `A`, allora \(\{u,v\}\) è sicuro per `A`.</p>
+                <div class="mermaid-container tree-diagram">
+                    <pre class="mermaid">
+                    graph TD
+                        subgraph "Componente C1"
+                            A1 --- B1
+                        end
+                         subgraph "Componente C2"
+                            A2 --- B2
+                        end
+                        A1 -- "{u,v} arco leggero" --> A2;
+                        linkStyle 2 stroke:red,stroke-width:2px;
+                    </pre>
+                </div>
+                <p><strong>Dimostrazione (idea):</strong> Si può definire un taglio che separa una delle due componenti (es. \(C_1\)) da tutto il resto del grafo (\(V \setminus C_1\)). L'insieme `A` rispetta questo taglio, e l'arco \(\{u,v\}\) è un arco leggero che lo attraversa. Per il teorema precedente, l'arco è sicuro.</p>
+            </div>
+        </article>
+        
+        <article id="algoritmo-kruskal" class="content-section">
+            <h2 class="section-title">3. L'Algoritmo di Kruskal</h2>
+            <div class="section-content">
+                <p>L'algoritmo di Kruskal è il primo dei due algoritmi greedy per l'MST e sfrutta direttamente il corollario appena visto.</p>
+            </div>
+        </article>
+
+        <article id="idea-kruskal" class="content-section">
+            <h3 class="subsection-title">3.1. Idea dell'Algoritmo</h3>
+            <div class="section-content">
+                <p>L'idea di Kruskal è di partire con un insieme vuoto di archi `A` e considerare ogni vertice come una componente connessa a sé stante. Ad ogni passo, si aggiunge ad `A` l'arco di peso minimo che collega due componenti connesse ancora distinte.</p>
+                <p>In pratica, l'algoritmo considera tutti gli archi del grafo in ordine di peso crescente e aggiunge un arco alla soluzione se e solo se non crea un ciclo con gli archi già selezionati.</p>
+            </div>
+        </article>
+
+        <article id="esempio-kruskal" class="content-section">
+            <h3 class="subsection-title">3.2. Esempio di Esecuzione</h3>
+            <div class="section-content">
+                <p>La professoressa mostra un esempio di esecuzione. L'algoritmo procede così:</p>
+                <ol>
+                    <li>Si ordinano tutti gli archi del grafo per peso, dal più leggero al più pesante.</li>
+                    <li>Si itera su questa lista ordinata. Per ogni arco:
+                        <ul>
+                            <li>Si controlla se i suoi due estremi appartengono già alla stessa componente connessa (formata dagli archi finora selezionati).</li>
+                            <li>Se non lo sono, si aggiunge l'arco alla soluzione e si fondono le due componenti.</li>
+                            <li>Se lo sono già, si scarta l'arco per non creare un ciclo.</li>
+                        </ul>
+                    </li>
+                    <li>Ci si ferma quando sono stati aggiunti \(|V|-1\) archi.</li>
+                </ol>
+                <p>Questo processo costruisce gradualmente una foresta di alberi che alla fine vengono uniti in un unico Minimum Spanning Tree.</p>
+            </div>
+        </article>
+
+        <article id="implementazione-kruskal" class="content-section">
+            <h3 class="subsection-title">3.3. Implementazione Efficiente con Insiemi Disgiunti</h3>
+            <div class="section-content">
+                <p>La sfida implementativa dell'algoritmo di Kruskal è determinare rapidamente se due nodi appartengono alla stessa componente connessa. Come suggerito da uno studente, la struttura dati perfetta per questo scopo è quella degli <strong>insiemi disgiunti (Union-Find)</strong>.</p>
+                <p>Ogni insieme disgiunto rappresenterà una componente connessa nella foresta che si sta costruendo. Le operazioni chiave sono:</p>
+                <ul>
+                    <li><code>Make-Set(v)</code>: All'inizio, ogni vertice è una componente a sé.</li>
+                    <li><code>Find(u)</code> e <code>Find(v)</code>: Per verificare se `u` e `v` sono nella stessa componente.</li>
+                    <li><code>Union(u, v)</code>: Per unire le due componenti dopo aver aggiunto un arco.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="pseudocodice-kruskal" class="content-section">
+            <h3 class="subsection-title">3.4. Pseudocodice di Kruskal</h3>
+            <div class="section-content">
+                <pre><code class="language-pseudocode">
+MST-Kruskal(G, w)
+  A = Ø
+
+  // 1. Crea |V| insiemi disgiunti, uno per ogni vertice
+  for each vertex v in G.V do
+    Make-Set(v)
+
+  // 2. Ordina gli archi per peso crescente
+  Sort(G.E, w)
+
+  // 3. Itera sugli archi ordinati
+  for each edge {u, v} in G.E (in ordine di peso) do
+    if Find-Set(u) != Find-Set(v) then
+      // L'arco non crea un ciclo
+      A = A U {{u, v}}
+      Union(u, v)
+      
+  return A
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="analisi-complessita" class="content-section">
+            <h3 class="subsection-title">3.5. Analisi della Complessità</h3>
+            <div class="section-content">
+                <p>Il costo totale dell'algoritmo di Kruskal è la somma dei costi delle sue parti:</p>
+                <ol>
+                    <li><strong>Ordinamento degli archi:</strong> \(O(|E| \log |E|)\).</li>
+                    <li><strong>Operazioni sugli insiemi disgiunti:</strong>
+                        <ul>
+                            <li>\(|V|\) operazioni <code>Make-Set</code>.</li>
+                            <li>\(2|E|\) operazioni <code>Find-Set</code> (due per ogni arco nel caso peggiore).</li>
+                            <li>\(|V|-1\) operazioni <code>Union</code>.</li>
+                        </ul>
+                        Il numero totale di operazioni Union-Find è \(O(|V|+|E|) = O(|E|)\) poiché il grafo è connesso.
+                    </li>
+                </ol>
+                <p>Utilizzando l'implementazione più efficiente per gli insiemi disgiunti (alberi con union-by-rank e path-compression), il costo totale delle operazioni Union-Find è \(O(|E| \cdot \alpha(|V|))\), dove \(\alpha\) è la funzione inversa di Ackermann, che cresce in modo estremamente lento.</p>
+                <p>Il costo totale è quindi \(O(|E| \log |E|) + O(|E| \alpha(|V|))\). Poiché \(\alpha(|V|)\) cresce molto più lentamente di \(\log|E|\), la complessità è dominata dall'ordinamento:</p>
+                <div class="math-block">
+                Costo Totale = \(O(|E| \log |E|)\)
+                </div>
+                <p>Poiché in un grafo connesso \(|E|\) è al più \(O(|V|^2)\), si ha che \(\log|E|\) è \(O(\log(|V|^2)) = O(2 \log|V|) = O(\log|V|)\). Pertanto, la complessità può anche essere scritta come:</p>
+                <div class="math-block">
+                Costo Totale = \(O(|E| \log |V|)\)
+                </div>
+            </div>
+        </article>
+        
+        <article id="osservazioni-kruskal" class="content-section">
+            <h3 class="subsection-title">3.6. Osservazioni Finali su Kruskal</h3>
+            <div class="section-content">
+                <ul>
+                    <li><strong>Costo dominante:</strong> Nella maggior parte dei casi, il collo di bottiglia è l'ordinamento degli archi.</li>
+                    <li><strong>Casi speciali:</strong> Se i pesi degli archi sono interi in un range piccolo, l'ordinamento può essere fatto in tempo lineare (es. con Counting Sort), e la complessità totale scenderebbe a \(O(|E| \alpha(|V|))\). In questo scenario, usare l'implementazione più performante degli insiemi disgiunti diventa cruciale.</li>
+                    <li><strong>Unicità dell'MST:</strong> La soluzione prodotta da Kruskal (e da qualsiasi algoritmo per l'MST) non è unica se nel grafo esistono archi con lo stesso peso. La domanda inversa, se la presenza di archi con lo stesso peso implichi sempre l'esistenza di più MST, viene lasciata come spunto di riflessione.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="algoritmo-prim" class="content-section">
+            <h2 class="section-title">4. Introduzione all'Algoritmo di Prim</h2>
+            <div class="section-content">
+                <p>Viene introdotto il secondo algoritmo per l'MST, l'<strong>Algoritmo di Prim</strong>.</p>
+            </div>
+        </article>
+
+        <article id="idea-prim" class="content-section">
+            <h3 class="subsection-title">4.1. Idea dell'Algoritmo</h3>
+            <div class="section-content">
+                <p>A differenza di Kruskal, che costruisce una foresta, l'algoritmo di Prim costruisce un <strong>singolo albero</strong> che "cresce" a partire da un nodo sorgente arbitrario `s`.</p>
+                <p>L'idea sfrutta direttamente il teorema principale: ad ogni passo, l'algoritmo mantiene un insieme `S` di vertici che fanno già parte dell'albero in costruzione. Questo definisce un taglio \((S, V \setminus S)\). L'algoritmo cerca l'arco <strong>leggero</strong> che attraversa questo taglio e lo aggiunge all'albero, spostando il suo estremo esterno all'interno dell'insieme `S` e "allargando" il taglio.</p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            subgraph "Albero A in costruzione (insieme S)"
+                                direction LR
+                                R(s) --- N1 --- N2
+                            end
+                            subgraph "Nodi esterni (V-S)"
+                                O1 --- O2
+                            end
+
+                            N1 --"arco leggero"--> O1
+                            N2 --"attraversa taglio"--> O1
+                            R --"attraversa taglio"--> O2
+                            
+                            linkStyle 2 stroke:red,stroke-width:2px;
+                     </pre>
+                </div>
+                <p>La sfida implementativa dell'algoritmo di Prim è trovare in modo efficiente, ad ogni passo, l'arco leggero che attraversa il taglio in continua espansione. La professoressa suggerisce di mantenere, per ogni nodo `v` non ancora nell'albero, l'informazione sull'arco di peso minimo che lo collega all'albero già costruito, lasciando come spunto la riflessione su quali strutture dati usare per gestire queste informazioni in modo efficiente.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
