@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 44: Algoritmo di Prim e Algoritmo di Dijkstra</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../../assets/css/common.css">
+
+    <style>
+        /* Stili specifici già presenti nelle altre lezioni, li riporto per coerenza */
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 0 2rem;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; color: var(--accent-primary); }
+
+        .hamburger-menu {
+            display: block; font-size: 2rem; color: var(--accent-secondary);
+            background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 1rem;
+        }
+        .hamburger-menu:hover { color: var(--text-primary); }
+
+        #sidebar {
+            background-color: var(--bg-card); color: var(--text-primary); padding: 1.5rem 1rem;
+            width: var(--sidebar-width); position: fixed; top: var(--header-height); left: 0;
+            height: calc(100% - var(--header-height)); overflow-y: auto;
+            box-shadow: 2px 0 10px var(--shadow-soft); border-right: 1px solid var(--border-soft);
+            z-index: 900; transform: translateX(0); transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+        #sidebar h2 {
+            font-size: 1.25rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.6rem; color: var(--accent-secondary); font-weight: 600;
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar ul li a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 0.65rem 0.5rem; transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            border-radius: var(--border-radius-small); font-size: 0.9rem;
+        }
+        #sidebar ul li a:hover, #sidebar ul li a.active-link {
+            background-color: rgba(96, 165, 250, 0.1); color: var(--accent-primary); padding-left: 1rem;
+        }
+
+        main {
+            flex: 1; margin-left: var(--sidebar-width); padding: 2.5rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+        
+        body.sidebar-hidden main { margin-left: 0; }
+
+        article {
+            margin-bottom: 3rem; padding: 2rem; background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary); border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft); display: none; 
+        }
+        article.active-section { display: block; }
+
+        .section-title { font-size: 1.5rem; color: var(--accent-primary); margin-bottom: 1.5rem; font-weight: 600; }
+        .subsection-title { font-size: 1.3rem; color: var(--accent-secondary); margin-top: 2rem; margin-bottom: 1rem; font-weight: 600; padding-bottom: 0.3rem; border-bottom: 1px dashed var(--border-soft); }
+        .subsubsection-title { font-size: 1.15rem; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.8rem; font-weight: 600; }
+        
+        .section-content { padding-left: 15px; border-left: 1px solid var(--border-soft); font-size: 0.95rem; }
+
+        p, .math-notation, .mermaid-container, .array-representation { 
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        .math-block { 
+            display: block;
+            text-align: center;
+            margin: 1.5rem auto;
+            font-size: 1.1em; 
+            color: var(--text-primary); 
+        }
+        .mermaid-container, .array-representation { 
+            background-color: var(--bg-deep-space); 
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            text-align: center; 
+            overflow-x: auto; 
+        }
+        .mermaid { 
+             text-align: center; 
+        }
+        .mermaid-container.tree-diagram svg {
+            max-width: 100%;
+        }
+
+        ul, ol { margin-left: 25px; margin-bottom: 1rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        strong { font-weight: 700; color: var(--text-primary); }
+
+        code, pre { font-family: var(--font-code); }
+        code { background-color: var(--code-bg); color: var(--code-text); padding: 0.2em 0.4em; border-radius: var(--border-radius-small); font-size: 0.85em; }
+        pre {
+            background-color: var(--code-bg); color: var(--code-text); padding: 1.2rem;
+            border-radius: var(--border-radius-small); overflow-x: auto; margin-bottom: 1.5rem;
+            font-size: 0.9em; line-height: 1.6; border: 1px solid var(--border-soft);
+        }
+        pre code { background-color: transparent; padding: 0; font-size: inherit; color: inherit; }
+        
+        .note-box {
+            background-color: rgba(129, 140, 248, 0.1);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .note-box strong { color: var(--accent-secondary); }
+        
+        .exercise-box {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-left: 4px solid #FACC15;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .exercise-box strong { color: #FACC15; }
+
+        .clarification-box {
+            background-color: rgba(52, 211, 153, 0.08);
+            border-left: 4px solid #34D399;
+            padding: 1em; margin: 1.5em 0; border-radius: var(--border-radius-small);
+        }
+        .clarification-box strong { color: #34D399; }
+
+        footer {
+            text-align: center; padding: 1.5rem; background-color: var(--bg-header);
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-soft);
+        }
+        
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 950;
+        }
+        body.sidebar-overlay-active .overlay { display: block; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb { background-color: var(--accent-secondary); border-radius: 10px; border: 2px solid var(--bg-deep-space); }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--accent-primary); }
+
+        @media (max-width: 992px) {
+            .hamburger-menu { display: block; }
+            #sidebar {
+                transform: translateX(calc(-1 * var(--sidebar-width))); top: 0; 
+                height: 100vh; padding-top: 1.5rem; z-index: 1100; border-right: none;
+            }
+            #sidebar.open { transform: translateX(0); }
+            main { margin-left: 0 !important; }
+        }
+
+        @media (min-width: 993px) {
+            body:not(.sidebar-hidden) main { margin-left: var(--sidebar-width); }
+            body.sidebar-hidden main { margin-left: 0; }
+            #sidebar { transform: translateX(0); }
+            #sidebar.hidden { transform: translateX(calc(-1 * var(--sidebar-width))); }
+            .overlay { display: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.3rem; }
+            main { padding: 2rem 1rem; }
+            .section-title { font-size: 1.35rem; }
+            article { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body data-pdf-path="Nota 21 mag 2021.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 44: Algoritmo di Prim e Algoritmo di Dijkstra</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../ASD_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna alle Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#algoritmo-prim" class="sidebar-link">1. L'Algoritmo di Prim per l'MST</a></li>
+            <li><a href="#strutture-dati-prim" class="sidebar-link">1.1. Strutture Dati e Logica</a></li>
+            <li><a href="#pseudocodice-prim" class="sidebar-link">1.2. Pseudocodice di Prim</a></li>
+            <li><a href="#esempio-prim" class="sidebar-link">1.3. Esempio di Esecuzione</a></li>
+            <li><a href="#complessita-prim" class="sidebar-link">1.4. Analisi della Complessità</a></li>
+            <li><a href="#problema-sssp" class="sidebar-link">2. Cammini Minimi da Sorgente Singola (SSSP)</a></li>
+            <li><a href="#definizione-sssp" class="sidebar-link">2.1. Definizione del Problema</a></li>
+            <li><a href="#mst-vs-sssp" class="sidebar-link">2.2. Differenza tra MST e SSSP</a></li>
+            <li><a href="#algoritmo-dijkstra" class="sidebar-link">3. L'Algoritmo di Dijkstra per SSSP</a></li>
+            <li><a href="#idea-dijkstra" class="sidebar-link">3.1. Idea e Modifiche a Prim</a></li>
+            <li><a href="#complessita-dijkstra" class="sidebar-link">3.2. Complessità e Limiti (Pesi Negativi)</a></li>
+            <li><a href="#problema-apsp" class="sidebar-link">4. Cammini Minimi tra Tutte le Coppie (APSP)</a></li>
+            <li><a href="#soluzione-naive-apsp" class="sidebar-link">4.1. Soluzione Naive con Dijkstra</a></li>
+            <li><a href="#floyd-warshall" class="sidebar-link">4.2. Cenni sull'Algoritmo di Floyd-Warshall</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="algoritmo-prim" class="content-section active-section">
+            <h2 class="section-title">1. L'Algoritmo di Prim per l'MST</h2>
+            <div class="section-content">
+                <p>La professoressa riprende la discussione sull'algoritmo di Prim per il calcolo del Minimum Spanning Tree (MST). A differenza di Kruskal, che costruisce una foresta, Prim fa crescere un singolo albero a partire da un nodo sorgente `s`.</p>
+                <p>L'idea centrale è mantenere una partizione dei nodi in due insiemi: quelli già inclusi nell'albero in costruzione e quelli ancora esterni. Ad ogni passo, si aggiunge all'albero l'arco di peso minimo (arco leggero) che collega un nodo interno a un nodo esterno.</p>
+            </div>
+        </article>
+
+        <article id="strutture-dati-prim" class="content-section">
+            <h3 class="subsection-title">1.1. Strutture Dati e Logica</h3>
+            <div class="section-content">
+                <p>Per implementare efficientemente questa idea, si utilizzano le seguenti strutture dati ausiliarie per ogni nodo `v`:</p>
+                <ul>
+                    <li><strong>`key[v]`</strong>: Memorizza il peso del più leggero arco che collega `v` a un nodo già presente nell'albero.</li>
+                    <li><strong>`π[v]`</strong>: Memorizza il predecessore di `v` nell'albero, ovvero l'altro estremo dell'arco identificato da `key[v]`.</li>
+                </ul>
+                <p>Per trovare rapidamente, ad ogni passo, il nodo esterno con la `key` minima da aggiungere all'albero, si utilizza una <strong>coda di priorità</strong>, implementata tipicamente con una <strong>min-heap</strong>.</p>
+            </div>
+        </article>
+
+        <article id="pseudocodice-prim" class="content-section">
+            <h3 class="subsection-title">1.2. Pseudocodice di Prim</h3>
+            <div class="section-content">
+                <pre><code class="language-pseudocode">
+MST-Prim(G, w, s)
+  // Inizializzazione
+  for each u in G.V do
+    key[u] = ∞
+    π[u] = NIL
+  
+  key[s] = 0
+  
+  Q = G.V  // Inserisci tutti i nodi nella coda di priorità
+  Build-Min-Heap(Q) // Organizza Q come min-heap basata su 'key'
+  
+  // Ciclo principale
+  while Q is not empty do
+    u = Extract-Min(Q) // Estrai il nodo con la chiave minima
+    
+    // Aggiorna le chiavi dei vicini
+    for each v in G.Adj[u] do
+      if (v is in Q) and (w(u,v) < key[v]) then
+        π[v] = u
+        key[v] = w(u,v)
+        Decrease-Key(Q, v, key[v]) // Aggiorna la posizione di v nella heap
+                </code></pre>
+                <div class="note-box">
+                    <strong>Risultato dell'algoritmo:</strong>
+                    <p>Al termine dell'algoritmo, l'MST non viene restituito come un insieme di archi esplicito. È invece rappresentato implicitamente dal vettore dei predecessori `π`. La somma dei valori finali nel vettore `key` dà il peso totale dell'MST.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="esempio-prim" class="content-section">
+            <h3 class="subsection-title">1.3. Esempio di Esecuzione</h3>
+            <div class="section-content">
+                <p>Viene svolto un esempio dettagliato per illustrare il funzionamento di Prim. Si parte con `key[s]=0` e `key` degli altri nodi a \(\infty\). La min-heap contiene tutti i nodi.</p>
+                <ol>
+                    <li><strong>Estrai S:</strong> `s` viene estratto. Si esamina la sua adiacenza, aggiornando le `key` e i `π` dei suoi vicini (es. A e B) e riorganizzando la heap.</li>
+                    <li><strong>Estrai A:</strong> Supponendo che l'arco (S,A) fosse il più leggero, `A` viene estratto. Si esaminano i suoi vicini. Se un vicino `C` può essere raggiunto da `A` con un arco più leggero di quello precedentemente noto, la sua `key` e il suo `π` vengono aggiornati (`Decrease-Key`).</li>
+                    <li>Il processo continua, estraendo sempre il nodo con la `key` minima dalla heap, finché la heap non si svuota.</li>
+                </ol>
+                <p>L'esempio chiarisce come l'algoritmo "faccia crescere" l'albero, aggiungendo sempre il nodo esterno più "vicino" all'albero già costruito.</p>
+                 <div class="exercise-box">
+                    <strong>Esercizio (dalla Professoressa):</strong>
+                    <p>Cosa succede se nell'algoritmo di Prim si rimuove il controllo `v is in Q`? Trovate un controesempio in cui l'algoritmo sbaglierebbe.</p>
+                    <p><strong>Soluzione (Aggiunta AI):</strong> Se si rimuove il controllo, si potrebbero considerare archi che portano a nodi già finalizzati (estratti dalla coda). Questo potrebbe portare alla creazione di cicli. Ad esempio, se `u` viene estratto e uno dei suoi vicini `v` è già stato estratto (ed è quindi già parte dell'MST), l'algoritmo potrebbe provare a creare un arco tra `u` e `v`, formando un ciclo con gli archi già presenti nell'albero che collegano `u` e `v`.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="complessita-prim" class="content-section">
+            <h3 class="subsection-title">1.4. Analisi della Complessità</h3>
+            <div class="section-content">
+                <p>Assumendo l'uso di una <strong>min-heap binaria</strong> e <strong>liste di adiacenza</strong>:</p>
+                <ul>
+                    <li><strong>Inizializzazione:</strong> \(\Theta(|V|)\)</li>
+                    <li><strong>Build-Min-Heap:</strong> \(\Theta(|V|)\)</li>
+                    <li><strong>Ciclo `while`:</strong> Viene eseguito \(|V|\) volte (una per ogni nodo).
+                        <ul>
+                            <li><strong>Extract-Min:</strong> \(O(\log|V|)\). In totale: \(|V| \cdot O(\log|V|) = O(|V| \log|V|)\).</li>
+                            <li><strong>Ciclo `for` (complessivo):</strong> Il corpo del ciclo `for` viene eseguito, su tutte le iterazioni del `while`, una volta per ogni arco del grafo. Ogni arco \(\{u,v\}\) viene considerato due volte (quando si estrae `u` e quando si estrae `v`). Il numero totale di operazioni `Decrease-Key` è quindi al più \(O(|E|)\).</li>
+                            <li><strong>Decrease-Key:</strong> \(O(\log|V|)\). Il costo totale di tutte le `Decrease-Key` è \(O(|E| \log|V|)\).</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>Il costo totale è dominato da \(O(|E| \log|V|)\). Poiché in un grafo connesso \(|E| \ge |V|-1\), questo è asintoticamente equivalente al costo di Kruskal, \(O(|E| \log|E|)\).</p>
+                 <div class="clarification-box">
+                    <strong>Implementazione alternativa:</strong> Se al posto della min-heap si usasse un semplice array e si cercasse il minimo con una scansione lineare, il costo diventerebbe \(O(|V|^2)\), che è preferibile per grafi densi. Con una struttura più avanzata come la <strong>Fibonacci heap</strong>, il costo di Prim può scendere a \(O(|E| + |V|\log|V|)\), rendendolo l'algoritmo più veloce per grafi sparsi.
+                </div>
+            </div>
+        </article>
+
+        <article id="problema-sssp" class="content-section">
+            <h2 class="section-title">2. Cammini Minimi da Sorgente Singola (SSSP)</h2>
+            <div class="section-content">
+                <p>La lezione si sposta su un nuovo problema fondamentale sui grafi pesati: il calcolo dei <strong>cammini di peso minimo da una sorgente singola (Single-Source Shortest Path)</strong>.</p>
+            </div>
+        </article>
+
+        <article id="definizione-sssp" class="content-section">
+            <h3 class="subsection-title">2.1. Definizione del Problema</h3>
+            <div class="section-content">
+                <p><strong>Input:</strong> Un grafo \(G = (V, E, W)\), pesato e potenzialmente orientato, e un nodo sorgente `s`.</p>
+                <p><strong>Obiettivo:</strong> Per ogni vertice `v` in `V`, trovare un cammino da `s` a `v` il cui peso totale sia minimo. Il <strong>peso di un cammino</strong> è la somma dei pesi degli archi che lo compongono.</p>
+                <p>Come per l'MST, la soluzione è un albero radicato in `s`, chiamato <strong>albero dei cammini minimi</strong>.</p>
+                <div class="note-box">
+                    <strong>Proprietà dei sottocammini ottimali:</strong> Se un cammino da `s` a `u` è un cammino minimo, allora ogni suo sottocammino (es. da `s` a un nodo intermedio `v`) è a sua volta un cammino minimo per i suoi estremi. Il viceversa non è vero: unire due cammini minimi non produce necessariamente un cammino minimo globale.
+                </div>
+            </div>
+        </article>
+
+        <article id="mst-vs-sssp" class="content-section">
+            <h3 class="subsection-title">2.2. Differenza tra MST e SSSP</h3>
+            <div class="section-content">
+                <p>La professoressa sottolinea con forza che i problemi di MST e SSSP sono <strong>concettualmente diversi</strong> e, in generale, portano a <strong>soluzioni diverse</strong>.</p>
+                <p>L'analogia è la seguente:</p>
+                <ul>
+                    <li><strong>MST:</strong> Rappresenta il problema di un'entità che deve <strong>costruire un'infrastruttura</strong> (es. rete stradale, rete di telecomunicazioni) per connettere tutti i punti con il costo minimo totale. L'obiettivo è la minimizzazione del costo globale della rete.</li>
+                    <li><strong>SSSP:</strong> Rappresenta il problema di un <strong>utente</strong> che si muove su un'infrastruttura già esistente. L'obiettivo è trovare il percorso individuale più breve/veloce/economico tra due punti, senza preoccuparsi del costo totale della rete.</li>
+                </ul>
+                <p>Un esempio chiarisce la differenza:</p>
+                <div class="mermaid-container tree-diagram">
+                     <pre class="mermaid">
+                        graph TD
+                            S -- 1 --> A
+                            A -- 1 --> C
+                            S -- 2 --> C
+                            subgraph "MST (Peso 3)"
+                                S1(S) -.-> A1(A) -.-> C1(C)
+                                linkStyle 0 stroke:red,stroke-width:2px;
+                                linkStyle 1 stroke:red,stroke-width:2px;
+                            end
+                            subgraph "Albero SSSP da S (Peso 4)"
+                                S2(S) -.-> A2(A)
+                                S2 -.-> C2(C)
+                                linkStyle 2 stroke:blue,stroke-width:2px;
+                                linkStyle 3 stroke:blue,stroke-width:2px;
+                            end
+                     </pre>
+                 </div>
+                 <p>Nell'esempio, l'MST sceglie gli archi (S,A) e (A,C) per un costo totale di 2. L'albero SSSP da S, invece, per raggiungere C sceglie l'arco diretto (S,C) che ha peso 2, anche se il cammino via A sarebbe più lungo (peso totale 1+1=2, quindi equivalente in questo caso, ma potrebbe essere maggiore).</p>
+            </div>
+        </article>
+        
+        <article id="algoritmo-dijkstra" class="content-section">
+            <h2 class="section-title">3. L'Algoritmo di Dijkstra per SSSP</h2>
+            <div class="section-content">
+                <p>L'algoritmo più famoso per risolvere il problema SSSP (con pesi non negativi) è l'<strong>algoritmo di Dijkstra</strong>.</p>
+            </div>
+        </article>
+
+        <article id="idea-dijkstra" class="content-section">
+            <h3 class="subsection-title">3.1. Idea e Modifiche a Prim</h3>
+            <div class="section-content">
+                <p>Sorprendentemente, la struttura dell'algoritmo di Dijkstra è quasi identica a quella dell'algoritmo di Prim. La differenza fondamentale risiede nel significato e nel calcolo della `key` (che in Dijkstra chiamiamo `d` per "distanza").</p>
+                <ul>
+                    <li>In <strong>Prim</strong>, `key[v]` rappresenta il peso del singolo arco più leggero che collega `v` all'albero.</li>
+                    <li>In <strong>Dijkstra</strong>, `d[v]` rappresenta il peso del cammino minimo <strong>complessivo</strong> dalla sorgente `s` a `v`, passando solo attraverso nodi già finalizzati.</li>
+                </ul>
+                <p>La modifica chiave avviene nell'operazione di aggiornamento (chiamata <strong>relax</strong> nel libro di testo):</p>
+                <p>Quando si estrae un nodo `u` e si esamina un suo vicino `v`, non si confronta `d[v]` con il solo peso dell'arco `w(u,v)`. Invece, si confronta con il peso totale del cammino che passa per `u`:</p>
+                <div class="math-block">
+                if \( d[v] > d[u] + w(u,v) \) then ...
+                </div>
+                <p>Questa modifica garantisce che `d[v]` accumuli il peso dell'intero cammino da `s`, non solo dell'ultimo arco.</p>
+            </div>
+        </article>
+
+        <article id="complessita-dijkstra" class="content-section">
+            <h3 class="subsection-title">3.2. Complessità e Limiti (Pesi Negativi)</h3>
+            <div class="section-content">
+                <p>Dato che la struttura dell'algoritmo è identica a quella di Prim, anche la sua <strong>complessità</strong> è la stessa: \(\mathbf{O(|E| \log|V|)}\) con min-heap binaria e liste di adiacenza.</p>
+                <p><strong>Limite fondamentale:</strong> L'algoritmo di Dijkstra funziona correttamente <strong>solo se tutti i pesi degli archi sono non negativi</strong>. La presenza di archi con peso negativo può portare l'algoritmo a finalizzare un cammino per un nodo che poi si rivela non essere ottimale, poiché un percorso successivo che passa attraverso un arco negativo potrebbe offrire una via più "economica". Per grafi con pesi negativi (ma senza cicli negativi), si usano altri algoritmi come quello di <strong>Bellman-Ford</strong>.</p>
+            </div>
+        </article>
+
+        <article id="problema-apsp" class="content-section">
+            <h2 class="section-title">4. Cammini Minimi tra Tutte le Coppie (APSP)</h2>
+            <div class="section-content">
+                <p>Viene brevemente introdotto il problema dei <strong>cammini minimi tra tutte le coppie (All-Pairs Shortest Path)</strong>, che chiede di trovare il cammino minimo per ogni possibile coppia di nodi \((s, v)\) nel grafo.</p>
+            </div>
+        </article>
+        
+        <article id="soluzione-naive-apsp" class="content-section">
+            <h3 class="subsection-title">4.1. Soluzione Naive con Dijkstra</h3>
+            <div class="section-content">
+                <p>Una soluzione semplice al problema APSP consiste nell'eseguire l'algoritmo di Dijkstra \(|V|\) volte, una per ogni possibile nodo sorgente.</p>
+                <p>La complessità di questo approccio sarebbe: \(\mathbf{O(|V| \cdot |E| \log|V|)}\).</p>
+                <p>Per grafi densi, dove \(|E| \approx O(|V|^2)\), questa complessità diventa \(O(|V|^3 \log|V|)\).</p>
+            </div>
+        </article>
+
+        <article id="floyd-warshall" class="content-section">
+            <h3 class="subsection-title">4.2. Cenni sull'Algoritmo di Floyd-Warshall</h3>
+            <div class="section-content">
+                <p>Esiste un algoritmo alternativo per il problema APSP, l'algoritmo di <strong>Floyd-Warshall</strong>, che utilizza un approccio di <strong>programmazione dinamica</strong>.</p>
+                <p>L'idea è di calcolare iterativamente i cammini minimi, permettendo a ogni passo di usare un insieme crescente di nodi intermedi. Nonostante la sua eleganza, la sua complessità è \(\Theta(|V|^3)\), che lo rende competitivo con l'approccio basato su Dijkstra solo per grafi densi. Questo argomento non verrà approfondito nel corso.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Algoritmi</p>
+    </footer>
+
+    <script src="../../assets/js/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
