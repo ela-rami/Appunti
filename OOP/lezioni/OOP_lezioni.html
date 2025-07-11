@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezioni di Programmazione Orientata agli Oggetti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Qui useremo il common.css dalla cartella assets -->
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <style>
+        /* Stili specifici per la pagina indice lezioni */
+        .page-header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 1.5rem 2rem;
+            text-align: left;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            display: flex;
+            align-items: center;
+        }
+        .back-link {
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-size: 1.8rem;
+            margin-right: 1.5rem;
+            transition: color 0.2s ease;
+        }
+        .back-link:hover { color: var(--accent-primary); }
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            flex-grow: 1; /* Permette al container di espandersi e spingere il footer in basso */
+        }
+        .content-category {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px var(--shadow-soft);
+        }
+        .content-category h2 {
+            font-size: 1.5rem;
+            color: var(--accent-secondary);
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.5rem;
+        }
+        .lessons-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .lessons-list li {
+            margin-bottom: 0.75rem;
+        }
+        .lessons-list li a {
+            display: block;
+            padding: 0.8rem 1rem;
+            background-color: var(--bg-deep-space); /* Un po' più scuro della card */
+            color: var(--accent-primary);
+            text-decoration: none;
+            border-radius: var(--border-radius-small);
+            font-weight: 600;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            border: 1px solid var(--border-soft);
+        }
+        .lessons-list li a:hover {
+            background-color: var(--accent-secondary);
+            color: var(--bg-header); /* Testo scuro su accento secondario */
+            transform: translateY(-2px);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 1.6rem; }
+            .container { margin-top: 1rem; padding: 0 0.5rem;}
+            .content-category { padding: 1.5rem; }
+            .content-category h2 { font-size: 1.3rem; }
+            .lessons-list li a { padding: 0.7rem 0.8rem; font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="page-header">
+        <a href="../OOP_home.html" class="back-link" title="Torna alla Home OOP">←</a> 
+        <h1>Lezioni di Programmazione Orientata agli Oggetti</h1>
+    </header>
+
+    <div class="container">
+        <main>
+            <section class="content-category">
+                <h2>Indice delle Lezioni</h2>
+                <ul class="lessons-list">
+                    <li><a href="OOP_lezione1.html">Lezione 1: Fondamenti di Java e Buone Pratiche</a></li>
+                    <li><a href="OOP_lezione2.html">Lezione 2: Contratti e Gestione degli Errori</a></li>
+                    <li><a href="OOP_lezione3.html">Lezione 3: Abstract Data Types (ADT)</a></li>
+                    <li><a href="OOP_lezione4.html">Lezione 4: Iteratori e Programmazione Funzionale</a></li>
+                    <li><a href="OOP_lezione5.html">Lezione 5: Gerarchie di Tipi e Classi Astratte</a></li>
+                    <li><a href="OOP_lezione6.html">Lezione 6: Il Principio di Sostituzione di Liskov (LSP)</a></li>
+                    <li><a href="OOP_lezione7.html">Lezione 7: Principi di Design (SOLID e CRC)</a></li>
+                    <li><a href="OOP_lezione8.html">Lezione 8: Design Pattern Creazionali (Factory, Builder)</a></li>
+                    <li><a href="OOP_lezione9.html">Lezione 9: Design Pattern Strutturali (Decorator, Composite, Bridge)</a></li>
+                    <li><a href="OOP_lezione10.html">Lezione 10: Design Pattern Comportamentali (Observer, Strategy)</a></li>
+                    <li><a href="OOP_lezione11.html">Lezione 11: Tipi Generici in Java</a></li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>© 2023 Appunti Corso Programmazione Orientata agli Oggetti</p>
+    </footer>
+
+    <!-- Il common.js non è strettamente necessario per questa pagina indice, ma può essere incluso per coerenza -->
+    <!-- <script src="../assets/js/common.js"></script> -->
+</body>
+</html>

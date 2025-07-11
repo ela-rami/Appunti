@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 02: Contratti e Gestione degli Errori</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Librerie Esterne -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <!-- CSS Comune -->
+    <link rel="stylesheet" href="../assets/css/common.css">
+
+    <style>
+        .box-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body data-pdf-path="../slides/Specification based abstractions.pdf"> <!-- Aggiorna con il path corretto -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 02: Contratti e Gestione degli Errori</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="OOP_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-contracts" class="sidebar-link">1. Design by Contract (DbC)</a></li>
+            <li><a href="#partial-abstractions" class="sidebar-link">2. Astrazioni Parziali e Totali</a></li>
+            <li><a href="#error-handling-strategies" class="sidebar-link">3. Strategie di Gestione degli Errori</a></li>
+            <li><a href="#exceptions" class="sidebar-link">4. Le Eccezioni in Java</a></li>
+            <li><a href="#assertions" class="sidebar-link">5. Le Asserzioni in Java</a></li>
+            <li><a href="#exceptions-vs-assertions" class="sidebar-link">6. Eccezioni vs. Asserzioni: La Scelta Giusta</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-contracts" class="content-section active-section">
+            <h2 class="section-title">1. Design by Contract (DbC)</h2>
+            <div class="section-content">
+                <p>Il **Design by Contract (DbC)** è una metodologia di progettazione software che vede l'interazione tra i componenti software (classi, metodi) come un **contratto formale**. Questo approccio mira a creare software più robusto, documentato e verificabile.</p>
+                <p>Un contratto tra un metodo (il "fornitore") e chi lo chiama (il "cliente") si basa su obblighi e benefici reciproci:</p>
+                <ul>
+                    <li><strong>Il Cliente (Chi chiama il metodo):</strong> Ha l'obbligo di rispettare le pre-condizioni. Se lo fa, ha il beneficio di ottenere i risultati promessi dalle post-condizioni.</li>
+                    <li><strong>Il Fornitore (Il metodo):</strong> Ha il beneficio di poter assumere che le pre-condizioni siano valide. In cambio, ha l'obbligo di garantire le post-condizioni al termine della sua esecuzione.</li>
+                </ul>
+                <h3 class="subsection-title">Gli Elementi del Contratto di un Metodo</h3>
+                <ol>
+                    <li><strong>Pre-condizioni (`REQUIRES`):</strong> Proprietà che devono essere vere **prima** che il metodo venga eseguito. Sono responsabilità del chiamante. Se una pre-condizione è violata, il comportamento del metodo è indefinito (può fare qualsiasi cosa).</li>
+                    <li><strong>Post-condizioni (`EFFECTS`, `RETURNS`):</strong> Proprietà che il metodo garantisce essere vere **al termine** della sua esecuzione, a patto che le pre-condizioni fossero soddisfatte. Sono responsabilità del metodo.</li>
+                    <li><strong>Effetti collaterali (`MODIFIES`):</strong> Una parte importante delle post-condizioni che specifica quali oggetti passati come parametro (o lo stato dell'oggetto stesso) vengono modificati.</li>
+                </ol>
+                <div class="note-box">
+                    <div class="box-title">💡 Specifica vs. Implementazione</div>
+                    Il contratto definisce il **cosa** (what) fa un metodo, non il **come** (how) lo fa. Questo separa nettamente l'interfaccia pubblica dall'implementazione privata, un pilastro dell'incapsulamento.
+                </div>
+            </div>
+        </article>
+        
+        <article id="partial-abstractions" class="content-section">
+            <h2 class="section-title">2. Astrazioni Parziali e Totali</h2>
+            <div class="section-content">
+                <p>Grazie ai contratti, possiamo classificare le astrazioni (i metodi) in due categorie.</p>
+                <ul>
+                    <li>Un'<strong>astrazione totale</strong> è una funzione che è definita per tutti i possibili input che rispettano il loro tipo. Non ha pre-condizioni aggiuntive.</li>
+                    <li>Un'<strong>astrazione parziale</strong> è una funzione che ha delle pre-condizioni restrittive. È definita solo per un sottoinsieme degli input possibili.</li>
+                </ul>
+                <div class="exercise-box">
+                    <div class="box-title">Esempio: Fattoriale</div>
+                    <p>La funzione matematica del fattoriale è definita solo per interi non negativi. Un metodo `factorial(int n)` che ha la pre-condizione `REQUIRES n >= 0` è un'astrazione parziale. Non ci dice cosa succede se viene chiamato con `factorial(-3)`.</p>
+                </div>
+                <p>Le astrazioni parziali sono "pericolose" perché scaricano sul client la responsabilità di garantire le pre-condizioni. L'obiettivo della programmazione robusta è trasformare, dove possibile, le astrazioni parziali in astrazioni totali, gestendo esplicitamente anche i casi "sbagliati".</p>
+            </div>
+        </article>
+
+        <article id="error-handling-strategies" class="content-section">
+            <h2 class="section-title">3. Strategie di Gestione degli Errori</h2>
+            <div class="section-content">
+                <p>Quando un client viola una pre-condizione, come possiamo gestire l'errore? Ci sono principalmente due approcci, di cui uno è fortemente sconsigliato.</p>
+                
+                <h3 class="subsection-title">Approccio 1: Estendere il Set di Risultati (SCONSIGLIATO)</h3>
+                <p>Questa strategia consiste nel "nascondere" l'errore nel valore di ritorno. Ad esempio, un metodo `factorial(n)` potrebbe restituire `-1` se `n` è negativo.</p>
+                <div class="warning-box">
+                    <div class="box-title">⚠️ Perché è una pessima idea?</div>
+                    <ul>
+                        <li><strong>Insicuro:</strong> Il client potrebbe dimenticarsi di controllare il valore speciale (`-1`) e usarlo in calcoli successivi, propagando l'errore in modo silenzioso e portando a bug difficilissimi da scovare.</li>
+                        <li><strong>Limitato:</strong> Non sempre è possibile trovare un valore "speciale" che non sia già un risultato valido. Ad esempio, un metodo che restituisce un `Object` può restituire qualsiasi cosa.</li>
+                        <li><strong>Codice Sporco:</strong> Obbliga il client a scrivere codice pieno di `if` per controllare i valori di ritorno, mescolando la logica di business con la logica di gestione degli errori.</li>
+                    </ul>
+                </div>
+
+                <h3 class="subsection-title">Approccio 2: Segnalazione Esplicita dell'Errore (CONSIGLIATO)</h3>
+                <p>Questa strategia prevede di interrompere il flusso normale del programma e segnalare esplicitamente che si è verificata una condizione eccezionale. Questo trasforma l'astrazione parziale in un'astrazione totale che ha due possibili esiti: un risultato normale o una segnalazione d'errore.</p>
+                <p>In Java, questo si implementa con due meccanismi principali: le <strong>eccezioni</strong> e le <strong>asserzioni</strong>.</p>
+            </div>
+        </article>
+
+        <article id="exceptions" class="content-section">
+            <h2 class="section-title">4. Le Eccezioni in Java</h2>
+            <div class="section-content">
+                <p>Le eccezioni sono il meccanismo principale di Java per gestire errori e situazioni anomale a runtime, specialmente quelle causate da un uso scorretto di un'API da parte del client.</p>
+                <h3 class="subsection-title">Cosa sono?</h3>
+                <p>Un'eccezione è un oggetto che rappresenta un evento anomalo. Quando viene "lanciata" (`throw`), interrompe il normale flusso di esecuzione e passa il controllo al più vicino gestore di eccezioni (`catch`) compatibile.</p>
+                
+                <h3 class="subsection-title">Checked vs. Unchecked Exceptions</h3>
+                <div class="mermaid-container">
+                     <pre class="mermaid">
+                        graph TD
+                            Throwable --> Error
+                            Throwable --> Exception
+                            Exception --> RuntimeException
+                            Exception --> OtherExceptions("Altre Eccezioni (Checked)")
+                            
+                            subgraph "Non recuperabili"
+                                Error["Error (es. OutOfMemoryError)"]
+                            end
+                            subgraph "Recuperabili dal programmatore"
+                                RuntimeException["RuntimeException (Unchecked)<br>es. NullPointerException<br>IllegalArgumentException"]
+                                OtherExceptions
+                            end
+                            style Error fill:#ff9999,stroke:#333,stroke-width:2px
+                     </pre>
+                 </div>
+                 <ul>
+                    <li><strong>Checked Exceptions:</strong> Ereditano da `Exception` ma non da `RuntimeException`. Rappresentano condizioni eccezionali da cui un client **può ragionevolmente riprendersi** (es. `FileNotFoundException`, `IOException`). Il compilatore **obbliga** a gestirle: o con un blocco `try-catch` o dichiarandole nella firma del metodo con `throws`.</li>
+                    <li><strong>Unchecked Exceptions:</strong> Ereditano da `RuntimeException` (o `Error`). Rappresentano **errori di programmazione** (bug) che non dovrebbero accadere in un programma corretto (es. `NullPointerException`, `IndexOutOfBoundsException`). Il compilatore non obbliga a gestirle.</li>
+                 </ul>
+                 <h3 class="subsection-title">Come si usano nei Contratti</h3>
+                 <p>Le eccezioni sostituiscono la clausola `REQUIRES` nel contratto. Un metodo non dice più "richiedo che `a` non sia nullo", ma "se `a` è nullo, lancio `NullPointerException`".</p>
+                 <pre><code class="language-java">
+/**
+ * Cerca un elemento in un array.
+ *
+ * @param array L'array in cui cercare.
+ * @param element L'elemento da trovare.
+ * @return L'indice dell'elemento.
+ * @throws NullPointerException se l'array è nullo.
+ * @throws NoSuchElementException se l'elemento non viene trovato.
+ */
+public static int search(int[] array, int element) throws NoSuchElementException {
+    // 1. Controllo della pre-condizione con un'eccezione
+    if (array == null) {
+        throw new NullPointerException("L'array di input non può essere nullo.");
+    }
+
+    for (int i = 0; i < array.length; i++) {
+        if (array[i] == element) {
+            return i; // Flusso normale
+        }
+    }
+
+    // 2. Segnalazione di un'altra condizione eccezionale
+    throw new NoSuchElementException("Elemento non trovato nell'array.");
+}
+                 </code></pre>
+            </div>
+        </article>
+
+        <article id="assertions" class="content-section">
+            <h2 class="section-title">5. Le Asserzioni in Java</h2>
+            <div class="section-content">
+                <p>Le asserzioni sono uno strumento di debugging per il programmatore. Servono a verificare le **assunzioni** che il programmatore fa sulla correttezza del proprio codice.</p>
+                <h3 class="subsection-title">Sintassi e Comportamento</h3>
+                <p>Si scrivono con la parola chiave `assert`.</p>
+                <pre><code class="language-java">
+assert (x > 0) : "x deve essere positivo, ma è " + x;
+                </code></pre>
+                <p>Se la condizione è `true`, non succede nulla. Se è `false`, viene lanciato un `AssertionError`, che tipicamente causa l'arresto del programma. Fondamentalmente, le asserzioni possono essere **disabilitate** dalla JVM (e lo sono di default). Quando disabilitate, non hanno alcun impatto sulle prestazioni.</p>
+                
+                <h3 class="subsection-title">Quando Usarle?</h3>
+                <p>Le asserzioni sono perfette per verificare le "promesse" interne al codice, ovvero che il *vostro* codice stia funzionando come previsto.</p>
+                <ul>
+                    <li><strong>Invarianti di Rappresentazione (RI):</strong> Per controllare che lo stato interno di un oggetto sia sempre valido all'inizio e alla fine di un metodo pubblico.</li>
+                    <li><strong>Post-condizioni:</strong> Per verificare che un metodo abbia prodotto il risultato atteso.</li>
+                    <li><strong>Pre-condizioni di metodi `private`:** Poiché un metodo privato è chiamato solo dal codice della stessa classe, il programmatore ha il pieno controllo sugli input e può usare `assert` per assicurarsi che li stia passando correttamente.</li>
+                    <li><strong>Punti del codice che non dovrebbero mai essere raggiunti</strong> (es. il ramo `default` di uno `switch` che copre tutti i casi possibili di un enum).</li>
+                </ul>
+                <pre><code class="language-java">
+private void setBalance(double newBalance) {
+    // Un metodo privato. Posso usare assert per la pre-condizione
+    // perché sono io (la classe) l'unico a chiamarlo.
+    assert newBalance >= 0 : "Il saldo non può diventare negativo";
+    
+    this.balance = newBalance;
+    
+    // Controllo l'invariante di rappresentazione alla fine
+    assert this.invariantOK(); 
+}
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="exceptions-vs-assertions" class="content-section">
+            <h2 class="section-title">6. Eccezioni vs. Asserzioni: La Scelta Giusta</h2>
+            <div class="section-content">
+                <p>La regola d'oro per decidere se usare un'eccezione o un'asserzione è semplice:</p>
+                <div class="clarification-box">
+                    <div class="box-title">⚖️ Regola Decisionale</div>
+                    <ul>
+                        <li>Usa le <strong>Eccezioni</strong> per violazioni del contratto di metodi <strong>pubblici</strong>. Sono errori che un *client* può commettere. Devono funzionare anche in produzione.</li>
+                        <li>Usa le <strong>Asserzioni</strong> per verificare assunzioni sul tuo codice interno. Sono *bug* che tu, come programmatore, devi risolvere. Possono (e dovrebbero) essere disattivate in produzione.</li>
+                    </ul>
+                </div>
+                <p>In pratica: un'eccezione dice "Tu (client) hai sbagliato a usare il mio codice". Un'asserzione fallita dice "Io (programmatore) ho sbagliato a scrivere il mio codice".</p>
+                <pre><code class="language-java">
+public class BankAccount {
+    private double balance;
+
+    // ... invarianti e costruttore ...
+
+    /**
+     * Preleva una somma dal conto.
+     * @param amount La somma da prelevare. Deve essere positiva.
+     * @throws IllegalArgumentException se 'amount' è negativo.
+     * @throws InsufficientFundsException se il saldo non è sufficiente.
+     */
+    public void withdraw(double amount) throws InsufficientFundsException {
+        // CONTROLLO DI PRE-CONDIZIONE PUBBLICA -> ECCEZIONE
+        if (amount < 0) {
+            throw new IllegalArgumentException("L'importo da prelevare non può essere negativo.");
+        }
+        
+        // LOGICA DI BUSINESS
+        if (this.balance < amount) {
+            throw new InsufficientFundsException("Fondi insufficienti", this.balance, amount);
+        }
+
+        this.balance -= amount;
+        
+        // CONTROLLO DI POST-CONDIZIONE/INVARIANTE INTERNO -> ASSERZIONE
+        assert this.balance >= 0;
+    }
+}
+                </code></pre>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Programmazione Orientata agli Oggetti</p>
+    </footer>
+
+    <!-- JS Comune e PrismJS -->
+    <script src="../assets/js/common.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+    <script>
+    // Script di inizializzazione Mermaid, come nel file precedente
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark', darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    fontSize: '14px',
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) { return; }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary);">Errore Mermaid.</p><pre>${e.message}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>

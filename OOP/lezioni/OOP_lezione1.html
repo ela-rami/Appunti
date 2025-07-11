@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 01: Fondamenti di Java e Buone Pratiche</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Librerie Esterne -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <!-- CSS Comune -->
+    <link rel="stylesheet" href="../assets/css/common.css">
+
+    <style>
+        /* Aggiungo uno stile specifico per le icone nei box informativi */
+        .box-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body data-pdf-path="../slides/Java ABC.pdf"> <!-- Aggiorna con il path corretto alle tue slide -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 01: Fondamenti e Buone Pratiche</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="OOP_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#style-conventions" class="sidebar-link">1. Stile e Convenzioni</a></li>
+            <li><a href="#data-types" class="sidebar-link">2. Tipi di Dati: Primitivi vs Riferimento</a></li>
+            <li><a href="#memory" class="sidebar-link">3. Allocazione in Memoria: Stack e Heap</a></li>
+            <li><a href="#mutability-equality" class="sidebar-link">4. Mutabilità e Uguaglianza</a></li>
+            <li><a href="#classes-objects" class="sidebar-link">5. Classi, Oggetti e Visibilità</a></li>
+            <li><a href="#methods" class="sidebar-link">6. Metodi: Overloading e Dispatching</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="style-conventions" class="content-section active-section">
+            <h2 class="section-title">1. Stile e Convenzioni: Scrivere Codice Leggibile</h2>
+            <div class="section-content">
+                <p>Prima di addentrarci nei concetti complessi, è fondamentale stabilire delle regole di base per scrivere codice che non sia solo funzionante, ma anche <strong>leggibile, manutenibile e professionale</strong>. Un buon software si riconosce prima di tutto da come è scritto.</p>
+                
+                <h3 class="subsection-title">Nomi Significativi (Intention-Revealing Names)</h3>
+                <p>La scelta dei nomi per variabili, metodi e classi è una delle decisioni più importanti che un programmatore prende. Un nome deve rivelare l'intenzione e il ruolo dell'elemento che identifica.</p>
+                
+                <div class="clarification-box">
+                    <div class="box-title">💡 Buona Pratica</div>
+                    Evita nomi generici, abbreviati o che possano creare disinformazione.
+                </div>
+
+                <pre><code class="language-java">
+// --- MALE (Cattiva Pratica) ---
+int d; // "d" cosa rappresenta? Giorni? Distanza? Dati?
+List<Account> a1; // "a1" non dà alcun contesto.
+
+String genymdhms; // Difficile da pronunciare e da ricordare.
+String phoneString; // Il suffisso "String" è ridondante.
+
+// --- BENE (Buona Pratica) ---
+int elapsedTimeInDays;
+List<Account> sourceAccounts;
+
+String generationTimestamp;
+String phoneNumber;
+                </code></pre>
+
+                <h3 class="subsection-title">Convenzioni Standard di Java</h3>
+                <p>Seguire le convenzioni standard del linguaggio rende il codice immediatamente familiare a qualsiasi altro sviluppatore Java.</p>
+                <ul>
+                    <li><strong>Classi e Interfacce:</strong> Usano `PascalCase` (o `UpperCamelCase`). Es: `Student`, `ShapeFactory`, `List`.</li>
+                    <li><strong>Metodi e Variabili:</strong> Usano `camelCase` (o `lowerCamelCase`). Es: `calculateArea`, `studentName`.</li>
+                    <li><strong>Costanti:</strong> Usano `UPPER_CASE_WITH_UNDERSCORES`. Es: `MAX_CONNECTIONS`, `DEFAULT_PORT`.</li>
+                    <li><strong>Package:</strong> Usano `lowercase.with.dots`. Es: `it.uniud.poo.utils`.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="data-types" class="content-section">
+            <h2 class="section-title">2. Tipi di Dati: Primitivi vs Riferimento</h2>
+            <div class="section-content">
+                <p>Java distingue due categorie principali di tipi di dati, il cui comportamento in memoria è radicalmente diverso.</p>
+                
+                <h3 class="subsection-title">Tipi Primitivi</h3>
+                <p>Sono i mattoni fondamentali del linguaggio. Rappresentano valori semplici e diretti. Ce ne sono otto: `boolean`, `char`, `byte`, `short`, `int`, `long`, `float`, `double`.</p>
+                
+                <h3 class="subsection-title">Tipi Riferimento (Oggetti)</h3>
+                <p>Qualsiasi tipo che non sia primitivo è un tipo riferimento. Questo include classi che creiamo noi (`Student`), classi della libreria standard (come `String`, `ArrayList`) e array. Una variabile di tipo riferimento non contiene l'oggetto stesso, ma un **riferimento** (un puntatore o indirizzo di memoria) alla locazione in cui l'oggetto risiede.</p>
+
+                <h3 class="subsection-title">Wrapper Classes, Boxing e Unboxing</h3>
+                <p>Per ogni tipo primitivo, Java fornisce una classe "wrapper" corrispondente (es. `int` -> `Integer`, `char` -> `Character`). Queste classi permettono di trattare i valori primitivi come oggetti, ad esempio per inserirli in collezioni generiche come `List<Integer>`.</p>
+                <p>Il processo di conversione da primitivo a wrapper è chiamato <strong>boxing</strong>, mentre il processo inverso è l'<strong>unboxing</strong>. Java gestisce queste conversioni automaticamente (<strong>autoboxing</strong>).</p>
+
+                <div class="warning-box">
+                    <div class="box-title">⚠️ Attenzione alla Performance</div>
+                    L'autoboxing, sebbene comodo, può avere un impatto negativo sulle prestazioni se avviene all'interno di un ciclo molto lungo, poiché ad ogni iterazione viene creato un nuovo oggetto.
+                </div>
+                <pre><code class="language-java">
+// Esempio di autoboxing inefficiente
+Long sum = 0L; // sum è un oggetto Long
+// In questo ciclo, ad ogni iterazione, viene creato un nuovo oggetto Long
+// per contenere il risultato di 'sum + i', e 'sum' viene aggiornato per puntare a questo nuovo oggetto.
+for (long i = 0; i <= 1_000_000; i++) {
+    sum += i; // Inefficace: sum = Long.valueOf(sum.longValue() + i);
+}
+
+// Esempio efficiente con tipo primitivo
+long sumPrimitive = 0L; // sumPrimitive è un valore primitivo
+for (long i = 0; i <= 1_000_000; i++) {
+    sumPrimitive += i; // Molto più veloce: nessuna creazione di oggetti.
+}
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="memory" class="content-section">
+            <h2 class="section-title">3. Allocazione in Memoria: Stack e Heap</h2>
+            <div class="section-content">
+                <p>Comprendere dove risiedono i dati è fondamentale per capire il comportamento del programma, specialmente per quanto riguarda la mutabilità e il passaggio di parametri.</p>
+                <ul>
+                    <li><strong>Stack (Pila):</strong> È una zona di memoria gestita con logica LIFO (Last-In, First-Out). Contiene i **tipi primitivi** e i **riferimenti agli oggetti**. Ogni chiamata a metodo crea un nuovo "frame" sullo stack per le sue variabili locali. Quando il metodo termina, il suo frame viene rimosso.</li>
+                    <li><strong>Heap:</strong> È una grande area di memoria dove vengono allocati dinamicamente tutti gli **oggetti** (creati con `new`). La gestione dello spazio nell'heap è compito del **Garbage Collector**, che dealloca automaticamente gli oggetti che non sono più raggiungibili (cioè, non ci sono più riferimenti attivi che puntano a loro).</li>
+                </ul>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                        graph TD
+                            subgraph Stack
+                                direction LR
+                                int_i["int i = 10"]
+                                ref_stud["Student s -->"]
+                            end
+                            subgraph Heap
+                                obj_stud["Student Object {<br> name: 'Mario Rossi',<br> id: 123 }"]
+                            end
+                            ref_stud --> obj_stud
+                    </pre>
+                </div>
+            </div>
+        </article>
+        
+        <article id="mutability-equality" class="content-section">
+            <h2 class="section-title">4. Mutabilità e Uguaglianza</h2>
+            <div class="section-content">
+                <p>Questi due concetti sono strettamente collegati e sono una fonte comune di bug se non compresi a fondo.</p>
+                
+                <h3 class="subsection-title">Oggetti Mutabili vs. Immutabili</h3>
+                <ul>
+                    <li>Un oggetto è <strong>mutabile</strong> se il suo stato interno può essere modificato dopo la sua creazione. Esempi: `ArrayList`, `StringBuilder`, la maggior parte delle classi di dominio personalizzate.</li>
+                    <li>Un oggetto è <strong>immutabile</strong> se il suo stato non può mai essere cambiato dopo la creazione. Ogni "modifica" in realtà crea un nuovo oggetto. Esempio per eccellenza: `String`.</li>
+                </ul>
+                 <pre><code class="language-java">
+// Esempio di immutabilità di String
+String s1 = "Ciao";
+String s2 = s1; // s2 ora punta allo stesso oggetto "Ciao" di s1
+s1 = s1 + " Mondo"; // VIENE CREATO UN NUOVO OGGETTO "Ciao Mondo". s1 ora punta a questo nuovo oggetto.
+
+System.out.println(s2); // Stampa "Ciao", perché s2 punta ancora all'oggetto originale.
+                </code></pre>
+
+                <h3 class="subsection-title">Identità (`==`) vs. Uguaglianza (`.equals()`)</h3>
+                <p>Questa è una delle distinzioni più importanti in Java.</p>
+                <ul>
+                    <li><strong>Identità (`==`):</strong> Controlla se due variabili di riferimento puntano **allo stesso identico oggetto in memoria**. Per i tipi primitivi, controlla se i valori sono uguali.</li>
+                    <li><strong>Uguaglianza (`.equals()`):</strong> È un metodo che, per convenzione, dovrebbe controllare se due oggetti sono "logicamente" equivalenti, cioè se hanno lo stesso stato significativo. La classe `Object` fornisce un'implementazione di default che si comporta come `==`. Per ottenere un confronto basato sul contenuto, **è necessario fare l'override del metodo `.equals()`** (e, di conseguenza, anche di `.hashCode()`).</li>
+                </ul>
+
+                <pre><code class="language-java">
+String literal1 = "Java";
+String literal2 = "Java";
+String obj1 = new String("Java");
+
+System.out.println(literal1 == literal2); // true (il compilatore riusa lo stesso oggetto per le stringhe letterali)
+System.out.println(literal1 == obj1);    // false (obj1 è un nuovo oggetto, anche se con lo stesso contenuto)
+System.out.println(literal1.equals(obj1)); // true (il contenuto è lo stesso, il metodo equals di String controlla i caratteri)
+
+StringBuilder sb1 = new StringBuilder("Test");
+StringBuilder sb2 = new StringBuilder("Test");
+
+System.out.println(sb1 == sb2);         // false (due oggetti distinti)
+System.out.println(sb1.equals(sb2));    // false! (StringBuilder non fa l'override di equals, quindi usa il comportamento di Object, che è come ==)
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="classes-objects" class="content-section">
+            <h2 class="section-title">5. Classi, Oggetti e Visibilità</h2>
+            <div class="section-content">
+                <p>Una classe è un "modello" o "progetto" per creare oggetti. Un oggetto è un'istanza di una classe.</p>
+                <h3 class="subsection-title">Variabili di Istanza e Variabili di Classe</h3>
+                <ul>
+                    <li><strong>Variabile di Istanza:</strong> Ogni oggetto ha la sua copia personale. Se `studente1.nome = "Mario"` e `studente2.nome = "Luigi"`, ogni oggetto ha il suo valore.</li>
+                    <li><strong>Variabile di Classe (`static`):</strong> Esiste una sola copia di questa variabile, condivisa da **tutte le istanze** della classe. È associata alla classe stessa, non ai singoli oggetti. È utile per contatori o costanti.</li>
+                </ul>
+                <h3 class="subsection-title">Modificatori di Visibilità</h3>
+                <p>La visibilità controlla chi può accedere a classi, metodi e variabili. È uno strumento fondamentale per l'**incapsulamento**.</p>
+                <ol>
+                    <li><strong>`private`</strong>: Accessibile solo dall'interno della stessa classe. **È la scelta di default per tutte le variabili di istanza per proteggere lo stato interno di un oggetto.**</li>
+                    <li><strong>Package-private (nessun modificatore):</strong> Accessibile solo da classi nello stesso package.</li>
+                    <li><strong>`protected`</strong>: Accessibile da classi nello stesso package E da sottoclassi (anche se in package diversi).</li>
+                    <li><strong>`public`</strong>: Accessibile da qualsiasi classe, ovunque. Va usato con parsimonia per l'API pubblica di una classe.</li>
+                </ol>
+            </div>
+        </article>
+        
+        <article id="methods" class="content-section">
+            <h2 class="section-title">6. Metodi: Overloading e Dispatching</h2>
+            <div class="section-content">
+                <h3 class="subsection-title">Overloading</h3>
+                <p>L'overloading (o sovraccarico) consiste nel definire più metodi con lo **stesso nome** ma con una **lista di parametri diversa** (per numero o per tipo) all'interno della stessa classe. Il compilatore decide quale versione chiamare in base ai tipi *apparenti* degli argomenti passati.</p>
+                <p>Se esistono più conversioni possibili, il compilatore sceglie la versione "più specifica", cioè quella che richiede il minor numero di conversioni da tipo più specifico a tipo più generico (es. da `int` a `long` è preferibile che da `int` a `double`). Se la scelta è ambigua, si ottiene un errore di compilazione.</p>
+
+                <h3 class="subsection-title">Method Dispatching (Polimorfismo)</h3>
+                <p>Il dispatching è il processo con cui la JVM decide quale implementazione di un metodo eseguire. È alla base del polimorfismo.</p>
+                <p>La decisione si basa su due fattori:</p>
+                <ol>
+                    <li><strong>Il tipo apparente degli argomenti (Compile-time):</strong> Determina quale metodo *overload* viene selezionato.</li>
+                    <li><strong>Il tipo reale dell'oggetto su cui il metodo è chiamato (Run-time):</strong> Determina quale versione *overridden* (sovrascritta) del metodo viene eseguita.</li>
+                </ol>
+
+                <div class="clarification-box">
+                    <div class="box-title">💡 Programmare verso le Interfacce</div>
+                    Una delle pratiche più importanti dell'OOP è "programmare verso un'interfaccia, non verso un'implementazione". Questo significa dichiarare le variabili con il tipo più generale possibile (es. `List` invece di `ArrayList`), sfruttando il polimorfismo per nascondere i dettagli implementativi e rendere il codice più flessibile.
+                </div>
+                <pre><code class="language-java">
+// Buona pratica: dichiaro la variabile con il tipo interfaccia
+List<String> names = new ArrayList<>(); 
+
+// Il mio metodo accetta qualsiasi implementazione di List
+public void processNames(List<String> nameList) {
+    // ... logica che usa solo i metodi di List
+}
+
+// Posso passare un ArrayList...
+processNames(names);
+// ... o potrei passare un LinkedList senza cambiare il metodo processNames!
+List<String> otherNames = new LinkedList<>();
+processNames(otherNames);
+                </code></pre>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Programmazione Orientata agli Oggetti</p>
+    </footer>
+
+    <!-- JS Comune e PrismJS -->
+    <script src="../assets/js/common.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+    <script>
+    // Inizializzazione di Mermaid quando una sezione diventa visibile
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    fontSize: '14px',
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary);">Definizione non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary);">Errore rendering Mermaid.</p><pre>${e.message}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
