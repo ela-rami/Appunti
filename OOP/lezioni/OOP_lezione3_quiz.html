@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Lezione 03: Tipi di Dati Astratti (ADT)</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --accent-success: #34D399;
+            --accent-danger: #f87171;
+            --accent-warning: #FACC15; 
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+        }
+        
+        header {
+            background-color: var(--bg-header);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+        header p {
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0.5rem auto 0;
+        }
+
+        main {
+            padding: 2.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .quiz-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .question-block {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            border-left: 4px solid var(--accent-secondary);
+        }
+
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title .question-number {
+            display: inline-block;
+            background-color: var(--accent-secondary);
+            color: var(--bg-header);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 0.75rem;
+            font-weight: 700;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .options-list label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .options-list label:hover {
+            background-color: rgba(96, 165, 250, 0.1);
+            border-color: var(--accent-primary);
+        }
+
+        .options-list input[type="radio"],
+        .options-list input[type="checkbox"] {
+            width: 1.2em;
+            height: 1.2em;
+            accent-color: var(--accent-secondary);
+        }
+        
+        pre {
+            background-color: var(--code-bg) !important;
+            padding: 1rem !important;
+            border-radius: var(--border-radius-small) !important;
+            margin: 1rem 0 !important;
+            font-size: 0.9em !important;
+        }
+
+        .submit-container {
+            text-align: center;
+            margin-top: 3rem;
+        }
+        
+        .submit-btn {
+            background-color: var(--accent-primary);
+            color: var(--bg-header);
+            border: none;
+            padding: 0.8rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: var(--border-radius-small);
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .submit-btn:hover {
+            background-color: var(--accent-success);
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            display: none; /* Hidden by default */
+        }
+        .feedback.correct {
+            background-color: rgba(52, 211, 153, 0.1);
+            border: 1px solid var(--accent-success);
+            color: var(--accent-success);
+        }
+        .feedback.incorrect {
+            background-color: rgba(248, 113, 113, 0.1);
+            border: 1px solid var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        .feedback p { margin: 0; }
+        .feedback p.summary-status { font-weight: bold; margin-bottom: 0.5rem; }
+        
+        /* Stili per le spiegazioni dettagliate */
+        .option-explanation {
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+            border-left: 2px solid;
+            font-size: 0.9em;
+        }
+        .option-explanation.correct-option {
+            border-color: var(--accent-success);
+            color: var(--accent-success);
+        }
+        .option-explanation.incorrect-option {
+            border-color: var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        
+        #results-summary {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            text-align: center;
+            display: none;
+            margin-top: 2rem;
+        }
+        #results-summary h2 { color: var(--accent-primary); margin-bottom: 1rem; }
+        #score { font-size: 1.5rem; font-weight: bold; }
+        #summary-text { color: var(--text-secondary); margin-top: 0.5rem; }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.6rem; }
+            main { padding: 1.5rem 1rem; }
+            .question-block { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Quiz: Tipi di Dati Astratti (ADT)</h1>
+        <p>Verifica la tua comprensione dei concetti chiave della Lezione 03, tra cui Stato Astratto, Funzione di Astrazione (AF) e Invariante di Rappresentazione (RI).</p>
+    </header>
+
+    <main>
+        <form id="quiz-form" class="quiz-container">
+            <!-- Domanda 1 -->
+            <div class="question-block" id="q1">
+                <p class="question-title"><span class="question-number">1</span>Qual è lo scopo principale della Funzione di Astrazione (AF)?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q1" value="a">Verificare che lo stato concreto di un oggetto sia valido.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="b">Definire il contratto pubblico di un metodo.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="c">Mappare lo stato concreto (implementazione) a uno stato astratto (concetto).</label></li>
+                    <li><label><input type="checkbox" name="q1" value="d">Nascondere le variabili di istanza rendendole `private`.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 2 (Vero/Falso - Radio) -->
+            <div class="question-block" id="q2">
+                <p class="question-title"><span class="question-number">2</span>L'Invariante di Rappresentazione (RI) deve essere vero in ogni momento durante l'esecuzione di un metodo pubblico.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q2" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q2" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 3 (Checkbox - Multipla) -->
+            <div class="question-block" id="q3">
+                <p class="question-title"><span class="question-number">3</span>Quali delle seguenti affermazioni descrivono correttamente un ADT? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q3" value="a">Un ADT è definito dal suo comportamento e non dalla sua implementazione.</label></li>
+                    <li><label><input type="checkbox" name="q3" value="b">Un ADT deve essere sempre immutabile.</label></li>
+                    <li><label><input type="checkbox" name="q3" value="c">La sua specifica (contratti dei metodi) si riferisce allo stato astratto.</label></li>
+                    <li><label><input type="checkbox" name="q3" value="d">L'esposizione della rappresentazione interna (es. tramite un getter pubblico) è una buona pratica per la flessibilità.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 4 (Checkbox - Singola, ma scelta come multipla) -->
+            <div class="question-block" id="q4">
+                <p class="question-title"><span class="question-number">4</span>Considera un ADT `BoundedCounter` che rappresenta un contatore intero che non può mai superare un valore massimo `MAX_VALUE`.</p>
+                <pre><code class="language-java">
+public class BoundedCounter {
+    private int value;
+    private final int MAX_VALUE;
+    // ... costruttore ...
+}
+                </code></pre>
+                <p>Qual è un buon Invariante di Rappresentazione (RI) per questa classe? (Seleziona quella corretta)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q4" value="a">`value` non deve contenere duplicati.</label></li>
+                    <li><label><input type="checkbox" name="q4" value="b">`0 <= value <= MAX_VALUE`.</label></li>
+                    <li><label><input type="checkbox" name="q4" value="c">L'oggetto è un contatore.</label></li>
+                    <li><label><input type="checkbox" name="q4" value="d">`MAX_VALUE` deve essere positivo.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 5 (Vero/Falso - Radio) -->
+            <div class="question-block" id="q5">
+                <p class="question-title"><span class="question-number">5</span>La Funzione di Astrazione (AF) è tipicamente una funzione iniettiva (uno-a-uno).</p>
+                 <ul class="options-list">
+                    <li><label><input type="radio" name="q5" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q5" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 6 (Checkbox - Singola, ma scelta come multipla) -->
+            <div class="question-block" id="q6">
+                <p class="question-title"><span class="question-number">6</span>Considera la classe `UniqueList` che implementa una lista senza duplicati usando un `ArrayList` interno.</p>
+                <pre><code class="language-java">
+public class UniqueList<E> {
+    private ArrayList<E> elements;
+
+    // ...
+    // AF(c) = l'insieme degli elementi in c.elements
+    // RI: elements != null && nessun elemento in elements è duplicato
+    // ...
+
+    public ArrayList<E> getElements() {
+        return this.elements; // <-- PROBLEMA
+    }
+}
+                </code></pre>
+                <p>Quale principio fondamentale degli ADT viene violato dal metodo `getElements()`? (Seleziona quella corretta)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q6" value="a">Design by Contract, perché il metodo non ha un contratto.</label></li>
+                    <li><label><input type="checkbox" name="q6" value="b">L'Invariante di Rappresentazione, perché `elements` potrebbe essere nullo.</label></li>
+                    <li><label><input type="checkbox" name="q6" value="c">L'incapsulamento, a causa dell'esposizione della rappresentazione (representation exposure).</label></li>
+                    <li><label><input type="checkbox" name="q6" value="d">Nessun principio, il codice è corretto se il client lo usa bene.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+            
+            <!-- Domanda 7 (Checkbox - Singola, ma scelta come multipla) -->
+            <div class="question-block" id="q7">
+                <p class="question-title"><span class="question-number">7</span>Un "benevolent side effect" (effetto collaterale benevolo) è un'operazione che...</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q7" value="a">Modifica lo stato astratto per migliorare le prestazioni.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="b">Modifica lo stato concreto (la rappresentazione) senza cambiare lo stato astratto.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="c">Modifica lo stato di un altro oggetto passato come parametro.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="d">Viola l'Invariante di Rappresentazione ma non quello di Astrazione.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 8 (Checkbox - Singola, ma scelta come multipla) -->
+            <div class="question-block" id="q8">
+                <p class="question-title"><span class="question-number">8</span>In una classe che implementa un ADT, dove è più appropriato controllare l'Invariante di Rappresentazione (RI) usando `assert`? (Seleziona quella corretta)</p>
+                 <ul class="options-list">
+                    <li><label><input type="checkbox" name="q8" value="a">Solo all'inizio di ogni metodo pubblico.</label></li>
+                    <li><label><input type="checkbox" name="q8" value="b">Solo alla fine di ogni metodo pubblico.</label></li>
+                    <li><label><input type="checkbox" name="q8" value="c">All'inizio e alla fine di ogni metodo pubblico.</label></li>
+                    <li><label><input type="checkbox" name="q8" value="d">Non va mai controllato, è solo un concetto teorico.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 9 (Checkbox - Singola, ma scelta come multipla) -->
+            <div class="question-block" id="q9">
+                <p class="question-title"><span class="question-number">9</span>Qual è la differenza principale tra lo stato astratto e lo stato concreto di un ADT?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q9" value="a">Lo stato astratto è modificabile, quello concreto no.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="b">Lo stato astratto è la rappresentazione interna, quello concreto è la sua interpretazione esterna.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="c">Lo stato astratto descrive il "cosa" l'ADT rappresenta concettualmente; quello concreto descrive il "come" è implementato.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="d">Non c'è differenza, sono sinonimi.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 10 (Vero/Falso - Radio) -->
+            <div class="question-block" id="q10">
+                <p class="question-title"><span class="question-number">10</span>Il protocollo di un ADT include la descrizione dettagliata degli algoritmi usati per le operazioni.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q10" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q10" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 11 (Checkbox - Multipla) -->
+            <div class="question-block" id="q11">
+                <p class="question-title"><span class="question-number">11</span>Quali delle seguenti affermazioni sulla Funzione di Astrazione (AF) sono corrette? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q11" value="a">È una mappa dal mondo concreto a quello astratto.</label></li>
+                    <li><label><input type="checkbox" name="q11" value="b">È unicamente definita (una sola AF per ogni ADT).</label></li>
+                    <li><label><input type="checkbox" name="q11" value="c">Può essere molti-a-uno (non iniettiva).</label></li>
+                    <li><label><input type="checkbox" name="q11" value="d">Serve a verificare se l'Invariante di Rappresentazione è soddisfatto.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 12 (Checkbox - Multipla) -->
+            <div class="question-block" id="q12">
+                <p class="question-title"><span class="question-number">12</span>Considera la classe `GradeList` per un elenco di voti, dove i voti sono interi tra 0 e 30. L'implementazione interna è `private List<Integer> grades;`</p>
+                <p>Quali delle seguenti affermazioni fanno parte di un buon Invariante di Rappresentazione (RI) per `GradeList`? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q12" value="a">`grades` non è nullo.</label></li>
+                    <li><label><input type="checkbox" name="q12" value="b">Tutti gli elementi in `grades` sono interi tra 0 e 30 (inclusi).</label></li>
+                    <li><label><input type="checkbox" name="q12" value="c">La lista `grades` è ordinata in senso crescente.</label></li>
+                    <li><label><input type="checkbox" name="q12" value="d">`grades.size()` è uguale al numero di esami sostenuti dallo studente.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 13 (Vero/Falso - Radio) -->
+            <div class="question-block" id="q13">
+                <p class="question-title"><span class="question-number">13</span>L'esposizione della rappresentazione (representation exposure) può portare a una violazione dell'Invariante di Rappresentazione (RI) da parte del codice client.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q13" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q13" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 14 (Checkbox - Singola, ma scelta come multipla) -->
+            <div class="question-block" id="q14">
+                <p class="question-title"><span class="question-number">14</span>Qual è il modo corretto per prevenire l'esposizione della rappresentazione se un metodo deve restituire una collezione mutabile interna (es. `List<String> getItems()`)? (Seleziona quella corretta)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q14" value="a">Restituire direttamente il riferimento alla collezione interna.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="b">Restituire una copia difensiva della collezione interna.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="c">Dichiarare la collezione interna `public`.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="d">Rendere la collezione interna `final`.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 15 (Vero/Falso - Radio) -->
+            <div class="question-block" id="q15">
+                <p class="question-title"><span class="question-number">15</span>Se un ADT è implementato utilizzando un array di dimensione fissa, il suo Invariante di Rappresentazione (RI) dovrebbe sempre includere che l'array non sia nullo e che gli elementi validi non superino la sua capacità.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q15" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q15" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 16 (Checkbox - Singola, ma scelta come multipla) -->
+            <div class="question-block" id="q16">
+                <p class="question-title"><span class="question-number">16</span>Quale dei seguenti scenari è un buon esempio di "benevolent side effect"?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q16" value="a">Un metodo `sort()` che riordina internamente gli elementi di una lista, ma l'ADT (es. un set) non garantisce un ordine specifico.</label></li>
+                    <li><label><input type="checkbox" name="q16" value="b">Un metodo `add()` che aggiunge un elemento e ne aumenta il contatore interno.</label></li>
+                    <li><label><input type="checkbox" name="q16" value="c">Un metodo `equals()` che stampa un messaggio di debug a console.</label></li>
+                    <li><label><input type="checkbox" name="q16" value="d">Un metodo che aggiorna un campo `lastModifiedDate` dopo ogni modifica dello stato.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 17 (Vero/Falso - Radio) -->
+            <div class="question-block" id="q17">
+                <p class="question-title"><span class="question-number">17</span>La specifica di un ADT dovrebbe riferirsi al suo stato concreto (`private int[] data;`).</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q17" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q17" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 18 (Vero/Falso - Radio) -->
+            <div class="question-block" id="q18">
+                <p class="question-title"><span class="question-number">18</span>Se un metodo violasse temporaneamente l'Invariante di Rappresentazione nel suo corpo, il controllo `assert invariantOK()` alla fine del metodo catcherebbe il bug.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q18" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q18" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 19 (Checkbox - Multipla) -->
+            <div class="question-block" id="q19">
+                <p class="question-title"><span class="question-number">19</span>Quali delle seguenti opzioni NON sono parte della specifica di un ADT, ma piuttosto dettagli di implementazione o strumenti di verifica? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q19" value="a">Lo Stato Astratto.</label></li>
+                    <li><label><input type="checkbox" name="q19" value="b">La Funzione di Astrazione (AF).</label></li>
+                    <li><label><input type="checkbox" name="q19" value="c">Le Pre-condizioni dei metodi.</label></li>
+                    <li><label><input type="checkbox" name="q19" value="d">L'Invariante di Rappresentazione (RI).</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 20 (Checkbox - Singola, ma scelta come multipla) -->
+            <div class="question-block" id="q20">
+                <p class="question-title"><span class="question-number">20</span>Un ADT è considerato "fully populated" quando... (Seleziona quella corretta)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q20" value="a">Tutti i suoi metodi sono stati implementati e testati.</label></li>
+                    <li><label><input type="checkbox" name="q20" value="b">È possibile creare tutti i possibili stati astratti tramite le sue operazioni.</label></li>
+                    <li><label><input type="checkbox" name="q20" value="c">La sua rappresentazione interna utilizza al massimo la memoria disponibile.</label></li>
+                    <li><label><input type="checkbox" name="q20" value="d">Tutti i suoi campi privati sono stati inizializzati nel costruttore.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+        </form>
+
+        <div class="submit-container">
+            <button type="button" id="submit-quiz-btn" class="submit-btn">Verifica Risposte</button>
+        </div>
+
+        <div id="results-summary">
+            <h2>Risultato del Quiz</h2>
+            <p id="score"></p>
+            <p id="summary-text"></p>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const solutions = {
+            q1: ['c'],
+            q2: 'b', // Falso
+            q3: ['a', 'c'],
+            q4: ['b'],
+            q5: 'b', // Falso
+            q6: ['c'],
+            q7: ['b'],
+            q8: ['c'],
+            q9: ['c'],
+            q10: 'b', // Falso
+            q11: ['a', 'c'],
+            q12: ['a', 'b'],
+            q13: 'a', // Vero
+            q14: ['b'],
+            q15: 'a', // Vero
+            q16: ['a'],
+            q17: 'b', // Falso
+            q18: 'a', // Vero
+            q19: ['b', 'd'],
+            q20: ['b']
+        };
+
+        const explanations = {
+            q1: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Lo scopo dell'AF non è verificare la validità dello stato concreto, bensì di definire la sua interpretazione astratta. La validità è compito dell'Invariante di Rappresentazione (RI)." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Il contratto pubblico di un metodo è definito dalle pre-condizioni e post-condizioni, non dalla Funzione di Astrazione (AF)." },
+                { option: 'c', status: 'correct-option', text: "Corretto. L'AF è il 'ponte' concettuale che definisce come una data rappresentazione interna (stato concreto) corrisponde a un valore astratto (il concetto)." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Rendere le variabili di istanza `private` è una pratica di incapsulamento, non lo scopo della Funzione di Astrazione (AF)." }
+            ],
+            q2: "Falso. L'RI deve essere vero all'inizio e alla fine dei metodi pubblici (e dei costruttori), ma può essere temporaneamente violato *all'interno* del corpo di un metodo mentre si sta modificando lo stato. L'assert all'inizio e alla fine serve proprio a catturare violazioni persistenti.",
+            q3: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Un ADT si definisce dal suo comportamento (le operazioni che offre) e non dai dettagli della sua implementazione interna." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Non tutti gli ADT devono essere immutabili; molti sono progettati per essere mutabili (es. un contatore, una lista modificabile)." },
+                { option: 'c', status: 'correct-option', text: "Corretto. La specifica di un ADT (i contratti dei suoi metodi) deve sempre riferirsi ai concetti astratti, non ai dettagli di implementazione interna." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. L'esposizione della rappresentazione interna è una cattiva pratica che viola l'incapsulamento e può portare a bug gravi." }
+            ],
+            q4: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Il contatore non ha un concetto di duplicati; questa è una proprietà tipica degli insiemi." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Per un contatore che ha un valore minimo (tipicamente 0) e un valore massimo, l'RI deve garantire che il valore corrente rientri sempre in questo intervallo." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Questa è una descrizione generica dell'oggetto, non un invariante sulla validità del suo stato interno." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Sebbene `MAX_VALUE` debba essere valido, questa è una pre-condizione sul costruttore, non un invariante sul campo `value` durante l'esecuzione." }
+            ],
+            q5: "Falso. L'AF è spesso molti-a-uno (non iniettiva). Ad esempio, in un `IntSet` implementato con una lista, gli stati concreti `[1, 2]` e `[2, 1]` mappano entrambi allo stesso stato astratto `{1, 2}`. Questo offre flessibilità all'implementazione.",
+            q6: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Il problema non è la mancanza di contratto, ma il modo in cui il metodo è implementato." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Sebbene `elements` possa essere nullo in alcuni contesti, il problema principale qui è il ritorno del riferimento all'oggetto interno mutabile." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Restituire un riferimento diretto a un campo mutabile interno (`this.elements`) è un classico esempio di 'representation exposure' e viola il principio di incapsulamento. Il client potrebbe modificare la lista dall'esterno (es. aggiungendo duplicati), rompendo l'RI che garantisce l'unicità degli elementi, e causando comportamenti indefiniti." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Un client che 'usa bene' il codice non dovrebbe essere una pre-condizione. Un buon design protegge da usi impropri." }
+            ],
+            q7: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Un effetto benevolo non modifica lo stato *astratto*." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Un 'benevolent side effect' è una modifica alla rappresentazione interna che non ha alcun impatto sullo stato astratto dell'ADT. Viene spesso fatto per motivi di performance." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Questo è un effetto collaterale normale, non 'benevolo' nel senso specifico degli ADT. Un effetto collaterale benevolo è sull'oggetto `this` stesso." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Un effetto benevolo *non deve violare* l'Invariante di Rappresentazione. Deve sempre mantenere lo stato concreto valido." }
+            ],
+            q8: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Controllare solo all'inizio non cattura i bug che potrebbero corrompere lo stato durante l'esecuzione del metodo." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Controllare solo alla fine non assicura che il metodo sia stato chiamato su un oggetto in stato valido." },
+                { option: 'c', status: 'correct-option', text: "Corretto. L'RI deve valere sia quando un metodo pubblico viene chiamato (agendo come pre-condizione sull'oggetto `this`) sia quando termina (agendo come post-condizione), per garantire la consistenza dello stato dell'oggetto durante il suo ciclo di vita. Gli `assert` sono lo strumento ideale per questi controlli in fase di sviluppo." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. L'RI è un concetto fondamentale per la verifica formale e pratica della correttezza dell'implementazione di un ADT." }
+            ],
+            q9: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. La mutabilità dipende dal design, non dalla distinzione astratto/concreto." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. L'astratto è l'interpretazione esterna/concettuale, il concreto è la rappresentazione interna." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Lo stato astratto (il 'cosa') è il modello concettuale che l'ADT rappresenta (es. 'un insieme di numeri'). Lo stato concreto (il 'come') è la struttura dati reale usata per implementare tale modello (es. 'un `ArrayList` di numeri')." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Sono due concetti distinti e fondamentali per la progettazione e verifica degli ADT." }
+            ],
+            q10: "Falso. Il protocollo definisce le *operazioni* e i loro *contratti* (cosa fanno), ma non i *dettagli di implementazione* (come lo fanno, inclusi gli algoritmi). Questo è il principio di astrazione.",
+            q11: [
+                { option: 'a', status: 'correct-option', text: "Corretto. La Funzione di Astrazione (AF) è il meccanismo che lega una data configurazione di variabili di istanza (stato concreto) al valore astratto che essa rappresenta." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Non è unica. Diverse AF possono essere definite per lo stesso ADT a seconda della rappresentazione." },
+                { option: 'c', status: 'correct-option', text: "Corretto. È spesso molti-a-uno (non iniettiva), dato che diverse rappresentazioni concrete (che rispettano l'RI) possono corrispondere allo stesso stato astratto (es. `[1,2]` e `[2,1]` per l'insieme `{1,2}`)." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. L'AF non è usata per verificare l'RI; quello è il compito del metodo `invariantOK()` e degli `assert`." }
+            ],
+            q12: [
+                { option: 'a', status: 'correct-option', text: "Corretto. `grades` non nullo è fondamentale per evitare `NullPointerException` e per assicurare che la rappresentazione sia sempre valida." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Tutti gli elementi in `grades` devono essere interi tra 0 e 30 (inclusi) per rispettare i vincoli di dominio dei voti. Un RI deve garantire che la rappresentazione sia semanticamente corretta." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. L'ordinamento della lista (`grades`) non è un requisito generale di un semplice elenco di voti, a meno che la specifica dell'ADT non richieda esplicitamente che sia ordinata (es. `SortedGradeList`). Se non specificato, non è parte dell'RI." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. `grades.size()` è una proprietà dello stato della lista, non un vincolo di validità intrinseco della rappresentazione stessa (ad esempio, la lista può essere vuota, o contenere 5 voti, a seconda del contesto)." }
+            ],
+            q13: "Vero. Se il client può ottenere un riferimento diretto a un oggetto mutabile interno (es. una `List` restituita da un getter) e modificarlo, non c'è più nulla che impedisca al client di rompere le regole interne di validità (l'RI) dell'oggetto ADT (es. aggiungendo un duplicato a una lista che dovrebbe essere unica), portando a comportamenti indefiniti.",
+            q14: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Questo è esattamente il problema dell'esposizione della rappresentazione." },
+                { option: 'b', status: 'correct-option', text: "Corretto. La soluzione corretta è restituire una copia difensiva della collezione interna. In questo modo, il client riceve una sua copia e qualsiasi modifica apportata dal client non influenzerà lo stato interno dell'oggetto ADT, preservando l'incapsulamento e l'RI." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Dichiarare la collezione interna `public` espone direttamente la rappresentazione, violando l'incapsulamento in modo ancora più grave." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. `final` rende il *riferimento* alla collezione immutabile (non può essere riassegnato), ma non rende immutabile la *collezione stessa*. Il client può comunque modificare il contenuto della collezione." }
+            ],
+            q15: "Vero. Per un array, l'RI deve garantire che il riferimento all'array non sia nullo (altrimenti non si può accedere) e che gli indici usati per gli elementi validi non eccedano i limiti dell'array (`array.length`), prevenendo `IndexOutOfBoundsException` e garantendo l'integrità dei dati." ,
+            q16: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Un effetto collaterale benevolo modifica la rappresentazione interna per motivi di performance (o altro) ma *senza alterare lo stato astratto*. Ordinare internamente una lista (a) per un Set (che non ha ordine intrinseco) è un esempio: la rappresentazione cambia, ma il Set rimane lo stesso dal punto di vista astratto." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Questo è un effetto collaterale *normale* di un metodo che modifica lo stato dell'ADT; aumenta il contatore perché la lista è cambiata a livello astratto." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Stampare un messaggio di debug è un effetto collaterale, ma non è 'benevolo' nel senso che modifica la rappresentazione interna dell'oggetto ADT senza alterare il suo stato astratto." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Anche questo è un effetto collaterale *normale* di un metodo che modifica lo stato dell'ADT; `lastModifiedDate` riflette un cambiamento astratto." }
+            ],
+            q17: "Falso. La specifica di un ADT deve riferirsi unicamente al suo **stato astratto**, ovvero al suo modello concettuale. Non deve mai fare riferimento a dettagli di implementazione come i nomi delle variabili private o le strutture dati concrete. Questo è il principio di astrazione, fondamentale per il disaccoppiamento tra specifica e implementazione.",
+            q18: "Vero. Il controllo `assert invariantOK()` alla fine del metodo serve proprio a questo: a verificare che, dopo tutte le modifiche intermedie (che possono temporaneamente rompere l'RI), il metodo abbia ristabilito uno stato concreto che rispetta l'RI. Se non lo facesse, l'asserzione fallirebbe, segnalando un bug nel codice del metodo stesso.",
+            q19: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Lo stato astratto è il fulcro della specifica di un ADT." },
+                { option: 'b', status: 'correct-option', text: "Corretto. La Funzione di Astrazione (AF) è uno strumento *teorico e di verifica* per l'implementatore, che spiega come la rappresentazione concreta mappa al concetto astratto. Non è parte della specifica pubblica dell'ADT." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Le pre-condizioni sono una parte essenziale del contratto di un metodo nella specifica." },
+                { option: 'd', status: 'correct-option', text: "Corretto. L'Invariante di Rappresentazione (RI) descrive le proprietà di validità della rappresentazione *interna* e viene usato per verificare la correttezza dell'implementazione, non è esposto nella specifica pubblica dell'ADT." }
+            ],
+            q20: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. 'Fully populated' si riferisce alla completezza dell'API, non all'implementazione." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Un ADT è considerato 'fully populated' quando la sua API (il suo protocollo) fornisce un set sufficiente di operazioni per creare e manipolare (raggiungere) tutti i possibili stati astratti che l'ADT può rappresentare nel suo dominio." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Questa è una questione di efficienza dell'implementazione, non di completezza funzionale dell'API." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Anche questa è una questione di implementazione e di robustezza del codice, non di completezza funzionale dell'API pubblica." }
+            ]
+        };
+
+        const submitBtn = document.getElementById('submit-quiz-btn');
+        submitBtn.addEventListener('click', () => {
+            let score = 0;
+            const totalQuestions = Object.keys(solutions).length;
+
+            for (const qId in solutions) {
+                const questionBlock = document.getElementById(qId);
+                const feedbackEl = questionBlock.querySelector('.feedback');
+                const inputs = questionBlock.querySelectorAll(`input[name=${qId}]`);
+                
+                let isCorrect = false;
+                const correctAnswer = solutions[qId]; // Array for checkboxes, string for radios
+                
+                if (Array.isArray(correctAnswer)) { // Checkbox (scelta multipla/singola forzate a checkbox)
+                    const selectedValues = Array.from(inputs).filter(i => i.checked).map(i => i.value);
+                    
+                    // Condizione di correttezza: TUTTE le risposte corrette sono selezionate E NESSUNA risposta sbagliata è selezionata.
+                    const allCorrectSelected = correctAnswer.every(val => selectedValues.includes(val));
+                    const noIncorrectSelected = selectedValues.every(val => correctAnswer.includes(val));
+                    
+                    isCorrect = allCorrectSelected && noIncorrectSelected;
+
+                } else { // Radio (vero/falso)
+                    const selectedInput = Array.from(inputs).find(i => i.checked);
+                    if (selectedInput && selectedInput.value === correctAnswer) {
+                        isCorrect = true;
+                    }
+                }
+
+                feedbackEl.style.display = 'block';
+                // Genera il feedback dettagliato per ogni opzione (solo per le checkbox)
+                if (Array.isArray(solutions[qId])) {
+                    let detailedExplanationHtml = '';
+                    const allOptions = questionBlock.querySelectorAll('.options-list input');
+                    Array.from(allOptions).forEach(input => {
+                        const optionValue = input.value;
+                        const explanationData = explanations[qId].find(exp => exp.option === optionValue);
+                        if (explanationData) {
+                            detailedExplanationHtml += `<p class="option-explanation ${explanationData.status}">${optionValue}) ${explanationData.text}</p>`;
+                        }
+                    });
+                     feedbackEl.innerHTML = `<p class="summary-status">${isCorrect ? 'Corretto!' : 'Sbagliato!'}</p>${detailedExplanationHtml}`;
+
+                } else { // Per Vero/Falso, usa la spiegazione semplice
+                    feedbackEl.innerHTML = `<p class="summary-status">${isCorrect ? 'Corretto!' : 'Sbagliato!'}</p><p>${explanations[qId]}</p>`;
+                }
+
+
+                if (isCorrect) {
+                    score++;
+                    feedbackEl.classList.remove('incorrect');
+                    feedbackEl.classList.add('correct');
+                } else {
+                    feedbackEl.classList.remove('correct');
+                    feedbackEl.classList.add('incorrect');
+                }
+            }
+            
+            // Mostra il riepilogo finale
+            const resultsSummary = document.getElementById('results-summary');
+            const scoreEl = document.getElementById('score');
+            const summaryTextEl = document.getElementById('summary-text');
+            
+            scoreEl.textContent = `Punteggio: ${score} / ${totalQuestions}`;
+            if (score === totalQuestions) {
+                summaryTextEl.textContent = "Eccellente! Hai una solida comprensione dei concetti degli ADT.";
+                scoreEl.style.color = 'var(--accent-success)';
+            } else if (score >= totalQuestions * 0.75) { 
+                summaryTextEl.textContent = "Molto bene! Hai compreso la maggior parte dei concetti. Rileggi le spiegazioni per consolidare i punti deboli.";
+                scoreEl.style.color = 'var(--accent-primary)';
+            } else if (score >= totalQuestions / 2) { 
+                summaryTextEl.textContent = "Buon lavoro! Ci sono alcuni concetti da rivedere. Rileggi attentamente la lezione e le spiegazioni fornite.";
+                scoreEl.style.color = 'var(--accent-warning)';
+            } else { 
+                summaryTextEl.textContent = "Sembra che ci siano diversi punti da approfondire. Ti consiglio di ripassare la lezione e poi riprovare il quiz.";
+                scoreEl.style.color = 'var(--accent-danger)';
+            }
+            resultsSummary.style.display = 'block';
+            resultsSummary.scrollIntoView({ behavior: 'smooth' });
+            
+            submitBtn.style.display = 'none';
+        });
+    });
+    </script>
+
+</body>
+</html>

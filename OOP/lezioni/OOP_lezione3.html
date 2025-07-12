@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 03: Tipi di Dati Astratti (ADT)</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Librerie Esterne -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <!-- CSS Comune -->
+    <link rel="stylesheet" href="../assets/css/common.css">
+
+    <style>
+        .box-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .concept-map { font-size: 1.1em; }
+    </style>
+</head>
+<body data-pdf-path="../slides/Abstract Data Types.pdf"> <!-- Aggiorna con il path corretto -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 03: Tipi di Dati Astratti (ADT)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="OOP_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#what-is-adt" class="sidebar-link">1. Cos'è un Tipo di Dato Astratto?</a></li>
+            <li><a href="#adt-specification" class="sidebar-link">2. La Specifica di un ADT</a></li>
+            <li><a href="#adt-implementation" class="sidebar-link">3. L'Implementazione di un ADT</a></li>
+            <li><a href="#abstraction-function" class="sidebar-link">3.1. Funzione di Astrazione (AF)</a></li>
+            <li><a href="#representation-invariant" class="sidebar-link">3.2. Invariante di Rappresentazione (RI)</a></li>
+            <li><a href="#af-ri-summary" class="sidebar-link">3.3. AF e RI: Il Ponte tra Astratto e Concreto</a></li>
+            <li><a href="#encapsulation" class="sidebar-link">4. L'Importanza dell'Incapsulamento</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="what-is-adt" class="content-section active-section">
+            <h2 class="section-title">1. Cos'è un Tipo di Dato Astratto (ADT)?</h2>
+            <div class="section-content">
+                <p>Un **Tipo di Dato Astratto (ADT)** è un modello matematico per un tipo di dato. È definito dal suo **comportamento** (le operazioni che si possono eseguire) e dal suo **valore** (lo stato che può assumere), dal punto di vista dell'utente (il *client*). Un ADT si concentra sul **"cosa"** un tipo di dato rappresenta e fa, ignorando completamente il **"come"** viene implementato.</p>
+                <p>L'obiettivo è creare nuovi tipi di dato che estendono il linguaggio, permettendo di modellare il dominio del problema in modo più naturale. In Java, gli ADT sono tipicamente realizzati tramite **classi e interfacce**.</p>
+                
+                <div class="note-box">
+                    <div class="box-title">💡 Esempi di ADT</div>
+                    <ul>
+                        <li><strong>Insieme (Set):</strong> Un ADT che rappresenta una collezione di elementi unici. Le sue operazioni sono `add`, `remove`, `contains`, `size`.</li>
+                        <li><strong>Pila (Stack):</strong> Un ADT che rappresenta una collezione LIFO (Last-In, First-Out). Le sue operazioni sono `push`, `pop`, `peek`.</li>
+                        <li><strong>Polinomio (Poly):</strong> Un ADT che rappresenta un'espressione matematica. Le operazioni sono `add`, `multiply`, `degree`.</li>
+                    </ul>
+                </div>
+
+                <p>La caratteristica fondamentale di un ADT è che le sue operazioni sono definite in termini del modello astratto, non dei dettagli implementativi.</p>
+            </div>
+        </article>
+        
+        <article id="adt-specification" class="content-section">
+            <h2 class="section-title">2. La Specifica di un ADT</h2>
+            <div class="section-content">
+                <p>Per definire formalmente un ADT, dobbiamo specificare due componenti principali, che insieme formano il suo **contratto pubblico**.</p>
+                
+                <h3 class="subsection-title">Lo Stato Astratto</h3>
+                <p>Descrive l'insieme dei possibili valori che un'istanza dell'ADT può assumere, in termini puramente matematici o logici.</p>
+                <ul>
+                    <li>Per un `IntSet`, lo stato astratto è "un qualsiasi insieme finito di numeri interi".</li>
+                    <li>Per un `Poly`, lo stato astratto è "un qualsiasi polinomio a coefficienti interi e esponenti non negativi".</li>
+                </ul>
+
+                <h3 class="subsection-title">Il Protocollo (le Operazioni)</h3>
+                <p>È l'insieme delle operazioni (metodi) che possono essere eseguite sull'ADT. Ogni operazione è definita dal suo **contratto** (pre-condizioni, post-condizioni, `@throws`), che si riferisce sempre allo **stato astratto**, mai a quello concreto.</p>
+                 <pre><code class="language-java">
+// Esempio di contratto per il metodo insert di un IntSet
+
+/**
+ * Aggiunge un intero all'insieme.
+ * 
+ * MODIFIES: this
+ * EFFECTS: se x non è già in this, lo aggiunge.
+ *          Altrimenti, non fa nulla.
+ *
+ * @param x l'intero da aggiungere.
+ */
+public void insert(int x);
+                 </code></pre>
+                 <p>Nota come la specifica parli di "aggiungere all'insieme", un concetto astratto, senza menzionare array, liste o altre strutture dati.</p>
+            </div>
+        </article>
+
+        <article id="adt-implementation" class="content-section">
+            <h2 class="section-title">3. L'Implementazione di un ADT</h2>
+            <div class="section-content">
+                <p>L'implementazione è il "come". Si tratta di scegliere una struttura dati concreta per rappresentare lo stato astratto e di scrivere il codice per i metodi. Per ragionare sulla correttezza di un'implementazione, introduciamo due concetti cruciali: la Funzione di Astrazione e l'Invariante di Rappresentazione.</p>
+            </div>
+        </article>
+                
+        <article id="abstraction-function" class="content-section">
+            <h3 class="subsection-title">3.1. Funzione di Astrazione (AF)</h3>
+            <div class="section-content">
+                <p>La **Funzione di Astrazione (AF)** è una mappa che definisce come lo stato **concreto** (la rappresentazione interna) viene interpretato per rappresentare uno stato **astratto**. È il "ponte" che collega il mondo dell'implementazione al mondo del modello matematico.</p>
+                <div class="math-block concept-map">
+                AF : Stato Concreto \(\to\) Stato Astratto
+                </div>
+                
+                <div class="exercise-box">
+                    <div class="box-title">Esempio: IntSet implementato con un `Vector`</div>
+                    <p><strong>Stato Concreto:</strong> Una variabile di istanza `private Vector<Integer> elements;`. I suoi valori possono essere `null`, `[]`, `[1, 2]`, `[2, 1]`, `[1, 2, 1]`, ecc.</p>
+                    <p><strong>Stato Astratto:</strong> Un insieme matematico di interi. I suoi valori sono `{}`, `{1}`, `{1, 2}`, ecc.</p>
+                    <p><strong>Funzione di Astrazione (AF):</strong></p>
+                    <p>`AF(c) = {c.elements.get(i) | 0 <= i < c.elements.size()}`</p>
+                    <p>Questa formula ci dice che, dato un oggetto concreto `c`, il suo valore astratto è l'insieme di tutti gli elementi contenuti nel suo `Vector` `elements`. Grazie all'AF, possiamo interpretare diversi stati concreti:</p>
+                    <ul>
+                        <li><code>AF([1, 2])</code> \(\to\) `{1, 2}`</li>
+                        <li><code>AF([2, 1])</code> \(\to\) `{1, 2}` (lo stesso stato astratto!)</li>
+                        <li><code>AF([1, 2, 1])</code> \(\to\) `{1, 2}` (gli insiemi non hanno duplicati)</li>
+                    </ul>
+                    <p>La funzione di astrazione è spesso **molti-a-uno**: più stati concreti possono rappresentare lo stesso stato astratto. Questo è normale e desiderabile, in quanto dà libertà all'implementatore.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="representation-invariant" class="content-section">
+            <h3 class="subsection-title">3.2. Invariante di Rappresentazione (RI)</h3>
+            <div class="section-content">
+                <p>Non tutti i valori possibili dello stato concreto sono "validi" per rappresentare uno stato astratto. L'**Invariante di Rappresentazione (RI)** è una proprietà che definisce quali stati concreti sono ben formati. L'RI deve essere vero per ogni istanza della classe **prima e dopo l'esecuzione di ogni metodo pubblico**.</p>
+                <div class="math-block concept-map">
+                RI : Stato Concreto \(\to\) {true, false}
+                </div>
+                
+                <div class="exercise-box">
+                    <div class="box-title">Esempio: IntSet implementato con un `Vector`</div>
+                    <p>Quali sono le proprietà che il nostro `Vector` `elements` deve sempre avere per rappresentare correttamente un insieme?</p>
+                    <p><strong>Invariante di Rappresentazione (RI):</strong></p>
+                    <ol>
+                        <li>`elements` non deve essere `null`.</li>
+                        <li>`elements` non deve contenere elementi `null`.</li>
+                        <li>`elements` non deve contenere duplicati.</li>
+                    </ol>
+                    <p>Lo stato concreto `[1, 2, 1]` viola la terza regola dell'RI, quindi è uno stato **invalido** che la nostra implementazione deve evitare di produrre. Uno stato `null` viola la prima regola. Invece, `[1, 2]` e `[2, 1]` sono entrambi stati concreti validi che rispettano l'RI.</p>
+                </div>
+                <p>L'RI è uno strumento potentissimo per il programmatore. Viene tipicamente controllato tramite un metodo `private boolean checkRep()` o `invariantOK()`, invocato con `assert` all'inizio e alla fine di ogni metodo pubblico per trovare bug durante lo sviluppo.</p>
+                <pre><code class="language-java">
+private boolean invariantOK() {
+    if (elements == null) return false;
+    // Controlla che non ci siano duplicati
+    Set<Integer> uniqueElements = new HashSet<>(elements);
+    return uniqueElements.size() == elements.size();
+}
+
+public void insert(int x) {
+    assert invariantOK(); // Controlla RI all'inizio
+
+    // ... corpo del metodo ...
+    
+    assert invariantOK(); // Controlla RI alla fine
+}
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="af-ri-summary" class="content-section">
+            <h3 class="subsection-title">3.3. AF e RI: Il Ponte tra Astratto e Concreto</h3>
+             <div class="clarification-box">
+                <div class="box-title">🔍 AF vs. RI: Una Sintesi</div>
+                <ul>
+                    <li>L'**Invariante di Rappresentazione (RI)** filtra gli stati **concreti**, separando quelli "buoni" (validi) da quelli "cattivi" (invalidi).</li>
+                    <li>La **Funzione di Astrazione (AF)** si applica solo agli stati concreti "buoni" (che soddisfano l'RI) e li mappa ai loro corrispondenti valori **astratti**.</li>
+                </ul>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+                        graph TD
+                            subgraph "Mondo Concreto"
+                                C1["Stato Concreto Valido<br>[1, 2]"]
+                                C2["Stato Concreto Valido<br>[2, 1]"]
+                                C3["Stato Concreto Non Valido<br>[1, 2, 1]"]
+                            end
+                            subgraph "Mondo Astratto"
+                                A1["Stato Astratto<br>{1, 2}"]
+                            end
+
+                            C1 -- "AF" --> A1
+                            C2 -- "AF" --> A1
+                            C3 -- "RI è FALSO!" --> X("Non rappresenta nulla di valido")
+
+                            style C1 fill:#10B981,stroke:#333
+                            style C2 fill:#10B981,stroke:#333
+                            style C3 fill:#EF4444,stroke:#333
+                    </pre>
+                </div>
+            </div>
+        </article>
+        
+        <article id="encapsulation" class="content-section">
+            <h2 class="section-title">4. L'Importanza dell'Incapsulamento (Representation Exposure)</h2>
+            <div class="section-content">
+                <p>Un ADT, per essere robusto e manutenibile, **NON DEVE MAI ESPORRE LA SUA RAPPRESENTAZIONE INTERNA**. Questo significa che le variabili di istanza devono essere `private` e nessun metodo deve restituire un riferimento diretto a un oggetto mutabile interno.</p>
+                
+                <h3 class="subsection-title">Cosa succede se si espone la rappresentazione?</h3>
+                <p>Se un client ottiene un riferimento diretto allo stato concreto (es. al `Vector` `elements` del nostro `IntSet`), possono accadere due disastri:</p>
+                <ol>
+                    <li><strong>Il client può rompere l'Invariante di Rappresentazione (RI):</strong> Potrebbe aggiungere duplicati o elementi `null` al `Vector`, portando l'oggetto in uno stato corrotto e causando comportamenti imprevedibili nei metodi successivi.</li>
+                    <li><strong>Si crea un forte accoppiamento:</strong> Il client ora dipende dalla specifica implementazione (`Vector`). Se in futuro volessimo cambiare la rappresentazione interna di `IntSet` (es. usando un `HashSet` per maggiore efficienza), saremmo costretti a modificare anche tutto il codice del client che faceva affidamento sul `Vector`. L'astrazione è andata perduta.</li>
+                </ol>
+                <div class="warning-box">
+                    <div class="box-title">⚠️ Attenzione all'esposizione implicita (Aliasing)</div>
+                    <p>Anche un metodo che sembra innocuo può esporre la rappresentazione. Considera questo metodo in una classe `Team`:</p>
+                    <pre><code class="language-java">
+public class Team {
+    private List<String> players;
+    
+    public List<String> getPlayers() {
+        return this.players; // PERICOLO! Restituisce un riferimento all'oggetto mutabile interno.
+    }
+}
+
+// Codice client
+Team myTeam = new Team();
+List<String> teamPlayers = myTeam.getPlayers();
+teamPlayers.clear(); // Ora il team non ha più giocatori! L'invariante è stato rotto dall'esterno.
+                    </code></pre>
+                    <p><strong>Soluzione:</strong> Restituire sempre una <strong>copia difensiva</strong> degli oggetti mutabili interni.</p>
+                     <pre><code class="language-java">
+public List<String> getPlayers() {
+    return new ArrayList<>(this.players); // Restituisce una copia, non l'originale.
+}
+                    </code></pre>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Programmazione Orientata agli Oggetti</p>
+    </footer>
+
+    <!-- JS Comune e PrismJS -->
+    <script src="../assets/js/common.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+    // Script di inizializzazione Mermaid
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, theme: 'dark', darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    fontSize: '14px',
+                }
+            });
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; diag.style.visibility = 'hidden'; 
+            });
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+                if (!diagramDefinition) { return; }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary);">Errore Mermaid.</p><pre>${e.message}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>

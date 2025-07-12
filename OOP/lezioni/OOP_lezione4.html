@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 04: Iteratori e Programmazione Funzionale</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Librerie Esterne -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <!-- CSS Comune -->
+    <link rel="stylesheet" href="../assets/css/common.css">
+
+    <style>
+        .box-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body data-pdf-path="../slides/Iterators.pdf"> <!-- Il PDF "Esempio sulle lambda.pdf" è anch'esso molto rilevante -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 04: Iteratori e Programmazione Funzionale</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="OOP_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-iterators" class="sidebar-link">1. Il Problema della Traversa delle Collezioni</a></li>
+            <li><a href="#iterator-pattern" class="sidebar-link">2. Il Pattern Iterator</a></li>
+            <li><a href="#implementing-iterators" class="sidebar-link">2.1. Implementazione di un Iteratore Custom</a></li>
+            <li><a href="#conc-mod-exception" class="sidebar-link">2.2. La `ConcurrentModificationException`</a></li>
+            <li><a href="#functional-programming" class="sidebar-link">3. Introduzione alla Programmazione Funzionale</a></li>
+            <li><a href="#functional-interfaces" class="sidebar-link">3.1. Interfacce Funzionali Standard</a></li>
+            <li><a href="#stream-api" class="sidebar-link">3.2. La Stream API di Java</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-iterators" class="content-section active-section">
+            <h2 class="section-title">1. Il Problema della Traversa delle Collezioni</h2>
+            <div class="section-content">
+                <p>Nelle lezioni precedenti, abbiamo visto come definire gli ADT in modo robusto, mantenendo l'incapsulamento della rappresentazione interna. Ma come facciamo a permettere al client di accedere (leggere) tutti gli elementi di una collezione (es. tutti i numeri di un `IntSet`) senza rompere l'incapsulamento?</p>
+                <p>Consideriamo un `IntSet` e l'esigenza di calcolare la somma di tutti i suoi elementi:</p>
+                
+                <h3 class.subsection-title">Approccio 1: Metodi Custom nell'ADT (Non Flessibile)</h3>
+                <p>Potremmo aggiungere un metodo `sum()` direttamente all'ADT `IntSet`.</p>
+                <pre><code class="language-java">
+public class IntSet {
+    private List<Integer> elements; // Rappresentazione interna
+
+    public int sum() {
+        int total = 0;
+        for (Integer num : elements) { // Accedo direttamente alla rappresentazione
+            total += num;
+        }
+        return total;
+    }
+}
+                </code></pre>
+                <div class="note-box">
+                    <div class="box-title">💡 Pro e Contro</div>
+                    **Pro:** Rispettiamo l'incapsulamento (il client non vede la rappresentazione).<br>
+                    **Contro:** Se volessimo calcolare la somma dei quadrati, o la somma dei numeri pari, o il prodotto, dovremmo aggiungere un metodo diverso per ogni operazione, gonfiando l'ADT e violando il Single Responsibility Principle. L'ADT diventerebbe "troppo intelligente".
+                </div>
+
+                <h3 class.subsection-title">Approccio 2: Esporre la Rappresentazione (PERICOLOSO)</h3>
+                <p>Potremmo esporre la rappresentazione interna con un getter pubblico (`public List<Integer> getElements()`). Ma come visto, questo è un disastro per l'incapsulamento e la manutenibilità.</p>
+
+                <h3 class.subsection-title">Approccio 3: Metodi Destruttivi (`choose()`/`remove()`)</h3>
+                <p>Un metodo `choose()` che restituisce un elemento casuale e un `remove()` per eliminarlo dall'insieme permette di processare tutti gli elementi, ma distrugge l'insieme originale.</p>
+                <pre><code class="language-java">
+public int sum(IntSet s) { // METODO DANNOSO: modifica l'input
+    int total = 0;
+    while (s.size() > 0) {
+        int element = s.choose(); // Prende un elemento
+        s.remove(element);        // Lo rimuove!
+        total += element;
+    }
+    return total;
+}
+                </code></pre>
+                <div class="warning-box">
+                    <div class="box-title">⚠️ Non è una buona soluzione!</div>
+                    Questo approccio è distruttivo (l'insieme originale viene svuotato), inefficiente (molte rimozioni possono essere costose) e non flessibile (non posso fare più operazioni sullo stesso insieme).
+                </div>
+            </div>
+        </article>
+
+        <article id="iterator-pattern" class="content-section">
+            <h2 class="section-title">2. Il Pattern Iterator</h2>
+            <div class="section-content">
+                <p>La soluzione elegante e standard al problema della traversa delle collezioni è il **Pattern Iterator**. Un iteratore è un oggetto che permette di accedere sequenzialmente agli elementi di una collezione senza esporre la sua struttura interna.</p>
+                
+                <h3 class.subsection-title">Interfaccia `java.util.Iterator<E>`</h3>
+                <p>Java fornisce un'interfaccia standard per gli iteratori. Tutte le collezioni (`List`, `Set`, `Map` tramite `entrySet()`) la implementano o la espongono.</p>
+                <ul>
+                    <li><code>boolean hasNext()</code>: Restituisce `true` se ci sono ancora elementi da visitare.</li>
+                    <li><code>E next()</code>: Restituisce il prossimo elemento e avanza l'iteratore. Lancia `NoSuchElementException` se non ci sono più elementi.</li>
+                    <li><code>void remove()</code>: (Opzionale) Rimuove l'ultimo elemento restituito da `next()`. Solitamente lancia `UnsupportedOperationException` se non supportato.</li>
+                </ul>
+                <div class="clarification-box">
+                    <div class="box-title">💡 Vantaggi dell'Iteratore</div>
+                    <ul>
+                        <li><strong>Incapsulamento:</strong> Il client non vede come la collezione è implementata internamente.</li>
+                        <li><strong>Flessibilità:</strong> Permette di implementare diverse logiche di traversa (es. ordinata, inversa, filtrata) senza modificare l'ADT.</li>
+                        <li><strong>Riutilizzo del Codice Client:</strong> Il codice che attraversa la collezione è indipendente dal tipo specifico di collezione.</li>
+                    </ul>
+                </div>
+                <pre><code class="language-java">
+// Codice client universale con Iterator
+List<Integer> numbers = new ArrayList<>(); // Oppure new LinkedList, new TreeSet, etc.
+// ... popola numbers ...
+
+Iterator<Integer> it = numbers.iterator(); // Ottengo un iteratore
+
+int sum = 0;
+while (it.hasNext()) { // C'è ancora un elemento?
+    Integer num = it.next(); // Prendilo
+    sum += num;
+}
+System.out.println("Somma: " + sum);
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="implementing-iterators" class="content-section">
+            <h3 class.subsection-title">2.1. Implementazione di un Iteratore Custom</h3>
+            <div class="section-content">
+                <p>Per un nostro ADT (es. `IntSet`), possiamo implementare un iteratore personalizzato, spesso come classe interna (`private inner class`).</p>
+                <div class="note-box">
+                    <div class="box-title">💡 Il "Snapshot"</div>
+                    Per assicurare che l'iteratore non venga influenzato da modifiche all'ADT originale durante la traversa, l'iteratore dovrebbe operare su una **copia (snapshot)** dei dati al momento della sua creazione.
+                </div>
+                <pre><code class="language-java">
+// Parte della classe IntSet
+public class IntSet {
+    private List<Integer> elements; // Rappresentazione interna
+
+    // ... costruttori, insert, remove, ecc. ...
+
+    // Metodo pubblico che restituisce l'iteratore
+    public Iterator<Integer> iterator() {
+        return new IntSetIterator(this); // Crea e restituisce un'istanza dell'iteratore interno
+    }
+
+    // Classe interna privata che implementa l'interfaccia Iterator
+    private class IntSetIterator implements Iterator<Integer> {
+        private List<Integer> snapshot; // La copia dei dati su cui iterare
+        private int currentIndex = 0;
+
+        // Il costruttore riceve l'istanza di IntSet e ne fa una copia difensiva
+        public IntSetIterator(IntSet set) {
+            // Nota: this.elements si riferisce al campo della classe IntSet esterna
+            this.snapshot = new ArrayList<>(set.elements); 
+            // Se l'iteratore deve essere ordinato, si ordina qui la snapshot:
+            // Collections.sort(this.snapshot); 
+        }
+
+        @Override
+        public boolean hasNext() {
+            return currentIndex < snapshot.size();
+        }
+
+        @Override
+        public Integer next() {
+            if (!hasNext()) {
+                throw new java.util.NoSuchElementException();
+            }
+            return snapshot.get(currentIndex++);
+        }
+
+        @Override
+        public void remove() {
+            // L'operazione remove() dell'iteratore spesso non è supportata
+            throw new UnsupportedOperationException("Remove non supportato.");
+        }
+    }
+}
+                </code></pre>
+            </div>
+        </article>
+        
+        <article id="conc-mod-exception" class="content-section">
+            <h3 class.subsection-title">2.2. La `ConcurrentModificationException`</h3>
+            <div class="section-content">
+                <p>Se un iteratore non opera su una copia (snapshot) e la collezione sottostante viene modificata durante la traversa, Java (nelle sue collezioni standard) lancia una `ConcurrentModificationException`. Questa è una "fail-fast exception": serve a segnalare immediatamente un problema, non a gestirlo.</p>
+                <div class="warning-box">
+                    <div class="box-title">⚠️ Esempio di `ConcurrentModificationException`</div>
+                    <pre><code class="language-java">
+List<String> names = new ArrayList<>(List.of("Alice", "Bob", "Charlie"));
+
+Iterator<String> it = names.iterator();
+while (it.hasNext()) {
+    String name = it.next();
+    if (name.equals("Bob")) {
+        names.remove("Bob"); // MODIFICA LA LISTA DURANTE L'ITERAZIONE DIRETTA
+    }
+}
+// Questo codice lancerà ConcurrentModificationException al prossimo next()
+// perché la lista è stata modificata 'dietro le quinte' dell'iteratore.
+                    </code></pre>
+                    <p><strong>Soluzione per le collezioni standard:</strong> Usare l'iteratore stesso per le modifiche (`it.remove()`) o modificare la collezione solo dopo aver finito l'iterazione.</p>
+                    <p>Per i nostri iteratori custom, la soluzione del **snapshot** previene questa eccezione, in quanto l'iteratore lavora su una copia isolata.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="functional-programming" class="content-section">
+            <h2 class="section-title">3. Introduzione alla Programmazione Funzionale in Java</h2>
+            <div class="section-content">
+                <p>Con Java 8, sono state introdotte le **Lambda Expressions** e la **Stream API**, che portano elementi di programmazione funzionale nel linguaggio. Questo permette di scrivere codice più conciso, leggibile e potente, specialmente per la manipolazione delle collezioni.</p>
+                
+                <h3 class.subsection-title">Astrazione del Comportamento: L'Evoluzione</h3>
+                <p>Ricordi il problema di filtrare una lista di `Person` (es. persone maggiorenni)? Abbiamo visto diverse evoluzioni:</p>
+                <ol>
+                    <li><strong>Ciclo For Tradizionale:</strong> Logica di filtro mescolata alla logica di traversa.</li>
+                    <li><strong>Metodo `hasLegalAge()` nella classe `Person`:</strong> Migliora l'incapsulamento del *dato*, ma non del *comportamento* di filtro.</li>
+                    <li><strong>Classi Anonime con Interfaccia Custom (`MyTest`):</strong> Il comportamento di filtro viene passato come oggetto, ma la sintassi è verbosa.</li>
+                    <li>**Lambda Expressions (Java 8+):** Il comportamento di filtro (una funzione) viene passato in modo conciso.</li>
+                </ol>
+                <pre><code class="language-java">
+// 3. Con Classe Anonima (prima di Java 8)
+// Interfaccia: interface MyTest<T> { boolean test(T t); }
+// Uso:
+List<Person> adults = new ArrayList<>();
+for (Person p : people) {
+    if (new MyTest<Person>() { // Classe anonima per il comportamento
+        @Override
+        public boolean test(Person p) {
+            return p.getAge() >= 18;
+        }
+    }.test(p)) {
+        adults.add(p);
+    }
+}
+
+// 4. Con Lambda Expression (Java 8+)
+// MyTest diventa un'interfaccia funzionale (con un solo metodo astratto)
+// Uso:
+List<Person> adultsLambda = new ArrayList<>();
+for (Person p : people) {
+    // Il comportamento di filtro (funzione) è espresso in linea
+    if (((Person person) -> person.getAge() >= 18).test(p)) { 
+        adultsLambda.add(p);
+    }
+}
+                </code></pre>
+                <p>Le lambda permettono di trattare il "comportamento" come un dato, passandolo come parametro o assegnandolo a variabili. Questo è fondamentale per la flessibilità del codice.</p>
+                <div class="note-box">
+                    <div class="box-title">💡 Lambdas e "Effectively Final"</div>
+                    Le lambda possono "catturare" variabili locali dal contesto esterno, ma queste variabili devono essere `final` o "effectively final" (cioè, il loro valore non cambia dopo essere stato inizializzato). Questo impedisce modifiche inaspettate dello stato locale da parte della lambda.
+                </div>
+            </div>
+        </article>
+
+        <article id="functional-interfaces" class="content-section">
+            <h3 class.subsection-title">3.1. Interfacce Funzionali Standard</h3>
+            <div class="section-content">
+                <p>Java 8 ha introdotto un pacchetto (`java.util.function`) con molte interfacce funzionali predefinite, per evitare di doverle scrivere ogni volta:</p>
+                <ul>
+                    <li><strong>`Predicate<T>`:</strong> Riceve un `T`, restituisce `boolean`. Usato per filtri (`test(T t)`). Es: `p -> p.getAge() >= 18`.</li>
+                    <li><strong>`Consumer<T>`:</strong> Riceve un `T`, non restituisce nulla (`void`). Usato per azioni con side-effects (`accept(T t)`). Es: `p -> System.out.println(p.getName())`.</li>
+                    <li><strong>`Function<T, R>`:</strong> Riceve un `T`, restituisce un `R`. Usato per trasformazioni (`apply(T t)`). Es: `p -> p.getName()`.</li>
+                    <li><strong>`Supplier<T>`:</strong> Non riceve nulla, restituisce un `T`. Usato per produrre valori (`get()`). Es: `() -> new Person("Nuovo")`.</li>
+                </ul>
+                <p>Esistono anche versioni per due argomenti (`BiPredicate`, `BiConsumer`, `BiFunction`) e versioni specializzate per tipi primitivi (`IntPredicate`, `LongFunction`, ecc.) per evitare autoboxing.</p>
+            </div>
+        </article>
+        
+        <article id="stream-api" class="content-section">
+            <h3 class.subsection-title">3.2. La Stream API di Java</h3>
+            <div class="section-content">
+                <p>La **Stream API** (introdotta con Java 8) è una delle più grandi innovazioni. Permette di elaborare collezioni di dati in modo dichiarativo e funzionale, in una pipeline di operazioni.</p>
+                <p>Un **Stream** è una sequenza di elementi che supporta operazioni funzionali. Non è una struttura dati; non modifica la sorgente; e le operazioni sono lazy (valutate solo quando necessario).</p>
+                
+                <h3 class.subsection-title">Flusso Tipico di un Stream</h3>
+                <ol>
+                    <li><strong>Creazione dello Stream:</strong> Da una collezione (`list.stream()`), da un array (`Arrays.stream(array)`), da valori singoli (`Stream.of(...)`).</li>
+                    <li><strong>Operazioni Intermedie (Lazy):</strong> Trasformano lo stream in un altro stream. Eseguite solo quando c'è un'operazione terminale. Esempi:
+                        <ul>
+                            <li>`filter(Predicate)`: Filtra elementi.</li>
+                            <li>`map(Function)`: Trasforma ogni elemento.</li>
+                            <li>`distinct()`: Rimuove duplicati.</li>
+                            <li>`sorted()`: Ordina elementi.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Operazioni Terminali (Eager):</strong> Producono un risultato o un side-effect, consumando lo stream. Esempi:
+                        <ul>
+                            <li>`forEach(Consumer)`: Esegue un'azione per ogni elemento.</li>
+                            <li>`collect(Collector)`: Raccoglie gli elementi in una nuova collezione.</li>
+                            <li>`count()`, `sum()`, `average()`, `min()`, `max()`.</li>
+                            <li>`reduce()`: Combina gli elementi in un unico risultato.</li>
+                        </ul>
+                    </li>
+                </ol>
+                <pre><code class="language-java">
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Arrays;
+
+// Supponiamo di avere una lista di persone (come in Lezione 03)
+// List<Person> people = ...;
+
+// Esempio 1: Filtrare e stampare i nomi dei maggiorenni
+System.out.println("Nomi maggiorenni:");
+people.stream()
+      .filter(p -> p.getAge() >= 18) // Operazione intermedia: filtra
+      .map(Person::getName)         // Operazione intermedia: trasforma Person in String (Method Reference)
+      .forEach(System.out::println); // Operazione terminale: stampa (Method Reference)
+
+// Esempio 2: Raccogliere tutti i maggiorenni in una nuova lista
+List<Person> adults = people.stream()
+                            .filter(p -> p.getAge() >= 18)
+                            .collect(Collectors.toList()); // Operazione terminale: raccoglie in List
+
+// Esempio 3: Somma delle età dei maggiorenni
+long totalAge = people.stream()
+                      .filter(p -> p.getAge() >= 18)
+                      .mapToInt(Person::getAge) // Mappa a IntStream per operazioni numeriche
+                      .sum(); // Operazione terminale specifica per IntStream
+
+// Esempio 4: Calcolare la media dei voti (assumendo una classe Grade con getScore())
+List<Grade> grades = Arrays.asList(new Grade(25), new Grade(30), new Grade(18));
+double averageScore = grades.stream()
+                            .mapToDouble(Grade::getScore)
+                            .average() // Restituisce OptionalDouble
+                            .orElse(0.0); // Se lo stream è vuoto, restituisce 0.0
+System.out.println("Voto medio: " + averageScore);
+                </code></pre>
+                <div class="note-box">
+                    <div class="box-title">💡 Method References</div>
+                    Le "Method References" (`ClassName::methodName`) sono una sintassi concisa per le lambda che chiamano semplicemente un metodo esistente. Migliorano la leggibilità.
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Programmazione Orientata agli Oggetti</p>
+    </footer>
+
+    <!-- JS Comune e PrismJS -->
+    <script src="../assets/js/common.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+    <script>
+    // Script di inizializzazione Mermaid, come nei file precedenti
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark', darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    fontSize: '14px',
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) { return; }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary);">Errore Mermaid.</p><pre>${e.message}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
