@@ -26,9 +26,27 @@
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            font-size: 0.9em;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid var(--border-soft);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .comparison-table th {
+            background-color: var(--code-bg);
+            color: var(--accent-primary);
+        }
+        .comparison-table td {
+            color: var(--text-secondary);
+        }
     </style>
 </head>
-<body data-pdf-path="../slides/Interfaces and abstract classes.pdf"> <!-- Aggiorna con il path corretto. Le slide "Type families.pdf" e "Abstract Data Types.pdf" sono anch'esse pertinenti. -->
+<body data-pdf-path="../slides/Interfaces and abstract classes.pdf"> <!-- Aggiorna con il path corretto -->
     <div class="overlay"></div>
     <header>
         <button class="hamburger-menu" id="hamburger-btn">☰</button>
@@ -43,191 +61,215 @@
         </div>
         <h2>Indice Argomenti</h2>
         <ul>
-            <li><a href="#intro-type-families" class="sidebar-link">1. Introduzione alle Gerarchie di Tipi</a></li>
-            <li><a href="#inheritance" class="sidebar-link">2. L'Ereditarietà: Base delle Gerarchie</a></li>
+            <li><a href="#intro-hierarchies" class="sidebar-link">1. Famiglie di Tipi e Gerarchie</a></li>
+            <li><a href="#inheritance-polymorphism" class="sidebar-link">2. Ereditarietà e Polimorfismo</a></li>
             <li><a href="#interfaces" class="sidebar-link">3. Le Interfacce</a></li>
             <li><a href="#abstract-classes" class="sidebar-link">4. Le Classi Astratte</a></li>
-            <li><a href="#comparison" class="sidebar-link">5. Interfacce vs. Classi Astratte: Quando Usarle?</a></li>
+            <li><a href="#interfaces-vs-abstract" class="sidebar-link">5. Interfaccia o Classe Astratta?</a></li>
             <li><a href="#typical-structure" class="sidebar-link">6. Struttura Tipica di una Gerarchia</a></li>
         </ul>
     </nav>
 
     <main>
-        <article id="intro-type-families" class="content-section active-section">
-            <h2 class="section-title">1. Introduzione alle Gerarchie di Tipi</h2>
+        <article id="intro-hierarchies" class="content-section active-section">
+            <h2 class="section-title">1. Famiglie di Tipi e Gerarchie</h2>
             <div class="section-content">
-                <p>Nello sviluppo software, spesso ci troviamo a dover modellare un sistema di classi che condividono proprietà e comportamenti. L'obiettivo è creare una "famiglia di tipi" che rifletta le relazioni del mondo reale e consenta la scrittura di codice più flessibile e riutilizzabile.</p>
-                <p>Una **gerarchia di tipi** è una struttura organizzativa dove un tipo generale (supertype) è raffinato da tipi più specifici (subtypes). Questa raffinazione può avvenire in due modi:</p>
+                <p>Nei problemi reali, spesso abbiamo a che fare con concetti che sono simili ma non identici. Ad esempio, `Automobile`, `Camion`, e `Moto` sono tutti tipi di `Veicolo`. Condividono proprietà comuni (es. una velocità, un proprietario) e comportamenti comuni (es. accelerare, frenare), ma hanno anche caratteristiche specifiche che li distinguono.</p>
+                <p>La Programmazione Orientata agli Oggetti ci fornisce gli strumenti per modellare queste relazioni attraverso le <strong>gerarchie di tipi</strong>. Una gerarchia di tipi organizza le classi in una struttura ad albero (o più in generale, un DAG), dove i tipi più generici (<strong>supertipi</strong>) si trovano in alto e vengono progressivamente raffinati da tipi più specifici (<strong>sottotipi</strong>).</p>
+                <div class="clarification-box">
+                    <div class="box-title">💡 Scopo di una Gerarchia</div>
+                    L'obiettivo è creare un sistema di classi che condividono proprietà e comportamenti, permettendo di:
+                    <ul>
+                        <li><strong>Riutilizzare il codice:</strong> La logica comune viene definita una sola volta nel supertipo.</li>
+                        <li><strong>Trattare oggetti diversi in modo uniforme:</strong> Possiamo scrivere codice che opera su un `Veicolo` senza sapere se si tratta di un'`Automobile` o di un `Camion` (polimorfismo).</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="inheritance-polymorphism" class="content-section">
+            <h2 class="section-title">2. Ereditarietà e Polimorfismo</h2>
+            <div class="section-content">
+                <p>L'<strong>ereditarietà</strong> è il meccanismo con cui un sottotipo (o classe derivata) acquisisce stato e comportamento da un supertipo (o classe base). Il sottotipo può poi:</p>
                 <ul>
-                    <li>Fornendo implementazioni alternative di un comportamento già definito (es. un `DensePoly` e un `SparsePoly` che implementano entrambi `Poly`).</li>
-                    <li>Aggiungendo nuovi metodi o funzionalità che sono specifici del subtype (es. un `MaxIntSet` che aggiunge il metodo `max()` a un `IntSet`).</li>
+                    <li><strong>Aggiungere</strong> nuovi metodi e campi.</li>
+                    <li><strong>Sovrascrivere (override)</strong> i metodi del supertipo per fornire un'implementazione più specifica.</li>
                 </ul>
-                <p>Il meccanismo fondamentale che abilita la creazione e l'uso flessibile di queste gerarchie in Java è l'**ereditarietà**.</p>
+                <p>Il <strong>polimorfismo</strong> (letteralmente "molte forme") è la conseguenza diretta dell'ereditarietà. Permette di trattare un oggetto di un sottotipo come se fosse un oggetto del suo supertipo. Questo è possibile perché un sottotipo, per definizione, deve avere tutti i metodi pubblici del suo supertipo.</p>
+                 <pre><code class="language-java">
+// Supertipo (o classe base)
+class Veicolo {
+    public void muovi() {
+        System.out.println("Il veicolo si muove.");
+    }
+}
+
+// Sottotipo (o classe derivata)
+class Automobile extends Veicolo {
+    // Override del metodo del supertipo
+    @Override
+    public void muovi() {
+        System.out.println("L'automobile corre sull'asfalto.");
+    }
+
+    // Aggiunta di un nuovo metodo
+    public void accendiRadio() {
+        System.out.println("Radio accesa.");
+    }
+}
+
+// Esempio di Polimorfismo
+Veicolo mioVeicolo = new Automobile(); // OK! Un'Automobile "è un" Veicolo
+
+// Chiamata polimorfica: viene eseguito il metodo del tipo REALE (Automobile)
+mioVeicolo.muovi(); // Stampa: "L'automobile corre sull'asfalto."
+
+// ERRORE DI COMPILAZIONE: il compilatore vede solo il tipo APPARENTE (Veicolo)
+// mioVeicolo.accendiRadio(); // Metodo non trovato in Veicolo
+                </code></pre>
             </div>
         </article>
         
-        <article id="inheritance" class="content-section">
-            <h2 class="section-title">2. L'Ereditarietà: Base delle Gerarchie</h2>
-            <div class="section-content">
-                <p>L'**ereditarietà** è un pilastro dell'OOP che permette a una classe (sottoclasse o classe derivata) di ereditare proprietà e comportamenti da un'altra classe (superclasse o classe base). Questo favorisce il riuso del codice e stabilisce una relazione "is-a" (es. "un Cane *è un* Animale").</p>
-                <p>Quando si definisce una sottoclasse, si specificano solo le **differenze** rispetto alla superclasse: nuovi metodi, nuovi campi o l'override di metodi esistenti per modificarne il comportamento. La sintassi Java per l'ereditarietà è `class SubClass extends SuperClass { ... }`.</p>
-                <pre><code class="language-java">
-// Superclasse generica
-public class Animal {
-    protected String species;
-
-    public Animal(String species) {
-        this.species = species;
-    }
-
-    public void makeSound() {
-        System.out.println("Generic animal sound");
-    }
-}
-
-// Sottoclasse che eredita e specializza
-public class Dog extends Animal {
-    public Dog(String name) {
-        super("Canis familiaris"); // Chiama il costruttore della superclasse
-        // this.name = name; // Potrebbe avere un campo name specifico del cane
-    }
-
-    @Override // Sovrascrive il comportamento della superclasse
-    public void makeSound() {
-        System.out.println("Woof woof!");
-    }
-
-    public void fetch() { // Nuovo metodo specifico di Dog
-        System.out.println("Fetching the ball!");
-    }
-}
-                </code></pre>
-            </div>
-        </article>
-
         <article id="interfaces" class="content-section">
             <h2 class="section-title">3. Le Interfacce</h2>
             <div class="section-content">
-                <p>In Java, le **interfacce** sono un concetto fondamentale per definire i contratti e le gerarchie di tipi. Un'interfaccia è un "contratto" che una classe può promettere di rispettare.</p>
+                <p>Un'interfaccia in Java è la forma più pura di astrazione sui tipi. È un <strong>contratto puro</strong> che definisce un insieme di comportamenti (metodi) che una classe può promettere di implementare.</p>
                 
-                <h3 class="subsection-title">Caratteristiche delle Interfacce</h3>
+                <h3 class="subsection-title">Caratteristiche Principali</h3>
                 <ul>
-                    <li>**Definizione di Tipo Puro:** Un'interfaccia fornisce solo la **definizione del tipo**, senza alcuna implementazione concreta (prima di Java 8).</li>
-                    <li>**Metodi Astratti:** Contengono solo firme di metodi astratti (senza corpo).
-                        <pre><code class="language-java">
-public interface Drivable {
-    void drive(); // Metodo astratto (implicito)
-    void stop();
+                    <li>Definisce un tipo di dato, ma <strong>non fornisce implementazione</strong> per i suoi metodi (a meno che non siano `default` o `static`).</li>
+                    <li>Non può avere variabili di istanza; può contenere solo costanti (`public static final`).</li>
+                    <li>Non può essere istanziata direttamente con `new`.</li>
+                    <li>Non ha uno stato concreto, quindi non ha né una Funzione di Astrazione (AF) né un Invariante di Rappresentazione (RI).</li>
+                </ul>
+                <div class="note-box">
+                    <div class="box-title">💡 Lo Scopo delle Interfacce</div>
+                    Le interfacce sono lo strumento principale per ottenere il <strong>disaccoppiamento</strong>. Permettono di definire un'API (un contratto) che nasconde un'intera famiglia di implementazioni, come abbiamo visto nell'esempio del `JSONizzatore` (Lezione 2), che implementava l'interfaccia `Serializzatore`.
+                </div>
+                 <pre><code class="language-java">
+// Un'interfaccia definisce un contratto di "serializzabilità"
+public interface Serializzabile {
+    String toJson();
+    String toXml();
 }
-                        </code></pre>
-                    </li>
-                    <li>**Costanti:** Possono contenere solo costanti (`public static final`, implicito).</li>
-                    <li>**Assenza di Stato:** Non possono avere variabili di istanza (campi non `static` e non `final`). Questo significa che non hanno uno "stato concreto" proprio, né un invariante di rappresentazione diretto.</li>
-                    <li>**Java 8+:** Possono contenere `default methods` (metodi con implementazione di default) e `static methods` (metodi di utilità legati all'interfaccia, non all'istanza).</li>
-                </ul>
 
-                <h3 class="subsection-title">Scopo delle Interfacce</h3>
-                <ul>
-                    <li><strong>Definire un Contratto (API):</strong> Costituiscono l'API pubblica di un componente, specificando il comportamento atteso senza rivelare i dettagli interni.</li>
-                    <li><strong>Nascondere Famiglie di Tipi:</strong> Permettono ai client di programmare verso un'interfaccia (es. `List`) senza dipendere da una specifica implementazione (es. `ArrayList` o `LinkedList`). Questo facilita il disaccoppiamento.</li>
-                    <li><strong>Supportare Dependency Inversion Principle (DIP):</strong> Le interfacce sono la chiave per far sì che i moduli di alto livello dipendano dalle astrazioni, non dalle implementazioni concrete.</li>
-                    <li><strong>Ereditarietà Multipla di Tipo:</strong> Una classe può implementare più interfacce, ereditando le definizioni di comportamento da ciascuna (cosa non possibile con l'ereditarietà di classi in Java).</li>
-                </ul>
+// Una classe che "promette" di rispettare il contratto
+public class Utente implements Serializzabile {
+    private String nome;
+    private int eta;
+
+    // ... costruttore e altri metodi ...
+
+    @Override
+    public String toJson() {
+        return "{ \"nome\": \"" + this.nome + "\", \"eta\": " + this.eta + " }";
+    }
+
+    @Override
+    public String toXml() {
+        return "<utente><nome>" + this.nome + "</nome><eta>" + this.eta + "</eta></utente>";
+    }
+}
+                </code></pre>
+                <h3 class="subsection-title">Ereditarietà Multipla di Tipo</h3>
+                <p>A differenza delle classi, che supportano solo l'ereditarietà singola, una classe può <strong>implementare più interfacce</strong>. Questo le permette di "ereditare" più contratti e di essere trattata polimorficamente secondo diversi tipi.</p>
                 <pre><code class="language-java">
-public class Car implements Drivable { // La classe Car promette di implementare Drivable
-    @Override
-    public void drive() {
-        System.out.println("Car is driving.");
-    }
-
-    @Override
-    public void stop() {
-        System.out.println("Car stopped.");
-    }
+// Una classe può essere sia Clonabile che Comparabile
+public class Prodotto implements Cloneable, Comparable<Prodotto> {
+    // ... implementazione dei metodi di entrambe le interfacce ...
 }
                 </code></pre>
             </div>
         </article>
-
+        
         <article id="abstract-classes" class="content-section">
             <h2 class="section-title">4. Le Classi Astratte</h2>
             <div class="section-content">
-                <p>Una **classe astratta** è un compromesso tra un'interfaccia e una classe concreta. Non può essere istanziata direttamente, ma può fornire un'implementazione parziale e definire metodi che le sottoclassi devono implementare.</p>
+                <p>Una classe astratta si trova a metà strada tra un'interfaccia e una classe concreta. Fornisce una <strong>definizione di tipo e un'implementazione parziale</strong>.</p>
                 
-                <h3 class="subsection-title">Caratteristiche delle Classi Astratte</h3>
+                <h3 class="subsection-title">Caratteristiche Principali</h3>
                 <ul>
-                    <li>**Implementazione Parziale:** Possono avere metodi **concreti** (con implementazione) e metodi **astratti** (senza implementazione, che le sottoclassi concrete *devono* implementare).</li>
-                    <li>**Campi:** Possono avere variabili di istanza (campi non `static` e non `final`), che rappresentano uno stato condiviso tra le sottoclassi.</li>
-                    <li>**Costruttori:** Possono avere costruttori, sebbene non possano essere chiamati direttamente per creare istanze (possono essere chiamati dalle sottoclassi con `super()`).</li>
+                    <li>Può contenere sia metodi <strong>astratti</strong> (senza corpo, da implementare nelle sottoclassi) sia metodi <strong>concreti</strong> (con un corpo, ereditati dalle sottoclassi).</li>
+                    <li>Può avere variabili di istanza (stato) che vengono ereditate dalle sottoclassi.</li>
+                    <li>Non può essere istanziata direttamente con `new`.</li>
+                    <li>Supporta solo l'ereditarietà singola (una classe può estendere al massimo una classe astratta).</li>
                 </ul>
+                <div class="note-box">
+                    <div class="box-title">💡 Lo Scopo delle Classi Astratte</div>
+                    Le classi astratte sono ideali per definire un <strong>comportamento e uno stato comune</strong> per una famiglia di classi strettamente correlate, lasciando alle sottoclassi il compito di definire i dettagli specifici.
+                </div>
                 <pre><code class="language-java">
-// Classe astratta per un'entità con ID
-public abstract class Entity {
-    protected int id; // Campo di istanza
+// Classe astratta che definisce lo stato e il comportamento comune di un animale
+public abstract class Animale {
+    private String nome;
 
-    public Entity(int id) {
-        this.id = id;
+    // Metodo concreto, ereditato da tutte le sottoclassi
+    public String getNome() {
+        return this.nome;
     }
 
-    public int getId() { // Metodo concreto
-        return id;
-    }
-
-    public abstract void process(); // Metodo astratto: deve essere implementato dalle sottoclassi
+    // Metodo astratto, ogni sottoclasse DEVE implementarlo
+    public abstract String emettiVerso();
 }
 
-// Sottoclasse concreta
-public class ConcreteEntity extends Entity {
-    public ConcreteEntity(int id) {
-        super(id);
-    }
-
+// Classe concreta che estende la classe astratta
+public class Cane extends Animale {
     @Override
-    public void process() { // Implementazione del metodo astratto
-        System.out.println("Processing entity " + this.id);
+    public String emettiVerso() {
+        return "Bau!";
+    }
+}
+
+public class Gatto extends Animale {
+    @Override
+    public String emettiVerso() {
+        return "Miao!";
     }
 }
                 </code></pre>
             </div>
         </article>
 
-        <article id="comparison" class="content-section">
-            <h2 class="section-title">5. Interfacce vs. Classi Astratte: Quando Usarle?</h2>
+        <article id="interfaces-vs-abstract" class="content-section">
+            <h2 class="section-title">5. Interfaccia o Classe Astratta? La Scelta Giusta</h2>
             <div class="section-content">
-                <p>La scelta tra interfaccia e classe astratta è cruciale per un buon design.</p>
+                <p>La scelta tra un'interfaccia e una classe astratta è una decisione di design fondamentale. Ecco una guida pratica:</p>
                 
-                <div class="clarification-box">
-                    <div class="box-title">⚖️ Regola Decisionale</div>
-                    <ul>
-                        <li>Usa una **Classe Astratta** quando:
-                            <ul>
-                                <li>Vuoi costruire una famiglia di tipi dove le classi condividono una **parte dello stato** (campi `protected` o `private`).</li>
-                                <li>Vuoi fornire un'**implementazione comune di default** che le sottoclassi possono (ma non devono per forza) sovrascrivere.</li>
-                                <li>Vuoi avere metodi `non-static` e `non-final` che implementano una logica di base.</li>
-                                <li>C'è una forte relazione "is-a" e una gerarchia di specializzazione ben definita.</li>
-                            </ul>
-                        </li>
-                        <li>Usa un'**Interfaccia** quando:
-                            <ul>
-                                <li>Vuoi definire un **contratto** (API) senza alcuna implementazione.</li>
-                                <li>I tipi che implementeranno il contratto possono essere **totalmente non correlati** tra loro (es. `Comparable`, `Cloneable`).</li>
-                                <li>Vuoi sfruttare il vantaggio dell'**ereditarietà multipla** (una classe può implementare più interfacce).</li>
-                                <li>Vuoi astrarre un "comportamento" che può essere applicato a diverse classi, indipendentemente dalla loro posizione nella gerarchia di ereditarietà.</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Criterio</th>
+                            <th>Usa un'Interfaccia se...</th>
+                            <th>Usa una Classe Astratta se...</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Relazione tra le classi</strong></td>
+                            <td>...le classi che implementano il contratto sono <strong>non correlate</strong> o possono appartenere a gerarchie diverse (es. `Comparable`, `Serializable`).</td>
+                            <td>...stai costruendo una famiglia di classi <strong>strettamente correlate</strong> che condividono molto codice (es. `Grafico`, `FormaGeometrica`).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Condivisione di Stato</strong></td>
+                            <td>...non hai bisogno di condividere variabili di istanza. Le interfacce (pre-Java 8) non possono avere stato.</td>
+                            <td>...le sottoclassi devono condividere uno stato comune (campi `private` o `protected`).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Condivisione di Codice</strong></td>
+                            <td>...vuoi solo definire un contratto di comportamento, senza fornire un'implementazione di default (anche se Java 8+ permette i `default methods`).</td>
+                            <td>...vuoi fornire un'implementazione di base per alcuni metodi, lasciando altri come astratti.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ereditarietà Multipla</strong></td>
+                            <td>...una classe ha bisogno di "ereditare" più tipi/contratti.</td>
+                            <td>...l'ereditarietà singola è sufficiente (poiché una classe può estendere una sola altra classe).</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-                <div class="exercise-box">
-                    <div class="box-title">Esempio: La Gerarchia `IntSet`</div>
-                    <p>La gerarchia `IntSet` (vista nelle slide) è un ottimo esempio pratico:</p>
-                    <ol>
-                        <li><strong>`IntSet` (Interfaccia):</strong> Definisce il contratto puro di un set di interi (`insert`, `remove`, `size`, `iterator`, etc.). Nessuna implementazione.</li>
-                        <li><strong>`IntSetImpl` (Classe Astratta, non sempre presente):</strong> Potrebbe essere una classe astratta che fornisce un'implementazione parziale comune (es. gestendo il `currentSize` e i controlli `invariantOK()` con `assert` per tutte le implementazioni).</li>
-                        <li><strong>`UnorderedIntSet` (Classe Concreta):</strong> Estende `IntSetImpl` e implementa `IntSet` usando una rappresentazione `Vector<Integer>` per un set non ordinato.</li>
-                        <li><strong>`MaxIntSet` (Classe Concreta):</strong> Estende `UnorderedIntSet` e aggiunge un campo `highestValue` e un metodo `max()`, sovrascrivendo `insert` e `remove` per mantenere `highestValue` aggiornato.</li>
-                    </ol>
-                    <p>Questo esempio mostra come interfacce e classi astratte collaborino per definire l'astrazione e fornire implementazioni riutilizzabili o specializzate.</p>
+                 <div class="warning-box">
+                    <div class="box-title">⚠️ Preferisci le Interfacce alle Classi Astratte</div>
+                    Come regola generale, se hai dubbi, <strong>preferisci le interfacce</strong>. Le interfacce offrono maggiore flessibilità e disaccoppiamento. Puoi sempre decidere in un secondo momento di fornire una classe astratta di base che implementa l'interfaccia per aiutare gli sviluppatori, ma partire dall'interfaccia mantiene le tue opzioni aperte.
                 </div>
             </div>
         </article>
@@ -235,33 +277,30 @@ public class ConcreteEntity extends Entity {
         <article id="typical-structure" class="content-section">
             <h2 class="section-title">6. Struttura Tipica di una Gerarchia</h2>
             <div class="section-content">
-                <p>Una gerarchia ben progettata segue spesso questo schema:</p>
-                <ol>
-                    <li>**Interfacce:** In cima, per definire tipi molto generali (il "cosa").</li>
-                    <li>**Classi Astratte:** Sotto le interfacce, per fornire implementazioni parziali e uno stato comune condiviso per una famiglia di tipi correlati.</li>
-                    <li>**Classi Concrete:** In basso, per fornire implementazioni complete. Possono essere:
-                        <ul>
-                            <li>**Implementazioni Alternative:** Diversi modi di realizzare la stessa interfaccia o classe astratta (es. `ArrayList` vs `LinkedList`).</li>
-                            <li>**Estensioni:** Aggiunta di nuove funzionalità o specializzazioni (es. `MaxIntSet` aggiunge `max()`).</li>
-                        </ul>
-                    </li>
-                </ol>
+                <p>Una gerarchia ben progettata in Java spesso combina entrambi gli strumenti in una struttura a più livelli per massimizzare flessibilità e riuso.</p>
                 <div class="mermaid-container">
-                     <pre class="mermaid">
+                    <pre class="mermaid">
                         graph TD
-                            I[("Interface<br>(Pure Contract)")]
-                            A["Abstract Class<br>(Partial Impl + Shared State)"]
-                            C1["Concrete Class 1<br>(Full Impl)"]
-                            C2["Concrete Class 2<br>(Specialization/Extension)"]
-                            C3["Concrete Class 3<br>(Alternative Impl)"]
-
-                            I -- implements --> A
-                            A -- extends --> C1
-                            A -- extends --> C2
-                            I -- implements --> C3
-                     </pre>
-                 </div>
-                 <p>Questa struttura promuove il riuso, la flessibilità e il disaccoppiamento, pilastri fondamentali del design orientato agli oggetti.</p>
+                            I(Interfaccia<br><i>Contratto Puro</i>)
+                            AC(Classe Astratta<br><i>Implementazione Parziale</i>)
+                            C1(Classe Concreta 1)
+                            C2(Classe Concreta 2<br><i>Estensione</i>)
+                            C3(Classe Concreta 3<br><i>Implementazione Alternativa</i>)
+                            
+                            AC -- implementa --> I
+                            C1 -- estende --> AC
+                            C2 -- estende --> C1
+                            C3 -- estende --> AC
+                            
+                            style I fill:#818cf8,color:#111827
+                            style AC fill:#60a5fa,color:#111827
+                    </pre>
+                </div>
+                <ol>
+                    <li><strong>Al vertice c'è un'interfaccia:</strong> Definisce il contratto pubblico e il tipo più generale. Il codice client dovrebbe dipendere da questa.</li>
+                    <li><strong>Sotto, una classe astratta (opzionale):</strong> Fornisce un'implementazione di base per i metodi più comuni, gestendo stato e logica condivisi.</li>
+                    <li><strong>Infine, le classi concrete:</strong> Estendono la classe astratta (o implementano direttamente l'interfaccia) per fornire implementazioni complete e specializzate. Possono essere implementazioni alternative (es. `ArrayList` vs `LinkedList`) o estensioni che aggiungono nuove funzionalità.</li>
+                </ol>
             </div>
         </article>
 
@@ -300,16 +339,12 @@ public class ConcreteEntity extends Entity {
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = diag.innerHTML; 
                 let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
-                
                 mermaidOriginalDefinitions.set(id, decodedContent);
-                diag.innerHTML = ''; 
-                diag.style.visibility = 'hidden'; 
+                diag.innerHTML = ''; diag.style.visibility = 'hidden'; 
             });
-
             async function renderMermaidDiagram(diagElement) {
                 const diagramId = diagElement.id;
                 const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
-
                 if (!diagramDefinition) { return; }
                 diagElement.innerHTML = ''; 
                 try {
@@ -322,13 +357,11 @@ public class ConcreteEntity extends Entity {
                     diagElement.style.visibility = 'visible';
                 }
             }
-            
             document.querySelectorAll('.content-section').forEach(section => {
                 section.addEventListener('sectionshown', function(event) {
                     this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
                 });
             });
-            
             const initiallyActiveSection = document.querySelector('.content-section.active-section');
             if (initiallyActiveSection) {
                 initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
