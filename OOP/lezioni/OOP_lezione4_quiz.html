@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Lezione 04: Iteratori e Programmazione Funzionale</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --accent-success: #34D399;
+            --accent-danger: #f87171;
+            --accent-warning: #FACC15; 
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+        }
+        
+        header {
+            background-color: var(--bg-header);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+        header p {
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0.5rem auto 0;
+        }
+
+        main {
+            padding: 2.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .quiz-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .question-block {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            border-left: 4px solid var(--accent-secondary);
+        }
+
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title .question-number {
+            display: inline-block;
+            background-color: var(--accent-secondary);
+            color: var(--bg-header);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 0.75rem;
+            font-weight: 700;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .options-list label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .options-list label:hover {
+            background-color: rgba(96, 165, 250, 0.1);
+            border-color: var(--accent-primary);
+        }
+
+        .options-list input[type="radio"],
+        .options-list input[type="checkbox"] {
+            width: 1.2em;
+            height: 1.2em;
+            accent-color: var(--accent-secondary);
+        }
+        
+        pre {
+            background-color: var(--code-bg) !important;
+            padding: 1rem !important;
+            border-radius: var(--border-radius-small) !important;
+            margin: 1rem 0 !important;
+            font-size: 0.9em !important;
+        }
+
+        .submit-container {
+            text-align: center;
+            margin-top: 3rem;
+        }
+        
+        .submit-btn {
+            background-color: var(--accent-primary);
+            color: var(--bg-header);
+            border: none;
+            padding: 0.8rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: var(--border-radius-small);
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .submit-btn:hover {
+            background-color: var(--accent-success);
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            display: none; /* Hidden by default */
+        }
+        .feedback.correct {
+            background-color: rgba(52, 211, 153, 0.1);
+            border: 1px solid var(--accent-success);
+            color: var(--accent-success);
+        }
+        .feedback.incorrect {
+            background-color: rgba(248, 113, 113, 0.1);
+            border: 1px solid var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        .feedback p { margin: 0; }
+        .feedback p.summary-status { font-weight: bold; margin-bottom: 0.5rem; }
+        
+        /* Stili per le spiegazioni dettagliate */
+        .option-explanation {
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+            border-left: 2px solid;
+            font-size: 0.9em;
+        }
+        .option-explanation.correct-option {
+            border-color: var(--accent-success);
+            color: var(--accent-success);
+        }
+        .option-explanation.incorrect-option {
+            border-color: var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        
+        #results-summary {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            text-align: center;
+            display: none;
+            margin-top: 2rem;
+        }
+        #results-summary h2 { color: var(--accent-primary); margin-bottom: 1rem; }
+        #score { font-size: 1.5rem; font-weight: bold; }
+        #summary-text { color: var(--text-secondary); margin-top: 0.5rem; }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.6rem; }
+            main { padding: 1.5rem 1rem; }
+            .question-block { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Quiz: Iteratori e Programmazione Funzionale</h1>
+        <p>Verifica la tua comprensione del Pattern Iterator e dei concetti chiave della Programmazione Funzionale in Java (Lambdas, Stream API).</p>
+    </header>
+
+    <main>
+        <form id="quiz-form" class="quiz-container">
+            <!-- Domanda 1 -->
+            <div class="question-block" id="q1">
+                <p class="question-title"><span class="question-number">1</span>Qual è il problema principale che il Pattern Iterator risolve?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q1" value="a">Permettere di modificare una collezione mentre la si attraversa.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="b">Nascondere i dettagli di implementazione della collezione durante la sua traversa.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="c">Garantire che una collezione sia sempre ordinata.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="d">Calcolare automaticamente la somma degli elementi di una collezione.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 2 -->
+            <div class="question-block" id="q2">
+                <p class="question-title"><span class="question-number">2</span>Un iteratore custom deve sempre implementare il metodo `remove()` dell'interfaccia `java.util.Iterator`.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q2" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q2" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 3 -->
+            <div class="question-block" id="q3">
+                <p class="question-title"><span class="question-number">3</span>Quali sono i vantaggi principali derivanti dall'uso del Pattern Iterator? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q3" value="a">Migliora l'incapsulamento della rappresentazione interna della collezione.</label></li>
+                    <li><label><input type="checkbox" name="q3" value="b">Permette al codice client di essere indipendente dal tipo specifico di collezione.</label></li>
+                    <li><label><input type="checkbox" name="q3" value="c">Rende automaticamente le collezioni immutabili.</label></li>
+                    <li><label><input type="checkbox" name="q3" value="d">Semplifica l'aggiunta di nuove operazioni di traversa all'ADT senza modificarlo.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 4 -->
+            <div class="question-block" id="q4">
+                <p class="question-title"><span class="question-number">4</span>Qual è la causa principale di una `ConcurrentModificationException` quando si itera su una collezione standard di Java?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q4" value="a">Il metodo `remove()` dell'iteratore viene chiamato troppo spesso.</label></li>
+                    <li><label><input type="checkbox" name="q4" value="b">La collezione viene modificata direttamente (senza usare l'iteratore) mentre è in corso un'iterazione.</label></li>
+                    <li><label><input type="checkbox" name="q4" value="c">L'iteratore ha raggiunto la fine della collezione e si tenta di chiamare `next()` di nuovo.</label></li>
+                    <li><label><input type="checkbox" name="q4" value="d">L'iteratore è stato creato su una copia difensiva della collezione.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 5 -->
+            <div class="question-block" id="q5">
+                <p class="question-title"><span class="question-number">5</span>Un iteratore custom che opera su una "snapshot" (copia) dei dati previene la `ConcurrentModificationException`?</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q5" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q5" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 6 -->
+            <div class="question-block" id="q6">
+                <p class="question-title"><span class="question-number">6</span>Qual è il vantaggio principale dell'uso delle Lambda Expressions rispetto alle Classi Anonime per implementare interfacce funzionali?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q6" value="a">Permettono di creare nuove classi senza definirle in un file separato.</label></li>
+                    <li><label><input type="checkbox" name="q6" value="b">Offrono una sintassi più concisa e leggibile per esprimere il comportamento.</label></li>
+                    <li><label><input type="checkbox" name="q6" value="c">Rendono il codice più performante in tutti i casi.</label></li>
+                    <li><label><input type="checkbox" name="q6" value="d">Permettono di modificare variabili locali non finali.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+            
+            <!-- Domanda 7 -->
+            <div class="question-block" id="q7">
+                <p class="question-title"><span class="question-number">7</span>Quale interfaccia funzionale standard di `java.util.function` è più appropriata per un'operazione che riceve un valore e non restituisce nulla (es. stampare un oggetto)?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q7" value="a">`Predicate<T>`</label></li>
+                    <li><label><input type="checkbox" name="q7" value="b">`Consumer<T>`</label></li>
+                    <li><label><input type="checkbox" name="q7" value="c">`Function<T, R>`</label></li>
+                    <li><label><input type="checkbox" name="q7" value="d">`Supplier<T>`</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 8 -->
+            <div class="question-block" id="q8">
+                <p class="question-title"><span class="question-number">8</span>Considera il seguente codice:</p>
+                <pre><code class="language-java">
+import java.util.function.Predicate;
+import java.util.List;
+import java.util.ArrayList;
+
+public class Quiz {
+    public static void main(String[] args) {
+        List<Integer> numbers = new ArrayList<>(List.of(10, 5, 20, 15));
+        
+        Predicate<Integer> isGreaterThan10 = n -> n > 10;
+        
+        long count = numbers.stream()
+                           .filter(isGreaterThan10)
+                           .count();
+        
+        System.out.println(count);
+    }
+}
+                </code></pre>
+                <p>Quale sarà l'output del programma?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q8" value="a">1</label></li>
+                    <li><label><input type="checkbox" name="q8" value="b">2</label></li>
+                    <li><label><input type="checkbox" name="q8" value="c">3</label></li>
+                    <li><label><input type="checkbox" name="q8" value="d">4</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 9 -->
+            <div class="question-block" id="q9">
+                <p class="question-title"><span class="question-number">9</span>Le operazioni intermedie di una Stream API sono "lazy". Cosa significa?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q9" value="a">Vengono eseguite solo quando viene invocata un'operazione terminale.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="b">Possono essere eseguite solo in parallelo.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="c">Modificano la sorgente di dati da cui è stato creato lo stream.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="d">Non possono essere concatenate.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 10 -->
+            <div class="question-block" id="q10">
+                <p class="question-title"><span class="question-number">10</span>Quale delle seguenti non è un'operazione terminale della Stream API?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q10" value="a">`collect(Collectors.toList())`</label></li>
+                    <li><label><input type="checkbox" name="q10" value="b">`filter(p -> true)`</label></li>
+                    <li><label><input type="checkbox" name="q10" value="c">`forEach(System.out::println)`</label></li>
+                    <li><label><input type="checkbox" name="q10" value="d">`sum()` (su un `IntStream`)</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 11 -->
+            <div class="question-block" id="q11">
+                <p class="question-title"><span class="question-number">11</span>Le Lambda Expressions in Java possono accedere e modificare variabili locali del contesto esterno, anche se non sono `final`.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q11" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q11" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 12 -->
+            <div class="question-block" id="q12">
+                <p class="question-title"><span class="question-number">12</span>Considera il seguente codice. Che tipo di interfaccia funzionale è `MyConverter`?</p>
+                <pre><code class="language-java">
+interface MyConverter<T, R> {
+    R convert(T t);
+}
+                </code></pre>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q12" value="a">`Predicate`</label></li>
+                    <li><label><input type="checkbox" name="q12" value="b">`Consumer`</label></li>
+                    <li><label><input type="checkbox" name="q12" value="c">`Function`</label></li>
+                    <li><label><input type="checkbox" name="q12" value="d">`Supplier`</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 13 -->
+            <div class="question-block" id="q13">
+                <p class="question-title"><span class="question-number">13</span>L'uso di `Method References` (es. `ClassName::methodName`) è una sintassi più concisa per le Lambda Expressions.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q13" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q13" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 14 -->
+            <div class="question-block" id="q14">
+                <p class="question-title"><span class="question-number">14</span>Quali delle seguenti affermazioni sulla Stream API sono vere? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q14" value="a">Uno Stream è una struttura dati che memorizza elementi.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="b">Le operazioni su uno Stream non modificano la sorgente originale.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="c">Le operazioni terminali consumano lo Stream.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="d">`map` è un'operazione terminale che trasforma lo Stream in un nuovo Stream.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 15 -->
+            <div class="question-block" id="q15">
+                <p class="question-title"><span class="question-number">15</span>Se un ADT ha una rappresentazione interna che non è ordinata (es. `HashSet`), ma si vuole che il suo iteratore restituisca gli elementi in ordine crescente, quale sarebbe la strategia migliore all'interno dell'iteratore custom?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q15" value="a">Forzare l'ADT a usare una rappresentazione ordinata (es. `TreeSet`).</label></li>
+                    <li><label><input type="checkbox" name="q15" value="b">Creare una snapshot della rappresentazione interna e ordinarla nel costruttore dell'iteratore.</label></li>
+                    <li><label><input type="checkbox" name="q15" value="c">Ordinare la rappresentazione interna dell'ADT ogni volta che `iterator()` viene chiamato.</label></li>
+                    <li><label><input type="checkbox" name="q15" value="d">Restituire un iteratore che ordina gli elementi "on-the-fly" ogni volta che `next()` viene chiamato.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+        </form>
+
+        <div class="submit-container">
+            <button type="button" id="submit-quiz-btn" class="submit-btn">Verifica Risposte</button>
+        </div>
+
+        <div id="results-summary">
+            <h2>Risultato del Quiz</h2>
+            <p id="score"></p>
+            <p id="summary-text"></p>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const solutions = {
+            q1: ['b'],
+            q2: 'b', // Falso
+            q3: ['a', 'b', 'd'],
+            q4: ['b'],
+            q5: 'a', // Vero
+            q6: ['b'],
+            q7: ['b'],
+            q8: ['b'], // n > 10 sono 20, 15 --> 2 elementi
+            q9: ['a'],
+            q10: ['b'], // filter
+            q11: 'b', // Falso
+            q12: ['c'], // Function
+            q13: 'a', // Vero
+            q14: ['b', 'c'],
+            q15: ['b']
+        };
+
+        const explanations = {
+            q1: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Il Pattern Iterator non è progettato per gestire le modifiche concorrenti; anzi, la modifica di una collezione durante l'iterazione può causare `ConcurrentModificationException`." },
+                { option: 'b', status: 'correct-option', text: "Corretto. L'obiettivo principale del Pattern Iterator è disaccoppiare l'algoritmo di traversa dalla rappresentazione interna della collezione, mantenendo l'incapsulamento." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. L'iteratore di per sé non garantisce l'ordinamento della collezione. Se la collezione è intrinsecamente non ordinata, l'iteratore fornirà gli elementi nell'ordine in cui sono memorizzati (o in cui li vede la snapshot)." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Calcolare la somma è un'operazione specifica che il client può eseguire utilizzando l'iteratore, ma non è lo scopo principale del pattern in sé." }
+            ],
+            q2: "Falso. Il metodo `remove()` dell'interfaccia `java.util.Iterator` è opzionale. Se l'implementazione non supporta la rimozione (come spesso accade per gli iteratori che operano su snapshot o per collezioni immutabili), dovrebbe lanciare `UnsupportedOperationException`.",
+            q3: [
+                { option: 'a', status: 'correct-option', text: "Corretto. L'iteratore permette al client di accedere agli elementi senza dover conoscere la struttura dati interna della collezione, mantenendo così un alto grado di incapsulamento." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Poiché il client interagisce con l'interfaccia `Iterator` e non con la classe concreta della collezione, il codice di traversa diventa generico e può funzionare con qualsiasi collezione che fornisca un iteratore." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. L'uso di un iteratore non rende automaticamente le collezioni immutabili; la mutabilità è una proprietà intrinseca della collezione stessa o dipende da come viene creato l'iteratore (es. su una copia difensiva)." },
+                { option: 'd', status: 'correct-option', text: "Corretto. L'iteratore permette di aggiungere nuove modalità di traversa (es. iteratore ordinato, iteratore filtrato) senza modificare la classe dell'ADT principale, rispettando il Principio Open/Closed." }
+            ],
+            q4: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Chiamare `remove()` troppo spesso non è la causa, ma un uso non corretto del metodo stesso (che dovrebbe essere chiamato solo una volta per `next()`)." },
+                { option: 'b', status: 'correct-option', text: "Corretto. La `ConcurrentModificationException` si verifica quando una collezione viene modificata da un thread diverso o attraverso un'operazione diversa dall'iteratore che la sta attraversando. Questo è per prevenire comportamenti imprevedibili." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Questo scenario (chiamare `next()` dopo `hasNext()` è `false`) lancia `NoSuchElementException`, non `ConcurrentModificationException`." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. L'uso di una copia difensiva (snapshot) è proprio la strategia per *prevenire* la `ConcurrentModificationException`, non per causarla." }
+            ],
+            q5: "Vero. Un iteratore che opera su una 'snapshot' (una copia dei dati al momento della sua creazione) è immune alle modifiche successive della collezione originale, perché sta lavorando su un set di dati isolato.",
+            q6: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Sia le lambda che le classi anonime permettono di definire e istanziare una classe senza un file separato. Questo non è un vantaggio esclusivo delle lambda." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Il vantaggio principale delle Lambda Expressions è la loro sintassi estremamente concisa, che riduce il boilerplate code rispetto alle classi anonime, rendendo il codice più leggibile e funzionale." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Le lambda non garantiscono un incremento automatico delle performance. In alcuni casi, l'overhead legato alle boxing/unboxing o alla creazione di oggetti funzionali può anche rallentare il codice, se non usate correttamente." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Le lambda, come le classi anonime, possono accedere solo a variabili locali `final` o 'effectively final' (cioè, il cui valore non viene modificato dopo l'inizializzazione)." }
+            ],
+            q7: [
+                { option: 'a', status: 'incorrect-option', text: "`Predicate<T>` è usato per test booleani (restituisce `boolean`)." },
+                { option: 'b', status: 'correct-option', text: "Corretto. `Consumer<T>` è l'interfaccia funzionale standard per operazioni che accettano un input di tipo `T` ma non producono alcun output (hanno un side effect, come una stampa)." },
+                { option: 'c', status: 'incorrect-option', text: "`Function<T, R>` è usata per trasformazioni (restituisce un valore di tipo `R`)." },
+                { option: 'd', status: 'incorrect-option', text: "`Supplier<T>` è usata per produrre un valore di tipo `T` senza input." }
+            ],
+            q8: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Ci sono più di un numero maggiore di 10." },
+                { option: 'b', status: 'correct-option', text: "Corretto. I numeri nella lista che sono maggiori di 10 sono 20 e 15. Quindi, ci sono 2 elementi che soddisfano il predicato." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Ci sono solo 2 numeri maggiori di 10." },
+                { option: 'd', 'status': 'incorrect-option', text: "Sbagliato. Questo sarebbe il numero totale di elementi, non il conteggio dopo il filtro." }
+            ],
+            q9: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Le operazioni intermedie sono valutate solo quando viene invocata un'operazione terminale, permettendo ottimizzazioni come il 'short-circuiting' e evitando calcoli non necessari." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Possono essere eseguite in parallelo (se si usa `parallelStream()`), ma la 'laziness' è una proprietà diversa e non legata al parallelismo intrinseco." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Gli Stream sono per definizione non modificabili e non alterano la sorgente di dati originale." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Le operazioni intermedie sono progettate per essere concatenate in pipeline." }
+            ],
+            q10: [
+                { option: 'a', status: 'incorrect-option', text: "`collect` è un'operazione terminale che raccoglie gli elementi dello stream in una collezione finale." },
+                { option: 'b', status: 'correct-option', text: "`filter` è un'operazione *intermedia* che produce un nuovo stream filtrato." },
+                { option: 'c', status: 'incorrect-option', text: "`forEach` è un'operazione terminale che esegue un'azione per ogni elemento dello stream." },
+                { option: 'd', status: 'incorrect-option', text: "`sum()` è un'operazione terminale specifica per `IntStream`, `LongStream`, `DoubleStream` che calcola la somma degli elementi." }
+            ],
+            q11: "Falso. Le Lambda Expressions, come le classi anonime, possono accedere solo a variabili locali che sono `final` o 'effectively final' (cioè, il cui valore non viene riassegnato dopo l'inizializzazione). Questo è per prevenire problemi di concorrenza e di coerenza dello stato.",
+            q12: [
+                { option: 'a', status: 'incorrect-option', text: "`Predicate` restituisce sempre un booleano." },
+                { option: 'b', status: 'incorrect-option', text: "`Consumer` non restituisce alcun valore." },
+                { option: 'c', status: 'correct-option', text: "Corretto. `MyConverter` è una `Function<T, R>` (T è il tipo di input, R è il tipo di output) perché prende un valore di tipo `T` e ne restituisce uno di tipo `R`." },
+                { option: 'd', status: 'incorrect-option', text: "`Supplier` non accetta input." }
+            ],
+            q13: "Vero. Le Method References sono una scorciatoia sintattica per le lambda che non fanno altro che invocare un metodo esistente, rendendo il codice più pulito e diretto (es. `Person::getName` invece di `p -> p.getName()`).",
+            q14: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Uno Stream non è una struttura dati; è una sequenza di elementi. Non memorizza i dati, ma li elabora in pipeline." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Le operazioni Stream sono 'non distruttive', cioè non modificano la sorgente di dati originale da cui sono stati creati." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Le operazioni terminali sono quelle che avviano l'elaborazione 'pigra' dello stream e, una volta eseguite, lo stream non può essere riutilizzato." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. `map` è un'operazione *intermedia*, non terminale." }
+            ],
+            q15: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Modificare la rappresentazione interna dell'ADT altererebbe la sua semantica (non più un `HashSet` generico) e violerebbe il principio di separazione delle responsabilità." },
+                { option: 'b', status: 'correct-option', text: "Corretto. La strategia migliore è creare una 'snapshot' (copia difensiva) della rappresentazione interna non ordinata al momento della creazione dell'iteratore, e poi ordinare questa copia. L'iteratore opererà quindi sulla copia ordinata, senza alterare l'ADT originale e fornendo l'ordine desiderato." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Ordinare la rappresentazione interna dell'ADT ogni volta che `iterator()` viene chiamato sarebbe costoso e altererebbe lo stato interno dell'ADT se questo non è intrinsecamente ordinato (potenziale 'benevolent side effect' non sempre desiderabile)." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Ordinare 'on-the-fly' ogni volta che `next()` viene chiamato sarebbe estremamente inefficiente, poiché richiederebbe la scansione e l'ordinamento ripetuti degli elementi non ancora visitati." }
+            ]
+        };
+
+        const submitBtn = document.getElementById('submit-quiz-btn');
+        submitBtn.addEventListener('click', () => {
+            let score = 0;
+            const totalQuestions = Object.keys(solutions).length;
+
+            for (const qId in solutions) {
+                const questionBlock = document.getElementById(qId);
+                const feedbackEl = questionBlock.querySelector('.feedback');
+                const inputs = questionBlock.querySelectorAll(`input[name=${qId}]`);
+                
+                let isCorrect = false;
+                const correctAnswer = solutions[qId]; 
+                
+                if (Array.isArray(correctAnswer)) { // Checkbox
+                    const selectedValues = Array.from(inputs).filter(i => i.checked).map(i => i.value);
+                    const allCorrectSelected = correctAnswer.every(val => selectedValues.includes(val));
+                    const noIncorrectSelected = selectedValues.every(val => correctAnswer.includes(val));
+                    isCorrect = allCorrectSelected && noIncorrectSelected;
+
+                } else { // Radio
+                    const selectedInput = Array.from(inputs).find(i => i.checked);
+                    if (selectedInput && selectedInput.value === correctAnswer) {
+                        isCorrect = true;
+                    }
+                }
+
+                feedbackEl.style.display = 'block';
+                // Genera il feedback dettagliato
+                let detailedExplanationHtml = `<p class="summary-status">${isCorrect ? 'Corretto!' : 'Sbagliato!'}</p>`;
+                
+                if (Array.isArray(solutions[qId])) { // Se la domanda era a scelta multipla (checkbox)
+                    const allOptions = questionBlock.querySelectorAll('.options-list input[type="checkbox"]');
+                    Array.from(allOptions).forEach(input => {
+                        const optionValue = input.value;
+                        const optionLabel = questionBlock.querySelector(`label[for="${input.id}"]`) ? questionBlock.querySelector(`label[for="${input.id}"]`).textContent.trim() : input.parentNode.textContent.trim();
+                        const isThisOptionCorrect = solutions[qId].includes(optionValue);
+                        const isThisOptionSelected = input.checked;
+
+                        let statusClass = '';
+                        let statusText = '';
+
+                        if (isThisOptionCorrect && isThisOptionSelected) {
+                            statusClass = 'correct-option';
+                            statusText = ' (Selezionato, Corretto)';
+                        } else if (isThisOptionCorrect && !isThisOptionSelected) {
+                            statusClass = 'correct-option';
+                            statusText = ' (Non selezionato, MA era Corretto)';
+                        } else if (!isThisOptionCorrect && isThisOptionSelected) {
+                            statusClass = 'incorrect-option';
+                            statusText = ' (Selezionato, Sbagliato)';
+                        } else { // !isThisOptionCorrect && !isThisOptionSelected
+                            // Questa opzione non era corretta e non è stata selezionata, quindi non è un errore
+                            statusClass = 'incorrect-option'; // Mantiene il colore per coerenza, ma indica "Non selezionato, Era Sbagliato"
+                            statusText = ' (Non selezionato, Era Sbagliato)';
+                        }
+                        
+                        // Per le spiegazioni specifiche di ogni opzione, prendi la text dall'array explanations[qId]
+                        const optionSpecificExplanation = explanations[qId].find(exp => exp.option === optionValue)?.text || '';
+                        
+                        detailedExplanationHtml += `<p class="option-explanation ${statusClass}"><strong>${optionValue})</strong> ${optionSpecificExplanation}</p>`;
+                    });
+                } else { // Se la domanda era Vero/Falso (radio)
+                    detailedExplanationHtml += `<p>${explanations[qId]}</p>`;
+                }
+                
+                feedbackEl.innerHTML = detailedExplanationHtml;
+
+                if (isCorrect) {
+                    score++;
+                    feedbackEl.classList.remove('incorrect');
+                    feedbackEl.classList.add('correct');
+                } else {
+                    feedbackEl.classList.remove('correct');
+                    feedbackEl.classList.add('incorrect');
+                }
+            }
+            
+            // Mostra il riepilogo finale
+            const resultsSummary = document.getElementById('results-summary');
+            const scoreEl = document.getElementById('score');
+            const summaryTextEl = document.getElementById('summary-text');
+            
+            scoreEl.textContent = `Punteggio: ${score} / ${totalQuestions}`;
+            if (score === totalQuestions) {
+                summaryTextEl.textContent = "Eccellente! Hai una solida comprensione dei concetti.";
+                scoreEl.style.color = 'var(--accent-success)';
+            } else if (score >= totalQuestions * 0.75) { 
+                summaryTextEl.textContent = "Molto bene! Hai compreso la maggior parte dei concetti. Rileggi le spiegazioni per consolidare i punti deboli.";
+                scoreEl.style.color = 'var(--accent-primary)';
+            } else if (score >= totalQuestions / 2) { 
+                summaryTextEl.textContent = "Buon lavoro! Ci sono alcuni concetti da rivedere. Rileggi attentamente la lezione e le spiegazioni fornite.";
+                scoreEl.style.color = 'var(--accent-warning)';
+            } else { 
+                summaryTextEl.textContent = "Sembra che ci siano diversi punti da approfondire. Ti consiglio di ripassare la lezione e poi riprovare il quiz.";
+                scoreEl.style.color = 'var(--accent-danger)';
+            }
+            resultsSummary.style.display = 'block';
+            resultsSummary.scrollIntoView({ behavior: 'smooth' });
+            
+            submitBtn.style.display = 'none';
+        });
+    });
+    </script>
+
+</body>
+</html>
