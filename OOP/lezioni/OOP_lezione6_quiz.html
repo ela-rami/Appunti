@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Lezione 06: Principio di Sostituzione di Liskov (LSP)</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --accent-success: #34D399;
+            --accent-danger: #f87171;
+            --accent-warning: #FACC15; 
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+        }
+        
+        header {
+            background-color: var(--bg-header);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+        header p {
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0.5rem auto 0;
+        }
+
+        main {
+            padding: 2.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .quiz-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .question-block {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            border-left: 4px solid var(--accent-secondary);
+        }
+
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title .question-number {
+            display: inline-block;
+            background-color: var(--accent-secondary);
+            color: var(--bg-header);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 0.75rem;
+            font-weight: 700;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .options-list label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .options-list label:hover {
+            background-color: rgba(96, 165, 250, 0.1);
+            border-color: var(--accent-primary);
+        }
+
+        .options-list input[type="radio"],
+        .options-list input[type="checkbox"] {
+            width: 1.2em;
+            height: 1.2em;
+            accent-color: var(--accent-secondary);
+        }
+        
+        pre {
+            background-color: var(--code-bg) !important;
+            padding: 1rem !important;
+            border-radius: var(--border-radius-small) !important;
+            margin: 1rem 0 !important;
+            font-size: 0.9em !important;
+        }
+
+        .submit-container {
+            text-align: center;
+            margin-top: 3rem;
+        }
+        
+        .submit-btn {
+            background-color: var(--accent-primary);
+            color: var(--bg-header);
+            border: none;
+            padding: 0.8rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: var(--border-radius-small);
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .submit-btn:hover {
+            background-color: var(--accent-success);
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            display: none; /* Hidden by default */
+        }
+        .feedback.correct {
+            background-color: rgba(52, 211, 153, 0.1);
+            border: 1px solid var(--accent-success);
+            color: var(--accent-success);
+        }
+        .feedback.incorrect {
+            background-color: rgba(248, 113, 113, 0.1);
+            border: 1px solid var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        .feedback p { margin: 0; }
+        .feedback p.summary-status { font-weight: bold; margin-bottom: 0.5rem; }
+        
+        .option-explanation {
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+            border-left: 2px solid;
+            font-size: 0.9em;
+        }
+        .option-explanation.correct-option {
+            border-color: var(--accent-success);
+            color: var(--accent-success);
+        }
+        .option-explanation.incorrect-option {
+            border-color: var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        
+        #results-summary {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            text-align: center;
+            display: none;
+            margin-top: 2rem;
+        }
+        #results-summary h2 { color: var(--accent-primary); margin-bottom: 1rem; }
+        #score { font-size: 1.5rem; font-weight: bold; }
+        #summary-text { color: var(--text-secondary); margin-top: 0.5rem; }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.6rem; }
+            main { padding: 1.5rem 1rem; }
+            .question-block { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Quiz: Il Principio di Sostituzione di Liskov (LSP)</h1>
+        <p>Verifica la tua comprensione delle regole fondamentali che governano l'ereditarietà e il polimorfismo corretti.</p>
+    </header>
+
+    <main>
+        <form id="quiz-form" class="quiz-container">
+            <!-- Domanda 1 -->
+            <div class="question-block" id="q1">
+                <p class="question-title"><span class="question-number">1</span>Qual è l'idea centrale del Principio di Sostituzione di Liskov (LSP)?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q1" value="a">Un sottotipo deve implementare tutti i metodi del suo supertipo.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="b">Un sottotipo deve essere sostituibile a un supertipo senza alterare la correttezza del programma.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="c">Un sottotipo non può aggiungere nuovi metodi pubblici.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="d">L'ereditarietà è principalmente un meccanismo per il riutilizzo del codice.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 2 -->
+            <div class="question-block" id="q2">
+                <p class="question-title"><span class="question-number">2</span>Nell'esempio `Rettangolo`/`Quadrato`, qual è la principale violazione dell'LSP?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q2" value="a">La classe `Quadrato` sovrascrive i metodi `setBase` e `setAltezza`.</label></li>
+                    <li><label><input type="checkbox" name="q2" value="b">La classe `Quadrato` non è in grado di calcolare l'area correttamente.</label></li>
+                    <li><label><input type="checkbox" name="q2" value="c">La classe `Quadrato` viola la post-condizione del supertipo, modificando l'altezza quando viene impostata la base.</label></li>
+                    <li><label><input type="checkbox" name="q2" value="d">La classe `Rettangolo` non dovrebbe avere metodi setter.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 3 -->
+            <div class="question-block" id="q3">
+                <p class="question-title"><span class="question-number">3</span>Secondo la "Regola dei Metodi" dell'LSP, come possono cambiare le pre-condizioni e le post-condizioni in un sottotipo? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q3" value="a">Le pre-condizioni possono essere rafforzate (più restrittive).</label></li>
+                    <li><label><input type="checkbox" name="q3" value="b">Le pre-condizioni possono essere indebolite (meno restrittive).</label></li>
+                    <li><label><input type="checkbox" name="q3" value="c">Le post-condizioni possono essere rafforzate (promettere di più).</label></li>
+                    <li><label><input type="checkbox" name="q3" value="d">Le post-condizioni possono essere indebolite (promettere di meno).</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 4 -->
+            <div class="question-block" id="q4">
+                <p class="question-title"><span class="question-number">4</span>Il compilatore Java garantisce il rispetto completo del Principio di Sostituzione di Liskov.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q4" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q4" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 5 -->
+            <div class="question-block" id="q5">
+                <p class="question-title"><span class="question-number">5</span>Considera la gerarchia `Account` -> `PremiumAccount`. Il metodo `withdraw(amount)` in `Account` lancia `InsufficientFundsException`. Quali dei seguenti comportamenti per `PremiumAccount.withdraw(amount)` rispetterebbero l'LSP? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q5" value="a">Lanciare `InsufficientFundsException` e anche una nuova `OverdraftFeeException` (checked).</label></li>
+                    <li><label><input type="checkbox" name="q5" value="b">Non lanciare mai `InsufficientFundsException` (es. permettendo un saldo negativo).</label></li>
+                    <li><label><input type="checkbox" name="q5" value="c">Lanciare solo `InsufficientFundsException`, ma in meno casi (es. solo se lo scoperto supera un limite).</label></li>
+                    <li><label><input type="checkbox" name="q5" value="d">Lanciare un'eccezione più generica come `java.lang.Exception`.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 6 -->
+            <div class="question-block" id="q6">
+                <p class="question-title"><span class="question-number">6</span>Un sottotipo `SUB` che non sovrascrive alcun metodo del suo supertipo `SUPER` viola automaticamente l'LSP.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q6" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q6" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 7 -->
+            <div class="question-block" id="q7">
+                <p class="question-title"><span class="question-number">7</span>Cosa afferma la "Regola delle Proprietà" dell'LSP?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q7" value="a">Il sottotipo deve avere le stesse proprietà private del supertipo.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="b">Tutti gli invarianti del supertipo devono essere veri anche per tutte le istanze del sottotipo.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="c">Il sottotipo può aggiungere nuove proprietà, ma non può modificarne il comportamento.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="d">Le proprietà che cambiano nel tempo (evolutive) non sono soggette all'LSP.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+            
+            <!-- Domanda 8 -->
+            <div class="question-block" id="q8">
+                <p class="question-title"><span class="question-number">8</span>Considera una classe `ImmutableList` (immutabile). Una sottoclasse `MutableList` che aggiunge metodi come `add()` e `remove()` è un buon sottotipo secondo l'LSP?</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q8" value="a">Sì, perché aggiunge nuove funzionalità senza togliere quelle esistenti.</label></li>
+                    <li><label><input type="radio" name="q8" value="b">No, perché viola la "Regola delle Proprietà": l'invariante di immutabilità del supertipo non è preservato.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 9 -->
+            <div class="question-block" id="q9">
+                <p class="question-title"><span class="question-number">9</span>Quale dei seguenti è un esempio di "rafforzamento" di una post-condizione, compatibile con l'LSP?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q9" value="a">Supertipo: restituisce un `Number`. Sottotipo: restituisce un `Integer`.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="b">Supertipo: `POST: result >= 0`. Sottotipo: `POST: result > 0`.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="c">Supertipo: `POST: la lista è ordinata`. Sottotipo: `POST: la lista è ordinata e non contiene duplicati`.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="d">Supertipo: `POST: non modifica l'input`. Sottotipo: `POST: modifica l'input`.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 10 -->
+            <div class="question-block" id="q10">
+                <p class="question-title"><span class="question-number">10</span>Quale dei seguenti è un esempio di "indebolimento" di una pre-condizione, compatibile con l'LSP?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q10" value="a">Supertipo: `REQUIRES: x > 0`. Sottotipo: `REQUIRES: x >= 0`.</label></li>
+                    <li><label><input type="checkbox" name="q10" value="b">Supertipo: accetta un `Object`. Sottotipo: accetta solo uno `String`.</label></li>
+                    <li><label><input type="checkbox" name="q10" value="c">Supertipo: non lancia eccezioni. Sottotipo: lancia `IllegalArgumentException`.</label></li>
+                    <li><label><input type="checkbox" name="q10" value="d">Supertipo: `REQUIRES: list is not empty`. Sottotipo: `REQUIRES: list is not empty and list size > 10`.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 11 -->
+            <div class="question-block" id="q11">
+                <p class="question-title"><span class="question-number">11</span>La "Regola della Firma" dell'LSP permette a un metodo sovrascritto di avere un tipo di ritorno più generico (es. `Object` nel sottotipo vs `String` nel supertipo).</p>
+                 <ul class="options-list">
+                    <li><label><input type="radio" name="q11" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q11" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 12 -->
+            <div class="question-block" id="q12">
+                <p class="question-title"><span class="question-number">12</span>Se si scopre che una gerarchia di ereditarietà viola l'LSP, quale delle seguenti è la migliore alternativa di design?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q12" value="a">Lanciare `UnsupportedOperationException` nei metodi del sottotipo che violano il contratto.</label></li>
+                    <li><label><input type="checkbox" name="q12" value="b">Riscrivere il codice client per controllare il tipo reale dell'oggetto con `instanceof` prima di chiamare i metodi.</label></li>
+                    <li><label><input type="checkbox" name="q12" value="c">Rimodellare la gerarchia, possibilmente usando la composizione e la delegazione invece dell'ereditarietà.</label></li>
+                    <li><label><input type="checkbox" name="q12" value="d">Rendere il supertipo `final` per prevenire l'ereditarietà.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 13 -->
+            <div class="question-block" id="q13">
+                <p class="question-title"><span class="question-number">13</span>L'LSP si applica solo a classi concrete che estendono altre classi concrete.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q13" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q13" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 14 -->
+            <div class="question-block" id="q14">
+                <p class="question-title"><span class="question-number">14</span>Quali dei seguenti sono benefici diretti del rispetto dell'LSP? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q14" value="a">Maggiore affidabilità del codice, poiché il comportamento polimorfico è prevedibile.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="b">Migliori prestazioni, perché il compilatore può ottimizzare meglio le chiamate a metodo.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="c">Maggiore riutilizzabilità e manutenibilità del codice client, che può operare su astrazioni senza preoccuparsi dei sottotipi specifici.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="d">Rende l'ereditarietà multipla sicura in Java.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 15 -->
+            <div class="question-block" id="q15">
+                <p class="question-title"><span class="question-number">15</span>Se un metodo `SUPER.m()` non lancia alcuna eccezione checked, un metodo `SUB.m()` che lo sovrascrive può lanciare `IOException`?</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q15" value="a">Sì, perché le eccezioni non fanno parte della firma del metodo.</label></li>
+                    <li><label><input type="radio" name="q15" value="b">No, perché un sottotipo non può lanciare nuove eccezioni checked che non sono state dichiarate nel supertipo.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+            
+        </form>
+
+        <div class="submit-container">
+            <button type="button" id="submit-quiz-btn" class="submit-btn">Verifica Risposte</button>
+        </div>
+
+        <div id="results-summary">
+            <h2>Risultato del Quiz</h2>
+            <p id="score"></p>
+            <p id="summary-text"></p>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const solutions = {
+            q1: ['b'],
+            q2: ['c'],
+            q3: ['b', 'c'],
+            q4: 'b',
+            q5: ['b', 'c'],
+            q6: 'b',
+            q7: ['b'],
+            q8: 'b',
+            q9: ['a', 'b', 'c'],
+            q10: ['a'],
+            q11: 'b',
+            q12: ['c'],
+            q13: 'b',
+            q14: ['a', 'c'],
+            q15: 'b'
+        };
+
+        const explanations = {
+            q1: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Questo è un requisito sintattico (Regola della Firma), ma non cattura l'essenza comportamentale dell'LSP." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Questa è la definizione centrale dell'LSP: un client che usa un supertipo non deve rompersi o cambiare comportamento se gli viene passata un'istanza di un sottotipo." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. I sottotipi possono (e spesso lo fanno) aggiungere nuovi metodi per specializzare il loro comportamento." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. L'LSP insegna proprio che l'ereditarietà non deve essere usata *solo* per il riutilizzo del codice, ma per modellare una relazione di sottotipo comportamentale." }
+            ],
+            q2: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Sovrascrivere metodi è una pratica normale e necessaria nell'ereditarietà. Il problema non è l'atto di sovrascrivere, ma *come* viene fatto." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Il calcolo dell'area in `Quadrato` è matematicamente corretto *per un quadrato*. Il problema è la discrepanza comportamentale con il `Rettangolo`." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Il `Rettangolo` 'promette' che `setBase` non modifichi l'altezza. Il `Quadrato` rompe questa promessa, rendendolo non sostituibile." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Un `Rettangolo` mutabile può legittimamente avere dei setter. Il problema è come il sottotipo si conforma al loro contratto." }
+            ],
+            q3: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Le pre-condizioni non possono essere rafforzate, altrimenti un input valido per il supertipo potrebbe diventare invalido per il sottotipo." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Un sottotipo può richiedere meno, essendo più permissivo. Se una chiamata è valida per il supertipo, deve esserlo anche per il sottotipo." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Un sottotipo può promettere di più (es. garantire un risultato più specifico), purché la sua promessa implichi quella del supertipo." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Le post-condizioni non possono essere indebolite, altrimenti il sottotipo non manterrebbe le promesse fatte dal supertipo." }
+            ],
+            q4: "Falso. Il compilatore Java garantisce solo la 'Regola della Firma' (compatibilità sintattica). Non può verificare la compatibilità comportamentale delle pre/post-condizioni o degli invarianti, che è responsabilità del programmatore.",
+            q5: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Aggiungere una nuova eccezione *checked* viola la Regola della Firma, poiché un client che si aspetta solo `InsufficientFundsException` non sarebbe preparato a gestire `OverdraftFeeException`." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Questo è un indebolimento della pre-condizione (o rimozione di una post-condizione eccezionale). Il sottotipo gestisce più casi senza lanciare un'eccezione, il che è permesso." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Lanciare la stessa eccezione ma in meno circostanze è un altro modo di indebolire una pre-condizione. È un comportamento più robusto e quindi valido." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Lanciare un'eccezione più *generica* violerebbe la Regola della Firma, perché un client che cattura `InsufficientFundsException` potrebbe non catturare `Exception`." }
+            ],
+            q6: "Falso. Se un sottotipo non sovrascrive alcun metodo, eredita semplicemente l'implementazione e il contratto del supertipo. Quindi, l'LSP è trivialmente soddisfatto.",
+            q7: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. L'LSP riguarda il comportamento pubblico e gli invarianti, non le proprietà private." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Questa è la definizione della Regola delle Proprietà: le proprietà che sono sempre vere per un supertipo (i suoi invarianti) devono rimanere vere anche per qualsiasi istanza di un sottotipo." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Il sottotipo può modificare il comportamento, ma deve farlo in modo compatibile con il contratto del supertipo (Regola dei Metodi)." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. L'LSP si applica a tutte le proprietà osservabili, incluse quelle che descrivono come lo stato può evolvere nel tempo (es. l'immutabilità)." }
+            ],
+            q8: "No, perché viola la 'Regola delle Proprietà'. Un invariante fondamentale di `ImmutableList` è che il suo stato non cambia mai. `MutableList`, introducendo metodi che modificano lo stato, rompe questa proprietà, rendendola non sostituibile in contesti dove l'immutabilità è assunta.",
+            q9: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Questo è un esempio di covarianza del tipo di ritorno. Se il supertipo promette un `Number`, il sottotipo può promettere qualcosa di più specifico, come un `Integer`." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Se il supertipo garantisce un risultato non negativo, il sottotipo può rafforzare questa promessa garantendo un risultato strettamente positivo. `result > 0` implica `result >= 0`." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Se il supertipo promette che la lista è ordinata, il sottotipo può promettere di più: che è ordinata E senza duplicati. Questa è una post-condizione più forte." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Questa è una violazione completa del contratto. Il supertipo promette di non avere effetti collaterali, mentre il sottotipo ne introduce uno." }
+            ],
+            q10: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Il sottotipo è più permissivo: accetta 0, che era escluso dal supertipo. Qualsiasi input valido per il supertipo (`x > 0`) è anche valido per il sottotipo (`x >= 0`)." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Questa è una pre-condizione più forte (più restrittiva), perché il sottotipo non accetta più tutti gli `Object` validi per il supertipo." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Lanciare un'eccezione dove prima non ce n'era è un rafforzamento della pre-condizione (rende invalidi input che prima erano validi)." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Questa è una pre-condizione più forte, perché un `list.size()` di 5 sarebbe valido per il supertipo ma non per il sottotipo." }
+            ],
+            q11: "Falso. È il contrario: un metodo sovrascritto può avere un tipo di ritorno più specifico (covarianza), ma non più generico.",
+            q12: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Lanciare `UnsupportedOperationException` è una violazione dell'LSP, perché il sottotipo non supporta un comportamento che il supertipo prometteva." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Questo è un 'code smell' che indica una violazione dell'LSP. Il client non dovrebbe aver bisogno di conoscere i sottotipi concreti." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Questa è la soluzione di design corretta: se due classi non hanno un comportamento sostituibile, non dovrebbero essere in una relazione di ereditarietà. La composizione è un'alternativa più flessibile e sicura." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Questo previene il problema, ma non lo risolve. È una misura drastica che elimina la possibilità di estensione, che potrebbe essere desiderabile." }
+            ],
+            q13: "Falso. L'LSP si applica a qualsiasi relazione di sottotipo, inclusa una classe concreta che implementa un'interfaccia, o una classe astratta che estende un'altra classe astratta. Riguarda la coerenza comportamentale in qualsiasi punto della gerarchia.",
+            q14: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Poiché i client possono fare affidamento sul contratto del supertipo, il comportamento del sistema diventa più prevedibile e meno soggetto a errori." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. L'LSP è un principio di design per la correttezza, non per le prestazioni. Non ha un impatto diretto sull'ottimizzazione del compilatore." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Questo è uno dei benefici principali: il codice client può essere scritto una volta per l'astrazione (supertipo) e funzionerà correttamente con qualsiasi implementazione futura che rispetti l'LSP." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. L'LSP non è correlato all'ereditarietà multipla, che in Java è possibile solo tramite interfacce (ereditarietà di tipo, non di stato o implementazione)." }
+            ],
+            q15: "No. Secondo la 'Regola della Firma' dell'LSP, un metodo sovrascritto non può dichiarare di lanciare nuove eccezioni *checked* che non siano state dichiarate (o che non siano sottotipi di quelle dichiarate) nel metodo del supertipo. Questo romperebbe il codice client che si aspetta di gestire solo le eccezioni dichiarate da `SUPER.m()`."
+        };
+
+        const submitBtn = document.getElementById('submit-quiz-btn');
+        submitBtn.addEventListener('click', () => {
+            let score = 0;
+            const totalQuestions = Object.keys(solutions).length;
+
+            for (const qId in solutions) {
+                const questionBlock = document.getElementById(qId);
+                const feedbackEl = questionBlock.querySelector('.feedback');
+                const inputs = questionBlock.querySelectorAll(`input[name=${qId}]`);
+                
+                let isCorrect = false;
+                const correctAnswer = solutions[qId]; 
+                
+                if (Array.isArray(correctAnswer)) { // Checkbox
+                    const selectedValues = Array.from(inputs).filter(i => i.checked).map(i => i.value).sort().join(',');
+                    const correctValues = correctAnswer.sort().join(',');
+                    isCorrect = selectedValues === correctValues;
+
+                } else { // Radio
+                    const selectedInput = Array.from(inputs).find(i => i.checked);
+                    if (selectedInput && selectedInput.value === correctAnswer) {
+                        isCorrect = true;
+                    }
+                }
+
+                feedbackEl.style.display = 'block';
+                let detailedExplanationHtml = `<p class="summary-status">${isCorrect ? 'Corretto!' : 'Sbagliato!'}</p>`;
+                
+                if (Array.isArray(explanations[qId])) { // Se le spiegazioni sono per opzione
+                    explanations[qId].forEach(exp => {
+                         detailedExplanationHtml += `<p class="option-explanation ${exp.status}"><strong>${exp.option.toUpperCase()})</strong> ${exp.text}</p>`;
+                    });
+                } else {
+                    detailedExplanationHtml += `<p>${explanations[qId]}</p>`;
+                }
+                
+                feedbackEl.innerHTML = detailedExplanationHtml;
+
+                if (isCorrect) {
+                    score++;
+                    feedbackEl.classList.remove('incorrect');
+                    feedbackEl.classList.add('correct');
+                } else {
+                    feedbackEl.classList.remove('correct');
+                    feedbackEl.classList.add('incorrect');
+                }
+            }
+            
+            // Mostra il riepilogo finale
+            const resultsSummary = document.getElementById('results-summary');
+            const scoreEl = document.getElementById('score');
+            const summaryTextEl = document.getElementById('summary-text');
+            
+            scoreEl.textContent = `Punteggio: ${score} / ${totalQuestions}`;
+            if (score === totalQuestions) {
+                summaryTextEl.textContent = "Eccellente! Hai una solida comprensione del Principio di Sostituzione di Liskov.";
+                scoreEl.style.color = 'var(--accent-success)';
+            } else if (score >= totalQuestions * 0.75) { 
+                summaryTextEl.textContent = "Molto bene! Hai compreso la maggior parte dei concetti. Rileggi le spiegazioni per consolidare i punti deboli.";
+                scoreEl.style.color = 'var(--accent-primary)';
+            } else if (score >= totalQuestions / 2) { 
+                summaryTextEl.textContent = "Buon lavoro! Ci sono alcuni concetti da rivedere. Rileggi attentamente la lezione e le spiegazioni fornite.";
+                scoreEl.style.color = 'var(--accent-warning)';
+            } else { 
+                summaryTextEl.textContent = "Sembra che ci siano diversi punti da approfondire. Ti consiglio di ripassare la lezione e poi riprovare il quiz.";
+                scoreEl.style.color = 'var(--accent-danger)';
+            }
+            resultsSummary.style.display = 'block';
+            resultsSummary.scrollIntoView({ behavior: 'smooth' });
+            
+            submitBtn.style.display = 'none';
+        });
+    });
+    </script>
+
+</body>
+</html>

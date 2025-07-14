@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Lezione 05: Gerarchie di Tipi e Classi Astratte</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --accent-success: #34D399;
+            --accent-danger: #f87171;
+            --accent-warning: #FACC15; 
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+        }
+        
+        header {
+            background-color: var(--bg-header);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+        header p {
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0.5rem auto 0;
+        }
+
+        main {
+            padding: 2.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .quiz-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .question-block {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            border-left: 4px solid var(--accent-secondary);
+        }
+
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title .question-number {
+            display: inline-block;
+            background-color: var(--accent-secondary);
+            color: var(--bg-header);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 0.75rem;
+            font-weight: 700;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .options-list label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .options-list label:hover {
+            background-color: rgba(96, 165, 250, 0.1);
+            border-color: var(--accent-primary);
+        }
+
+        .options-list input[type="radio"],
+        .options-list input[type="checkbox"] {
+            width: 1.2em;
+            height: 1.2em;
+            accent-color: var(--accent-secondary);
+        }
+        
+        pre {
+            background-color: var(--code-bg) !important;
+            padding: 1rem !important;
+            border-radius: var(--border-radius-small) !important;
+            margin: 1rem 0 !important;
+            font-size: 0.9em !important;
+        }
+
+        .submit-container {
+            text-align: center;
+            margin-top: 3rem;
+        }
+        
+        .submit-btn {
+            background-color: var(--accent-primary);
+            color: var(--bg-header);
+            border: none;
+            padding: 0.8rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: var(--border-radius-small);
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .submit-btn:hover {
+            background-color: var(--accent-success);
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            display: none; /* Hidden by default */
+        }
+        .feedback.correct {
+            background-color: rgba(52, 211, 153, 0.1);
+            border: 1px solid var(--accent-success);
+            color: var(--accent-success);
+        }
+        .feedback.incorrect {
+            background-color: rgba(248, 113, 113, 0.1);
+            border: 1px solid var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        .feedback p { margin: 0; }
+        .feedback p.summary-status { font-weight: bold; margin-bottom: 0.5rem; }
+        
+        .option-explanation {
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+            border-left: 2px solid;
+            font-size: 0.9em;
+        }
+        .option-explanation.correct-option {
+            border-color: var(--accent-success);
+            color: var(--accent-success);
+        }
+        .option-explanation.incorrect-option {
+            border-color: var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        
+        #results-summary {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            text-align: center;
+            display: none;
+            margin-top: 2rem;
+        }
+        #results-summary h2 { color: var(--accent-primary); margin-bottom: 1rem; }
+        #score { font-size: 1.5rem; font-weight: bold; }
+        #summary-text { color: var(--text-secondary); margin-top: 0.5rem; }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.6rem; }
+            main { padding: 1.5rem 1rem; }
+            .question-block { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Quiz: Gerarchie di Tipi e Classi Astratte</h1>
+        <p>Verifica la tua comprensione dei ruoli di interfacce e classi astratte, dell'ereditarietà e del polimorfismo.</p>
+    </header>
+
+    <main>
+        <form id="quiz-form" class="quiz-container">
+            <!-- Domanda 1 -->
+            <div class="question-block" id="q1">
+                <p class="question-title"><span class="question-number">1</span>Qual è la differenza principale tra un'interfaccia e una classe astratta in Java (pre-Java 8)?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q1" value="a">Un'interfaccia può avere solo metodi astratti e costanti, mentre una classe astratta può avere metodi concreti e variabili di istanza.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="b">Una classe astratta non può essere istanziata, mentre un'interfaccia sì.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="c">Una classe può implementare più classi astratte ma estendere solo un'interfaccia.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="d">Le classi astratte sono usate per il polimorfismo, le interfacce no.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 2 -->
+            <div class="question-block" id="q2">
+                <p class="question-title"><span class="question-number">2</span>In quale dei seguenti scenari è più appropriato usare una <strong>classe astratta</strong> invece di un'interfaccia?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q2" value="a">Per definire un contratto che può essere implementato da classi non correlate tra loro, come `Comparable`.</label></li>
+                    <li><label><input type="checkbox" name="q2" value="b">Quando si vuole permettere a una classe di ereditare da più tipi.</label></li>
+                    <li><label><input type="checkbox" name="q2" value="c">Quando si vuole fornire uno stato (`variabili di istanza`) e un'implementazione di base comuni a una famiglia di sottoclassi strettamente correlate.</label></li>
+                    <li><label><input type="checkbox" name="q2" value="d">Quando si vuole solo definire un contratto pubblico senza fornire alcuna implementazione.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 3 -->
+            <div class="question-block" id="q3">
+                <p class="question-title"><span class="question-number">3</span>Una classe può estendere più di una classe (astratta o concreta) in Java.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q3" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q3" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 4 -->
+            <div class="question-block" id="q4">
+                <p class="question-title"><span class="question-number">4</span>Cosa significa "programmare verso un'interfaccia, non verso un'implementazione"?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q4" value="a">Dichiarare le variabili con il tipo dell'interfaccia (`List<String> list = ...`) invece del tipo della classe concreta (`ArrayList<String> list = ...`).</label></li>
+                    <li><label><input type="checkbox" name="q4" value="b">Significa che ogni classe deve implementare almeno un'interfaccia.</label></li>
+                    <li><label><input type="checkbox" name="q4" value="c">È un modo per scrivere codice più flessibile e disaccoppiato, che dipende da contratti astratti piuttosto che da dettagli implementativi specifici.</label></li>
+                    <li><label><input type="checkbox" name="q4" value="d">È una pratica sconsigliata perché nasconde il tipo reale dell'oggetto.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 5 -->
+            <div class="question-block" id="q5">
+                <p class="question-title"><span class="question-number">5</span>Considera il seguente codice. Quali righe provocheranno un errore di compilazione?</p>
+                <pre><code class="language-java">
+abstract class Animale {
+    public abstract void emettiVerso();
+}
+class Cane extends Animale {
+    @Override public void emettiVerso() { System.out.println("Bau"); }
+    public void scodinzola() { System.out.println("Scodinzola"); }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Animale a1 = new Animale();    // Riga 1
+        Animale a2 = new Cane();       // Riga 2
+        a2.emettiVerso();              // Riga 3
+        a2.scodinzola();               // Riga 4
+    }
+}
+                </code></pre>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q5" value="a">Riga 1</label></li>
+                    <li><label><input type="checkbox" name="q5" value="b">Riga 2</label></li>
+                    <li><label><input type="checkbox" name="q5" value="c">Riga 3</label></li>
+                    <li><label><input type="checkbox" name="q5" value="d">Riga 4</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 6 -->
+            <div class="question-block" id="q6">
+                <p class="question-title"><span class="question-number">6</span>Il polimorfismo in Java permette a una variabile di tipo superclasse di contenere un riferimento a un oggetto di una sottoclasse.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q6" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q6" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 7 -->
+            <div class="question-block" id="q7">
+                <p class="question-title"><span class="question-number">7</span>Cosa può contenere un'interfaccia Java (considerando Java 8 e versioni successive)? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q7" value="a">Metodi astratti (senza corpo).</label></li>
+                    <li><label><input type="checkbox" name="q7" value="b">Metodi `default` (con un'implementazione di base).</label></li>
+                    <li><label><input type="checkbox" name="q7" value="c">Variabili di istanza (`private int x;`).</label></li>
+                    <li><label><input type="checkbox" name="q7" value="d">Metodi `static`.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="e">Costruttori.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 8 -->
+            <div class="question-block" id="q8">
+                <p class="question-title"><span class="question-number">8</span>Se una classe `A` implementa un'interfaccia `I`, è obbligata a fornire un'implementazione per tutti i metodi astratti di `I`?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q8" value="a">Sì, sempre.</label></li>
+                    <li><label><input type="checkbox" name="q8" value="b">No, può scegliere quali implementare.</label></li>
+                    <li><label><input type="checkbox" name="q8" value="c">No, se la classe `A` è essa stessa dichiarata `abstract`.</label></li>
+                    <li><label><input type="checkbox" name="q8" value="d">No, se i metodi dell'interfaccia sono `default`.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 9 -->
+            <div class="question-block" id="q9">
+                <p class="question-title"><span class="question-number">9</span>Qual è il beneficio principale di una gerarchia di tipi ben progettata?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q9" value="a">Ridurre la quantità di codice da scrivere attraverso il riuso.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="b">Aumentare la flessibilità e la manutenibilità del sistema, permettendo di trattare oggetti diversi in modo uniforme.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="c">Migliorare le performance del programma.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="d">Rendere il codice più difficile da capire per i programmatori junior.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 10 -->
+            <div class="question-block" id="q10">
+                <p class="question-title"><span class="question-number">10</span>Una classe astratta può essere dichiarata `final`.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q10" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q10" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 11 -->
+            <div class="question-block" id="q11">
+                <p class="question-title"><span class="question-number">11</span>Quando si usa `extends` e quando si usa `implements`?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q11" value="a">Si usa `extends` per ereditare da una classe (concreta o astratta) e `implements` per implementare un'interfaccia.</label></li>
+                    <li><label><input type="checkbox" name="q11" value="b">Si usa `implements` per ereditare da una classe e `extends` per un'interfaccia.</label></li>
+                    <li><label><input type="checkbox" name="q11" value="c">Un'interfaccia può `extends` un'altra interfaccia.</label></li>
+                    <li><label><input type="checkbox" name="q11" value="d">Una classe può `implements` un'altra classe.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 12 -->
+            <div class="question-block" id="q12">
+                <p class="question-title"><span class="question-number">12</span>Una classe astratta può non avere alcun metodo astratto.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q12" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q12" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 13 -->
+            <div class="question-block" id="q13">
+                <p class="question-title"><span class="question-number">13</span>Considerando la gerarchia `Veicolo -> Automobile`, quale di queste affermazioni è corretta riguardo al dispatching dei metodi?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q13" value="a">La decisione su quale metodo `overload` chiamare è presa a compile-time basandosi sul tipo apparente degli argomenti.</label></li>
+                    <li><label><input type="checkbox" name="q13" value="b">La decisione su quale metodo `override` eseguire è presa a run-time basandosi sul tipo reale dell'oggetto.</label></li>
+                    <li><label><input type="checkbox" name="q13" value="c">Entrambe le decisioni (overload e override) vengono prese a run-time.</label></li>
+                    <li><label><input type="checkbox" name="q13" value="d">Entrambe le decisioni (overload e override) vengono prese a compile-time.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 14 -->
+            <div class="question-block" id="q14">
+                <p class="question-title"><span class="question-number">14</span>Quale delle seguenti affermazioni descrive meglio l'uso di `default methods` in un'interfaccia (Java 8+)?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q14" value="a">Permettono di aggiungere nuovi metodi a un'interfaccia senza "rompere" le classi esistenti che la implementano.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="b">Trasformano l'interfaccia in una classe astratta.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="c">Sono obbligatori per tutte le classi che implementano l'interfaccia.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="d">Permettono di definire variabili di istanza nell'interfaccia.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 15 -->
+            <div class="question-block" id="q15">
+                <p class="question-title"><span class="question-number">15</span>Qual è il motivo principale per cui Java non supporta l'ereditarietà multipla da classi?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q15" value="a">Per problemi di performance.</label></li>
+                    <li><label><input type="checkbox" name="q15" value="b">Per evitare il "problema del diamante" (Diamond Problem), dove una classe eredita implementazioni contrastanti dello stesso metodo da due superclassi diverse.</label></li>
+                    <li><label><input type="checkbox" name="q15" value="c">Perché le interfacce sono sempre un'alternativa migliore.</label></li>
+                    <li><label><input type="checkbox" name="q15" value="d">Perché renderebbe il codice troppo flessibile.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+        </form>
+
+        <div class="submit-container">
+            <button type="button" id="submit-quiz-btn" class="submit-btn">Verifica Risposte</button>
+        </div>
+
+        <div id="results-summary">
+            <h2>Risultato del Quiz</h2>
+            <p id="score"></p>
+            <p id="summary-text"></p>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const solutions = {
+            q1: ['a'],
+            q2: ['c'],
+            q3: 'b',
+            q4: ['a', 'c'],
+            q5: ['a', 'd'],
+            q6: 'a',
+            q7: ['a', 'b', 'd'],
+            q8: ['c', 'd'],
+            q9: ['b'],
+            q10: 'b',
+            q11: ['a', 'c'],
+            q12: 'a',
+            q13: ['a', 'b'],
+            q14: ['a'],
+            q15: ['b']
+        };
+
+        const explanations = {
+            q1: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Un'interfaccia è un contratto puro (metodi astratti e costanti), mentre una classe astratta può fornire stato e implementazioni parziali." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Nessuna delle due può essere istanziata direttamente con `new`." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. È il contrario: una classe può estendere una sola classe, ma implementare più interfacce." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Entrambe sono strumenti fondamentali per il polimorfismo." }
+            ],
+            q2: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Per classi non correlate, un'interfaccia è la scelta migliore." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Questo è un caso d'uso per le interfacce." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Questo è il caso d'uso ideale per una classe astratta: condividere stato e implementazione di base all'interno di una famiglia di tipi strettamente legati." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Questo è il caso d'uso ideale per un'interfaccia." }
+            ],
+            q3: "Falso. Java supporta solo l'ereditarietà singola da classi, per evitare le complicazioni dell'ereditarietà multipla di stato e implementazione (come il 'Diamond Problem').",
+            q4: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Questa è l'applicazione pratica del principio: il codice dipende dal tipo più generale possibile, l'interfaccia." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Non è un obbligo, ma una buona pratica di design." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Questo è il beneficio principale: il codice che dipende da `List` può funzionare con un `ArrayList`, un `LinkedList` o qualsiasi altra implementazione futura di `List` senza dover essere modificato." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Nascondere i dettagli è un vantaggio, non uno svantaggio, perché promuove il disaccoppiamento." }
+            ],
+            q5: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Le classi astratte non possono essere istanziate direttamente. Errore di compilazione." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Questa riga è corretta: è un esempio di polimorfismo." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Questa chiamata è polimorfica e corretta. Verrà eseguito il metodo `emettiVerso` della classe `Cane`." },
+                { option: 'd', status: 'correct-option', text: "Corretto. La variabile `a2` ha tipo apparente `Animale`. Il compilatore non vede il metodo `scodinzola()`, che appartiene solo alla classe `Cane`. Errore di compilazione." }
+            ],
+            q6: "Vero. Questa è la definizione stessa del polimorfismo per riferimento in Java. Permette di scrivere codice generico che opera su supertipi, aumentando la flessibilità.",
+            q7: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Questo è lo scopo primario di un'interfaccia." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Da Java 8, le interfacce possono avere metodi `default` per fornire un'implementazione di base." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Le interfacce non possono avere variabili di istanza. Possono avere solo costanti (`public static final`)." },
+                { option: 'd', status: 'correct-option', text: "Corretto. Da Java 8, le interfacce possono avere metodi `static`." },
+                { option: 'e', status: 'incorrect-option', text: "Sbagliato. Le interfacce non possono avere costruttori, poiché non possono essere istanziate." }
+            ],
+            q8: [
+                { option: 'a', status: 'incorrect-option', text: "Non è 'sempre' vero. Vedi opzione (c)." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Questa affermazione è incorretta." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Se la classe `A` è essa stessa `abstract`, può scegliere di non implementare alcuni metodi dell'interfaccia, delegando l'obbligo di implementazione alle sue sottoclassi concrete." },
+                { option: 'd', status: 'correct-option', text: "Corretto. Se un metodo è `default` nell'interfaccia, fornisce già un'implementazione. La classe che implementa l'interfaccia eredita questa implementazione e non è obbligata a sovrascriverla." }
+            ],
+            q9: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Il riuso del codice è un beneficio, ma non quello principale. Il riuso del codice fine a se stesso può portare a violazioni dell'LSP." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Il beneficio principale è creare un sistema in cui i componenti sono disaccoppiati e possono essere estesi o sostituiti facilmente, grazie al polimorfismo." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. L'ereditarietà può avere un leggero overhead di performance dovuto al dispatching dinamico, quindi non è primariamente uno strumento di ottimizzazione." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Una gerarchia ben progettata dovrebbe rendere il codice *più facile* da capire, non più difficile." }
+            ],
+            q10: "Falso. Una classe dichiarata `abstract` è progettata per essere estesa. Una classe dichiarata `final` non può essere estesa. I due modificatori sono mutuamente esclusivi e il compilatore segnala un errore.",
+            q11: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Questa è la sintassi fondamentale dell'ereditarietà e dell'implementazione di interfacce in Java." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. È l'esatto contrario." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Le interfacce possono ereditare da altre interfacce (anche più di una), aggregando più contratti in uno nuovo." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Una classe non può 'implementare' un'altra classe; può solo 'estenderla'." }
+            ],
+            q12: "Vero. Una classe può essere dichiarata `abstract` anche solo per impedire la sua istanziazione diretta, pur fornendo un'implementazione completa che le sottoclassi possono ereditare o usare.",
+            q13: [
+                { option: 'a', status: 'correct-option', text: "Corretto. La risoluzione dell'overloading (quale metodo chiamare basandosi sulla lista dei parametri) avviene a tempo di compilazione." },
+                { option: 'b', status: 'correct-option', text: "Corretto. La risoluzione dell'overriding (quale versione di un metodo eseguire) avviene a tempo di esecuzione, in base al tipo reale dell'oggetto. Questo è il cuore del polimorfismo dinamico." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. L'overloading è risolto a compile-time." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. L'overriding è risolto a run-time." }
+            ],
+            q14: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Questo è lo scopo principale dei metodi default: permettere l'evoluzione delle interfacce senza costringere tutte le classi esistenti a essere modificate." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Un'interfaccia rimane un'interfaccia. Non può avere stato o costruttori come una classe astratta." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. I metodi default sono, per definizione, non obbligatori da implementare; la classe eredita l'implementazione di default." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Le interfacce non possono avere variabili di istanza." }
+            ],
+            q15: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Sebbene ci possa essere un piccolo overhead, il motivo principale è la gestione della complessità e dell'ambiguità." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Il 'Diamond Problem' si verifica quando una classe D eredita da due classi B e C, che a loro volta ereditano da una classe A. Se B e C sovrascrivono un metodo di A, quale versione dovrebbe ereditare D? Java evita questa ambiguità proibendo l'ereditarietà multipla di implementazione." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Sebbene le interfacce siano un'ottima alternativa, ci sono casi d'uso validi per le classi astratte (condivisione di stato e codice)." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. L'obiettivo della OOP è gestire la complessità, non limitare la flessibilità in modo arbitrario." }
+            ]
+        };
+
+        const submitBtn = document.getElementById('submit-quiz-btn');
+        submitBtn.addEventListener('click', () => {
+            let score = 0;
+            const totalQuestions = Object.keys(solutions).length;
+
+            for (const qId in solutions) {
+                const questionBlock = document.getElementById(qId);
+                const feedbackEl = questionBlock.querySelector('.feedback');
+                const inputs = questionBlock.querySelectorAll(`input[name=${qId}]`);
+                
+                let isCorrect = false;
+                const correctAnswer = solutions[qId]; 
+                
+                if (Array.isArray(correctAnswer)) { // Checkbox
+                    const selectedValues = Array.from(inputs).filter(i => i.checked).map(i => i.value).sort().join(',');
+                    const correctValues = correctAnswer.sort().join(',');
+                    isCorrect = selectedValues === correctValues;
+                } else { // Radio
+                    const selectedInput = Array.from(inputs).find(i => i.checked);
+                    if (selectedInput && selectedInput.value === correctAnswer) {
+                        isCorrect = true;
+                    }
+                }
+
+                feedbackEl.style.display = 'block';
+                let detailedExplanationHtml = `<p class="summary-status">${isCorrect ? 'Corretto!' : 'Sbagliato!'}</p>`;
+                
+                if (Array.isArray(explanations[qId])) { // Spiegazioni per opzione
+                    explanations[qId].forEach(exp => {
+                         detailedExplanationHtml += `<p class="option-explanation ${exp.status}"><strong>${exp.option.toUpperCase()})</strong> ${exp.text}</p>`;
+                    });
+                } else {
+                    detailedExplanationHtml += `<p>${explanations[qId]}</p>`;
+                }
+                
+                feedbackEl.innerHTML = detailedExplanationHtml;
+
+                if (isCorrect) {
+                    score++;
+                    feedbackEl.classList.remove('incorrect');
+                    feedbackEl.classList.add('correct');
+                } else {
+                    feedbackEl.classList.remove('correct');
+                    feedbackEl.classList.add('incorrect');
+                }
+            }
+            
+            // Mostra riepilogo finale
+            const resultsSummary = document.getElementById('results-summary');
+            const scoreEl = document.getElementById('score');
+            const summaryTextEl = document.getElementById('summary-text');
+            
+            scoreEl.textContent = `Punteggio: ${score} / ${totalQuestions}`;
+            if (score === totalQuestions) {
+                summaryTextEl.textContent = "Eccellente! Hai una solida comprensione dei concetti.";
+                scoreEl.style.color = 'var(--accent-success)';
+            } else if (score >= totalQuestions * 0.75) { 
+                summaryTextEl.textContent = "Molto bene! Hai compreso la maggior parte dei concetti. Rileggi le spiegazioni per consolidare i punti deboli.";
+                scoreEl.style.color = 'var(--accent-primary)';
+            } else if (score >= totalQuestions / 2) { 
+                summaryTextEl.textContent = "Buon lavoro! Ci sono alcuni concetti da rivedere. Rileggi attentamente la lezione e le spiegazioni fornite.";
+                scoreEl.style.color = 'var(--accent-warning)';
+            } else { 
+                summaryTextEl.textContent = "Sembra che ci siano diversi punti da approfondire. Ti consiglio di ripassare la lezione e poi riprovare il quiz.";
+                scoreEl.style.color = 'var(--accent-danger)';
+            }
+            resultsSummary.style.display = 'block';
+            resultsSummary.scrollIntoView({ behavior: 'smooth' });
+            
+            submitBtn.style.display = 'none';
+        });
+    });
+    </script>
+
+</body>
+</html>
