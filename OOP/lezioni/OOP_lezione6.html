@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 06: Principio di Sostituzione di Liskov (LSP)</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Librerie Esterne -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <!-- CSS Comune -->
+    <link rel="stylesheet" href="../assets/css/common.css">
+
+    <style>
+        .box-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body data-pdf-path="../slides/Type families.pdf"> <!-- Aggiorna con il path corretto -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 06: Il Principio di Sostituzione di Liskov (LSP)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="OOP_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-lsp" class="sidebar-link">1. L'Importanza dell'LSP</a></li>
+            <li><a href="#lsp-definition" class="sidebar-link">2. Definizione del Principio</a></li>
+            <li><a href="#case-study-rect-square" class="sidebar-link">3. Caso di Studio: Rettangolo e Quadrato</a></li>
+            <li><a href="#the-bug" class="sidebar-link">3.1. Il Problema Comportamentale</a></li>
+            <li><a href="#lsp-rules" class="sidebar-link">4. Le Regole dell'LSP</a></li>
+            <li><a href="#signature-rule" class="sidebar-link">4.1. Regola della Firma</a></li>
+            <li><a href="#methods-rule" class="sidebar-link">4.2. Regola dei Metodi (Pre/Post-condizioni)</a></li>
+            <li><a href="#properties-rule" class="sidebar-link">4.3. Regola delle Proprietà (Invarianti)</a></li>
+            <li><a href="#conclusions" class="sidebar-link">5. Conclusioni e Alternative</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-lsp" class="content-section active-section">
+            <h2 class="section-title">1. L'Importanza dell'LSP</h2>
+            <div class="section-content">
+                <p>Nelle lezioni precedenti abbiamo visto come l'ereditarietà e il polimorfismo ci permettano di creare gerarchie di tipi flessibili. Tuttavia, l'ereditarietà non è solo un meccanismo per riutilizzare il codice. È prima di tutto un meccanismo per definire una relazione di <strong>sottotipo comportamentale</strong>.</p>
+                <p>Se una classe `Sottotipo` estende `Supertipo`, implicitamente dichiariamo che "un `Sottotipo` è un `Supertipo`". Questo significa che ogni istanza di `Sottotipo` dovrebbe potersi comportare come un'istanza di `Supertipo` senza sorprendere il client o rompere il programma.</p>
+                <p>Il <strong>Principio di Sostituzione di Liskov (LSP)</strong>, formulato da Barbara Liskov, fornisce le regole formali per garantire che questa relazione di sottotipo sia semanticamente corretta.</p>
+                <div class="warning-box">
+                    <div class="box-title">⚠️ Il Rischio</div>
+                    Una violazione dell'LSP porta a gerarchie fragili, codice imprevedibile e bug difficili da scovare. Il compilatore Java può verificare solo la correttezza sintattica (le firme dei metodi), ma non quella comportamentale. <strong>Garantire l'LSP è una responsabilità del programmatore.</strong>
+                </div>
+            </div>
+        </article>
+
+        <article id="lsp-definition" class="content-section">
+            <h2 class="section-title">2. Definizione del Principio</h2>
+            <div class="section-content">
+                <p>La definizione formale dell'LSP può essere espressa così:</p>
+                <div class="note-box">
+                    <div class="box-title">💡 Principio di Sostituzione di Liskov</div>
+                    "Se per ogni oggetto `o1` di tipo `S` esiste un oggetto `o2` di tipo `T` tale che per tutti i programmi `P` definiti in termini di `S`, il comportamento di `P` non cambia quando `o1` è sostituito con `o2`, allora `T` è un sottotipo di `S`."
+                </div>
+                <p>In parole più semplici: <strong>i sottotipi devono essere sostituibili ai loro supertipi senza alterare la correttezza del programma</strong>. Un client che usa un riferimento a un `Supertipo` non dovrebbe nemmeno accorgersi (o preoccuparsi) se l'oggetto reale che sta manipolando è un'istanza del `Supertipo` o di uno qualsiasi dei suoi `Sottotipi`.</p>
+            </div>
+        </article>
+        
+        <article id="case-study-rect-square" class="content-section">
+            <h2 class="section-title">3. Caso di Studio: Rettangolo e Quadrato</h2>
+            <div class="section-content">
+                <p>L'esempio più classico di violazione dell'LSP è la relazione tra `Rettangolo` e `Quadrato`. Intuitivamente, un quadrato "è un" rettangolo. Proviamo a modellarlo con l'ereditarietà.</p>
+                <pre><code class="language-java">
+public class Rettangolo {
+    protected int base;
+    protected int altezza;
+
+    public void setBase(int base) { this.base = base; }
+    public void setAltezza(int altezza) { this.altezza = altezza; }
+
+    // ... altri metodi come getBase, getAltezza, area ...
+}
+
+public class Quadrato extends Rettangolo {
+    // Un quadrato deve avere base e altezza uguali.
+    // Tentiamo di forzare questo invariante sovrascrivendo i setter.
+
+    @Override
+    public void setBase(int lato) {
+        super.setBase(lato);
+        super.setAltezza(lato); // Violazione in agguato!
+    }
+
+    @Override
+    public void setAltezza(int lato) {
+        super.setAltezza(lato);
+        super.setBase(lato); // Violazione in agguato!
+    }
+}
+                </code></pre>
+            </div>
+        </article>
+        
+        <article id="the-bug" class="content-section">
+            <h3 class="subsection-title">3.1. Il Problema Comportamentale</h3>
+            <div class="section-content">
+                <p>A prima vista, il codice sembra corretto. Ma cosa succede quando un client usa questi oggetti in modo polimorfico?</p>
+                <pre><code class="language-java">
+public class Client {
+    public void unaFunzione(Rettangolo r) {
+        // Il contratto implicito di questo metodo si aspetta che, dopo aver impostato
+        // base e altezza, queste rimangano indipendenti.
+        r.setBase(5);
+        r.setAltezza(4);
+
+        // Mi aspetto che l'area sia 5 * 4 = 20.
+        assert r.area() == 20;
+    }
+
+    public static void main(String[] args) {
+        Client c = new Client();
+        Rettangolo rettangolo = new Rettangolo();
+        Rettangolo quadrato = new Quadrato();
+
+        c.unaFunzione(rettangolo); // OK, l'assert passa (area è 20).
+        c.unaFunzione(quadrato);   // ERRORE! L'assert fallisce.
+    }
+}
+                </code></pre>
+                <p>Quando `unaFunzione` riceve un `Quadrato`, succede questo:</p>
+                <ol>
+                    <li>`r.setBase(5)` imposta sia la base che l'altezza a 5. Il quadrato diventa 5x5.</li>
+                    <li>`r.setAltezza(4)` imposta sia l'altezza che la base a 4. Il quadrato diventa 4x4.</li>
+                    <li>L'area calcolata è `4 * 4 = 16`, non 20. L'asserzione fallisce.</li>
+                </ol>
+                <div class="warning-box">
+                    <div class="box-title">⚠️ Violazione del Contratto</div>
+                    Il problema non è che il `Quadrato` si comporta in modo errato per un quadrato, ma che <strong>si comporta in modo diverso da un `Rettangolo`</strong>. Il metodo `setBase` del `Rettangolo` ha una post-condizione implicita: "la base cambia, l'altezza rimane invariata". Il metodo `setBase` del `Quadrato` viola questa post-condizione, alterando anche l'altezza. Per questo, un `Quadrato` non è un sottotipo comportamentale corretto di `Rettangolo`.
+                </div>
+            </div>
+        </article>
+        
+        <article id="lsp-rules" class="content-section">
+            <h2 class="section-title">4. Le Regole dell'LSP</h2>
+            <div class="section-content">
+                <p>Per essere un sottotipo corretto, una classe `SUB` che estende `SUPER` deve rispettare tre insiemi di regole.</p>
+            </div>
+        </article>
+
+        <article id="signature-rule" class="content-section">
+            <h3 class="subsection-title">4.1. Regola della Firma (Garantita da Java)</h3>
+            <div class="section-content">
+                <p>Il sottotipo deve avere tutti i metodi del supertipo, con firme compatibili.</p>
+                <ul>
+                    <li>I tipi dei parametri devono essere identici (o più generali nel sottotipo - controvarianza, non supportato da Java).</li>
+                    <li>Il tipo di ritorno può essere più specifico nel sottotipo (covarianza).</li>
+                    <li>Il sottotipo può lanciare <strong>meno eccezioni</strong> (o eccezioni più specifiche) rispetto al metodo sovrascritto, ma non di nuove o più generiche (checked).</li>
+                </ul>
+                <p>Il compilatore Java si occupa di far rispettare questa regola.</p>
+            </div>
+        </article>
+
+        <article id="methods-rule" class="content-section">
+            <h3 class="subsection-title">4.2. Regola dei Metodi (Pre/Post-condizioni)</h3>
+            <div class="section-content">
+                <p>Questa è la regola comportamentale chiave, non garantita dal compilatore.</p>
+                <div class="clarification-box">
+                    <div class="box-title">💡 "Richiedi meno, prometti di più"</div>
+                    <ul>
+                        <li><strong>Pre-condizioni:</strong> Un metodo sovrascritto nel sottotipo non può avere pre-condizioni più forti (più restrittive) di quelle del supertipo. Può averle uguali o <strong>più deboli</strong>.
+                            <br>Formalmente: \( \text{pre}_{SUPER}(x) \implies \text{pre}_{SUB}(x) \)</li>
+                        <li><strong>Post-condizioni:</strong> Un metodo sovrascritto nel sottotipo non può avere post-condizioni più deboli (promettere di meno) di quelle del supertipo. Può averle uguali o <strong>più forti</strong>.
+                            <br>Formalmente: \( \text{post}_{SUB}(x) \implies \text{post}_{SUPER}(x) \)</li>
+                    </ul>
+                </div>
+                <p>Nel nostro esempio, il `Quadrato` viola la regola delle post-condizioni. La post-condizione di `Rettangolo.setBase` è \( \text{this.base} = b \land \text{this.altezza} = \text{altezza}' \). Quella di `Quadrato.setBase` è \( \text{this.base} = b \land \text{this.altezza} = b \). La seconda non implica la prima (perché cambia anche l'altezza).</p>
+            </div>
+        </article>
+
+        <article id="properties-rule" class="content-section">
+            <h3 class="subsection-title">4.3. Regola delle Proprietà (Invarianti)</h3>
+            <div class="section-content">
+                <p>Un sottotipo deve preservare tutte le proprietà e gli invarianti del suo supertipo.</p>
+                <div class="exercise-box">
+                    <div class="box-title">Esempio: `FatIntSet` vs. `ThinIntSet`</div>
+                    <p>Immaginiamo una classe `FatIntSet` il cui invariante è "l'insieme non può mai essere vuoto". Se creiamo una sottoclasse `ThinIntSet` che estende `FatIntSet` ma permette all'insieme di diventare vuoto tramite un'operazione `remove()`, allora `ThinIntSet` non è un sottotipo valido di `FatIntSet` perché viola il suo invariante fondamentale.</p>
+                </div>
+                <p>Anche la relazione `Rettangolo`/`Quadrato` viola questa regola. Un invariante di `Rettangolo` è che "la base e l'altezza sono proprietà indipendenti". Il `Quadrato` invalida questa proprietà, legandole insieme.</p>
+            </div>
+        </article>
+
+        <article id="conclusions" class="content-section">
+            <h2 class="section-title">5. Conclusioni e Alternative</h2>
+            <div class="section-content">
+                <p>Il Principio di Sostituzione di Liskov ci insegna che l'ereditarietà va usata per modellare una relazione "è un" <strong>comportamentale</strong>, non solo tassonomica.</p>
+                
+                <h3 class="subsection-title">Cosa fare quando l'LSP è violato?</h3>
+                <p>Se un sottotipo non può rispettare il contratto del suo supertipo, l'ereditarietà è la scelta sbagliata. Le alternative sono:</p>
+                <ol>
+                    <li><strong>Creare una gerarchia diversa:</strong> Magari `FormaGeometrica` è il supertipo, e `Rettangolo` e `Quadrato` sono due sottotipi fratelli, non in relazione padre-figlio.</li>
+                    <li><strong>Usare la Composizione e la Delegazione:</strong> Invece di `Quadrato extends Rettangolo`, la classe `Quadrato` potrebbe *contenere* un'istanza di un'altra classe (es. `Lato`) e delegare a essa i calcoli, senza ereditare comportamenti indesiderati.</li>
+                </ol>
+                
+                <div class="note-box">
+                    <div class="box-title">💡 Regola Pratica</div>
+                    L'ereditarietà è uno strumento potente ma anche rigido. Se hai dubbi sulla validità comportamentale di una relazione "is-a", <strong>preferisci la composizione all'ereditarietà</strong>. È una soluzione più flessibile e meno soggetta a violazioni dell'LSP.
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Programmazione Orientata agli Oggetti</p>
+    </footer>
+
+    <!-- JS Comune e PrismJS -->
+    <script src="../assets/js/common.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>
