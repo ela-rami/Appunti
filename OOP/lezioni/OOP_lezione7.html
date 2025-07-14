@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 07: Principi di Design (SOLID e CRC)</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Librerie Esterne -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <!-- CSS Comune -->
+    <link rel="stylesheet" href="../assets/css/common.css">
+
+    <style>
+        .box-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .crc-card-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .crc-card {
+            border: 2px solid var(--accent-secondary);
+            border-radius: var(--border-radius-main);
+            width: 90%;
+            max-width: 500px;
+            background-color: var(--bg-card);
+            box-shadow: 0 4px 15px var(--shadow-soft);
+        }
+        .crc-card-header {
+            padding: 0.75rem 1rem;
+            background-color: var(--accent-secondary);
+            color: var(--bg-header);
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-bottom: 2px solid var(--accent-secondary);
+        }
+        .crc-card-body {
+            display: flex;
+        }
+        .crc-card-responsibilities, .crc-card-collaborators {
+            padding: 1rem;
+            width: 50%;
+        }
+        .crc-card-responsibilities {
+            border-right: 1px solid var(--border-soft);
+        }
+        .crc-card-body h4 {
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        .crc-card-body ul {
+            list-style-type: '✔  ';
+            padding-left: 20px;
+        }
+        .crc-card-body li {
+            margin-bottom: 0.25rem;
+        }
+    </style>
+</head>
+<body data-pdf-path="../slides/Object oriented design.pdf"> <!-- Aggiorna con il path corretto -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 07: Principi di Design (SOLID e CRC)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="OOP_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#responsibility-design" class="sidebar-link">1. Responsibility-Driven Design (RDD)</a></li>
+            <li><a href="#srp" class="sidebar-link">2. Single Responsibility Principle (SRP)</a></li>
+            <li><a href="#dip" class="sidebar-link">3. Dependency Inversion Principle (DIP)</a></li>
+            <li><a href="#solid" class="sidebar-link">4. Gli altri principi SOLID</a></li>
+            <li><a href="#crc" class="sidebar-link">5. Metodologia CRC (Class-Responsibility-Collaboration)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="responsibility-design" class="content-section active-section">
+            <h2 class="section-title">1. Responsibility-Driven Design (RDD)</h2>
+            <div class="section-content">
+                <p>La progettazione orientata agli oggetti (OOP) non riguarda solo la scrittura di classi, ma la creazione di un sistema di <strong>oggetti che collaborano</strong>. L'approccio RDD si concentra sul definire prima le <strong>responsabilità</strong> del sistema e poi assegnarle agli oggetti più appropriati.</p>
+                <ul>
+                    <li><strong>Responsabilità:</strong> Un contratto o un obbligo di un componente. Descrive il comportamento di alto livello che un oggetto deve garantire.</li>
+                    <li><strong>Collaborazione:</strong> Un oggetto adempie alle sue responsabilità o da solo o collaborando con altri oggetti, delegando parte del lavoro.</li>
+                </ul>
+                <div class="clarification-box">
+                    <div class="box-title">💡 La Domanda Chiave del Design</div>
+                    La domanda fondamentale da porsi durante la progettazione non è "che stato ha questo oggetto?", ma <strong>"cosa sa fare questo oggetto?"</strong> e <strong>"con chi deve parlare per farlo?"</strong>. Il design guidato dalle responsabilità si focalizza prima sul comportamento e poi sullo stato.
+                </div>
+            </div>
+        </article>
+
+        <article id="srp" class="content-section">
+            <h2 class="section-title">2. Single Responsibility Principle (SRP)</h2>
+            <div class="section-content">
+                <p>Il Single Responsibility Principle (SRP) è il primo e forse il più importante dei principi SOLID, formalizzato da Robert C. Martin.</p>
+                <div class="note-box">
+                    <div class="box-title">💡 Definizione di SRP</div>
+                    <strong>"Una classe dovrebbe avere una e una sola ragione per cambiare."</strong>
+                </div>
+                <p>Questo non significa che una classe debba avere un solo metodo. Significa che tutti i metodi e le proprietà di una classe dovrebbero essere coesi e allineati attorno a una <strong>singola responsabilità o concetto di business</strong>.</p>
+                <p>Se una classe ha più di una responsabilità, queste responsabilità diventano accoppiate. Un cambiamento richiesto per una responsabilità potrebbe influenzare o rompere la logica dell'altra, rendendo il codice fragile e difficile da mantenere.</p>
+                
+                <h3 class="subsection-title">Esempio Pratico: La Classe `Fattura`</h3>
+                <div class="warning-box">
+                    <div class="box-title">⚠️ Violazione dell'SRP</div>
+                    <pre><code class="language-java">
+// Questa classe viola l'SRP perché ha DUE responsabilità.
+public class Fattura {
+    private List<Item> items;
+    private double totale;
+
+    // --- Responsabilità 1: Calcoli di Business ---
+    public void aggiungiItem(Item item) { /* ... */ }
+    public void calcolaTotale() { /* ... */ }
+    
+    // --- Responsabilità 2: Persistenza e Formattazione ---
+    public void salvaSuDatabase() { /* Logica SQL per salvare la fattura */ }
+    public String generaPDF() { /* Logica per creare un file PDF */ }
+}
+                    </code></pre>
+                    <p><strong>Problema:</strong> Se cambia il modo in cui calcoliamo il totale (es. aggiungendo l'IVA), dobbiamo modificare la classe. Se cambia il database (es. da MySQL a PostgreSQL) o la libreria PDF, dobbiamo modificare <strong>la stessa classe</strong>. Le due responsabilità sono accoppiate.</p>
+                </div>
+                
+                <div class="clarification-box">
+                    <div class="box-title">💡 Soluzione con SRP</div>
+                    <p>La soluzione è separare le responsabilità in classi distinte:</p>
+                    <pre><code class="language-java">
+// 1. Classe Fattura: solo logica di business
+public class Fattura {
+    private List<Item> items;
+    private double totale;
+
+    public void aggiungiItem(Item item) { /* ... */ }
+    public void calcolaTotale() { /* ... */ }
+}
+
+// 2. Classe Repository: solo persistenza
+public class FatturaRepository {
+    public void salva(Fattura fattura) { /* Logica SQL */ }
+}
+
+// 3. Classe Service/Formatter: solo formattazione
+public class FatturaPdfExporter {
+    public byte[] esporta(Fattura fattura) { /* Logica per creare PDF */ }
+}
+                    </code></pre>
+                    <p>Ora, ogni classe ha una sola ragione per cambiare. Il sistema è più modulare, testabile e manutenibile.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="dip" class="content-section">
+            <h2 class="section-title">3. Dependency Inversion Principle (DIP)</h2>
+            <div class="section-content">
+                <p>Il Dependency Inversion Principle è un altro principio SOLID fondamentale per creare software disaccoppiato e flessibile.</p>
+                 <div class="note-box">
+                    <div class="box-title">💡 Definizione di DIP</div>
+                    <ol>
+                        <li>I moduli di alto livello non dovrebbero dipendere dai moduli di basso livello. <strong>Entrambi dovrebbero dipendere da astrazioni</strong>.</li>
+                        <li>Le astrazioni non dovrebbero dipendere dai dettagli. <strong>I dettagli dovrebbero dipendere dalle astrazioni</strong>.</li>
+                    </ol>
+                </div>
+                <p>In pratica, questo significa che il codice che contiene la logica di business importante (alto livello) non dovrebbe dipendere direttamente da classi concrete che gestiscono dettagli tecnici come database, file system o chiamate di rete (basso livello). Invece, entrambi dovrebbero dipendere da **interfacce** (astrazioni).</p>
+                
+                <h3 class.subsection-title">Esempio Pratico: Servizio di Notifica</h3>
+                <div class="warning-box">
+                    <div class="box-title">⚠️ Violazione del DIP</div>
+                    <pre><code class="language-java">
+// Modulo di basso livello (dettaglio)
+public class EmailSender {
+    public void inviaEmail(String destinatario, String messaggio) { /* ... */ }
+}
+
+// Modulo di alto livello (logica di business)
+public class GestoreOrdini {
+    private EmailSender emailSender; // Dipendenza DIRETTA da una classe concreta!
+
+    public GestoreOrdini() {
+        this.emailSender = new EmailSender(); // Accoppiamento forte!
+    }
+
+    public void processaOrdine(Ordine ordine) {
+        // ... logica per processare l'ordine ...
+        emailSender.inviaEmail(ordine.getClienteEmail(), "Il tuo ordine è stato spedito!");
+    }
+}
+                    </code></pre>
+                    <p><strong>Problema:</strong> Il `GestoreOrdini` è saldamente accoppiato a `EmailSender`. Se domani volessimo inviare notifiche tramite SMS invece che email, dovremmo modificare la classe `GestoreOrdini`. Il modulo di alto livello dipende da un dettaglio di basso livello.</p>
+                </div>
+                
+                <div class="clarification-box">
+                    <div class="box-title">💡 Soluzione con DIP (Dependency Injection)</div>
+                    <p>La soluzione è introdurre un'astrazione (un'interfaccia) e usare la <strong>Dependency Injection</strong> per "iniettare" l'implementazione concreta dall'esterno.</p>
+                    <pre><code class="language-java">
+// 1. L'astrazione
+public interface ServizioNotifica {
+    void inviaNotifica(String destinatario, String messaggio);
+}
+
+// 2. Le implementazioni di basso livello dipendono dall'astrazione
+public class EmailNotifier implements ServizioNotifica {
+    @Override
+    public void inviaNotifica(String destinatario, String messaggio) { /* invia email */ }
+}
+
+public class SmsNotifier implements ServizioNotifica {
+    @Override
+    public void inviaNotifica(String destinatario, String messaggio) { /* invia SMS */ }
+}
+
+// 3. Il modulo di alto livello dipende dall'astrazione
+public class GestoreOrdini {
+    // Dipende dall'INTERFACCIA, non dalla classe concreta
+    private final ServizioNotifica servizioNotifica; 
+
+    // L'implementazione concreta viene "iniettata" dall'esterno (es. nel costruttore)
+    public GestoreOrdini(ServizioNotifica servizioNotifica) {
+        this.servizioNotifica = servizioNotifica;
+    }
+
+    public void processaOrdine(Ordine ordine) {
+        // ... logica ...
+        servizioNotifica.inviaNotifica(ordine.getClienteEmail(), "Il tuo ordine è stato spedito!");
+    }
+}
+
+// Nel Main o in una Factory, si configura il sistema:
+// GestoreOrdini gestore = new GestoreOrdini(new EmailNotifier()); // Usa le email
+// GestoreOrdini gestore = new GestoreOrdini(new SmsNotifier());   // Oppure usa gli SMS
+                    </code></pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="solid" class="content-section">
+            <h2 class="section-title">4. Gli altri principi SOLID</h2>
+            <div class="section-content">
+                <p>SRP e DIP sono due dei cinque principi SOLID. Gli altri tre sono strettamente legati a quanto visto finora:</p>
+                <ul>
+                    <li><strong>O - Open/Closed Principle (OCP):</strong> Un'entità software dovrebbe essere aperta all'estensione, ma chiusa alla modifica. Il DIP è una delle tecniche principali per ottenere l'OCP. Il nostro `GestoreOrdini` è chiuso alla modifica ma aperto all'estensione (possiamo aggiungere un `WhatsAppNotifier` senza toccare `GestoreOrdini`).</li>
+                    <li><strong>L - Liskov Substitution Principle (LSP):</strong> I sottotipi devono essere sostituibili ai loro supertipi. Lo abbiamo visto in dettaglio nella lezione precedente. È fondamentale perché il DIP funzioni correttamente.</li>
+                    <li><strong>I - Interface Segregation Principle (ISP):</strong> I client non dovrebbero essere forzati a dipendere da interfacce che non usano. È meglio avere molte interfacce piccole e specifiche piuttosto che una grande e generica.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="crc" class="content-section">
+            <h2 class="section-title">5. Metodologia CRC (Class-Responsibility-Collaboration)</h2>
+            <div class="section-content">
+                <p>La metodologia CRC è una tecnica di brainstorming semplice e potente per il design orientato agli oggetti. Si basa sull'uso di semplici schede (originariamente, schede di cartone) per rappresentare ogni classe del sistema.</p>
+                <p>Ogni scheda è divisa in tre sezioni:</p>
+                
+                <div class="crc-card-container">
+                    <div class="crc-card">
+                        <div class="crc-card-header">Nome della Classe</div>
+                        <div class="crc-card-body">
+                            <div class="crc-card-responsibilities">
+                                <h4>Responsabilità</h4>
+                                <ul>
+                                    <li>Conosce/fa qualcosa.</li>
+                                    <li>Mantiene uno stato.</li>
+                                    <li>...</li>
+                                </ul>
+                            </div>
+                            <div class="crc-card-collaborators">
+                                <h4>Collaboratori</h4>
+                                <ul>
+                                    <li>AltraClasse</li>
+                                    <li>ServizioEsterno</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="subsection-title">Come si usa?</h3>
+                <ol>
+                    <li><strong>Identifica le Classi:</strong> Dal testo dei requisiti, estrai i "sostantivi" che potrebbero diventare classi (`Fattura`, `Cliente`, `Prodotto`).</li>
+                    <li><strong>Assegna le Responsabilità:</strong> Per ogni classe, elenca le sue responsabilità principali (i "verbi" associati, es. `Fattura` -> "calcola totale").</li>
+                    <li><strong>Identifica i Collaboratori:</strong> Se una classe ha bisogno di aiuto per adempiere a una responsabilità, elenca le altre classi (o interfacce) con cui deve collaborare.</li>
+                    <li><strong>Simula Scenari:</strong> "Esegui" uno scenario d'uso muovendo fisicamente le schede e seguendo le interazioni. Questo aiuta a scoprire responsabilità mancanti o assegnate male.</li>
+                </ol>
+                <p>La tecnica CRC è un ottimo modo per applicare il Responsibility-Driven Design e i principi SOLID in modo pratico e collaborativo, prima ancora di scrivere una sola riga di codice.</p>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Programmazione Orientata agli Oggetti</p>
+    </footer>
+
+    <!-- JS Comune e PrismJS -->
+    <script src="../assets/js/common.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>
