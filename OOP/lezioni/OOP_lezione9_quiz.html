@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Lezione 09: Design Pattern Strutturali</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --accent-success: #34D399;
+            --accent-danger: #f87171;
+            --accent-warning: #FACC15; 
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+        }
+        
+        header {
+            background-color: var(--bg-header);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+        header p {
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0.5rem auto 0;
+        }
+
+        main {
+            padding: 2.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .quiz-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .question-block {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            border-left: 4px solid var(--accent-secondary);
+        }
+
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title .question-number {
+            display: inline-block;
+            background-color: var(--accent-secondary);
+            color: var(--bg-header);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 0.75rem;
+            font-weight: 700;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .options-list label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .options-list label:hover {
+            background-color: rgba(96, 165, 250, 0.1);
+            border-color: var(--accent-primary);
+        }
+
+        .options-list input[type="radio"],
+        .options-list input[type="checkbox"] {
+            width: 1.2em;
+            height: 1.2em;
+            accent-color: var(--accent-secondary);
+        }
+        
+        pre {
+            background-color: var(--code-bg) !important;
+            padding: 1rem !important;
+            border-radius: var(--border-radius-small) !important;
+            margin: 1rem 0 !important;
+            font-size: 0.9em !important;
+        }
+
+        .submit-container {
+            text-align: center;
+            margin-top: 3rem;
+        }
+        
+        .submit-btn {
+            background-color: var(--accent-primary);
+            color: var(--bg-header);
+            border: none;
+            padding: 0.8rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: var(--border-radius-small);
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .submit-btn:hover {
+            background-color: var(--accent-success);
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            display: none; /* Hidden by default */
+        }
+        .feedback.correct {
+            background-color: rgba(52, 211, 153, 0.1);
+            border: 1px solid var(--accent-success);
+            color: var(--accent-success);
+        }
+        .feedback.incorrect {
+            background-color: rgba(248, 113, 113, 0.1);
+            border: 1px solid var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        .feedback p { margin: 0; }
+        .feedback p.summary-status { font-weight: bold; margin-bottom: 0.5rem; }
+        
+        /* Stili per le spiegazioni dettagliate */
+        .option-explanation {
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+            border-left: 2px solid;
+            font-size: 0.9em;
+        }
+        .option-explanation.correct-option {
+            border-color: var(--accent-success);
+            color: var(--accent-success);
+        }
+        .option-explanation.incorrect-option {
+            border-color: var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        
+        #results-summary {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            text-align: center;
+            display: none;
+            margin-top: 2rem;
+        }
+        #results-summary h2 { color: var(--accent-primary); margin-bottom: 1rem; }
+        #score { font-size: 1.5rem; font-weight: bold; }
+        #summary-text { color: var(--text-secondary); margin-top: 0.5rem; }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.6rem; }
+            main { padding: 1.5rem 1rem; }
+            .question-block { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Quiz: Design Pattern Strutturali</h1>
+        <p>Verifica la tua comprensione dei pattern Decorator, Composite e Bridge.</p>
+    </header>
+
+    <main>
+        <form id="quiz-form" class="quiz-container">
+            <!-- Domanda 1 -->
+            <div class="question-block" id="q1">
+                <p class="question-title"><span class="question-number">1</span>Qual è lo scopo principale del pattern Decorator?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q1" value="a">Unire più oggetti in una struttura ad albero.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="b">Aggiungere dinamicamente nuove responsabilità a un oggetto senza modificare la sua classe.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="c">Disaccoppiare un'astrazione dalla sua implementazione.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="d">Creare famiglie di oggetti correlati.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 2 -->
+            <div class="question-block" id="q2">
+                <p class="question-title"><span class="question-number">2</span>Nel pattern Composite, sia gli oggetti "Leaf" (foglia) che gli oggetti "Composite" (composito) devono implementare la stessa interfaccia "Component".</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q2" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q2" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 3 -->
+            <div class="question-block" id="q3">
+                <p class="question-title"><span class="question-number">3</span>Quale problema risolve principalmente il pattern Bridge?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q3" value="a">L'esplosione di sottoclassi quando si hanno due gerarchie di classi ortogonali (es. Astrazione e Implementazione).</label></li>
+                    <li><label><input type="checkbox" name="q3" value="b">La necessità di creare oggetti complessi con molti parametri opzionali.</label></li>
+                    <li><label><input type="checkbox" name="q3" value="c">L'incapacità di estendere una classe `final`.</label></li>
+                    <li><label><input type="checkbox" name="q3" value="d">La gestione di notifiche tra un oggetto e i suoi molti osservatori.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 4 -->
+            <div class="question-block" id="q4">
+                <p class="question-title"><span class="question-number">4</span>Considera l'esempio del Caffè. Se volessi un "Caffè Decaffeinato con Latte", come lo creeresti usando il pattern Decorator?</p>
+                <pre><code class="language-java">
+Caffe decaLatte = ???
+                </code></pre>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q4" value="a">`new ConLatte(new CaffeDecaffeinato());`</label></li>
+                    <li><label><input type="checkbox" name="q4" value="b">`new CaffeDecaffeinatoConLatte();` (assumendo che esista questa classe)</label></li>
+                    <li><label><input type="checkbox" name="q4" value="c">`new CaffeDecaffeinato().add(new Latte());`</label></li>
+                    <li><label><input type="checkbox" name="q4" value="d">`new ConLatte(new CaffeSemplice(true));` (assumendo che CaffeSemplice prenda un booleano per decaffeinato)</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 5 -->
+            <div class="question-block" id="q5">
+                <p class="question-title"><span class="question-number">5</span>Nel pattern Composite, un oggetto "Composite" può contenere solo oggetti "Leaf".</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q5" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q5" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 6 -->
+            <div class="question-block" id="q6">
+                <p class="question-title"><span class="question-number">6</span>Quali sono le relazioni chiave nel pattern Bridge? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q6" value="a">L'Astrazione `contiene un riferimento` (composizione) all'Implementatore.</label></li>
+                    <li><label><input type="checkbox" name="q6" value="b">L'Implementatore `estende` l'Astrazione.</label></li>
+                    <li><label><input type="checkbox" name="q6" value="c">L'Astrazione e l'Implementatore possono evolvere indipendentemente.</label></li>
+                    <li><label><input type="checkbox" name="q6" value="d">Il Client interagisce direttamente con il ConcreteImplementor.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+            
+            <!-- Domanda 7 -->
+            <div class="question-block" id="q7">
+                <p class="question-title"><span class="question-number">7</span>Il pattern Decorator si basa principalmente sul principio di...</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q7" value="a">Ereditarietà, per estendere le funzionalità.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="b">Composizione, per "avvolgere" l'oggetto e delegare le chiamate.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="c">Astrazione, per definire l'interfaccia comune.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="d">Tutti i precedenti.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 8 -->
+            <div class="question-block" id="q8">
+                <p class="question-title"><span class="question-number">8</span>In un'implementazione del pattern Composite, dove risiede tipicamente la logica per iterare sui figli e delegare le operazioni?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q8" value="a">Nella classe `Leaf`.</label></li>
+                    <li><label><input type="checkbox" name="q8" value="b">Nella classe `Composite`.</label></li>
+                    <li><label><input type="checkbox" name="q8" value="c">Nell'interfaccia `Component`.</label></li>
+                    <li><label><input type="checkbox" name="q8" value="d">Nel codice del `Client`.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 9 -->
+            <div class="question-block" id="q9">
+                <p class="question-title"><span class="question-number">9</span>Il pattern Bridge è una forma di "late binding", dove l'implementazione concreta può essere scelta o cambiata a runtime.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q9" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q9" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 10 -->
+            <div class="question-block" id="q10">
+                <p class="question-title"><span class="question-number">10</span>Qual è il principale svantaggio del pattern Decorator?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q10" value="a">Aggiunge un gran numero di piccole classi al sistema.</label></li>
+                    <li><label><input type="checkbox" name="q10" value="b">Rende il codice più lento a causa delle chiamate delegate.</label></li>
+                    <li><label><input type="checkbox" name="q10" value="c">Non può aggiungere stato a un oggetto, solo comportamento.</label></li>
+                    <li><label><input type="checkbox" name="q10" value="d">L'oggetto decorato non è a conoscenza dei suoi decoratori.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 11 -->
+            <div class="question-block" id="q11">
+                <p class="question-title"><span class="question-number">11</span>Il pattern Composite permette al client di trattare oggetti singoli e composizioni di oggetti in modo uniforme.</p>
+                 <ul class="options-list">
+                    <li><label><input type="radio" name="q11" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q11" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 12 -->
+            <div class="question-block" id="q12">
+                <p class="question-title"><span class="question-number">12</span>Quale pattern strutturale è più indicato per risolvere un problema in cui sia l'astrazione (es. `Finestra`) che l'implementazione (es. `WindowsAPI`, `LinuxAPI`) possono variare e avere le proprie sottoclassi (es. `FinestraDialogo`, `FinestraIcona`)?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q12" value="a">Decorator</label></li>
+                    <li><label><input type="checkbox" name="q12" value="b">Composite</label></li>
+                    <li><label><input type="checkbox" name="q12" value="c">Bridge</label></li>
+                    <li><label><input type="checkbox" name="q12" value="d">Factory</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 13 -->
+            <div class="question-block" id="q13">
+                <p class="question-title"><span class="question-number">13</span>L'ereditarietà è sempre una soluzione migliore del Decorator per estendere le funzionalità di una classe.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q13" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q13" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 14 -->
+            <div class="question-block" id="q14">
+                <p class="question-title"><span class="question-number">14</span>In un pattern Composite, i metodi per la gestione dei figli (es. `add`, `remove`) dovrebbero essere definiti in... (Seleziona le opzioni valide)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q14" value="a">...nell'interfaccia `Component`, anche se la classe `Leaf` li implementerà lanciando un'eccezione.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="b">...solo nella classe `Composite`.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="c">...nella classe `Leaf`, per indicare che non possono avere figli.</label></li>
+                    <li><label><input type="checkbox" name="q14" value="d">...non è importante, dipende dalla preferenza dello sviluppatore.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 15 -->
+            <div class="question-block" id="q15">
+                <p class="question-title"><span class="question-number">15</span>Qual è una differenza chiave tra il pattern Bridge e il pattern Adapter?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q15" value="a">Il Bridge è progettato in anticipo per disaccoppiare, mentre l'Adapter viene usato per far collaborare interfacce incompatibili esistenti.</label></li>
+                    <li><label><input type="checkbox" name="q15" value="b">Il Bridge usa l'ereditarietà, mentre l'Adapter usa solo la composizione.</label></li>
+                    <li><label><input type="checkbox" name="q15" value="c">L'Adapter disaccoppia l'astrazione dall'implementazione, mentre il Bridge le fa funzionare insieme.</label></li>
+                    <li><label><input type="checkbox" name="q15" value="d">Non c'è una differenza significativa, sono due nomi per lo stesso pattern.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+        </form>
+
+        <div class="submit-container">
+            <button type="button" id="submit-quiz-btn" class="submit-btn">Verifica Risposte</button>
+        </div>
+
+        <div id="results-summary">
+            <h2>Risultato del Quiz</h2>
+            <p id="score"></p>
+            <p id="summary-text"></p>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const solutions = {
+            q1: ['b'],
+            q2: 'a', // Vero
+            q3: ['a'],
+            q4: ['a'],
+            q5: 'b', // Falso
+            q6: ['a', 'c'],
+            q7: ['d'], // Tutti
+            q8: ['b'],
+            q9: 'a', // Vero
+            q10: ['a'],
+            q11: 'a', // Vero
+            q12: ['c'],
+            q13: 'b', // Falso
+            q14: ['a', 'b'], // Entrambi sono approcci validi
+            q15: ['a']
+        };
+
+        const explanations = {
+            q1: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Questo è lo scopo del pattern Composite." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Il Decorator 'avvolge' un oggetto per aggiungere nuove funzionalità in modo flessibile, senza ricorrere a sottoclassi." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Questo è lo scopo del pattern Bridge." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Questo è lo scopo del pattern Abstract Factory." }
+            ],
+            q2: "Vero. Questo è il punto centrale del pattern Composite. Permette al client di trattare sia gli oggetti singoli (Leaf) che le composizioni (Composite) in modo uniforme, attraverso la stessa interfaccia.",
+            q3: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Il Bridge è progettato per evitare una matrice di classi NxM quando si hanno due dimensioni di variazione indipendenti (es. Telecomando Base/Avanzato e TV/Radio)." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Questo problema è risolto dal pattern Builder." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Il Decorator è una soluzione per estendere le classi, ma non specificamente quelle `final`." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Questo problema è risolto dal pattern Observer." }
+            ],
+            q4: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Questo è l'uso idiomatico del pattern Decorator: si avvolge l'oggetto base (`CaffeDecaffeinato`) con il decoratore (`ConLatte`)." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Questo è l'approccio basato sull'ereditarietà che il Decorator cerca di evitare per prevenire l'esplosione delle classi." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Questo non corrisponde alla struttura del pattern Decorator." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Sebbene possa funzionare, accoppia la logica del tipo di caffè (normale/deca) alla classe base, rendendola meno flessibile." }
+            ],
+            q5: "Falso. Un oggetto Composite può contenere qualsiasi oggetto che implementi l'interfaccia Component, inclusi altri oggetti Composite. Questo è ciò che permette di creare strutture ad albero ricorsive.",
+            q6: [
+                { option: 'a', status: 'correct-option', text: "Corretto. La relazione chiave è la composizione: l'Astrazione contiene un riferimento all'interfaccia dell'Implementatore." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. L'Implementatore e l'Astrazione appartengono a gerarchie separate e non sono legati da ereditarietà." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Questo è il vantaggio principale del Bridge: le due gerarchie possono essere modificate indipendentemente." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Il Client interagisce con l'Astrazione di alto livello, che a sua volta delega all'Implementatore." }
+            ],
+            q7: [
+                { option: 'a', status: 'incorrect-option', text: "Incompleto. L'ereditarietà è usata dai decoratori concreti per estendere il decoratore astratto, ma non è il principio unico." },
+                { option: 'b', status: 'incorrect-option', text: "Incompleto. La composizione è usata per contenere l'oggetto da decorare, ma anche l'ereditarietà gioca un ruolo." },
+                { option: 'c', status: 'incorrect-option', text: "Incompleto. L'astrazione è usata per definire l'interfaccia comune, ma non è l'unico principio." },
+                { option: 'd', status: 'correct-option', text: "Corretto. Il pattern Decorator combina abilmente l'ereditarietà (per conformarsi al tipo Component) e la composizione (per avvolgere un altro Component) per raggiungere il suo scopo." }
+            ],
+            q8: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. La classe `Leaf` rappresenta un oggetto singolo e non ha figli su cui iterare." },
+                { option: 'b', status: 'correct-option', text: "Corretto. La classe `Composite` contiene la collezione di figli e il suo metodo `operation()` è responsabile di iterare su di essi e delegare la chiamata." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Un'interfaccia definisce solo la firma del metodo, non la sua logica di implementazione." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Lo scopo del pattern è proprio nascondere questa logica al client, che deve poter trattare un composito come un oggetto singolo." }
+            ],
+            q9: "Vero. L'implementazione dell'Astrazione (l'oggetto `Implementor`) può essere passata nel costruttore o tramite un setter. Questo permette di decidere a runtime quale implementazione concreta utilizzare, disaccoppiando l'astrazione da una specifica implementazione al momento della compilazione.",
+            q10: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Lo svantaggio più citato del Decorator è che può portare a un numero elevato di piccole classi (una per ogni funzionalità aggiuntiva), che può rendere il design più complesso da gestire." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. L'overhead di una chiamata di metodo aggiuntiva è generalmente trascurabile e non è considerato un problema significativo del pattern." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Un decoratore può aggiungere sia stato che comportamento. Ad esempio, un decoratore potrebbe memorizzare informazioni aggiuntive sull'oggetto decorato." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Questo è vero, ma è una caratteristica del design (trasparenza), non uno svantaggio." }
+            ],
+            q11: "Vero. Questo è l'obiettivo principale del pattern Composite: fornire un'interfaccia unificata per trattare sia oggetti singoli (Leaf) che gruppi di oggetti (Composite) allo stesso modo.",
+            q12: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Il Decorator aggiunge funzionalità a un singolo oggetto, non gestisce due gerarchie ortogonali." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Il Composite gestisce gerarchie parte-tutto, non due gerarchie separate." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Il pattern Bridge è la soluzione ideale quando si hanno due dimensioni di variazione indipendenti: la gerarchia delle 'Finestre' (astrazione) e la gerarchia delle 'API di sistema' (implementazione)." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Factory è un pattern creazionale, non strutturale, e non risolve questo specifico problema di disaccoppiamento di gerarchie." }
+            ],
+            q13: "Falso. Il Decorator è spesso una soluzione migliore perché è più flessibile. Permette di aggiungere e rimuovere responsabilità a runtime e di combinare più funzionalità senza creare una classe per ogni possibile combinazione, evitando l'esplosione delle sottoclassi.",
+            q14: [
+                { option: 'a', status: 'correct-option', text: "Approccio valido (Trasparenza). Questo rende il client più semplice, in quanto può trattare tutti i componenti allo stesso modo, anche se deve gestire eccezioni se chiama `add` su una foglia. Promuove l'uniformità." },
+                { option: 'b', status: 'correct-option', text: "Approccio valido (Sicurezza). Questo rende le interfacce più pulite e sicure (non si può chiamare `add` su una foglia), ma richiede al client di fare un controllo del tipo (`instanceof`) prima di gestire i figli. Separa meglio le responsabilità." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. La classe `Leaf` non definisce i metodi di gestione dei figli, al massimo li implementa (spesso vuoti o con eccezioni) se sono nell'interfaccia `Component`." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. La scelta tra (a) e (b) è una decisione di design importante con implicazioni sulla trasparenza e la sicurezza del sistema." }
+            ],
+            q15: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Questa è la differenza di 'intento' fondamentale. Il Bridge è un pattern proattivo, pensato all'inizio del design per separare gerarchie. L'Adapter è un pattern reattivo, usato per far funzionare insieme classi con interfacce incompatibili che non erano state progettate per collaborare." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Entrambi i pattern possono essere implementati sia con l'ereditarietà che con la composizione (object adapter)." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. È il contrario: il Bridge disaccoppia, mentre l'Adapter adatta un'interfaccia a un'altra." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Hanno intenti e strutture diverse." }
+            ]
+        };
+
+        const submitBtn = document.getElementById('submit-quiz-btn');
+        submitBtn.addEventListener('click', () => {
+            let score = 0;
+            const totalQuestions = Object.keys(solutions).length;
+
+            for (const qId in solutions) {
+                const questionBlock = document.getElementById(qId);
+                const feedbackEl = questionBlock.querySelector('.feedback');
+                const inputs = questionBlock.querySelectorAll(`input[name=${qId}]`);
+                
+                let isCorrect = false;
+                const correctAnswer = solutions[qId];
+                
+                const selectedValues = Array.from(inputs).filter(i => i.checked).map(i => i.value);
+
+                if (Array.isArray(correctAnswer)) { // Checkbox
+                    isCorrect = selectedValues.length === correctAnswer.length && selectedValues.every(val => correctAnswer.includes(val));
+                } else { // Radio
+                    isCorrect = selectedValues.length === 1 && selectedValues[0] === correctAnswer;
+                }
+
+                feedbackEl.style.display = 'block';
+                let detailedExplanationHtml = `<p class="summary-status">${isCorrect ? 'Corretto!' : 'Sbagliato!'}</p>`;
+                
+                const explanationData = explanations[qId];
+                if (Array.isArray(explanationData)) {
+                     explanationData.forEach(exp => {
+                        detailedExplanationHtml += `<p class="option-explanation ${exp.status}"><strong>${exp.option.toUpperCase()})</strong> ${exp.text}</p>`;
+                    });
+                } else {
+                    detailedExplanationHtml += `<p>${explanationData}</p>`;
+                }
+                
+                feedbackEl.innerHTML = detailedExplanationHtml;
+
+                if (isCorrect) {
+                    score++;
+                    feedbackEl.classList.add('correct');
+                    feedbackEl.classList.remove('incorrect');
+                } else {
+                    feedbackEl.classList.add('incorrect');
+                    feedbackEl.classList.remove('correct');
+                }
+            }
+            
+            // Mostra il riepilogo finale
+            const resultsSummary = document.getElementById('results-summary');
+            const scoreEl = document.getElementById('score');
+            const summaryTextEl = document.getElementById('summary-text');
+            
+            scoreEl.textContent = `Punteggio: ${score} / ${totalQuestions}`;
+            if (score === totalQuestions) {
+                summaryTextEl.textContent = "Eccellente! Hai una solida comprensione dei pattern strutturali.";
+                scoreEl.style.color = 'var(--accent-success)';
+            } else if (score >= totalQuestions * 0.75) { 
+                summaryTextEl.textContent = "Molto bene! Rileggi le spiegazioni per consolidare i punti deboli.";
+                scoreEl.style.color = 'var(--accent-primary)';
+            } else if (score >= totalQuestions / 2) { 
+                summaryTextEl.textContent = "Buon lavoro! Rivedi attentamente la lezione e le spiegazioni fornite.";
+                scoreEl.style.color = 'var(--accent-warning)';
+            } else { 
+                summaryTextEl.textContent = "Sembra che ci siano diversi punti da approfondire. Ti consiglio di ripassare la lezione e poi riprovare il quiz.";
+                scoreEl.style.color = 'var(--accent-danger)';
+            }
+            resultsSummary.style.display = 'block';
+            resultsSummary.scrollIntoView({ behavior: 'smooth' });
+            
+            submitBtn.style.display = 'none';
+        });
+    });
+    </script>
+
+</body>
+</html>

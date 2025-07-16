@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Lezione 08: Design Pattern Creazionali</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --accent-success: #34D399;
+            --accent-danger: #f87171;
+            --accent-warning: #FACC15; 
+            --code-bg: #2a303c;
+            --code-text: #c3c9d6;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --font-code: 'Source Code Pro', monospace;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+        }
+        
+        header {
+            background-color: var(--bg-header);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+        header p {
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0.5rem auto 0;
+        }
+
+        main {
+            padding: 2.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .quiz-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .question-block {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            border-left: 4px solid var(--accent-secondary);
+        }
+
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-title .question-number {
+            display: inline-block;
+            background-color: var(--accent-secondary);
+            color: var(--bg-header);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 0.75rem;
+            font-weight: 700;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .options-list label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .options-list label:hover {
+            background-color: rgba(96, 165, 250, 0.1);
+            border-color: var(--accent-primary);
+        }
+
+        .options-list input[type="radio"],
+        .options-list input[type="checkbox"] {
+            width: 1.2em;
+            height: 1.2em;
+            accent-color: var(--accent-secondary);
+        }
+        
+        pre {
+            background-color: var(--code-bg) !important;
+            padding: 1rem !important;
+            border-radius: var(--border-radius-small) !important;
+            margin: 1rem 0 !important;
+            font-size: 0.9em !important;
+        }
+
+        .submit-container {
+            text-align: center;
+            margin-top: 3rem;
+        }
+        
+        .submit-btn {
+            background-color: var(--accent-primary);
+            color: var(--bg-header);
+            border: none;
+            padding: 0.8rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: var(--border-radius-small);
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .submit-btn:hover {
+            background-color: var(--accent-success);
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+            display: none; /* Hidden by default */
+        }
+        .feedback.correct {
+            background-color: rgba(52, 211, 153, 0.1);
+            border: 1px solid var(--accent-success);
+            color: var(--accent-success);
+        }
+        .feedback.incorrect {
+            background-color: rgba(248, 113, 113, 0.1);
+            border: 1px solid var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        .feedback p { margin: 0; }
+        .feedback p.summary-status { font-weight: bold; margin-bottom: 0.5rem; }
+        
+        /* Stili per le spiegazioni dettagliate */
+        .option-explanation {
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+            border-left: 2px solid;
+            font-size: 0.9em;
+        }
+        .option-explanation.correct-option {
+            border-color: var(--accent-success);
+            color: var(--accent-success);
+        }
+        .option-explanation.incorrect-option {
+            border-color: var(--accent-danger);
+            color: var(--accent-danger);
+        }
+        
+        #results-summary {
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius-main);
+            text-align: center;
+            display: none;
+            margin-top: 2rem;
+        }
+        #results-summary h2 { color: var(--accent-primary); margin-bottom: 1rem; }
+        #score { font-size: 1.5rem; font-weight: bold; }
+        #summary-text { color: var(--text-secondary); margin-top: 0.5rem; }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.6rem; }
+            main { padding: 1.5rem 1rem; }
+            .question-block { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Quiz: Design Pattern Creazionali</h1>
+        <p>Verifica la tua comprensione dei pattern Factory Method, Abstract Factory e Builder.</p>
+    </header>
+
+    <main>
+        <form id="quiz-form" class="quiz-container">
+            <!-- Domanda 1 -->
+            <div class="question-block" id="q1">
+                <p class="question-title"><span class="question-number">1</span>Qual è il problema principale che il pattern Factory Method risolve?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q1" value="a">Creare oggetti complessi con molti parametri opzionali.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="b">Garantire che di una classe esista una sola istanza.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="c">Disaccoppiare il codice client dalle classi concrete che devono essere istanziate.</label></li>
+                    <li><label><input type="checkbox" name="q1" value="d">Creare famiglie di oggetti correlati tra loro.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 2 -->
+            <div class="question-block" id="q2">
+                <p class="question-title"><span class="question-number">2</span>Il pattern Builder è particolarmente utile quando un costruttore avrebbe troppi parametri, specialmente se molti sono opzionali.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q2" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q2" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 3 -->
+            <div class="question-block" id="q3">
+                <p class="question-title"><span class="question-number">3</span>Quale pattern è più adatto per un sistema che deve supportare temi intercambiabili (es. Windows, macOS, Linux), dove ogni tema ha un proprio set di widget (Button, Checkbox, Window)? (Seleziona quella corretta)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q3" value="a">Factory Method</label></li>
+                    <li><label><input type="checkbox" name="q3" value="b">Abstract Factory</label></li>
+                    <li><label><input type="checkbox" name="q3" value="c">Builder</label></li>
+                    <li><label><input type="checkbox" name="q3" value="d">Singleton</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 4 -->
+            <div class="question-block" id="q4">
+                <p class="question-title"><span class="question-number">4</span>Quali dei seguenti sono benefici diretti dell'utilizzo del Builder Pattern? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q4" value="a">Migliora la leggibilità del codice di creazione dell'oggetto.</label></li>
+                    <li><label><input type="checkbox" name="q4" value="b">Permette di costruire oggetti immutabili in modo efficace.</label></li>
+                    <li><label><input type="checkbox" name="q4" value="c">Risolve il problema dei "telescoping constructors" (costruttori con liste di parametri crescenti).</label></li>
+                    <li><label><input type="checkbox" name="q4" value="d">Disaccoppia il client dalle classi concrete di una famiglia di prodotti.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+            
+            <!-- Domanda 5 -->
+            <div class="question-block" id="q5">
+                <p class="question-title"><span class="question-number">5</span>Nel pattern Factory Method, la classe "Creator" conosce sempre la classe "ConcreteProduct" che sta per istanziare.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q5" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q5" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 6 -->
+            <div class="question-block" id="q6">
+                <p class="question-title"><span class="question-number">6</span>Nel pattern Builder, quale metodo è responsabile della creazione finale dell'oggetto complesso?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q6" value="a">Il costruttore della classe Builder.</label></li>
+                    <li><label><input type="checkbox" name="q6" value="b">Un metodo `set...()` del Builder.</label></li>
+                    <li><label><input type="checkbox" name="q6" value="c">Il costruttore privato della classe Prodotto.</label></li>
+                    <li><label><input type="checkbox" name="q6" value="d">Un metodo `build()` del Builder.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 7 -->
+            <div class="question-block" id="q7">
+                <p class="question-title"><span class="question-number">7</span>Qual è la relazione tra Abstract Factory e Factory Method?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q7" value="a">Sono due nomi per lo stesso pattern.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="b">Un'Abstract Factory è spesso implementata usando diversi Factory Method.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="c">Un Factory Method è una versione più complessa di un'Abstract Factory.</label></li>
+                    <li><label><input type="checkbox" name="q7" value="d">Non hanno alcuna relazione tra loro.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 8 -->
+            <div class="question-block" id="q8">
+                <p class="question-title"><span class="question-number">8</span>Nel codice di esempio del Builder per l'oggetto `Computer`, il costruttore della classe `Computer` è `private`.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q8" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q8" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 9 -->
+            <div class="question-block" id="q9">
+                <p class="question-title"><span class="question-number">9</span>Qual è lo scopo principale dell'interfaccia `AbstractFactory` nel pattern omonimo?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q9" value="a">Creare una singola istanza di un prodotto.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="b">Definire i metodi per creare tutti i prodotti di una famiglia, senza specificare le implementazioni concrete.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="c">Fornire un'implementazione di default per la creazione di prodotti.</label></li>
+                    <li><label><input type="checkbox" name="q9" value="d">Gestire la logica di business associata ai prodotti creati.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+            <!-- Domanda 10 -->
+            <div class="question-block" id="q10">
+                <p class="question-title"><span class="question-number">10</span>Il Factory Method è un pattern che si applica sempre a livello di classe (usando metodi `static`).</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q10" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q10" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+             <!-- Domanda 11 -->
+             <div class="question-block" id="q11">
+                <p class="question-title"><span class="question-number">11</span>Quando si utilizza il Builder Pattern, i parametri obbligatori sono tipicamente passati...</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q11" value="a">Al metodo `build()`.</label></li>
+                    <li><label><input type="checkbox" name="q11" value="b">Al costruttore della classe Builder.</label></li>
+                    <li><label><input type="checkbox" name="q11" value="c">A metodi `set...()` specifici.</label></li>
+                    <li><label><input type="checkbox" name="q11" value="d">Al costruttore `private` della classe Prodotto.</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+             <!-- Domanda 12 -->
+             <div class="question-block" id="q12">
+                <p class="question-title"><span class="question-number">12</span>Quale principio SOLID è maggiormente promosso dall'uso dei pattern Factory Method e Abstract Factory? (Seleziona quello più pertinente)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q12" value="a">Single Responsibility Principle (SRP)</label></li>
+                    <li><label><input type="checkbox" name="q12" value="b">Dependency Inversion Principle (DIP)</label></li>
+                    <li><label><input type="checkbox" name="q12" value="c">Liskov Substitution Principle (LSP)</label></li>
+                    <li><label><input type="checkbox" name="q12" value="d">Interface Segregation Principle (ISP)</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+             <!-- Domanda 13 -->
+             <div class="question-block" id="q13">
+                <p class="question-title"><span class="question-number">13</span>L'Abstract Factory Pattern è utile quando bisogna cambiare l'intera famiglia di prodotti correlati in fase di esecuzione o configurazione.</p>
+                <ul class="options-list">
+                    <li><label><input type="radio" name="q13" value="a">Vero</label></li>
+                    <li><label><input type="radio" name="q13" value="b">Falso</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+            
+             <!-- Domanda 14 -->
+            <div class="question-block" id="q14">
+                <p class="question-title"><span class="question-number">14</span>Quali sono gli attori principali nel Factory Method Pattern? (Seleziona tutte quelle corrette)</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q14" value="a">Product (Interfaccia/Classe Astratta Prodotto)</label></li>
+                    <li><label><input type="checkbox" name="q14" value="b">ConcreteProduct (Prodotto Concreto)</label></li>
+                    <li><label><input type="checkbox" name="q14" value="c">Creator (Classe con il Factory Method)</label></li>
+                    <li><label><input type="checkbox" name="q14" value="d">Builder (Costruttore)</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+             <!-- Domanda 15 -->
+             <div class="question-block" id="q15">
+                <p class="question-title"><span class="question-number">15</span>Lo stile "fluente" (`.setA(...).setB(...).build()`) è una caratteristica distintiva di quale pattern?</p>
+                <ul class="options-list">
+                    <li><label><input type="checkbox" name="q15" value="a">Abstract Factory</label></li>
+                    <li><label><input type="checkbox" name="q15" value="b">Factory Method</label></li>
+                    <li><label><input type="checkbox" name="q15" value="c">Builder</label></li>
+                    <li><label><input type="checkbox" name="q15" value="d">Observer</label></li>
+                </ul>
+                <div class="feedback"></div>
+            </div>
+
+        </form>
+
+        <div class="submit-container">
+            <button type="button" id="submit-quiz-btn" class="submit-btn">Verifica Risposte</button>
+        </div>
+
+        <div id="results-summary">
+            <h2>Risultato del Quiz</h2>
+            <p id="score"></p>
+            <p id="summary-text"></p>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const solutions = {
+            q1: ['c'],
+            q2: 'a',
+            q3: ['b'],
+            q4: ['a', 'b', 'c'],
+            q5: 'a',
+            q6: ['d'],
+            q7: ['b'],
+            q8: 'a',
+            q9: ['b'],
+            q10: 'b',
+            q11: ['b'],
+            q12: ['b'],
+            q13: 'a',
+            q14: ['a', 'b', 'c'],
+            q15: ['c']
+        };
+
+        const explanations = {
+            q1: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Questo è il problema risolto dal pattern Builder." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. Questo è il problema risolto dal pattern Singleton." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Il Factory Method astrae il processo di istanziazione, permettendo al client di creare oggetti tramite un'interfaccia senza conoscere la classe concreta esatta." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Questo è il problema risolto dal pattern Abstract Factory." }
+            ],
+            q2: "Vero. Il Builder è la soluzione standard per evitare i 'telescoping constructors' (costruttori con un numero crescente di parametri) e per migliorare la leggibilità quando si creano oggetti complessi.",
+            q3: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Il Factory Method è più adatto a creare un singolo tipo di oggetto, non un'intera famiglia correlata." },
+                { option: 'b', status: 'correct-option', text: "Corretto. L'Abstract Factory è progettato specificamente per creare famiglie di oggetti correlati (es. Button e Checkbox di un certo tema) senza che il client conosca le classi concrete di quella famiglia (WinButton, MacButton)." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Il Builder si concentra sulla costruzione di un singolo oggetto complesso, non su famiglie di oggetti." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Il Singleton non è adatto a questo scopo, serve a garantire un'unica istanza." }
+            ],
+            q4: [
+                { option: 'a', status: 'correct-option', text: "Corretto. `new Computer.Builder(...).setBluetooth(true)` è molto più chiaro di `new Computer(..., ..., true, false)`." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Poiché l'oggetto viene creato in un unico passaggio finale tramite il metodo `build()`, è ideale per restituire un'istanza immutabile." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Il Builder è la soluzione classica al problema dei costruttori con troppi parametri." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Questo è un beneficio dei pattern Factory Method e Abstract Factory, non del Builder." }
+            ],
+            q5: "Vero. Nella sua implementazione più comune, la classe Factory (Creator) contiene una logica (spesso un `if` o uno `switch`) che decide quale `ConcreteProduct` istanziare in base a un parametro.",
+            q6: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Il costruttore del Builder serve a impostare i parametri iniziali, non a creare il prodotto finale." },
+                { option: 'b', status: 'incorrect-option', text: "Sbagliato. I metodi `set...()` servono a configurare i parametri opzionali." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Il costruttore privato del Prodotto viene chiamato *dal* metodo `build()`, ma non è il metodo che il client invoca." },
+                { option: 'd', status: 'correct-option', text: "Corretto. Il metodo `build()` è il passo finale che prende tutti i parametri raccolti dal Builder e li usa per istanziare l'oggetto complesso." }
+            ],
+            q7: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Risolvono problemi diversi (singolo oggetto vs. famiglia di oggetti)." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Spesso, un'interfaccia `AbstractFactory` definisce più metodi (es. `createButton()`, `createCheckbox()`) e ogni metodo è, di fatto, un Factory Method." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. È il contrario: l'Abstract Factory è un pattern di livello più alto che può utilizzare i Factory Method." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Hanno una relazione stretta." }
+            ],
+            q8: "Vero. Rendere privato il costruttore del prodotto è una pratica comune nel pattern Builder per forzare il client a usare sempre il Builder per l'istanziazione, garantendo così che l'oggetto sia sempre creato in uno stato valido.",
+            q9: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Questo è il ruolo di un Factory Method." },
+                { option: 'b', status: 'correct-option', text: "Corretto. L'interfaccia `AbstractFactory` definisce un contratto per creare una famiglia di prodotti (es. `createButton`, `createCheckbox`) senza legare il client alle implementazioni concrete (es. `WinButton`, `MacButton`)." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. Le interfacce non possono fornire implementazioni concrete (a parte i metodi `default`)." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. La logica di business è responsabilità di altre parti del sistema; le factory si occupano solo della creazione." }
+            ],
+            q10: "Falso. Sebbene una Factory possa essere implementata con metodi `static` (chiamata a volte Simple Factory), il pattern Factory Method originale, come definito dalla GoF, spesso coinvolge un metodo di istanza in una gerarchia di classi Creator, permettendo alle sottoclassi di sovrascrivere il metodo per cambiare il prodotto creato.",
+            q11: [
+                { option: 'a', status: 'incorrect-option', text: "Sbagliato. Il metodo `build()` non accetta parametri; usa quelli già impostati." },
+                { option: 'b', status: 'correct-option', text: "Corretto. Il costruttore del Builder è il posto ideale per passare i parametri obbligatori, garantendo che il Builder non possa essere creato senza di essi." },
+                { option: 'c', status: 'incorrect-option', text: "Sbagliato. I metodi `set...()` sono tipicamente usati per i parametri opzionali." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Il client non interagisce mai direttamente con il costruttore privato del Prodotto." }
+            ],
+            q12: [
+                { option: 'a', status: 'incorrect-option', text: "Anche se le factory stesse rispettano SRP (la loro unica responsabilità è creare oggetti), il principio principale che promuovono è un altro." },
+                { option: 'b', status: 'correct-option', text: "Corretto. I pattern Factory sono un'applicazione diretta del DIP. Il codice client dipende da un'astrazione (l'interfaccia `Product` o `AbstractFactory`) e non dai dettagli concreti (`ConcreteProduct` o `ConcreteFactory`), che vengono 'iniettati' dalla factory." },
+                { option: 'c', status: 'incorrect-option', text: "LSP è un principio che riguarda la correttezza delle gerarchie di ereditarietà, non direttamente la creazione degli oggetti." },
+                { option: 'd', status: 'incorrect-option', text: "Anche se le interfacce usate potrebbero essere 'segregate', non è il principio primario promosso da questi pattern." }
+            ],
+            q13: "Vero. Questo è esattamente il caso d'uso dell'Abstract Factory. Si può creare un'applicazione e configurarla con una `WinFactory` o una `MacFactory` (anche a runtime) per cambiare l'aspetto di tutti i componenti UI in modo coerente.",
+            q14: [
+                { option: 'a', status: 'correct-option', text: "Corretto. Definisce l'interfaccia per gli oggetti creati." },
+                { option: 'b', status: 'correct-option', text: "Corretto. È l'implementazione concreta dell'interfaccia Product." },
+                { option: 'c', status: 'correct-option', text: "Corretto. È la classe che contiene il metodo di fabbrica e decide quale ConcreteProduct istanziare." },
+                { option: 'd', status: 'incorrect-option', text: "Sbagliato. Il Builder è un pattern creazionale separato, non fa parte del Factory Method." }
+            ],
+            q15: [
+                { option: 'a', status: 'incorrect-option', text: "Le Abstract Factory non usano tipicamente questo stile." },
+                { option: 'b', status: 'incorrect-option', text: "I Factory Method non usano tipicamente questo stile." },
+                { option: 'c', status: 'correct-option', text: "Corretto. Lo stile fluente, dove ogni metodo `set...` restituisce `this` per permettere la concatenazione, è una caratteristica distintiva e molto comune del pattern Builder." },
+                { option: 'd', status: 'incorrect-option', text: "L'Observer è un pattern comportamentale, non creazionale." }
+            ]
+        };
+
+        const submitBtn = document.getElementById('submit-quiz-btn');
+        submitBtn.addEventListener('click', () => {
+            let score = 0;
+            const totalQuestions = Object.keys(solutions).length;
+
+            for (const qId in solutions) {
+                const questionBlock = document.getElementById(qId);
+                const feedbackEl = questionBlock.querySelector('.feedback');
+                const inputs = questionBlock.querySelectorAll(`input[name=${qId}]`);
+                
+                let isCorrect = false;
+                const correctAnswer = solutions[qId];
+                
+                if (Array.isArray(correctAnswer)) { // Checkbox
+                    const selectedValues = Array.from(inputs).filter(i => i.checked).map(i => i.value);
+                    const allCorrectSelected = correctAnswer.every(val => selectedValues.includes(val));
+                    isCorrect = allCorrectSelected && selectedValues.length === correctAnswer.length;
+                } else { // Radio
+                    const selectedInput = Array.from(inputs).find(i => i.checked);
+                    isCorrect = selectedInput && selectedInput.value === correctAnswer;
+                }
+                
+                if (isCorrect) score++;
+
+                feedbackEl.style.display = 'block';
+                feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+                let detailedExplanationHtml = `<p class="summary-status">${isCorrect ? 'Corretto!' : 'Sbagliato!'}</p>`;
+                
+                if (Array.isArray(solutions[qId])) { // Feedback dettagliato per checkbox
+                    const allOptions = questionBlock.querySelectorAll('.options-list input[type="checkbox"]');
+                    Array.from(allOptions).forEach(input => {
+                        const optionValue = input.value;
+                        const explanationData = explanations[qId].find(exp => exp.option === optionValue);
+                        if (explanationData) {
+                             detailedExplanationHtml += `<p class="option-explanation ${explanationData.status}"><strong>${optionValue.toUpperCase()})</strong> ${explanationData.text}</p>`;
+                        }
+                    });
+                } else { // Feedback semplice per radio
+                    detailedExplanationHtml += `<p>${explanations[qId]}</p>`;
+                }
+                feedbackEl.innerHTML = detailedExplanationHtml;
+            }
+            
+            // Mostra il riepilogo finale
+            const resultsSummary = document.getElementById('results-summary');
+            const scoreEl = document.getElementById('score');
+            const summaryTextEl = document.getElementById('summary-text');
+            
+            scoreEl.textContent = `Punteggio: ${score} / ${totalQuestions}`;
+            if (score === totalQuestions) {
+                summaryTextEl.textContent = "Eccellente! Padronanza completa dei pattern creazionali.";
+                scoreEl.style.color = 'var(--accent-success)';
+            } else if (score >= totalQuestions * 0.75) { 
+                summaryTextEl.textContent = "Molto bene! Rileggi le spiegazioni per consolidare i dettagli.";
+                scoreEl.style.color = 'var(--accent-primary)';
+            } else if (score >= totalQuestions / 2) { 
+                summaryTextEl.textContent = "Buon lavoro! Ci sono alcuni concetti chiave da rivedere.";
+                scoreEl.style.color = 'var(--accent-warning)';
+            } else { 
+                summaryTextEl.textContent = "Sembra che ci siano diversi punti da approfondire. Ti consiglio di ripassare la lezione.";
+                scoreEl.style.color = 'var(--accent-danger)';
+            }
+            resultsSummary.style.display = 'block';
+            resultsSummary.scrollIntoView({ behavior: 'smooth' });
+            
+            submitBtn.style.display = 'none';
+        });
+    });
+    </script>
+</body>
+</html>

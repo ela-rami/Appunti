@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 09: Design Pattern Strutturali</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Librerie Esterne -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <!-- CSS Comune -->
+    <link rel="stylesheet" href="../assets/css/common.css">
+
+    <style>
+        .box-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body data-pdf-path="../slides/Design Patterns.pdf"> <!-- Aggiorna con il path corretto -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 09: Design Pattern Strutturali</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="OOP_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-structural" class="sidebar-link">1. Cosa sono i Pattern Strutturali?</a></li>
+            <li><a href="#decorator-pattern" class="sidebar-link">2. Decorator Pattern</a></li>
+            <li><a href="#decorator-example" class="sidebar-link">2.1. Esempio: Personalizzare un Caffè</a></li>
+            <li><a href="#composite-pattern" class="sidebar-link">3. Composite Pattern</a></li>
+            <li><a href="#composite-example" class="sidebar-link">3.1. Esempio: Sistema di File Grafico</a></li>
+            <li><a href="#bridge-pattern" class="sidebar-link">4. Bridge Pattern</a></li>
+            <li><a href="#bridge-example" class="sidebar-link">4.1. Esempio: Telecomandi e Dispositivi</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-structural" class="content-section active-section">
+            <h2 class="section-title">1. Cosa sono i Design Pattern Strutturali?</h2>
+            <div class="section-content">
+                <p>I <strong>Design Pattern Strutturali</strong> si concentrano su come classi e oggetti possono essere composti per formare strutture più grandi e complesse. Mentre i pattern creazionali si occupano dell'istanziazione, quelli strutturali si occupano delle relazioni tra entità.</p>
+                <p>L'obiettivo principale è garantire che, se una parte del sistema cambia, il resto del sistema non debba cambiare. Questi pattern aiutano a definire relazioni pulite e stabili, spesso sfruttando l'ereditarietà e la composizione in modi intelligenti per aumentare la flessibilità.</p>
+            </div>
+        </article>
+
+        <article id="decorator-pattern" class="content-section">
+            <h2 class="section-title">2. Decorator Pattern</h2>
+            <div class="section-content">
+                <p>Il <strong>Decorator</strong> permette di aggiungere nuove funzionalità a un oggetto in modo dinamico, a runtime, senza alterare la sua classe. Questo pattern è un'alternativa flessibile all'ereditarietà per estendere il comportamento.</p>
+                <p>Funziona "avvolgendo" (wrapping) l'oggetto originale in uno o più oggetti "decoratori" che condividono la stessa interfaccia.</p>
+                <h3 class="subsection-title">Struttura</h3>
+                <div class="mermaid-container">
+                     <pre class="mermaid">
+                        classDiagram
+                            direction TB
+                            class Component {
+                                <<interface>>
+                                +operation()
+                            }
+                            class ConcreteComponent {
+                                +operation()
+                            }
+                            class Decorator {
+                                <<abstract>>
+                                -component: Component
+                                +operation()
+                            }
+                            class ConcreteDecoratorA {
+                                +operation()
+                            }
+                            class ConcreteDecoratorB {
+                                +operation()
+                            }
+                            
+                            ConcreteComponent --|> Component
+                            Decorator --|> Component
+                            Decorator o-- Component
+                            ConcreteDecoratorA --|> Decorator
+                            ConcreteDecoratorB --|> Decorator
+                     </pre>
+                 </div>
+                 <ul>
+                     <li><strong>Component:</strong> L'interfaccia comune sia per gli oggetti da decorare che per i decoratori.</li>
+                     <li><strong>ConcreteComponent:</strong> L'oggetto base a cui vogliamo aggiungere funzionalità.</li>
+                     <li><strong>Decorator:</strong> Una classe astratta che implementa l'interfaccia `Component` e contiene un riferimento (composizione) a un altro oggetto `Component`. La sua implementazione di `operation()` delega semplicemente la chiamata all'oggetto avvolto.</li>
+                     <li><strong>ConcreteDecorator:</strong> Estende il `Decorator` e aggiunge il suo comportamento specifico, prima o dopo aver delegato la chiamata all'oggetto avvolto.</li>
+                 </ul>
+            </div>
+        </article>
+        
+        <article id="decorator-example" class="content-section">
+            <h3 class="subsection-title">2.1. Esempio: Personalizzare un Caffè</h3>
+            <div class="section-content">
+                <p>Immaginiamo di dover calcolare il costo di un caffè con vari ingredienti aggiuntivi (latte, panna, cioccolato). Usare l'ereditarietà creerebbe un'esplosione di classi (`CaffeConLatte`, `CaffeConPanna`, `CaffeConLatteEPanna`, ...). Il Decorator risolve elegantemente il problema.</p>
+                <pre><code class="language-java">
+// 1. L'interfaccia Component
+public interface Caffe {
+    double getCosto();
+    String getIngredienti();
+}
+
+// 2. Il ConcreteComponent
+public class CaffeSemplice implements Caffe {
+    @Override
+    public double getCosto() { return 1.0; }
+    @Override
+    public String getIngredienti() { return "Caffè"; }
+}
+
+// 3. Il Decorator astratto
+public abstract class CaffeDecorator implements Caffe {
+    protected final Caffe caffeDecorato;
+
+    public CaffeDecorator(Caffe caffe) {
+        this.caffeDecorato = caffe;
+    }
+
+    // Delega all'oggetto avvolto
+    @Override
+    public double getCosto() { return caffeDecorato.getCosto(); }
+    @Override
+    public String getIngredienti() { return caffeDecorato.getIngredienti(); }
+}
+
+// 4. I ConcreteDecorator
+public class ConLatte extends CaffeDecorator {
+    public ConLatte(Caffe caffe) { super(caffe); }
+
+    @Override
+    public double getCosto() {
+        return super.getCosto() + 0.5; // Aggiunge il costo del latte
+    }
+    @Override
+    public String getIngredienti() {
+        return super.getIngredienti() + ", Latte"; // Aggiunge l'ingrediente
+    }
+}
+
+public class ConPanna extends CaffeDecorator {
+    public ConPanna(Caffe caffe) { super(caffe); }
+    
+    @Override
+    public double getCosto() { return super.getCosto() + 0.7; }
+    @Override
+    public String getIngredienti() { return super.getIngredienti() + ", Panna"; }
+}
+
+// 5. Il Client
+public class Main {
+    public static void main(String[] args) {
+        Caffe mioCaffe = new CaffeSemplice();
+        System.out.println(mioCaffe.getIngredienti() + ": €" + mioCaffe.getCosto());
+
+        // Aggiungo il latte decorando l'oggetto base
+        mioCaffe = new ConLatte(mioCaffe);
+        System.out.println(mioCaffe.getIngredienti() + ": €" + mioCaffe.getCosto());
+
+        // Aggiungo la panna decorando l'oggetto già decorato con il latte
+        mioCaffe = new ConPanna(mioCaffe);
+        System.out.println(mioCaffe.getIngredienti() + ": €" + mioCaffe.getCosto());
+        // Output:
+        // Caffè: €1.0
+        // Caffè, Latte: €1.5
+        // Caffè, Latte, Panna: €2.2
+    }
+}
+                </code></pre>
+            </div>
+        </article>
+        
+        <article id="composite-pattern" class="content-section">
+            <h2 class="section-title">3. Composite Pattern</h2>
+            <div class="section-content">
+                <p>Il <strong>Composite</strong> permette di comporre oggetti in strutture ad albero per rappresentare gerarchie parte-tutto. Il punto chiave è che permette ai client di trattare oggetti <strong>individuali</strong> (foglie) e <strong>composizioni di oggetti</strong> (nodi compositi) in modo uniforme.</p>
+                <p>Ad esempio, in un sistema grafico, un `Gruppo` di forme può essere trattato esattamente come una `Forma` singola: entrambi possono essere disegnati, spostati, ridimensionati.</p>
+                <h3 class="subsection-title">Struttura</h3>
+                <div class="mermaid-container">
+                     <pre class="mermaid">
+                        classDiagram
+                            direction TB
+                            class Component {
+                                <<interface>>
+                                +operation()
+                            }
+                            class Leaf {
+                                +operation()
+                            }
+                            class Composite {
+                                -children: List~Component~
+                                +operation()
+                                +add(Component)
+                                +remove(Component)
+                            }
+                            
+                            Leaf --|> Component
+                            Composite --|> Component
+                            Composite o-- "many" Component
+                     </pre>
+                 </div>
+                 <ul>
+                    <li><strong>Component:</strong> L'interfaccia comune che dichiara le operazioni sia per gli oggetti semplici (foglie) che per quelli complessi (compositi).</li>
+                    <li><strong>Leaf (Foglia):</strong> Rappresenta un oggetto primitivo nella gerarchia. Non ha figli e implementa le operazioni direttamente.</li>
+                    <li><strong>Composite (Composito):</strong> Rappresenta un oggetto che può avere figli (altri `Component`, che possono essere a loro volta foglie o altri compositi). La sua implementazione di `operation()` tipicamente itera sui suoi figli e delega a loro la chiamata.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="composite-example" class="content-section">
+            <h3 class="subsection-title">3.1. Esempio: Sistema di File Grafico</h3>
+            <div class="section-content">
+                <p>Vogliamo calcolare la dimensione totale di un sistema di file, dove sia i singoli file che le cartelle devono rispondere a un metodo `getSize()`.</p>
+                <pre><code class="language-java">
+// 1. L'interfaccia Component
+public interface FileSystemComponent {
+    int getSize(); // Dimensione in KB
+}
+
+// 2. La classe Leaf
+public class File implements FileSystemComponent {
+    private String name;
+    private int size;
+    public File(String name, int size) { this.name = name; this.size = size; }
+    
+    @Override
+    public int getSize() { return this.size; }
+}
+
+// 3. La classe Composite
+public class Directory implements FileSystemComponent {
+    private String name;
+    private List<FileSystemComponent> children = new ArrayList<>();
+    public Directory(String name) { this.name = name; }
+    
+    public void add(FileSystemComponent component) { children.add(component); }
+    public void remove(FileSystemComponent component) { children.remove(component); }
+
+    @Override
+    public int getSize() {
+        int totalSize = 0;
+        // Delega la chiamata a tutti i figli e somma i risultati
+        for (FileSystemComponent child : children) {
+            totalSize += child.getSize();
+        }
+        return totalSize;
+    }
+}
+
+// 4. Il Client
+public class Main {
+    public static void main(String[] args) {
+        Directory root = new Directory("root");
+        Directory documents = new Directory("documenti");
+        Directory pictures = new Directory("immagini");
+        
+        File doc1 = new File("tesi.docx", 1024);
+        File pic1 = new File("vacanza.jpg", 2048);
+        File pic2 = new File("gatto.png", 512);
+
+        root.add(documents);
+        root.add(pictures);
+        documents.add(doc1);
+        pictures.add(pic1);
+        pictures.add(pic2);
+
+        // Il client tratta tutto in modo uniforme, senza sapere se è un file o una cartella.
+        System.out.println("Dimensione documenti: " + documents.getSize() + " KB"); // 1024
+        System.out.println("Dimensione immagini: " + pictures.getSize() + " KB");   // 2560
+        System.out.println("Dimensione totale root: " + root.getSize() + " KB");     // 3584
+    }
+}
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="bridge-pattern" class="content-section">
+            <h2 class="section-title">4. Bridge Pattern</h2>
+            <div class="section-content">
+                <p>Il <strong>Bridge</strong> è un pattern che serve a <strong>disaccoppiare un'astrazione dalla sua implementazione</strong>, in modo che le due possano evolvere indipendentemente. È particolarmente utile quando si ha una gerarchia di astrazioni e una gerarchia di implementazioni, per evitare di dover creare una classe per ogni combinazione possibile (esplosione di classi N x M).</p>
+                
+                <h3 class="subsection-title">Struttura</h3>
+                <div class="mermaid-container">
+                     <pre class="mermaid">
+                        classDiagram
+                            direction LR
+                            class Abstraction {
+                                -implementor: Implementor
+                                +operation()
+                            }
+                            class RefinedAbstraction {
+                                +refinedOperation()
+                            }
+                            class Implementor {
+                                <<interface>>
+                                +operationImpl()
+                            }
+                            class ConcreteImplementorA {
+                                +operationImpl()
+                            }
+                            class ConcreteImplementorB {
+                                +operationImpl()
+                            }
+
+                            Abstraction o-- Implementor
+                            RefinedAbstraction --|> Abstraction
+                            ConcreteImplementorA --|> Implementor
+                            ConcreteImplementorB --|> Implementor
+                     </pre>
+                 </div>
+                <ul>
+                    <li><strong>Abstraction:</strong> Definisce l'interfaccia di alto livello per i client. Mantiene un riferimento a un oggetto di tipo `Implementor`.</li>
+                    <li><strong>RefinedAbstraction:</strong> Estende `Abstraction` per aggiungere o modificare il comportamento di alto livello.</li>
+                    <li><strong>Implementor:</strong> Definisce l'interfaccia per le classi di implementazione. Non deve necessariamente corrispondere all'interfaccia di `Abstraction`.</li>
+                    <li><strong>ConcreteImplementor:</strong> Le classi che implementano l'interfaccia `Implementor` e forniscono la logica concreta di basso livello.</li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="bridge-example" class="content-section">
+            <h3 class="subsection-title">4.1. Esempio: Telecomandi e Dispositivi</h3>
+            <div class="section-content">
+                <p>Vogliamo avere diversi tipi di telecomandi (base, avanzato con mute) che possono controllare diversi tipi di dispositivi (TV, Radio). Senza Bridge, dovremmo creare `TvRemote`, `RadioRemote`, `AdvancedTvRemote`, `AdvancedRadioRemote`, ecc. Con il Bridge, disaccoppiamo l'astrazione "Telecomando" dall'implementazione "Dispositivo".</p>
+                <pre><code class="language-java">
+// 1. L'interfaccia Implementor
+public interface Device {
+    boolean isEnabled();
+    void enable();
+    void disable();
+    int getVolume();
+    void setVolume(int percent);
+}
+
+// 2. I ConcreteImplementor
+public class Tv implements Device { /* ... implementazione per la TV ... */ }
+public class Radio implements Device { /* ... implementazione per la Radio ... */ }
+
+// 3. L'Abstraction
+public class RemoteControl {
+    protected Device device; // Contiene un riferimento all'implementazione
+
+    public RemoteControl(Device device) { this.device = device; }
+
+    public void togglePower() {
+        if (device.isEnabled()) device.disable();
+        else device.enable();
+    }
+    public void volumeUp() { device.setVolume(device.getVolume() + 10); }
+    public void volumeDown() { device.setVolume(device.getVolume() - 10); }
+}
+
+// 4. La RefinedAbstraction
+public class AdvancedRemoteControl extends RemoteControl {
+    public AdvancedRemoteControl(Device device) { super(device); }
+
+    public void mute() { // Funzionalità aggiuntiva
+        device.setVolume(0);
+    }
+}
+
+// 5. Il Client
+public class Main {
+    public static void main(String[] args) {
+        Tv tv = new Tv();
+        RemoteControl remote = new RemoteControl(tv);
+        remote.togglePower();
+
+        Radio radio = new Radio();
+        // Stessa astrazione (RemoteControl), ma con un'implementazione diversa!
+        AdvancedRemoteControl advancedRemote = new AdvancedRemoteControl(radio);
+        advancedRemote.volumeUp();
+        advancedRemote.mute();
+    }
+}
+                </code></pre>
+                <div class="clarification-box">
+                    <div class="box-title">💡 Vantaggio del Bridge</div>
+                    La gerarchia dei Telecomandi (`RemoteControl`, `AdvancedRemoteControl`) può evolvere indipendentemente dalla gerarchia dei Dispositivi (`Tv`, `Radio`, `Stereo`, ...). Possiamo aggiungere un nuovo dispositivo senza toccare i telecomandi, e viceversa. Questo evita l'esplosione combinatoria delle classi.
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Programmazione Orientata agli Oggetti</p>
+    </footer>
+
+    <!-- JS Comune e PrismJS -->
+    <script src="../assets/js/common.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+    <script>
+    // Script di inizializzazione Mermaid, come nei file precedenti
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, theme: 'dark', darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    fontSize: '14px',
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; diag.style.visibility = 'hidden'; 
+            });
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+                if (!diagramDefinition) { return; }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary);">Errore Mermaid.</p><pre>${e.message}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
