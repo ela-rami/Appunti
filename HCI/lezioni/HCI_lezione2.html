@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 2: Il Contesto dell'Interazione e Casi Critici</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 2: Il Contesto e Casi Critici</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#triangolo-interazione" class="sidebar-link">1. Il Triangolo dell'Interazione</a></li>
+            <li><a href="#importanza-contesto" class="sidebar-link">1.1. L'Importanza Cruciale del Contesto</a></li>
+            <li><a href="#casi-critici" class="sidebar-link">2. Casi di Studio: Quando l'HCI Fallisce</a></li>
+            <li><a href="#caso-three-mile-island" class="sidebar-link">2.1. Incidente Nucleare di Three Mile Island (1979)</a></li>
+            <li><a href="#caso-therac-25" class="sidebar-link">2.2. L'Incidente del Therac-25 (1985-1987)</a></li>
+            <li><a href="#caso-airbus-a320" class="sidebar-link">2.3. Incidenti dell'Airbus A320</a></li>
+            <li><a href="#caso-pompa-infusione" class="sidebar-link">2.4. Le Pompe a Infusione Medicali</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="triangolo-interazione">
+                <h2 class="section-title">1. Il Triangolo dell'Interazione</h2>
+                <div class="section-content">
+                    <p>Per comprendere appieno l'Interazione Uomo-Macchina, non possiamo considerare l'utente e la macchina come entità isolate. L'interazione avviene sempre all'interno di un **contesto** specifico, che influenza profondamente il modo in cui l'utente si comporta e percepisce il sistema.</p>
+                    <p>Questo ci porta a definire il "triangolo dell'interazione", i cui vertici sono:</p>
+                    <ul>
+                        <li><strong>Utente:</strong> Con le sue capacità cognitive e fisiche, le sue conoscenze pregresse, i suoi obiettivi e le sue emozioni.</li>
+                        <li><strong>Macchina (o Sistema):</strong> Con le sue funzionalità, il suo design, le sue periferiche e i suoi limiti tecnologici.</li>
+                        <li><strong>Contesto d'Uso:</strong> L'ambiente fisico, sociale e organizzativo in cui l'interazione ha luogo.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="importanza-contesto">
+                <h3 class="subsection-title">1.1. L'Importanza Cruciale del Contesto</h3>
+                <div class="section-content">
+                    <p>Il contesto è un fattore determinante che può trasformare un'interfaccia ben progettata in una inutilizzabile, e viceversa. Non esiste una "soluzione migliore" in assoluto; esiste solo la soluzione migliore per un dato contesto.</p>
+                    <div class="note-box">
+                        <strong>Esempio: Interfaccia Vocale vs. Tastiera</strong>
+                        <p>Consideriamo un sistema per prenotare un biglietto del treno. Quale interfaccia è migliore?</p>
+                        <ul>
+                            <li><strong>In un ambiente silenzioso e privato</strong> (come un ufficio vuoto), un'interfaccia vocale può essere più veloce e naturale.</li>
+                            <li><strong>In una stazione ferroviaria affollata e rumorosa</strong>, la stessa interfaccia vocale diventa quasi inutilizzabile. Il rumore di fondo interferisce con il riconoscimento vocale e l'utente potrebbe non voler comunicare i propri dati di viaggio ad alta voce. In questo contesto, un'interfaccia basata su touchscreen è nettamente superiore.</li>
+                        </ul>
+                    </div>
+                    <p>Analizzare il contesto significa porsi domande come: Dove verrà usato il sistema? Da chi? In quali condizioni ambientali (luce, rumore)? L'utente sarà sotto stress o avrà fretta? L'interazione avverrà in un contesto sociale o privato?</p>
+                </div>
+            </section>
+
+            <section id="casi-critici">
+                <h2 class="section-title">2. Casi di Studio: Quando l'HCI Fallisce</h2>
+                <div class="section-content">
+                    <p>Il modo migliore per comprendere l'importanza vitale di una buona progettazione HCI è analizzare i casi in cui un design scadente ha portato a conseguenze gravi o addirittura tragiche. Questi esempi storici sono diventati pilastri della disciplina, dimostrando che i problemi di usabilità non sono semplici "fastidi", ma possono essere causa di errori catastrofici.</p>
+                </div>
+            </section>
+
+            <section id="caso-three-mile-island">
+                <h3 class="subsection-title">2.1. Incidente Nucleare di Three Mile Island (1979)</h3>
+                <div class="section-content">
+                    <p>Uno degli incidenti più famosi che ha dato il via a una seria riflessione sull'HCI in contesti critici.</p>
+                    <ul>
+                        <li><strong>Il Problema:</strong> Nella sala di controllo della centrale nucleare, un guasto meccanico minore ha innescato una cascata di allarmi. Gli operatori furono sommersi da centinaia di spie lampeggianti e allarmi sonori simultaneamente.</li>
+                        <li><strong>Fallimento dell'Interfaccia:</strong> L'interfaccia soffriva di un grave problema di **information overload**. Non forniva alcuna gerarchia o priorità tra gli allarmi, rendendo impossibile per gli operatori distinguere il problema principale (una valvola bloccata) dal rumore di fondo delle conseguenze secondarie.</li>
+                        <li><strong>Conseguenza:</strong> Incapaci di diagnosticare correttamente il problema, gli operatori presero una decisione sbagliata (disattivare il sistema di raffreddamento di emergenza), che portò alla fusione parziale del nocciolo del reattore. L'errore non fu umano, ma di **progettazione del sistema informativo**.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="caso-therac-25">
+                <h3 class="subsection-title">2.2. L'Incidente del Therac-25 (1985-1987)</h3>
+                <div class="section-content">
+                    <p>Un caso emblematico di come i bug software e una cattiva interfaccia possano avere conseguenze letali in ambito medico.</p>
+                    <ul>
+                        <li><strong>Il Sistema:</strong> Il Therac-25 era una macchina per la radioterapia che poteva operare in due modalità: una a basso consumo per raggi X diretti e una ad alto consumo con un filtro metallico per proteggere il paziente.</li>
+                        <li><strong>Fallimento dell'Interfaccia:</strong> L'interfaccia era puramente testuale e richiedeva agli operatori di inserire rapidamente i dati. A causa di un **bug software (race condition)**, se un operatore esperto inseriva i comandi troppo velocemente, la macchina poteva attivare la modalità ad alta potenza senza posizionare il filtro protettivo.</li>
+                        <li><strong>Mancanza di Feedback:</strong> Il sistema riportava un generico messaggio di "Malfunction" senza specificare la natura del problema. Gli operatori, abituati a errori minori, tendevano a ignorare il messaggio e a ripetere la procedura.</li>
+                        <li><strong>Conseguenza:</strong> Diversi pazienti ricevettero dosi di radiazioni migliaia di volte superiori a quelle previste, causando morti e gravi lesioni.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="caso-airbus-a320">
+                <h3 class="subsection-title">2.3. Incidenti dell'Airbus A320</h3>
+                <div class="section-content">
+                    <p>L'introduzione di interfacce altamente automatizzate e digitali ("glass cockpit") negli aerei ha introdotto nuove tipologie di errori.</p>
+                    <ul>
+                        <li><strong>Il Problema:</strong> I piloti, abituati a un controllo analogico diretto (leve, cavi), si trovarono a interagire con un sistema digitale complesso. L'interfaccia non sempre comunicava in modo chiaro lo stato del sistema automatico.</li>
+                        <li><strong>Fallimento dell'Interfaccia:</strong> In alcuni incidenti, i piloti non si resero conto di quale modalità di volo fosse attiva o non compresero le azioni che il pilota automatico stava compiendo. Il sistema era progettato per "aiutare", ma la mancanza di un feedback chiaro sul suo stato interno creava confusione e portava i piloti a lottare contro il sistema invece di collaborare con esso.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="caso-pompa-infusione">
+                <h3 class="subsection-title">2.4. Le Pompe a Infusione Medicali</h3>
+                <div class="section-content">
+                    <p>Un esempio più recente e diffuso, che evidenzia problemi di design comuni in dispositivi di uso quotidiano in contesti critici come gli ospedali.</p>
+                     <div class="exercise-box">
+                        <strong>Problemi di Progettazione Comuni:</strong>
+                        <ul>
+                            <li><strong>Inconsistenza:</strong> Diversi modelli di pompe a infusione utilizzano tastierini numerici con layout differenti (stile telefono vs. stile calcolatrice), aumentando il rischio di errori di digitazione per infermieri che passano da un dispositivo all'altro.</li>
+                            <li><strong>Mancanza di Feedback:</strong> Spesso non c'è una chiara indicazione dello stato (es. livello della batteria, farmaco in infusione) o un feedback immediato alla pressione di un tasto.</li>
+                            <li><strong>Ambiguità:</strong> Uso di icone non standard o abbreviazioni poco chiare per farmaci diversi, aumentando il rischio di confusione.</li>
+                            <li><strong>Assenza di "Undo":</strong> Mancanza di un tasto "back" per correggere un errore di inserimento, costringendo l'infermiere a ricominciare la procedura da capo, aumentando lo stress e la probabilità di nuovi errori.</li>
+                        </ul>
+                    </div>
+                    <p>Questi "piccoli" problemi di usabilità, in un contesto ospedaliero, possono portare a errori di dosaggio dei farmaci con conseguenze potenzialmente fatali per il paziente.</p>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
