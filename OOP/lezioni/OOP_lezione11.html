@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 11: Tipi Generici (Generics)</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Librerie Esterne -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <!-- CSS Comune -->
+    <link rel="stylesheet" href="../assets/css/common.css">
+
+    <style>
+        .box-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body data-pdf-path="../slides/Generic types.pdf"> <!-- Aggiorna con il path corretto -->
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 11: Tipi Generici (Generics)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="OOP_lezioni.html" class="sidebar-action-button" id="lezioni-home-btn">Torna all'Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-generics" class="sidebar-link">1. Perché Esistono i Generics?</a></li>
+            <li><a href="#generic-classes-methods" class="sidebar-link">2. Classi e Metodi Generici</a></li>
+            <li><a href="#type-erasure" class="sidebar-link">3. Type Erasure: Il "Trucco" dei Generics</a></li>
+            <li><a href="#bounded-types" class="sidebar-link">4. Tipi Generici Vincolati (Bounded Types)</a></li>
+            <li><a href="#subtyping-generics" class="sidebar-link">5. Sottotipi e Generics: Una Relazione Complessa</a></li>
+            <li><a href="#wildcards" class="sidebar-link">6. I Wildcards (`?`)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-generics" class="content-section active-section">
+            <h2 class="section-title">1. Perché Esistono i Generics?</h2>
+            <div class="section-content">
+                <p>Prima di Java 5, le collezioni come `ArrayList` potevano contenere solo oggetti di tipo `Object`. Questo creava due problemi principali:</p>
+                <ol>
+                    <li><strong>Necessità di Cast Espliciti:</strong> Per recuperare un oggetto dalla collezione, era necessario effettuare un cast esplicito al suo tipo originale, rendendo il codice verboso e meno leggibile.</li>
+                    <li><strong>Mancanza di Type Safety:</strong> Il compilatore non poteva garantire che il cast fosse corretto. Se per errore si inseriva un oggetto di tipo diverso nella collezione, si otteneva una `ClassCastException` a <strong>runtime</strong>, un bug difficile da prevedere.</li>
+                </ol>
+                
+                <div class="warning-box">
+                    <div class="box-title">⚠️ Il Codice "Pre-Generics" (Pericoloso)</div>
+                    <pre><code class="language-java">
+// Codice come si scriveva in Java 1.4
+List list = new ArrayList();
+list.add("hello");
+list.add(123); // Nessun errore di compilazione!
+
+// Questo cast funziona
+String s = (String) list.get(0); 
+
+// Questo cast fallirà a RUNTIME con una ClassCastException
+Integer i = (Integer) list.get(0); // Errore logico
+String s2 = (String) list.get(1); // ERRORE A RUNTIME!
+                    </code></pre>
+                </div>
+
+                <p>I **Generics** (o tipi generici) sono stati introdotti per risolvere esattamente questi problemi, spostando il controllo dei tipi dalla fase di esecuzione alla fase di compilazione.</p>
+                 <div class="clarification-box">
+                    <div class="box-title">💡 Vantaggi dei Generics</div>
+                    <ul>
+                        <li><strong>Stronger Type Checking:</strong> Il compilatore verifica che nella collezione vengano inseriti solo oggetti del tipo corretto.</li>
+                        <li><strong>Eliminazione dei Cast:</strong> Non sono più necessari cast espliciti, rendendo il codice più pulito e sicuro.</li>
+                        <li><strong>Riutilizzo del Codice:</strong> Permettono di scrivere algoritmi e strutture dati generiche che funzionano con qualsiasi tipo di dato in modo sicuro.</li>
+                    </ul>
+                </div>
+                <pre><code class="language-java">
+// Codice moderno con i Generics
+List<String> list = new ArrayList<>(); // Definisco che la lista conterrà SOLO String
+list.add("hello");
+// list.add(123); // ERRORE DI COMPILAZIONE! Il compilatore ci protegge.
+
+String s = list.get(0); // Nessun cast necessario.
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="generic-classes-methods" class="content-section">
+            <h2 class="section-title">2. Classi e Metodi Generici</h2>
+            <div class="section-content">
+                <p>Possiamo creare non solo collezioni generiche, ma anche le nostre classi, interfacce e metodi generici.</p>
+                <h3 class="subsection-title">Classi e Interfacce Generiche</h3>
+                <p>Si definisce un "parametro di tipo" (solitamente una lettera maiuscola come `T` per Type, `E` per Element, `K` per Key, `V` per Value) tra parentesi angolari dopo il nome della classe.</p>
+                <pre><code class="language-java">
+// Un'interfaccia generica per una coppia di valori
+public interface Pair<K, V> {
+    K getKey();
+    V getValue();
+}
+
+// Una classe concreta che implementa l'interfaccia generica
+public class OrderedPair<K, V> implements Pair<K, V> {
+    private K key;
+    private V value;
+
+    public OrderedPair(K key, V value) {
+        this.key = key;
+        this.value = value;
+    }
+
+    public K getKey() { return key; }
+    public V getValue() { return value; }
+}
+
+// Utilizzo:
+Pair<String, Integer> p1 = new OrderedPair<>("Punteggio", 100);
+Pair<Integer, String> p2 = new OrderedPair<>(1, "Primo posto");
+                </code></pre>
+
+                <h3 class="subsection-title">Metodi Generici</h3>
+                <p>Un metodo può avere i suoi parametri di tipo, indipendenti da quelli della classe. La dichiarazione del parametro di tipo avviene prima del tipo di ritorno del metodo.</p>
+                <pre><code class="language-java">
+public class Util {
+    // Questo metodo generico può confrontare qualsiasi tipo di Pair
+    public static <K, V> boolean compare(Pair<K, V> p1, Pair<K, V> p2) {
+        return p1.getKey().equals(p2.getKey()) &&
+               p1.getValue().equals(p2.getValue());
+    }
+}
+                </code></pre>
+            </div>
+        </article>
+        
+        <article id="type-erasure" class="content-section">
+            <h2 class="section-title">3. Type Erasure: Il "Trucco" dei Generics</h2>
+            <div class="section-content">
+                <p>Una domanda comune è: come funzionano i generics a runtime? La risposta è attraverso un meccanismo chiamato <strong>Type Erasure</strong> (cancellazione del tipo).</p>
+                <p>Durante la compilazione, il compilatore Java:</p>
+                <ol>
+                    <li><strong>Verifica la correttezza dei tipi:</strong> Si assicura che tutte le operazioni siano type-safe.</li>
+                    <li><strong>Rimuove tutte le informazioni sui tipi generici:</strong> Sostituisce i parametri di tipo (`T`, `K`, `V`, ecc.) con il loro "bound" (limite), che per default è `Object`.</li>
+                    <li><strong>Inserisce i cast necessari:</strong> Aggiunge automaticamente i cast dove serve per garantire la compatibilità con il codice non generico.</li>
+                </ol>
+                <div class="note-box">
+                    <div class="box-title">💡 Conseguenze della Type Erasure</div>
+                    <ul>
+                        <li><strong>Nessun overhead a runtime:</strong> La JVM non sa nulla dei generics, quindi non c'è alcun calo di performance.</li>
+                        <li><strong>Compatibilità all'indietro:</strong> Il codice generico può interagire con codice legacy non generico.</li>
+                        <li><strong>Limitazioni:</strong> Non è possibile ottenere il tipo generico a runtime (es. non si può fare `if (list instanceof List<String>)`).</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="bounded-types" class="content-section">
+            <h2 class="section-title">4. Tipi Generici Vincolati (Bounded Types)</h2>
+            <div class="section-content">
+                <p>A volte vogliamo limitare i tipi che possono essere usati come parametri in un tipo generico. Ad esempio, potremmo voler creare un metodo che calcola il massimo in una collezione, ma questo ha senso solo se gli elementi sono confrontabili tra loro.</p>
+                <p>Questo si ottiene con i <strong>bounded type parameters</strong> (tipi generici vincolati), usando la parola chiave `extends`.</p>
+                 <pre><code class="language-java">
+// T deve essere un sottotipo di Number
+public class Stats<T extends Number> {
+    private T[] nums;
+    
+    public Stats(T[] o) { this.nums = o; }
+    
+    public double average() {
+        double sum = 0.0;
+        for (T num : nums) {
+            sum += num.doubleValue(); // POSSIBILE perché sappiamo che T è un Number
+        }
+        return sum / nums.length;
+    }
+}
+
+// Utilizzo:
+Integer[] i_nums = {1, 2, 3, 4, 5};
+Stats<Integer> intStats = new Stats<>(i_nums); // OK
+System.out.println("Media: " + intStats.average());
+
+// String[] s_nums = {"a", "b", "c"};
+// Stats<String> stringStats = new Stats<>(s_nums); // ERRORE DI COMPILAZIONE! String non estende Number.
+                </code></pre>
+                <div class="clarification-box">
+                    <div class="box-title">💡 `extends` per Classi e Interfacce</div>
+                    Nei bounded types, si usa sempre `extends`, sia per estendere una classe che per implementare un'interfaccia. Ad esempio: `<T extends Comparable<T>>`.
+                </div>
+            </div>
+        </article>
+        
+        <article id="subtyping-generics" class="content-section">
+            <h2 class="section-title">5. Sottotipi e Generics: Una Relazione Complessa</h2>
+            <div class="section-content">
+                <p>Questo è uno dei concetti più controintuitivi dei generics. Anche se `Integer` è un sottotipo di `Number`, una `List<Integer>` **NON è** un sottotipo di `List<Number>`.</p>
+                <pre><code class="language-java">
+// Questo codice NON COMPILA
+List<Number> numbers = new ArrayList<Integer>();
+                </code></pre>
+                <div class="warning-box">
+                    <div class="box-title">⚠️ Perché questa regola esiste?</div>
+                    <p>Per garantire la type safety. Se l'assegnazione fosse permessa, potrebbe accadere questo:</p>
+                    <pre><code class="language-java">
+List<Integer> integers = new ArrayList<>();
+List<Number> numbers = integers; // Immaginiamo che sia permesso
+numbers.add(3.14); // Aggiungo un Double a una lista che dovrebbe contenere solo Integer!
+
+Integer myInt = integers.get(0); // ERRORE a runtime! Tentativo di castare un Double a Integer.
+                    </code></pre>
+                    <p>Per prevenire questo tipo di errore a runtime, il compilatore lo impedisce a compile-time. Si dice che i generics sono **invarianti** rispetto al loro parametro di tipo.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="wildcards" class="content-section">
+            <h2 class="section-title">6. I Wildcards (`?`)</h2>
+            <div class="section-content">
+                <p>Come possiamo allora scrivere metodi flessibili che accettino collezioni di tipi diversi ma correlati? La soluzione sono i **wildcards** (caratteri jolly), rappresentati dal punto interrogativo `?`.</p>
+                
+                <h3 class="subsection-title">Wildcard Illimitato: `List<?>`</h3>
+                <p>`List<?>` significa "una lista di un tipo sconosciuto". È utile per metodi che non dipendono dal tipo specifico degli elementi.</p>
+                <pre><code class="language-java">
+public void printList(List<?> list) {
+    for (Object elem : list) {
+        System.out.print(elem + " ");
+    }
+}
+
+// Questo metodo può accettare List<Integer>, List<String>, List<Object>, ecc.
+                </code></pre>
+                
+                <h3 class="subsection-title">Wildcard con Limite Superiore: `<? extends Type>`</h3>
+                <p>`List<? extends Number>` significa "una lista di un qualsiasi tipo che sia `Number` o un suo sottotipo". Viene usato per le strutture dati da cui si **legge** (Producer). Questo è il principio **PECS (Producer Extends, Consumer Super)**.</p>
+                <pre><code class="language-java">
+public double sumOfList(List<? extends Number> list) {
+    double sum = 0.0;
+    for (Number n : list) {
+        sum += n.doubleValue(); // Sicuro: sappiamo che ogni elemento è almeno un Number
+    }
+    // list.add(new Integer(5)); // ERRORE DI COMPILAZIONE: non puoi aggiungere nulla (tranne null)
+    // perché non sai se la lista è List<Integer>, List<Double>, ecc.
+    return sum;
+}
+                </code></pre>
+
+                <h3 class="subsection-title">Wildcard con Limite Inferiore: `<? super Type>`</h3>
+                <p>`List<? super Integer>` significa "una lista di un qualsiasi tipo che sia `Integer` o un suo supertipo (`Number`, `Object`)". Viene usato per le strutture dati in cui si **scrive** (Consumer).</p>
+                 <pre><code class="language-java">
+public void addNumbers(List<? super Integer> list) {
+    for (int i = 1; i <= 5; i++) {
+        list.add(i); // Sicuro: un Integer può sempre essere aggiunto a una lista di Integer, Number o Object.
+    }
+    // Object obj = list.get(0); // Puoi leggere solo come Object, perché non sai se è List<Integer> o List<Number>.
+}
+                </code></pre>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Programmazione Orientata agli Oggetti</p>
+    </footer>
+
+    <!-- JS Comune e PrismJS -->
+    <script src="../assets/js/common.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>
