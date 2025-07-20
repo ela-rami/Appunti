@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 4: Periferiche di Input - Puntamento, Tracciamento e Gestures</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 4: Input - Puntamento e Gestures</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-puntamento" class="sidebar-link">1. Puntamento e Selezione</a></li>
+            <li><a href="#relativo-vs-assoluto" class="sidebar-link">1.1. Relativo vs. Assoluto: Mouse e Touchscreen</a></li>
+            <li><a href="#altri-dispositivi" class="sidebar-link">1.2. Altri Dispositivi di Puntamento</a></li>
+            <li><a href="#multi-touch" class="sidebar-link">2. Multi-touch e Gestures</a></li>
+            <li><a href="#potenzialita-gestures" class="sidebar-link">2.1. Le Potenzialità delle Gestures</a></li>
+            <li><a href="#puntamento-3d" class="sidebar-link">3. Puntamento e Tracciamento in 3D</a></li>
+            <li><a href="#gradi-liberta" class="sidebar-link">3.1. I 6 Gradi di Libertà (6DoF)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="intro-puntamento">
+                <h2 class="section-title">1. Puntamento e Selezione</h2>
+                <div class="section-content">
+                    <p>Dopo l'inserimento di testo, l'attività di interazione più comune è il **puntamento**, ovvero l'azione di indicare un oggetto su un'interfaccia (un'icona, un link, un pulsante), seguita spesso da una **selezione** (tipicamente un click).</p>
+                    <p>La distinzione più importante in questo ambito è tra sistemi a puntamento **relativo** e **assoluto**.</p>
+                </div>
+            </section>
+
+            <section id="relativo-vs-assoluto">
+                <h3 class="subsection-title">1.1. Relativo vs. Assoluto: Mouse e Touchscreen</h3>
+                <div class="section-content">
+                    <p>Questa differenza concettuale è fondamentale perché cambia radicalmente il modello mentale dell'interazione.</p>
+                    <ul>
+                        <li>
+                            <strong>Puntamento Relativo (es. Mouse, Trackpad):</strong> Il movimento del cursore sullo schermo è relativo alla sua posizione attuale. Se sposto il mouse a destra, il cursore si sposta a destra *rispetto a dove si trovava*. Non c'è una corrispondenza diretta tra la posizione del mouse sulla scrivania e la posizione del cursore sullo schermo. Posso alzare il mouse e riposizionarlo senza che il cursore si muova.
+                        </li>
+                        <li>
+                            <strong>Puntamento Assoluto (es. Touchscreen, Tavoletta Grafica):</strong> C'è una mappatura diretta tra la superficie di input e lo schermo. Se tocco il dito nell'angolo in alto a sinistra del mio smartphone, il "click" avviene esattamente in quell'angolo dello schermo. La posizione del mio input sulla superficie fisica corrisponde direttamente alla posizione dell'azione sullo schermo.
+                        </li>
+                    </ul>
+                     <div class="clarification-box">
+                        <strong>Implicazioni sul Design:</strong>
+                        <p>Questa distinzione ha un impatto enorme. In un videogioco per PC (puntamento relativo), è naturale "trascinare" un cursore su un oggetto. Trasportare questa stessa logica su un dispositivo mobile (puntamento assoluto) può essere frustrante. Su mobile, l'azione naturale è toccare direttamente l'oggetto desiderato. Molti porting di giochi da PC a mobile falliscono proprio perché non adattano correttamente questo paradigma di interazione.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="altri-dispositivi">
+                <h3 class="subsection-title">1.2. Altri Dispositivi di Puntamento</h3>
+                <div class="section-content">
+                    <p>Oltre ai due esempi principali, esistono molti altri dispositivi, ciascuno con le proprie caratteristiche e contesti d'uso ideali.</p>
+                    <ul>
+                        <li><strong>Joystick:</strong> Tipico dei videogiochi, traduce l'inclinazione di una leva in un movimento (spesso relativo). I joystick moderni sono **analogici**, ovvero rilevano l'intensità dell'inclinazione: una piccola inclinazione fa camminare il personaggio, una massima lo fa correre.</li>
+                        <li><strong>Touchpad/Trackpad:</strong> La superficie sensibile al tocco presente sui laptop. Funziona con puntamento relativo, mimando il comportamento di un mouse.</li>
+                        <li><strong>Trackball:</strong> Una sorta di "mouse rovesciato". La base è ferma e l'utente muove una sfera con le dita per controllare il cursore. È utile in spazi ristretti dove non c'è posto per muovere un mouse.</li>
+                        <li><strong>Pointing Stick:</strong> Il piccolo "joystick" gommoso che si trova al centro di alcune tastiere di laptop (es. i ThinkPad). Permette di muovere il cursore senza staccare le mani dalla posizione di scrittura.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="multi-touch">
+                <h2 class="section-title">2. Multi-touch e Gestures</h2>
+                <div class="section-content">
+                    <p>L'evoluzione dei touchscreen ha introdotto il **multi-touch**, ovvero la capacità del dispositivo di rilevare e tracciare più punti di contatto simultaneamente (es. due o più dita). Questa tecnologia ha aperto la porta a un nuovo paradigma di interazione: le **gestures** (gesti).</p>
+                    <p>Una gesture è un movimento specifico eseguito sulla superficie di input che viene interpretato dal sistema come un comando. Questo permette un'interazione più ricca e spesso più naturale.</p>
+                </div>
+            </section>
+
+            <section id="potenzialita-gestures">
+                <h3 class="subsection-title">2.1. Le Potenzialità delle Gestures</h3>
+                <div class="section-content">
+                    <p>Le gestures più comuni sono ormai entrate nel nostro linguaggio di interazione quotidiano:</p>
+                    <ul>
+                        <li><strong>Pinch to Zoom:</strong> Avvicinare o allontanare due dita per ridurre o aumentare lo zoom di un'immagine o di una mappa. Questa è una gesture iconica, estremamente intuitiva perché mima un'azione del mondo reale.</li>
+                        <li><strong>Swipe:</strong> Scorrere con il dito per navigare tra pagine, foto o per sbloccare lo schermo.</li>
+                        <li><strong>Tap / Double Tap:</strong> Un tocco singolo per selezionare, un doppio tocco per ingrandire o per altre funzioni.</li>
+                        <li><strong>Drag:</strong> Tenere premuto e trascinare per spostare un'icona o selezionare del testo.</li>
+                    </ul>
+                     <div class="note-box">
+                        <strong>Naturalezza e Apprendimento:</strong>
+                        <p>Alcune gestures sono così naturali (come il pinch-to-zoom) che non richiedono quasi nessun apprendimento. Altre sono più arbitrarie e devono essere scoperte o imparate. Un buon design di interfaccia spesso introduce le gestures meno ovvie attraverso tutorial o suggerimenti visivi per facilitarne l'adozione da parte dell'utente.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="puntamento-3d">
+                <h2 class="section-title">3. Puntamento e Tracciamento in 3D</h2>
+                <div class="section-content">
+                    <p>Quando l'interazione si sposta da uno schermo 2D a uno spazio 3D (come nella Realtà Virtuale o in alcune applicazioni specialistiche), il semplice puntamento non è più sufficiente. Abbiamo bisogno di tracciare non solo la posizione, ma anche l'orientamento degli oggetti nello spazio.</p>
+                </div>
+            </section>
+
+            <section id="gradi-liberta">
+                <h3 class="subsection-title">3.1. I 6 Gradi di Libertà (6DoF)</h3>
+                <div class="section-content">
+                    <p>Un oggetto libero di muoversi nello spazio tridimensionale ha **6 Gradi di Libertà (6DoF - Six Degrees of Freedom)**. Questi si dividono in due categorie:</p>
+                    <ul>
+                        <li><strong>3 Gradi di Traslazione (Posizione):</strong>
+                            <ul>
+                                <li>Spostamento lungo l'asse X (destra/sinistra)</li>
+                                <li>Spostamento lungo l'asse Y (su/giù)</li>
+                                <li>Spostamento lungo l'asse Z (avanti/indietro)</li>
+                            </ul>
+                        </li>
+                        <li><strong>3 Gradi di Rotazione (Orientamento):</strong>
+                            <ul>
+                                <li><strong>Roll (Rollio):</strong> Rotazione attorno all'asse Z (come un aereo che inclina le ali).</li>
+                                <li><strong>Pitch (Beccheggio):</strong> Rotazione attorno all'asse X (come un aereo che punta il muso in su o in giù).</li>
+                                <li><strong>Yaw (Imbardata):</strong> Rotazione attorno all'asse Y (come girare la testa a destra o sinistra).</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+                        graph LR
+                            subgraph "Traslazione"
+                                direction LR
+                                X1["Asse X (Lato)"]
+                                Y1["Asse Y (Altezza)"]
+                                Z1["Asse Z (Profondità)"]
+                            end
+                            subgraph "Rotazione"
+                                direction LR
+                                R["Roll (su asse Z)"]
+                                P["Pitch (su asse X)"]
+                                Y2["Yaw (su asse Y)"]
+                            end
+                        </pre>
+                    </div>
+                    <p>Dispositivi come i controller della Realtà Virtuale o i sistemi di motion capture sono in grado di tracciare tutti e 6 questi gradi di libertà, permettendo una mappatura molto più fedele e naturale dei movimenti dell'utente nello spazio virtuale.</p>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>

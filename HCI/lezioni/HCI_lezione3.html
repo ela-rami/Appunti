@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 3: Periferiche di Input - Testo, Voce e Scansione</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 3: Input - Testo, Voce e Scansione</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#input-testo" class="sidebar-link">1. Periferiche per l'Inserimento del Testo</a></li>
+            <li><a href="#layout-tastiera" class="sidebar-link">1.1. Layout della Tastiera: QWERTY vs. Dvorak</a></li>
+            <li><a href="#tastiere-speciali" class="sidebar-link">1.2. Tastiere per Esigenze Specifiche</a></li>
+            <li><a href="#tastiere-virtuali" class="sidebar-link">1.3. Tastiere Virtuali e Scrittura Predittiva</a></li>
+            <li><a href="#input-vocale" class="sidebar-link">2. Riconoscimento Vocale</a></li>
+            <li><a href="#sfide-vocale" class="sidebar-link">2.1. Sfide e Complessità dell'Input Vocale</a></li>
+            <li><a href="#input-scansione" class="sidebar-link">3. Sistemi a Scansione Ottica</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="input-testo">
+                <h2 class="section-title">1. Periferiche per l'Inserimento del Testo</h2>
+                <div class="section-content">
+                    <p>L'inserimento di testo è una delle forme più fondamentali di interazione con un computer. La periferica regina per questo scopo è, da sempre, la <strong>tastiera</strong>.</p>
+                </div>
+            </section>
+
+            <section id="layout-tastiera">
+                <h3 class="subsection-title">1.1. Layout della Tastiera: QWERTY vs. Dvorak</h3>
+                <div class="section-content">
+                    <p>La maggior parte di noi utilizza il layout <strong>QWERTY</strong>, ma pochi sanno che la sua disposizione non è stata progettata per la velocità, bensì per risolvere un problema meccanico.</p>
+                    <ul>
+                        <li><strong>Layout QWERTY:</strong> Nato con le macchine da scrivere meccaniche, il suo scopo era distanziare le lettere usate più di frequente in sequenza (in inglese) per evitare che i martelletti si incastrassero tra loro. È un classico esempio di <strong>design nato da un vincolo tecnologico</strong> che è sopravvissuto fino ad oggi per pura inerzia storica e abitudine consolidata (un sistema "legacy").</li>
+                        <li><strong>Layout Dvorak:</strong> Progettato decenni dopo, questo layout è ottimizzato per la velocità e l'ergonomia. Posiziona le lettere più comuni sulla fila centrale, sotto le dita più forti, per minimizzare il movimento e massimizzare la velocità di digitazione. Nonostante sia tecnicamente superiore, non si è mai affermato a causa dell'enorme base di utenti già abituata al QWERTY.</li>
+                    </ul>
+                    <div class="note-box">
+                        <strong>Eredità e Costo del Cambiamento:</strong>
+                        <p>Il caso QWERTY vs. Dvorak è un esempio perfetto di come l'abitudine e i costi di ri-apprendimento possano bloccare l'adozione di una tecnologia oggettivamente migliore. Per un'azienda, far passare tutti i propri dipendenti a un nuovo layout comporterebbe un crollo temporaneo della produttività che spesso non si è disposti ad affrontare.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="tastiere-speciali">
+                <h3 class="subsection-title">1.2. Tastiere per Esigenze Specifiche</h3>
+                <div class="section-content">
+                    <p>Oltre ai layout standard, esistono tastiere progettate per contesti o utenti specifici, dove l'obiettivo primario non è la velocità di scrittura.</p>
+                    <ul>
+                        <li><strong>Tastiere Alfabetiche:</strong> Le lettere sono disposte in ordine alfabetico (A, B, C...). Sebbene più lente per la digitazione, sono molto più veloci per la <strong>ricerca visiva</strong>. Un utente che non sa scrivere a macchina troverà una lettera più rapidamente in un layout alfabetico. Sono spesso usate in contesti dove l'input è limitato a brevi codici e la distrazione deve essere minima (es. pannelli di controllo in aerei o dispositivi industriali).</li>
+                        <li><strong>Tastiere per una Mano Sola:</strong> Progettate per utenti con disabilità motorie o per contesti in cui una mano è impegnata a fare altro (es. tenere un lettore di codici a barre). Il layout è compattato per rendere tutte le lettere raggiungibili con una sola mano.</li>
+                        <li><strong>Tastierini Numerici:</strong> Fondamentali per l'inserimento rapido di numeri. Esistono due layout standard principali che possono creare confusione:
+                            <ul>
+                                <li><strong>Layout Calcolatrice:</strong> 7-8-9 in alto.</li>
+                                <li><strong>Layout Telefono:</strong> 1-2-3 in alto.</li>
+                            </ul>
+                           Questa apparente piccola differenza può causare errori per utenti abituati a un layout che si trovano a usare l'altro.
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="tastiere-virtuali">
+                <h3 class="subsection-title">1.3. Tastiere Virtuali e Scrittura Predittiva</h3>
+                <div class="section-content">
+                    <p>Con l'avvento dei feature phone e poi degli smartphone, l'inserimento di testo si è spostato su interfacce senza tasti fisici.</p>
+                    <ul>
+                        <li><strong>T9 (Text on 9 keys):</strong> Una tecnologia rivoluzionaria per i telefoni con tastierino numerico. Invece di premere più volte un tasto per selezionare una lettera, l'utente premeva ogni tasto una sola volta. Un dizionario predittivo interno al telefono indovinava la parola intesa. Questo ha ridotto drasticamente il numero di pressioni necessarie per scrivere un messaggio.</li>
+                        <li><strong>Swype/Gesture Typing:</strong> Sulle tastiere virtuali degli smartphone, invece di toccare ogni singola lettera, l'utente può trascinare il dito da una lettera all'altra. L'algoritmo riconosce la traiettoria e la confronta con le parole del dizionario per determinare la parola desiderata. Questo sfrutta il riconoscimento di pattern (la traiettoria) invece del semplice puntamento.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="input-vocale">
+                <h2 class="section-title">2. Riconoscimento Vocale</h2>
+                <div class="section-content">
+                    <p>Il riconoscimento vocale è una delle forme di interazione più naturali, ma anche una delle più complesse dal punto di vista tecnologico. Negli ultimi anni, grazie ai progressi nel machine learning, la sua qualità è migliorata drasticamente, rendendolo un'alternativa praticabile all'input testuale in molti contesti.</p>
+                </div>
+            </section>
+            
+            <section id="sfide-vocale">
+                <h3 class="subsection-title">2.1. Sfide e Complessità dell'Input Vocale</h3>
+                <div class="section-content">
+                     <p>Un sistema di riconoscimento vocale deve affrontare diverse sfide:</p>
+                     <ul>
+                         <li><strong>Dimensione del Vocabolario:</strong> Un sistema addestrato su un vocabolario generico (lingua comune) farà fatica a riconoscere termini specialistici (es. terminologia medica o legale). È più facile progettare un sistema che riconosce un set limitato di comandi.</li>
+                         <li><strong>Dipendenza dal Parlatore:</strong> I sistemi possono essere addestrati sulla voce di un singolo utente (speaker-dependent) o essere generici (speaker-independent). I primi sono più accurati per quell'utente, i secondi sono più flessibili ma più soggetti a errori.</li>
+                         <li><strong>Contesto Ambientale:</strong> Il rumore di fondo (es. in auto, in un luogo affollato) è uno dei maggiori ostacoli a un riconoscimento accurato. I sistemi moderni usano algoritmi per filtrare il rumore e isolare la voce.</li>
+                         <li><strong>Accenti e Variazioni Linguistiche:</strong> Come dimostrato dall'esempio degli scozzesi che interagiscono con un assistente vocale, un sistema addestrato prevalentemente su un accento standard (es. inglese britannico o americano) può fallire miseramente con pronunce diverse.</li>
+                     </ul>
+                     <div class="clarification-box">
+                         <strong>Feedback e Conferma:</strong>
+                         <p>Un aspetto cruciale dell'interazione vocale è fornire un feedback adeguato. Dato che l'utente non "vede" l'input, il sistema deve confermare ciò che ha capito, specialmente prima di eseguire azioni importanti. Ad esempio, un sistema di navigazione in auto dovrebbe ripetere "Ho capito, avvio la navigazione per Via Roma" prima di partire, per dare all'utente la possibilità di correggere un eventuale fraintendimento.</p>
+                     </div>
+                </div>
+            </section>
+
+            <section id="input-scansione">
+                <h2 class="section-title">3. Sistemi a Scansione Ottica</h2>
+                <div class="section-content">
+                    <p>Un'altra forma di input "testuale" non richiede la digitazione, ma la scansione di codici visivi. Questi sistemi traducono un pattern grafico in una stringa di testo o un link.</p>
+                    <ul>
+                        <li><strong>Codici a Barre:</strong> Il sistema più vecchio e diffuso, usato principalmente per l'identificazione di prodotti. Converte una serie di barre verticali in un codice numerico.</li>
+                        <li><strong>QR Code (Quick Response Code):</strong> Un'evoluzione del codice a barre. È una matrice bidimensionale che può contenere una quantità molto maggiore di informazioni, come un link a una pagina web, informazioni di contatto, o le credenziali di una rete Wi-Fi. È un modo estremamente efficiente per trasferire testo dalla realtà fisica a un dispositivo digitale senza doverlo digitare.</li>
+                    </ul>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
