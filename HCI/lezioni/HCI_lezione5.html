@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 5: Periferiche di Output - Display 2D, Suono e Feedback Aptico</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 5: Periferiche di Output</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#output-visivo" class="sidebar-link">1. Output Visivo: i Display</a></li>
+            <li><a href="#display-testuali" class="sidebar-link">1.1. Display Alfanumerici e Testuali</a></li>
+            <li><a href="#display-grafici" class="sidebar-link">1.2. Display Grafici e Tecnologie a Confronto</a></li>
+            <li><a href="#e-ink-vs-lcd" class="sidebar-link">1.3. Caso di Studio: E-ink vs. LCD</a></li>
+            <li><a href="#output-uditivo" class="sidebar-link">2. Output Uditivo: il Suono</a></li>
+            <li><a href="#tipi-suono" class="sidebar-link">2.1. Suono Linguistico e Non Linguistico</a></li>
+            <li><a href="#audio-spaziale" class="sidebar-link">2.2. Audio Spaziale (3D)</a></li>
+            <li><a href="#output-tattile" class="sidebar-link">3. Output Tattile e Aptico</a></li>
+            <li><a href="#feedback-aptico" class="sidebar-link">3.1. Vibrazione e Feedback Aptico Avanzato</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="output-visivo">
+                <h2 class="section-title">1. Output Visivo: i Display</h2>
+                <div class="section-content">
+                    <p>Il canale visivo è il principale canale di output per la maggior parte delle interazioni informatiche. I dispositivi che mediano questa comunicazione sono i <strong>display</strong> o schermi.</p>
+                </div>
+            </section>
+
+            <section id="display-testuali">
+                <h3 class="subsection-title">1.1. Display Alfanumerici e Testuali</h3>
+                <div class="section-content">
+                    <p>La forma più semplice di display è quella <strong>alfanumerica</strong>. Questi schermi, basati su segmenti (come quelli delle calcolatrici) o piccole matrici di punti, possono visualizzare solo un set limitato di caratteri, numeri e simboli.</p>
+                    <p>Nonostante possano sembrare obsoleti, hanno ancora un ruolo fondamentale in molti contesti grazie a due vantaggi chiave:</p>
+                    <ul>
+                        <li><strong>Basso Costo:</strong> Sono estremamente economici da produrre.</li>
+                        <li><strong>Basso Consumo Energetico:</strong> Richiedono pochissima energia per funzionare.</li>
+                    </ul>
+                    <p>Per questo motivo, sono ideali per dispositivi dove la durata della batteria è critica e le informazioni da visualizzare sono semplici (es. timer di una lavatrice, orologi digitali, piccoli dispositivi IoT).</p>
+                </div>
+            </section>
+            
+            <section id="display-grafici">
+                <h3 class="subsection-title">1.2. Display Grafici e Tecnologie a Confronto</h3>
+                <div class="section-content">
+                    <p>I display moderni sono <strong>display grafici (o bitmap)</strong>. Sono composti da una griglia di <strong>pixel</strong> (picture elements), dove ogni pixel può assumere un colore specifico. La combinazione di milioni di pixel colorati permette di creare immagini complesse, testo e interfacce grafiche.</p>
+                    <p>Le principali tecnologie sono:</p>
+                    <ul>
+                        <li><strong>CRT (Tubo a Raggi Catodici):</strong> La tecnologia dei vecchi televisori e monitor, ingombrante e superata.</li>
+                        <li><strong>LCD (Display a Cristalli Liquidi):</strong> La tecnologia dominante per molti anni. Utilizza una retroilluminazione che passa attraverso cristalli liquidi per generare i colori.</li>
+                        <li><strong>LED/OLED:</strong> I display moderni. Ogni pixel è un piccolo diodo che emette luce propria (LED: Light Emitting Diode). Nelle versioni OLED (Organic LED), questo permette di spegnere completamente i pixel neri, garantendo neri più profondi e un contrasto superiore.</li>
+                        <li><strong>E-ink (Inchiostro Elettronico):</strong> Tecnologia usata negli e-book reader (es. Kindle).</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="e-ink-vs-lcd">
+                <h3 class="subsection-title">1.3. Caso di Studio: E-ink vs. LCD</h3>
+                <div class="section-content">
+                    <p>Il confronto tra la tecnologia E-ink e quella LCD/LED è un perfetto esempio di come la scelta della tecnologia di output debba dipendere dal **contesto d'uso**.</p>
+                     <div class="clarification-box">
+                        <strong>E-ink (es. Kindle):</strong>
+                        <ul>
+                            <li><strong>Funzionamento:</strong> Non emette luce propria, ma riflette la luce ambientale, proprio come la carta. Delle microcapsule contenenti pigmenti bianchi e neri vengono orientate da un campo elettrico per formare l'immagine.</li>
+                            <li><strong>Vantaggi:</strong> Consuma energia **solo quando si cambia pagina**. È perfettamente leggibile sotto la luce diretta del sole e non affatica la vista, mimando l'esperienza della lettura su carta.</li>
+                            <li><strong>Svantaggi:</strong> Bassa frequenza di aggiornamento (lento a cambiare pagina), rendendolo inadatto a video o animazioni. Generalmente in bianco e nero o con colori molto limitati.</li>
+                        </ul>
+                    </div>
+                     <div class="note-box">
+                        <strong>LCD/LED (es. Smartphone/Tablet):</strong>
+                        <ul>
+                            <li><strong>Funzionamento:</strong> Emette luce propria. Ogni pixel è una fonte luminosa.</li>
+                            <li><strong>Vantaggi:</strong> Alta frequenza di aggiornamento, perfetto per video e interazioni veloci. Può visualizzare milioni di colori. È utilizzabile al buio.</li>
+                            <li><strong>Svantaggi:</strong> Consuma costantemente energia. Sotto la luce diretta del sole, la luce emessa "combatte" con quella ambientale, rendendo la lettura difficile. L'esposizione prolungata alla luce blu può affaticare la vista.</li>
+                        </ul>
+                    </div>
+                    <p>La conclusione è chiara: per la lettura prolungata, specialmente all'aperto, l'E-ink è superiore. Per un uso multimediale e interattivo, gli schermi LCD/LED sono indispensabili. La tecnologia "migliore" dipende interamente dal task.</p>
+                </div>
+            </section>
+
+            <section id="output-uditivo">
+                <h2 class="section-title">2. Output Uditivo: il Suono</h2>
+                <div class="section-content">
+                    <p>Il canale uditivo è il secondo canale di output più importante. Il suono è fondamentale perché può catturare l'attenzione dell'utente anche quando non sta guardando lo schermo. Si distinguono due categorie principali di suoni.</p>
+                </div>
+            </section>
+            
+            <section id="tipi-suono">
+                <h3 class="subsection-title">2.1. Suono Linguistico e Non Linguistico</h3>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>Suono Linguistico (Speech):</strong> È il parlato. Include la voce di un'altra persona in una chiamata, le indicazioni di un navigatore GPS o le risposte di un assistente vocale. La tecnologia che genera il parlato è la **sintesi vocale**.</li>
+                        <li><strong>Suono Non Linguistico (Non-speech):</strong> Include tutti gli altri suoni. Svolge funzioni cruciali nell'interfaccia:
+                            <ul>
+                                <li><strong>Feedback:</strong> Il "click" sonoro quando si preme un tasto virtuale, il suono di conferma quando un'operazione è completata.</li>
+                                <li><strong>Notifiche e Allarmi:</strong> Il suono di un nuovo messaggio o una sveglia. Cattura l'attenzione in modo efficace.</li>
+                                <li><strong>Atmosfera ed Emozione:</strong> La colonna sonora di un videogioco o di un film, che contribuisce a creare l'atmosfera e a suscitare emozioni.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <p>Il suono non linguistico è uno strumento potente per ridurre il sovraccarico del canale visivo, comunicando informazioni importanti senza richiedere all'utente di guardare lo schermo.</p>
+                </div>
+            </section>
+            
+            <section id="audio-spaziale">
+                <h3 class="subsection-title">2.2. Audio Spaziale (3D)</h3>
+                <div class="section-content">
+                    <p>Così come abbiamo due occhi per percepire la profondità visiva, abbiamo due orecchie per percepire la **direzione** di un suono. Il nostro cervello analizza le minuscole differenze di tempo e volume con cui un suono arriva alle due orecchie per localizzarne la provenienza.</p>
+                    <p>L'**audio spaziale o 3D** è una tecnologia che simula questo fenomeno. Utilizzando cuffie o sistemi di altoparlanti multipli, è possibile posizionare una sorgente sonora in uno spazio virtuale tridimensionale. Se in un videogioco un nemico si avvicina da destra, sentiremo i suoi passi provenire da destra. Questo non solo aumenta l'immersività, ma fornisce anche un'informazione utile per l'interazione.</p>
+                </div>
+            </section>
+
+            <section id="output-tattile">
+                <h2 class="section-title">3. Output Tattile e Aptico</h2>
+                <div class="section-content">
+                    <p>Il canale tattile, sebbene meno utilizzato, è fondamentale per alcune forme di feedback e per l'accessibilità.</p>
+                </div>
+            </section>
+            
+            <section id="feedback-aptico">
+                <h3 class="subsection-title">3.1. Vibrazione e Feedback Aptico Avanzato</h3>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>Vibrazione:</strong> È la forma più comune di feedback tattile. La vibrazione di uno smartphone ci notifica una chiamata o un messaggio in modo discreto. Fornisce anche un feedback di conferma quando si preme un tasto su una tastiera virtuale, simulando parzialmente la sensazione di un tasto fisico.</li>
+                        <li><strong>Display Braille:</strong> Un dispositivo di output cruciale per le persone non vedenti. Una griglia di piccoli perni si alza e si abbassa per formare caratteri Braille, rendendo il testo sullo schermo leggibile al tatto.</li>
+                        <li><strong>Feedback Aptico (Haptic Feedback):</strong> È un concetto più ampio che include non solo la vibrazione ma anche la simulazione di forze, texture e forme. Dispositivi come i **guanti aptici** per la VR possono simulare la resistenza di un oggetto quando lo si afferra, o la sua texture quando lo si tocca, bloccando o facendo vibrare le dita dell'utente.</li>
+                    </ul>
+                    <p>Il feedback aptico è fondamentale per creare esperienze virtuali più immersive e realistiche, fornendo un canale di output che si avvicina alla complessità del mondo fisico.</p>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
