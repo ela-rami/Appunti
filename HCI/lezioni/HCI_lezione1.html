@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 1: Introduzione a HCI, Usabilità e User Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        /* Rimuoviamo la logica di display:none/block */
+        article {
+            display: block !important; /* Sempre visibile */
+        }
+        section { /* Usiamo section per ogni blocco di contenuto */
+           margin-bottom: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 1: Introduzione a HCI, Usabilità e User Experience</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-hci" class="sidebar-link">1. Cos'è l'Interazione Uomo-Macchina (HCI)?</a></li>
+            <li><a href="#definizione-usabilita" class="sidebar-link">1.1. I Pilastri dell'Usabilità</a></li>
+            <li><a href="#oltre-usabilita" class="sidebar-link">2. Oltre l'Usabilità: la User Experience (UX)</a></li>
+            <li><a href="#piacevolezza-ux" class="sidebar-link">2.1. Il Concetto di "Piacevolezza"</a></li>
+            <li><a href="#due-sfere" class="sidebar-link">2.2. Usabilità e UX: Due Sfere Concentriche</a></li>
+            <li><a href="#importanza-hci" class="sidebar-link">3. Perché l'HCI è Importante?</a></li>
+            <li><a href="#successo-mercato" class="sidebar-link">3.1. Fattore di Successo sul Mercato</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="intro-hci">
+                <h2 class="section-title">1. Cos'è l'Interazione Uomo-Macchina (HCI)?</h2>
+                <div class="section-content">
+                    <p>L'Interazione Uomo-Macchina, o <strong>Human-Computer Interaction (HCI)</strong>, è la disciplina che studia, progetta e valuta i sistemi informatici interattivi destinati all'uso umano. L'obiettivo primario non è solo creare tecnologia che "funzioni", ma creare tecnologia che sia **usabile** dalle persone in modo efficace, efficiente e soddisfacente.</p>
+                    <p>Il campo si pone al crocevia di diverse discipline: informatica, psicologia cognitiva, design, sociologia e ingegneria. L'HCI analizza il dialogo tra due entità: l'<strong>uomo</strong> (con le sue capacità, limiti e obiettivi) e la **macchina** (con la sua tecnologia e le sue funzionalità).</p>
+                     <div class="note-box">
+                        <strong>Nota Terminologica:</strong>
+                        <p>In italiano si usa spesso "Interazione Uomo-Macchina", mentre in contesti più recenti si preferisce "Interazione Persona-Macchina" per essere più inclusivi. A livello internazionale, il termine consolidato è Human-Computer Interaction (HCI).</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="definizione-usabilita">
+                <h3 class="subsection-title">1.1. I Pilastri dell'Usabilità</h3>
+                <div class="section-content">
+                    <p>Storicamente, il concetto cardine dell'HCI è l'<strong>usabilità</strong>. Un sistema è considerato usabile quando rispetta una serie di criteri fondamentali. Questi pilastri definiscono la qualità dell'interazione dal punto di vista funzionale.</p>
+                    <ul>
+                        <li><strong>Semplice:</strong> Il sistema non deve essere complicato. L'utente deve poter compiere le proprie azioni senza passaggi superflui o contorti. Un esempio di scarsa semplicità è un processo di configurazione che richiede numerosi tentativi e cambi di impostazioni per funzionare.</li>
+                        <li><strong>Intuitivo:</strong> Il funzionamento del sistema deve corrispondere alle aspettative dell'utente. Le azioni devono produrre i risultati attesi in modo naturale. Una maniglia di una porta è intuitiva perché suggerisce di essere afferrata e tirata/spinta.</li>
+                        <li><strong>Produttivo:</strong> Il sistema deve aiutare l'utente a raggiungere i propri obiettivi in modo efficiente, ottimizzando i tempi e gli sforzi. È importante notare che la "produttività" in HCI non riguarda solo le performance tecniche della macchina (CPU, RAM), ma l'efficacia dell'interazione nel suo complesso.</li>
+                        <li><strong>Affidabile:</strong> Il sistema deve comportarsi in modo prevedibile e consistente. Deve fare ciò che l'utente si aspetta che faccia, senza errori inaspettati o comportamenti anomali (es. un messaggio inviato due volte quando si è premuto una volta sola).</li>
+                        <li><strong>Sicuro:</strong> Il sistema deve proteggere l'utente da errori gravi e irreversibili e garantire la sicurezza dei suoi dati e delle sue azioni.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="oltre-usabilita">
+                <h2 class="section-title">2. Oltre l'Usabilità: la User Experience (UX)</h2>
+                <div class="section-content">
+                    <p>Con il tempo, il focus dell'HCI si è ampliato. Non basta più che un sistema sia semplicemente funzionale e privo di problemi. L'evoluzione tecnologica e la diffusione dei dispositivi nella vita quotidiana hanno spostato l'attenzione verso l'<strong>esperienza globale</strong> che l'utente vive prima, durante e dopo l'interazione.</p>
+                    <p>Questo concetto più ampio è noto come <strong>User Experience (UX)</strong>.</p>
+                </div>
+            </section>
+
+            <section id="piacevolezza-ux">
+                <h3 class="subsection-title">2.1. Il Concetto di "Piacevolezza"</h3>
+                <div class="section-content">
+                    <p>Un sesto pilastro, emerso più di recente, si è aggiunto ai criteri tradizionali dell'usabilità: la <strong>piacevolezza</strong>. Un sistema può essere perfettamente funzionale ma risultare noioso, sgradevole o frustrante. Viceversa, un sistema "piacevole" è quello che l'utente gradisce usare, che evoca emozioni positive e che rende l'interazione un'esperienza gradevole.</p>
+                    <p>La piacevolezza è la porta d'accesso alla User Experience, che include aspetti più complessi come:</p>
+                    <ul>
+                        <li><strong>Coinvolgimento:</strong> La capacità del sistema di catturare e mantenere l'attenzione dell'utente.</li>
+                        <li><strong>Estetica:</strong> La qualità visiva e la gradevolezza del design.</li>
+                        <li><strong>Emozioni:</strong> Le sensazioni che il sistema suscita (gioia, sicurezza, frustrazione, ansia).</li>
+                        <li><strong>Divertimento:</strong> La capacità di rendere un'interazione, anche se funzionale, ludica e divertente.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="due-sfere">
+                <h3 class="subsection-title">2.2. Usabilità e UX: Due Sfere Concentriche</h3>
+                <div class="section-content">
+                     <p>Possiamo visualizzare la relazione tra Usabilità e User Experience come due sfere concentriche.</p>
+                     <div class="mermaid-container">
+                         <pre class="mermaid">
+                            graph TD
+                                subgraph UX [User Experience]
+                                    direction LR
+                                    A[Usabilità] --> B((Emozioni<br>Estetica<br>Coinvolgimento))
+                                end
+                                C(Tecnologia) --> A
+                         </pre>
+                     </div>
+                     <ul>
+                         <li>La <strong>sfera interna è l'Usabilità</strong>: rappresenta il nucleo funzionale, la base senza la quale un'esperienza positiva è quasi impossibile. Se un'app non funziona, è difficile che possa essere piacevole.</li>
+                         <li>La <strong>sfera esterna è la User Experience</strong>: avvolge l'usabilità e include tutti gli aspetti soggettivi, emotivi ed estetici che definiscono l'esperienza globale dell'utente.</li>
+                     </ul>
+                     <p>Un buon design HCI oggi mira a soddisfare entrambi i livelli: creare prodotti che non solo funzionino bene, ma che siano anche un piacere da usare.</p>
+                </div>
+            </section>
+            
+            <section id="importanza-hci">
+                <h2 class="section-title">3. Perché l'HCI è Importante?</h2>
+                <div class="section-content">
+                    <p>Trascurare gli aspetti di HCI nella progettazione di un sistema informatico può avere conseguenze significative, che vanno dal fallimento commerciale di un prodotto a incidenti gravi in contesti critici.</p>
+                </div>
+            </section>
+            
+            <section id="successo-mercato">
+                <h3 class="subsection-title">3.1. Fattore di Successo sul Mercato</h3>
+                <div class="section-content">
+                    <p>In un mercato competitivo, a parità di funzionalità tecniche, l'usabilità e la user experience diventano il fattore chiave che determina il successo di un prodotto.</p>
+                    <div class="clarification-box">
+                        <strong>Esempio: il caso Nokia</strong>
+                        <p>Prima dell'avvento degli smartphone moderni, Nokia era leader di mercato non solo per la qualità costruttiva, ma soprattutto perché aveva investito moltissimo nell'**interazione uomo-macchina**. I suoi telefoni erano percepiti come più **facili e intuitivi** da usare rispetto a quelli della concorrenza.</p>
+                        <p>Mentre per usare un telefono di un'altra marca era spesso necessario leggere il manuale, un "Nokia" poteva essere usato quasi subito, anche da persone non esperte. Questo ha creato un vantaggio competitivo enorme, al punto che molti consumatori non chiedevano "un cellulare", ma "un Nokia".</p>
+                    </div>
+                    <p>Lo stesso principio si applica a innumerevoli altri prodotti, dalle lavatrici che pubblicizzano la loro "semplicità d'uso" (con due manopole intuitive invece di complessi menu digitali) ai software che vincono la concorrenza perché, semplicemente, sono più facili da imparare e meno frustranti da usare.</p>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
