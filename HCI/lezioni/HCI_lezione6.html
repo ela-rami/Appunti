@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 6: Realtà Virtuale, Aumentata e Immersività</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 6: Realtà Virtuale e Aumentata</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#continuum-realta" class="sidebar-link">1. Il Continuum Realtà-Virtualità di Milgram</a></li>
+            <li><a href="#realta-virtuale" class="sidebar-link">1.1. Realtà Virtuale (VR)</a></li>
+            <li><a href="#realta-aumentata" class="sidebar-link">1.2. Realtà Aumentata (AR)</a></li>
+            <li><a href="#realta-mista" class="sidebar-link">1.3. Realtà Mista (MR) ed Estesa (XR)</a></li>
+            <li><a href="#tecnologie-3d" class="sidebar-link">2. Tecnologie per Ambienti 3D</a></li>
+            <li><a href="#shutter-glasses" class="sidebar-link">2.1. Shutter Glasses e Display Stereoscopici</a></li>
+            <li><a href="#head-mounted-displays" class="sidebar-link">2.2. Head-Mounted Displays (HMD)</a></li>
+            <li><a href="#parametri-immersivita" class="sidebar-link">3. Parametri Chiave dell'Immersività</a></li>
+            <li><a href="#campo-visivo" class="sidebar-link">3.1. Campo Visivo (Field of View - FoV)</a></li>
+            <li><a href="#risoluzione-refresh" class="sidebar-link">3.2. Risoluzione e Frequenza di Aggiornamento</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="continuum-realta">
+                <h2 class="section-title">1. Il Continuum Realtà-Virtualità di Milgram</h2>
+                <div class="section-content">
+                    <p>Per comprendere le diverse tecnologie immersive, è utile fare riferimento al **Continuum Realtà-Virtualità** proposto da Paul Milgram. Questo modello non vede "reale" e "virtuale" come due mondi separati, ma come gli estremi di un unico spettro, con varie gradazioni intermedie.</p>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+                        graph LR
+                            A[Mondo Reale] --- B(Realtà Aumentata - AR) --- C(Virtualità Aumentata - AV) --- D[Mondo Virtuale]
+                            subgraph "Realtà Mista (Mixed Reality - MR)"
+                                B --- C
+                            end
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="realta-virtuale">
+                <h3 class="subsection-title">1.1. Realtà Virtuale (VR)</h3>
+                <div class="section-content">
+                    <p>La **Realtà Virtuale (VR)** si colloca all'estremo destro del continuum. È un'esperienza completamente immersiva in cui l'utente viene "trasportato" in un ambiente interamente digitale e sintetico. La percezione del mondo reale viene completamente bloccata.</p>
+                    <ul>
+                        <li><strong>Obiettivo:</strong> Isolare l'utente dal mondo fisico per immergerlo in uno virtuale.</li>
+                        <li><strong>Tecnologia Tipica:</strong> Caschi o visori (Head-Mounted Displays) che coprono completamente il campo visivo dell'utente, sostituendo ciò che vede e sente con stimoli generati dal computer.</li>
+                        <li><strong>Esempi:</strong> Videogiochi VR, simulazioni di addestramento (es. chirurgico o di volo), esperienze artistiche immersive.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="realta-aumentata">
+                <h3 class="subsection-title">1.2. Realtà Aumentata (AR)</h3>
+                <div class="section-content">
+                    <p>La **Realtà Aumentata (AR)** si colloca all'estremo sinistro del continuum, molto vicina al mondo reale. Invece di sostituire la realtà, la "aumenta", sovrapponendo informazioni o oggetti digitali al mondo fisico che l'utente sta vedendo.</p>
+                    <ul>
+                        <li><strong>Obiettivo:</strong> Arricchire la percezione del mondo reale con contenuti digitali pertinenti.</li>
+                        <li><strong>Tecnologia Tipica:</strong> Smartphone (che usano la fotocamera per inquadrare la realtà e sovrapporre grafica sullo schermo), occhiali smart o visori trasparenti.</li>
+                        <li><strong>Esempi:</strong> Pokémon GO (personaggi virtuali nel mondo reale), filtri di Instagram/Snapchat, app che mostrano le recensioni di un ristorante inquadrandolo con la fotocamera, istruzioni di montaggio visualizzate direttamente su un pezzo meccanico.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="realta-mista">
+                <h3 class="subsection-title">1.3. Realtà Mista (MR) ed Estesa (XR)</h3>
+                <div class="section-content">
+                    <p>I termini **Realtà Mista (Mixed Reality - MR)** e **Realtà Estesa (Extended Reality - XR)** sono spesso usati per descrivere lo spazio intermedio del continuum o l'intero spettro.</p>
+                    <ul>
+                        <li><strong>Realtà Mista (MR):</strong> In senso stretto, si riferisce a esperienze in cui gli oggetti virtuali non sono solo sovrapposti al mondo reale, ma sono anche "consapevoli" di esso e possono interagire con esso. Ad esempio, una palla virtuale che rimbalza su un tavolo reale. Molti visori moderni (come il Meta Quest 3) che permettono di vedere l'ambiente circostante tramite telecamere (pass-through) rientrano in questa categoria.</li>
+                        <li><strong>Realtà Estesa (XR):</strong> È un termine ombrello che comprende tutte le tecnologie lungo il continuum: VR, AR e MR. Viene usato per riferirsi collettivamente a tutte le esperienze che combinano mondo reale e virtuale.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="tecnologie-3d">
+                <h2 class="section-title">2. Tecnologie per Ambienti 3D</h2>
+                <div class="section-content">
+                    <p>Per creare l'illusione della profondità e della tridimensionalità, tutte queste tecnologie si basano sul principio della **stereopsia**: fornire a ciascun occhio un'immagine leggermente diversa, mimando il modo in cui percepiamo il mondo reale.</p>
+                </div>
+            </section>
+
+            <section id="shutter-glasses">
+                <h3 class="subsection-title">2.1. Shutter Glasses e Display Stereoscopici</h3>
+                <div class="section-content">
+                    <p>Una delle prime tecnologie per portare il 3D su schermi piatti è stata quella degli **occhiali attivi (Shutter Glasses)**.</p>
+                    <ul>
+                        <li><strong>Funzionamento:</strong> Lo schermo visualizza alternativamente e a velocità molto elevata l'immagine per l'occhio sinistro e quella per l'occhio destro. Gli occhiali, sincronizzati con lo schermo, hanno lenti LCD che si oscurano alternativamente, garantendo che ogni occhio veda solo l'immagine a esso destinata.</li>
+                        <li><strong>Utilizzo:</strong> Era una tecnologia popolare per i televisori 3D e in alcuni cinema. Oggi è meno diffusa per l'uso domestico, ma il principio rimane valido per alcuni sistemi professionali.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="head-mounted-displays">
+                <h3 class="subsection-title">2.2. Head-Mounted Displays (HMD)</h3>
+                <div class="section-content">
+                    <p>Gli **Head-Mounted Displays (HMD)**, comunemente noti come caschi o visori, sono la tecnologia principale per la VR e la MR.</p>
+                    <ul>
+                        <li><strong>Funzionamento:</strong> Invece di un unico schermo, un HMD ha due piccoli display separati, uno per ogni occhio. Ogni display mostra l'immagine da una prospettiva leggermente diversa, creando un'illusione stereoscopica molto più potente e immersiva rispetto agli occhiali 3D.</li>
+                        <li><strong>Tipi di HMD:</strong>
+                            <ul>
+                                <li><strong>Visori VR:</strong> Sono completamente opachi e bloccano la vista del mondo esterno.</li>
+                                <li><strong>Visori AR/MR:</strong> Possono essere basati su lenti trasparenti su cui vengono proiettate le immagini (es. HoloLens) o utilizzare telecamere esterne per mostrare il mondo reale sui display interni (modalità pass-through, es. Meta Quest, Apple Vision Pro).</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="parametri-immersivita">
+                <h2 class="section-title">3. Parametri Chiave dell'Immersività</h2>
+                <div class="section-content">
+                    <p>La qualità e il comfort di un'esperienza immersiva dipendono da diversi parametri tecnici. Un valore basso in uno qualsiasi di questi può compromettere l'intera esperienza o, peggio, causare malessere fisico (cinetosi o *motion sickness*).</p>
+                </div>
+            </section>
+
+            <section id="campo-visivo">
+                <h3 class="subsection-title">3.1. Campo Visivo (Field of View - FoV)</h3>
+                <div class="section-content">
+                    <p>Il **Campo Visivo** è l'ampiezza dell'immagine che il visore è in grado di mostrare. Un FoV ampio è cruciale per l'immersione, perché copre anche la visione periferica dell'utente.</p>
+                    <ul>
+                        <li><strong>FoV Stretto (vecchi visori):</strong> L'utente ha la sensazione di guardare il mondo virtuale attraverso un "binocolo" o una "maschera da sub". La visione periferica è bloccata da bordi neri, riducendo drasticamente il senso di presenza.</li>
+                        <li><strong>FoV Ampio (visori moderni):</strong> I visori attuali offrono un FoV orizzontale di 100-110 gradi o più, sufficiente a coprire gran parte della visione periferica e a creare un forte senso di immersione.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="risoluzione-refresh">
+                <h3 class="subsection-title">3.2. Risoluzione e Frequenza di Aggiornamento</h3>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>Risoluzione:</strong> È il numero di pixel presenti nei display. Dato che i display sono molto vicini agli occhi, una bassa risoluzione causa il cosiddetto **"screen-door effect"**: l'utente percepisce la griglia nera tra i pixel, come se guardasse il mondo attraverso una zanzariera. I visori moderni hanno risoluzioni molto elevate (4K per occhio e oltre) per eliminare questo effetto.</li>
+                        <li><strong>Frequenza di Aggiornamento (Refresh Rate):</strong> Misurata in Hertz (Hz), indica quante volte al secondo l'immagine sullo schermo viene aggiornata. Per un'esperienza fluida e confortevole, specialmente durante i movimenti rapidi della testa, è necessaria una frequenza molto alta (tipicamente 90 Hz, 120 Hz o più). Frequenze basse causano sfarfallio, immagini "a scatti" e sono una delle principali cause di cinetosi.</li>
+                        <li><strong>Latenza:</strong> È il ritardo tra il movimento della testa dell'utente e l'aggiornamento dell'immagine nel visore. Per evitare la cinetosi, questa latenza deve essere bassissima (inferiore ai 20 millisecondi).</li>
+                    </ul>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
