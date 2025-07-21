@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 7: La Percezione Visiva e le Leggi della Gestalt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 7: La Percezione Visiva</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#occhio-umano" class="sidebar-link">1. L'Occhio Umano: Un Sensore Complesso</a></li>
+            <li><a href="#struttura-occhio" class="sidebar-link">1.1. Struttura e Funzionamento</a></li>
+            <li><a href="#coni-bastoncelli" class="sidebar-link">1.2. Coni e Bastoncelli: Due Sistemi di Visione</a></li>
+            <li><a href="#visione-centrale-periferica" class="sidebar-link">2. Visione Centrale vs. Visione Periferica</a></li>
+            <li><a href="#implicazioni-design" class="sidebar-link">2.1. Implicazioni per il Design delle Interfacce</a></li>
+            <li><a href="#angolo-cieco" class="sidebar-link">3. L'Angolo Cieco e l'Elaborazione Cerebrale</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="occhio-umano">
+                <h2 class="section-title">1. L'Occhio Umano: Un Sensore Complesso</h2>
+                <div class="section-content">
+                    <p>Per progettare interfacce visive efficaci, è fondamentale capire come funziona il nostro principale sensore: l'occhio. Non è una semplice "telecamera", ma un organo biologico complesso che cattura la luce e la trasforma in segnali neurali, i quali vengono poi elaborati e interpretati dal cervello.</p>
+                </div>
+            </section>
+
+            <section id="struttura-occhio">
+                <h3 class="subsection-title">1.1. Struttura e Funzionamento</h3>
+                <div class="section-content">
+                    <p>Il percorso della luce attraverso l'occhio segue queste tappe principali:</p>
+                    <ol>
+                        <li><strong>Cornea e Pupilla:</strong> La luce entra attraverso la cornea trasparente e passa per la pupilla, il cui diametro è regolato dall'iride per controllare la quantità di luce in ingresso.</li>
+                        <li><strong>Cristallino:</strong> Agisce come una lente dinamica. I muscoli ciliari ne modificano la forma per mettere a fuoco oggetti a distanze diverse.</li>
+                        <li><strong>Retina:</strong> È il "sensore" vero e proprio, una membrana sul fondo dell'occhio piena di cellule fotosensibili. L'immagine proiettata sulla retina è capovolta; sarà il cervello a "raddrizzarla".</li>
+                    </ol>
+                    <p>La retina non è uniforme. Contiene due tipi di fotorecettori con funzioni molto diverse: i coni e i bastoncelli.</p>
+                </div>
+            </section>
+            
+            <section id="coni-bastoncelli">
+                <h3 class="subsection-title">1.2. Coni e Bastoncelli: Due Sistemi di Visione</h3>
+                <div class="section-content">
+                    <p>La retina umana possiede due sistemi di visione distinti, basati su questi due tipi di cellule:</p>
+                    <ul>
+                        <li><strong>Coni:</strong>
+                            <ul>
+                                <li><strong>Funzione:</strong> Sono responsabili della **visione a colori** e della percezione dei **dettagli fini** (alta acuità visiva).</li>
+                                <li><strong>Condizioni:</strong> Funzionano bene solo in condizioni di buona illuminazione (visione diurna o fotopica).</li>
+                                <li><strong>Distribuzione:</strong> Sono concentrati principalmente al centro della retina, in un'area chiamata **fovea**.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Bastoncelli:</strong>
+                            <ul>
+                                <li><strong>Funzione:</strong> Sono estremamente sensibili alla luce e sono responsabili della **visione in condizioni di scarsa luminosità** (visione notturna o scotopica). Sono anche molto efficaci nel rilevare il **movimento**.</li>
+                                <li><strong>Limiti:</strong> Non distinguono i colori (per questo di notte vediamo in "bianco e nero") e hanno una bassa acuità visiva.</li>
+                                <li><strong>Distribuzione:</strong> Sono quasi assenti nella fovea e popolano densamente la **periferia** della retina.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="visione-centrale-periferica">
+                <h2 class="section-title">2. Visione Centrale vs. Visione Periferica</h2>
+                <div class="section-content">
+                    <p>Questa diversa distribuzione di coni e bastoncelli crea due modalità di visione con capacità molto diverse:</p>
+                    <div class="mermaid-container">
+                         <pre class="mermaid">
+                            graph TD
+                                A["<b>Visione Centrale (Foveale)</b><br><i>Dominata dai Coni</i>"]
+                                B["<b>Visione Periferica</b><br><i>Dominata dai Bastoncelli</i>"]
+                                A --> A1("Alta acuità visiva (dettagli)")
+                                A --> A2("Ottima percezione dei colori")
+                                A --> A3("Richiede buona illuminazione")
+                                A --> A4("Scarsa sensibilità al movimento")
+                                B --> B1("Bassa acuità visiva (sfocata)")
+                                B --> B2("Scarsa/nulla percezione dei colori")
+                                B --> B3("Funziona con poca luce")
+                                B --> B4("<b>Alta sensibilità al movimento</b>")
+                         </pre>
+                     </div>
+                </div>
+            </section>
+
+            <section id="implicazioni-design">
+                <h3 class="subsection-title">2.1. Implicazioni per il Design delle Interfacce</h3>
+                <div class="section-content">
+                    <p>Comprendere questa dualità è fondamentale per progettare interfacce efficaci. Dobbiamo posizionare gli elementi in modo che sfruttino le capacità della parte giusta della retina.</p>
+                     <div class="clarification-box">
+                        <strong>Regole di Progettazione Pratiche:</strong>
+                        <ul>
+                            <li><strong>Informazioni Dettagliate:</strong> Testo, icone complesse e immagini ricche di dettagli devono essere posizionate al **centro** dell'area di lavoro, dove l'utente focalizzerà la sua visione foveale. È inutile mettere testo importante in un angolo periferico.</li>
+                            <li><strong>Notifiche e Allarmi:</strong> Elementi che devono catturare l'attenzione dell'utente, anche se non li sta guardando direttamente, devono sfruttare la visione periferica. Come? Utilizzando il **movimento**. Un'icona che lampeggia, un banner che appare o un'animazione sottile in periferia sono estremamente efficaci per attirare lo sguardo.</li>
+                            <li><strong>Contesto e Colore:</strong> Il colore è uno strumento potente per veicolare informazioni, ma solo se l'elemento è nella visione centrale. Affidarsi solo al colore per una notifica in un angolo dello schermo è una scelta di design inefficace.</li>
+                        </ul>
+                    </div>
+                    <div class="note-box">
+                        <strong>Esempio: L'icona di caricamento del browser</strong>
+                        <p>Le vecchie icone animate (es. il logo di Netscape che girava) nell'angolo del browser erano un ottimo esempio di sfruttamento della visione periferica. Anche mentre leggevi il contenuto della pagina (visione centrale), la tua visione periferica percepiva il movimento, dandoti un feedback costante sul fatto che la pagina stava ancora caricando. Quando il movimento cessava, capivi che il caricamento era terminato. Questo feedback non interrompeva il tuo task primario (la lettura).</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="angolo-cieco">
+                <h2 class="section-title">3. L'Angolo Cieco e l'Elaborazione Cerebrale</h2>
+                <div class="section-content">
+                    <p>Un'altra peculiarità dell'occhio è l'esistenza di un **angolo cieco (blind spot)**. È il punto della retina dove si innesta il nervo ottico, e in cui non ci sono fotorecettori. Tecnicamente, in quel punto non vediamo nulla.</p>
+                    <p><strong>Perché non percepiamo un "buco" nel nostro campo visivo?</strong></p>
+                    <p>Perché il nostro cervello "imbroglia". Svolge un'operazione di **completamento automatico**, riempiendo l'area mancante con le informazioni visive circostanti (colore, texture). È un processo simile a quello degli algoritmi di "content-aware fill" in programmi come Photoshop, ma che il nostro cervello esegue in tempo reale e in modo del tutto inconscio.</p>
+                    <p>Questo fenomeno ci insegna una lezione fondamentale: ciò che "vediamo" non è una riproduzione fedele della realtà catturata dalla retina, ma una **ricostruzione attiva e interpretata** dal nostro cervello. Il cervello costantemente completa, corregge e dà un senso ai dati sensoriali grezzi e imperfetti che riceve.</p>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
