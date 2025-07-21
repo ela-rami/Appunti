@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 8: Memoria Umana - Modelli e Limiti Cognitivi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 8: Memoria Umana</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#modello-memoria" class="sidebar-link">1. Un Modello a Tre Stadi della Memoria</a></li>
+            <li><a href="#memoria-sensoriale" class="sidebar-link">1.1. Memoria Sensoriale</a></li>
+            <li><a href="#memoria-lavoro" class="sidebar-link">1.2. Memoria di Lavoro</a></li>
+            <li><a href="#memoria-lungo-termine" class="sidebar-link">1.3. Memoria a Lungo Termine</a></li>
+            <li><a href="#limiti-memoria-lavoro" class="sidebar-link">2. I Limiti della Memoria di Lavoro</a></li>
+            <li><a href="#numero-magico" class="sidebar-link">2.1. Il Numero Magico 7 ± 2</a></li>
+            <li><a href="#chunking" class="sidebar-link">2.2. Il Chunking: Raggruppare per Ricordare</a></li>
+            <li><a href="#implicazioni-design-memoria" class="sidebar-link">3. Implicazioni per il Design</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="modello-memoria">
+                <h2 class="section-title">1. Un Modello a Tre Stadi della Memoria</h2>
+                <div class="section-content">
+                    <p>Per comprendere come progettare interfacce che non sovraccarichino cognitivamente l'utente, è utile adottare un modello semplificato del funzionamento della memoria umana. Il modello più comune la suddivide in tre "magazzini" principali, ognuno con caratteristiche diverse in termini di capacità, durata e funzione.</p>
+                     <div class="mermaid-container">
+                         <pre class="mermaid">
+                            graph TD
+                                Input[Stimoli Esterni] --> MS(Memoria Sensoriale);
+                                MS -- Attenzione --> ML(Memoria di Lavoro);
+                                ML -- Reiterazione / Organizzazione --> MLT(Memoria a Lungo Termine);
+                                MLT -- Recupero --> ML;
+                                MS -- Decadimento Rapido --> Perdita1((Info Persa));
+                                ML -- Oblio / Interferenza --> Perdita2((Info Persa));
+                         </pre>
+                     </div>
+                </div>
+            </section>
+
+            <section id="memoria-sensoriale">
+                <h3 class="subsection-title">1.1. Memoria Sensoriale</h3>
+                <div class="section-content">
+                    <p>La memoria sensoriale agisce come un **buffer temporaneo** per tutti gli stimoli che riceviamo dai nostri sensi (vista, udito, tatto, etc.).</p>
+                    <ul>
+                        <li><strong>Funzione:</strong> Cattura una grande quantità di informazioni sensoriali grezze per una durata brevissima.</li>
+                        <li><strong>Durata:</strong> Molto limitata, dall'ordine di poche centinaia di millisecondi a qualche secondo.</li>
+                        <li><strong>Processo:</strong> Le informazioni decadono rapidamente a meno che non vengano selezionate dal processo dell'<strong>attenzione</strong>, che le trasferisce al magazzino successivo: la memoria di lavoro.</li>
+                    </ul>
+                    <p>È il motivo per cui, se non stiamo prestando attenzione, non ricordiamo le parole appena dette da qualcuno, anche se le abbiamo "sentite". L'informazione è entrata nel buffer sensoriale ma è decaduta prima che l'attenzione la elaborasse.</p>
+                </div>
+            </section>
+            
+            <section id="memoria-lavoro">
+                <h3 class="subsection-title">1.2. Memoria di Lavoro</h3>
+                <div class="section-content">
+                    <p>La **memoria di lavoro** (spesso chiamata anche memoria a breve termine) è la nostra "RAM" cognitiva. È il "banco di lavoro" della mente, dove le informazioni vengono mantenute attive e manipolate per eseguire compiti come ragionare, risolvere problemi e prendere decisioni.</p>
+                    <ul>
+                        <li><strong>Funzione:</strong> Mantiene e processa una piccola quantità di informazioni per un breve periodo.</li>
+                        <li><strong>Durata:</strong> Limitata, tipicamente da pochi secondi a meno di un minuto, a meno che l'informazione non venga attivamente "reiterata" (ripetuta mentalmente).</li>
+                        <li><strong>Capacità:</strong> Estremamente limitata. Questo è il suo vincolo più importante e ha enormi implicazioni per il design delle interfacce.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="memoria-lungo-termine">
+                <h3 class="subsection-title">1.3. Memoria a Lungo Termine</h3>
+                <div class="section-content">
+                    <p>La **memoria a lungo termine** è il nostro archivio vastissimo e permanente di conoscenze, abilità ed esperienze.</p>
+                    <ul>
+                        <li><strong>Funzione:</strong> Immagazzinare informazioni per periodi prolungati (da minuti a tutta la vita).</li>
+                        <li><strong>Capacità:</strong> Virtualmente illimitata.</li>
+                        <li><strong>Processo:</strong> Le informazioni vengono trasferite dalla memoria di lavoro a quella a lungo termine attraverso processi come la **reiterazione** e l'**organizzazione** (collegare nuove informazioni a conoscenze preesistenti). Il processo inverso è il **recupero**.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="limiti-memoria-lavoro">
+                <h2 class="section-title">2. I Limiti della Memoria di Lavoro</h2>
+                <div class="section-content">
+                    <p>La limitazione più critica per la progettazione di interfacce è la ridotta capacità della memoria di lavoro. Sovraccaricare questa memoria porta a frustrazione, errori e abbandono del compito.</p>
+                </div>
+            </section>
+
+            <section id="numero-magico">
+                <h3 class="subsection-title">2.1. Il Numero Magico 7 ± 2</h3>
+                <div class="section-content">
+                    <p>Nel 1956, lo psicologo George Miller pubblicò un articolo famosissimo, "The Magical Number Seven, Plus or Minus Two". In questo studio, osservò che la capacità della memoria a breve termine umana è sorprendentemente costante per item non correlati: riusciamo a ricordare circa **da 5 a 9 "unità" di informazione** alla volta.</p>
+                    <p>Se vi viene dettata una sequenza di 11 cifre casuali, è molto probabile che dimenticherete le prime cifre non appena sentite le ultime. La vostra memoria di lavoro è già satura.</p>
+                </div>
+            </section>
+
+             <section id="chunking">
+                <h3 class="subsection-title">2.2. Il Chunking: Raggruppare per Ricordare</h3>
+                <div class="section-content">
+                    <p>Come facciamo allora a ricordare informazioni complesse? La chiave sta nel concetto di **chunk** (blocco, raggruppamento). Un chunk non è una singola cifra o lettera, ma un'unità di informazione significativa.</p>
+                    <p>Il nostro cervello è eccezionale nel raggruppare elementi separati in chunk più grandi, basandosi sulla conoscenza pregressa immagazzinata nella memoria a lungo termine. Questo processo, chiamato **chunking**, ci permette di superare il limite dei 7±2 item.</p>
+                     <div class="clarification-box">
+                        <strong>Esempio: Numero di Telefono</strong>
+                        <p>Consideriamo il numero `3489512706`. Come sequenza di 10 cifre, è difficile da ricordare.</p>
+                        <p>Tuttavia, lo raggruppiamo istintivamente in chunk significativi:</p>
+                        <ul>
+                            <li><strong>`348`</strong> (un chunk: il prefisso di un operatore mobile)</li>
+                            <li><strong>`951`</strong> (un chunk)</li>
+                            <li><strong>`2706`</strong> (un chunk)</li>
+                        </ul>
+                        <p>Invece di 10 item, ora dobbiamo ricordare solo **3 chunk**. Questo rientra perfettamente nella capacità della nostra memoria di lavoro.</p>
+                    </div>
+                     <div class="note-box">
+                        <strong>Esempio: Scacchi</strong>
+                        <p>Un giocatore di scacchi novizio vede la scacchiera come un insieme di singole pedine (molti chunk). Un grande maestro, invece, non vede le singole pedine, ma riconosce configurazioni strategiche complesse (es. "la difesa siciliana, variante Najdorf"). L'intera configurazione della scacchiera può diventare un unico, grande chunk. Per questo motivo, un maestro è in grado di memorizzare la posizione di tutti i pezzi dopo averla vista per pochi secondi.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="implicazioni-design-memoria">
+                <h2 class="section-title">3. Implicazioni per il Design</h2>
+                <div class="section-content">
+                    <p>I limiti della memoria di lavoro e il meccanismo del chunking hanno implicazioni dirette e potentissime sul design delle interfacce.</p>
+                    <ul>
+                        <li><strong>Non costringere a ricordare:</strong> L'interfaccia non deve mai obbligare l'utente a ricordare informazioni da una schermata all'altra. Se un utente deve copiare un codice da una pagina e incollarlo in un'altra, quel codice deve rimanere visibile o essere facilmente accessibile.</li>
+                        <li><strong>Riconoscimento > Rievocazione (Recognition over Recall):</strong> È molto più facile per noi **riconoscere** qualcosa che vediamo (es. un'icona o una voce di menù) piuttosto che **rievocare** da zero un comando o una procedura. Le interfacce grafiche con menu e icone sono efficaci proprio perché sfruttano il riconoscimento.</li>
+                        <li><strong>Raggruppare le informazioni:</strong> Organizzare visivamente le informazioni correlate in gruppi (usando spazi bianchi, bordi, colori) aiuta l'utente a processarle come chunk unici, riducendo il carico cognitivo.</li>
+                        <li><strong>Fornire un contesto chiaro:</strong> Mantenere visibile un riepilogo delle scelte fatte in un processo a più passi (es. un wizard di prenotazione) libera la memoria di lavoro dell'utente, che non deve più ricordare cosa ha fatto nei passaggi precedenti.</li>
+                    </ul>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
