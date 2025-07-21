@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 9: Modelli Mentali, Metafore ed Errori Umani</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 9: Modelli Mentali e Metafore</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#modelli-mentali" class="sidebar-link">1. I Modelli Mentali</a></li>
+            <li><a href="#come-si-formano" class="sidebar-link">1.1. Come si Formano?</a></li>
+            <li><a href="#metafore-design" class="sidebar-link">2. Le Metafore nel Design</a></li>
+            <li><a href="#metafora-desktop" class="sidebar-link">2.1. Esempio Iconico: la Metafora del Desktop</a></li>
+            <li><a href="#uso-corretto-metafore" class="sidebar-link">2.2. Uso Corretto e Abuso delle Metafore</a></li>
+            <li><a href="#classificazione-errori" class="sidebar-link">3. Classificazione degli Errori Umani</a></li>
+            <li><a href="#sviste-slips" class="sidebar-link">3.1. Sviste (Slips)</a></li>
+            <li><a href="#sbagli-mistakes" class="sidebar-link">3.2. Sbagli (Mistakes)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="modelli-mentali">
+                <h2 class="section-title">1. I Modelli Mentali</h2>
+                <div class="section-content">
+                    <p>Un **modello mentale** è la rappresentazione cognitiva che una persona si crea su come funziona qualcosa nel mondo, che sia un oggetto fisico, un processo o un sistema software. È un modello semplificato della realtà che ci permette di fare previsioni, capire le cause degli eventi e pianificare le nostre azioni.</p>
+                    <p>Quando interagiamo con un'interfaccia, non operiamo "a vuoto". Attiviamo o costruiamo un modello mentale su come essa funziona, basandoci su esperienze passate, indizi visivi e sul nostro ragionamento.</p>
+                    <div class="note-box">
+                        <strong>Caratteristiche dei Modelli Mentali:</strong>
+                        <ul>
+                            <li><strong>Sono incompleti:</strong> Generalmente contengono solo le informazioni necessarie per l'uso, tralasciando i dettagli tecnici interni. Per usare il caffè, non abbiamo bisogno di sapere come funziona la resistenza che scalda l'acqua.</li>
+                            <li><strong>Sono instabili:</strong> Si evolvono e cambiano con l'esperienza.</li>
+                            <li><strong>Non sono scientifici:</strong> Possono essere basati su credenze "superstiziose" o correlazioni errate.</li>
+                            <li><strong>Sono personali:</strong> Ogni individuo può sviluppare un modello mentale leggermente diverso per lo stesso sistema.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="come-si-formano">
+                <h3 class="subsection-title">1.1. Come si Formano?</h3>
+                <div class="section-content">
+                    <p>Gli utenti costruiscono i loro modelli mentali principalmente trasferendo la conoscenza da sistemi familiari. Quando si trovano di fronte a un nuovo dispositivo, cercano analogie con qualcosa che già conoscono. Questo processo è alla base dell'uso delle **metafore** nel design.</p>
+                    <div class="exercise-box">
+                        <strong>Esempio: il Termostato vs. il Fornello a Gas</strong>
+                        <p>Molte persone applicano erroneamente il modello mentale del **fornello a gas** al **termostato** di casa.</p>
+                        <ul>
+                            <li><strong>Modello del Fornello:</strong> Se voglio che l'acqua bolla più in fretta, alzo la manopola del gas al massimo. C'è una relazione proporzionale tra l'intensità del controllo e la velocità del risultato.</li>
+                            <li><strong>Modello del Termostato:</strong> Il termostato funziona in modo binario (acceso/spento). Se imposto 20°C, la caldaia si accende alla massima potenza finché non raggiunge 20°C, poi si spegne. Impostare 24°C non farà raggiungere i 20°C più velocemente; semplicemente, la caldaia continuerà a funzionare fino a raggiungere una temperatura più alta.</li>
+                        </ul>
+                        <p>L'utente che applica il modello sbagliato e imposta il termostato a 24°C per "scaldare prima" sta compiendo un'azione inutile basata su un modello mentale errato, trasferito da un altro dominio (la cucina).</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="metafore-design">
+                <h2 class="section-title">2. Le Metafore nel Design</h2>
+                <div class="section-content">
+                    <p>Una **metafora** in HCI è l'uso di concetti, immagini e terminologie familiari, presi dal mondo reale o da altri sistemi, per aiutare l'utente a comprendere e usare un'interfaccia nuova e non familiare. L'obiettivo è attivare un modello mentale preesistente per facilitare l'apprendimento.</p>
+                </div>
+            </section>
+
+            <section id="metafora-desktop">
+                <h3 class="subsection-title">2.1. Esempio Iconico: la Metafora del Desktop</h3>
+                <div class="section-content">
+                    <p>La metafora più famosa e di successo nella storia dell'informatica è quella della **scrivania (desktop)**, introdotta con le prime interfacce grafiche.</p>
+                    <ul>
+                        <li><strong>File come Documenti:</strong> Le unità di informazione sono rappresentate come fogli di carta.</li>
+                        <li><strong>Cartelle (Folders):</strong> I contenitori per i file sono rappresentati come cartelline fisiche.</li>
+                        <li><strong>Cestino (Trash/Recycle Bin):</strong> Il luogo dove si gettano i documenti che non servono più.</li>
+                    </ul>
+                    <p>Questa metafora ha permesso a milioni di persone, non esperte di informatica, di capire immediatamente i concetti di base della gestione dei file, trasferendo il loro modello mentale di un ufficio fisico al mondo digitale.</p>
+                </div>
+            </section>
+            
+            <section id="uso-corretto-metafore">
+                <h3 class="subsection-title">2.2. Uso Corretto e Abuso delle Metafore</h3>
+                <div class="section-content">
+                     <p>Le metafore sono uno strumento potente, ma devono essere usate con cautela. Una buona metafora deve essere coerente e non creare false aspettative.</p>
+                     <div class="clarification-box">
+                        <strong>Il Problema del Cestino del primo Macintosh</strong>
+                        <p>Nella prima versione del Mac, la metafora del cestino fu applicata in modo troppo letterale. Per "espellere" un floppy disk, l'utente doveva trascinare la sua icona nel cestino. Questo creava un conflitto cognitivo enorme: l'utente, il cui modello mentale associava il cestino alla distruzione/cancellazione, aveva paura di perdere tutti i suoi dati. Applicava un'azione ("buttare via") che nel mondo reale significava una cosa, ma nel sistema ne significava un'altra ("espellere"). Questo è un esempio di metafora incoerente che genera ansia e confusione.</p>
+                    </div>
+                     <p>Una metafora non deve corrispondere perfettamente al mondo reale, ma deve essere internamente coerente e non violare le aspettative fondamentali dell'utente. A volte, si usano **metafore composite**, combinando più modelli per descrivere un sistema complesso (es. l'unione della metafora del desktop con quella delle "finestre").</p>
+                </div>
+            </section>
+
+            <section id="classificazione-errori">
+                <h2 class="section-title">3. Classificazione degli Errori Umani</h2>
+                <div class="section-content">
+                    <p>Quando il design di un sistema non è allineato con il modello mentale dell'utente, o quando l'attenzione dell'utente vacilla, si verificano degli errori. È utile classificare questi errori per capire meglio la loro origine e come prevenirli.</p>
+                </div>
+            </section>
+            
+            <section id="sviste-slips">
+                <h3 class="subsection-title">3.1. Sviste (Slips)</h3>
+                <div class="section-content">
+                    <p>Una **svista (slip)** si verifica quando l'utente ha il **modello mentale corretto** e l'intenzione giusta, ma esegue l'azione in modo errato. È un errore di esecuzione, spesso dovuto a disattenzione o a un automatismo interrotto. L'utente sa cosa fare, ma "inciampa" nel farlo.</p>
+                    <div class="note-box">
+                        <strong>Esempi di Sviste:</strong>
+                        <ul>
+                            <li><strong>Insalata nel microonde:</strong> Ho l'intenzione di scaldare la pasta e mettere l'insalata sul tavolo. Sono distratto e inverto le azioni: metto la pasta sul tavolo e l'insalata nel microonde. Il mio piano era corretto, ma l'esecuzione è stata sbagliata.</li>
+                            <li><strong>Errore di battitura (typo):</strong> Voglio scrivere "ciao" ma per errore premo il tasto "v" invece del "c".</li>
+                            <li><strong>Rispondere/Riagganciare:</strong> Il telefono squilla mentre sto facendo altro. Corro a rispondere ma, per fretta e disattenzione, premo il pulsante rosso (riaggancia) invece di quello verde (rispondi), pur sapendo benissimo quale dei due avrei dovuto premere.</li>
+                        </ul>
+                    </div>
+                     <p>Le sviste sono spesso causate da interfacce che posizionano controlli con effetti opposti troppo vicini tra loro, non fornendo abbastanza indizi visivi per distinguere le azioni in condizioni di stress o disattenzione.</p>
+                </div>
+            </section>
+
+            <section id="sbagli-mistakes">
+                <h3 class="subsection-title">3.2. Sbagli (Mistakes)</h3>
+                <div class="section-content">
+                    <p>Uno **sbaglio (mistake)** è un errore più profondo. Si verifica quando l'utente esegue l'azione in modo perfettamente corretto, ma l'**intenzione stessa è sbagliata** perché basata su un modello mentale errato del sistema.</p>
+                     <div class="note-box">
+                        <strong>Esempi di Sbagli:</strong>
+                        <ul>
+                            <li><strong>Termostato a 24°C:</strong> L'utente imposta il termostato a una temperatura più alta del necessario, credendo che questo acceleri il riscaldamento. L'azione (impostare 24°C) è eseguita correttamente, ma il piano è sbagliato perché basato su un modello mentale errato.</li>
+                            <li><strong>Tasto "Back":</strong> Un utente inesperto potrebbe credere che il tasto "Back" del browser annulli l'ultima operazione (es. un acquisto), mentre in realtà serve solo a tornare alla pagina precedente.</li>
+                            <li><strong>Lapsus di Memoria:</strong> Dimenticare un passaggio in una procedura complessa (es. non mettere il sale nella pasta) è un errore basato su un fallimento nel recupero del modello procedurale corretto.</li>
+                        </ul>
+                    </div>
+                    <p>Gli sbagli sono più difficili da prevenire perché non dipendono da disattenzione, ma da una fondamentale incomprensione del sistema. Per ridurli, è necessario progettare interfacce che "insegnino" il modello corretto all'utente, che siano coerenti e che forniscano un feedback chiaro sugli effetti delle sue azioni.</p>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
