@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soluzione Esame: Noleggio Barche</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Librerie Esterne -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <!-- PrismJS per Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    
+    <!-- CSS Comune -->
+    <link rel="stylesheet" href="../assets/css/common.css">
+
+    <style>
+        .box-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        blockquote {
+            border-left: 4px solid var(--accent-primary);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+        .code-filename {
+            font-family: var(--font-code);
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            background-color: var(--bg-header);
+            padding: 0.3rem 0.6rem;
+            border-top-left-radius: var(--border-radius-small);
+            border-top-right-radius: var(--border-radius-small);
+            display: inline-block;
+            margin-bottom: -1px;
+            border: 1px solid var(--border-soft);
+            border-bottom: 1px solid var(--code-bg);
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Soluzione Esame: Noleggio Barche (04/02/2021)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="OOP_esami_home.html" class="sidebar-action-button" id="lezioni-home-btn">Torna agli Esami</a>
+        </div>
+        <h2>Indice Soluzione</h2>
+        <ul>
+            <li><a href="#step1" class="sidebar-link">Step 1: Enum e ADT di Base</a></li>
+            <li><a href="#step2" class="sidebar-link">Step 2: L'ADT `Barca` con Builder</a></li>
+            <li><a href="#step3" class="sidebar-link">Step 3: Gerarchia degli `Extra`</a></li>
+            <li><a href="#step4" class="sidebar-link">Step 4: Pattern Strategy per i Costi</a></li>
+            <li><a href="#step5" class="sidebar-link">Step 5: Repository e Query Pattern</a></li>
+            <li><a href="#step6" class="sidebar-link">Step 6: Facade (API) e Main</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="step1" class="content-section active-section">
+            <h2 class="section-title">Step 1: Definire Enum e ADT di Base (Immutabili)</h2>
+            <div class="section-content">
+                <p>Iniziamo analizzando le prime frasi della traccia per identificare i concetti fondamentali e stabili del nostro dominio.</p>
+                <blockquote>
+                    L'azienda "MareESole” noleggia barche a vela... di varie **marche**... Il **noleggio** riguarda il mezzo con una serie di possibili **extra**... è dato a un **cliente**... da una certa **data-ora** a una **data-ora**... in un certo **luogo**.
+                </blockquote>
+                
+                <h3 class="subsection-title">Ragionamento</h3>
+                <p>Identifichiamo i concetti che rappresentano "valori" o categorie fisse. Per questi, usiamo `enum` per la type safety e classi immutabili per la robustezza.</p>
+                
+                <div class="code-filename">MarcaBarca.java</div>
+                <pre><code class="language-java">
+public enum MarcaBarca {
+    X_YACHTS, BAVARIA, GRAND_SOLEIL, BENETEAU
+}
+                </code></pre>
+
+                <div class="code-filename">TipoExtra.java</div>
+                <pre><code class="language-java">
+public enum TipoExtra {
+    PULIZIA_FINALE, SKIPPER, CUOCO
+}
+                </code></pre>
+                
+                <div class="code-filename">StatoNoleggio.java</div>
+                <pre><code class="language-java">
+public enum StatoNoleggio {
+    PRENOTATO, IN_CORSO, CONCLUSO, ANNULLATO
+}
+                </code></pre>
+                
+                <div class="code-filename">Cliente.java</div>
+                <pre><code class="language-java">
+// ADT immutabile per il cliente
+public final class Cliente {
+    private final String id;
+    private final String nome;
+    // ... costruttore e getters ...
+}
+                </code></pre>
+
+                <div class="code-filename">PeriodoNoleggio.java</div>
+                <pre><code class="language-java">
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
+// ADT immutabile per l'intervallo di tempo, con logica di business incapsulata
+public final class PeriodoNoleggio {
+    private final LocalDateTime dataInizio;
+    private final LocalDateTime dataFine;
+
+    public PeriodoNoleggio(LocalDateTime dataInizio, LocalDateTime dataFine) {
+        if (dataInizio == null || dataFine == null || dataInizio.isAfter(dataFine)) {
+            throw new IllegalArgumentException("Periodo non valido.");
+        }
+        this.dataInizio = dataInizio;
+        this.dataFine = dataFine;
+    }
+    
+    public long getDurataInGiorni() {
+        long minuti = ChronoUnit.MINUTES.between(dataInizio, dataFine);
+        if (minuti == 0) return 0;
+        return (minuti - 1) / 1440 + 1;
+    }
+    
+    // ... getters ...
+}
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="step2" class="content-section">
+            <h2 class="section-title">Step 2: L'ADT `Barca` con il Pattern Builder</h2>
+            <div class="section-content">
+                <p>La traccia descrive la barca con molti attributi, alcuni dei quali opzionali.</p>
+                <blockquote>
+                    ...varie **dimensioni**, con 1 o 2 **alberi**, di varie **marche** ed eventuali altre **caratteristiche** (condizionatore, televisione, tendalini, età della barca, modello).
+                </blockquote>
+
+                <h3 class="subsection-title">Ragionamento</h3>
+                <p>Un costruttore con molti parametri è illeggibile e prono a errori. Il **Pattern Builder** è la soluzione ideale per costruire oggetti complessi in modo leggibile e per facilitare l'immutabilità.</p>
+
+                <div class="code-filename">Barca.java</div>
+                <pre><code class="language-java">
+public final class Barca {
+    // Campi obbligatori (final)
+    private final String id;
+    private final MarcaBarca marca;
+    // ...
+    // Campi opzionali (final)
+    private final boolean haCondizionatore;
+    // ...
+
+    // Costruttore privato che accetta solo il builder
+    private Barca(BarcaBuilder builder) {
+        this.id = builder.id;
+        this.marca = builder.marca;
+        // ... assegna tutti i campi dal builder ...
+    }
+
+    // ... solo getters ...
+
+    // --- CLASSE BUILDER INTERNA E STATICA ---
+    public static class BarcaBuilder {
+        // Campi obbligatori
+        private final String id;
+        private final MarcaBarca marca;
+        // ...
+        // Campi opzionali con valori di default
+        private boolean haCondizionatore = false;
+        // ...
+
+        public BarcaBuilder(String id, MarcaBarca marca, ...) {
+            // ... inizializza campi obbligatori ...
+        }
+
+        public BarcaBuilder withCondizionatore(boolean presente) {
+            this.haCondizionatore = presente;
+            return this; // Interfaccia fluente
+        }
+        
+        // ... altri metodi with... per opzionali ...
+
+        public Barca build() {
+            return new Barca(this);
+        }
+    }
+}
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="step3" class="content-section">
+            <h2 class="section-title">Step 3: Gerarchia degli `Extra`</h2>
+            <div class="section-content">
+                <p>Gli extra hanno logiche di costo diverse, il che suggerisce polimorfismo.</p>
+                <blockquote>
+                    ...ogni **extra** costa in più (alcuni in **percentuale**, altri in **valore assoluto**...).
+                </blockquote>
+
+                <h3 class="subsection-title">Ragionamento</h3>
+                <p>Questo è un caso da manuale per una gerarchia di tipi. Creiamo un'interfaccia `Extra` che definisce il contratto comune (`calcolaCosto`) e classi concrete per ogni tipo di extra. Questo rispetta il **Principio Open/Closed**.</p>
+                
+                <div class="code-filename">Extra.java</div>
+                <pre><code class="language-java">
+public interface Extra {
+    String getNome();
+    double calcolaCosto(Noleggio noleggio);
+}
+                </code></pre>
+
+                <div class="code-filename">Skipper.java</div>
+                <pre><code class="language-java">
+public final class Skipper implements Extra {
+    private final double costoGiornaliero;
+    // ... costruttore ...
+    
+    @Override
+    public double calcolaCosto(Noleggio noleggio) {
+        return noleggio.getPeriodo().getDurataInGiorni() * this.costoGiornaliero;
+    }
+    // ...
+}
+                </code></pre>
+
+                <div class="code-filename">PuliziaFinale.java</div>
+                <pre><code class="language-java">
+public final class PuliziaFinale implements Extra {
+    private final double costoFisso;
+    // ... costruttore ...
+
+    @Override
+    public double calcolaCosto(Noleggio noleggio) {
+        return this.costoFisso;
+    }
+    // ...
+}
+                </code></pre>
+            </div>
+        </article>
+        
+        <article id="step4" class="content-section">
+            <h2 class="section-title">Step 4: Pattern Strategy per i Costi</h2>
+            <div class="section-content">
+                <p>La traccia evidenzia che tariffe, sconti e penalità sono logiche variabili e soggette a frequenti modifiche.</p>
+                <blockquote>
+                     La **tariffa**... **sconti** di diverso tipo... **penalità**... il valore delle tariffe, degli sconti e delle penalità viene **modificato molto frequentemente**.
+                </blockquote>
+
+                <h3 class="subsection-title">Ragionamento</h3>
+                <p>Questo è lo scenario perfetto per il **Pattern Strategy**. Incapsuliamo ogni regola di calcolo in una classe separata, rendendo il sistema flessibile e estensibile.</p>
+                
+                <div class="code-filename">RegolaDiCalcolo.java</div>
+                <pre><code class="language-java">
+public interface RegolaDiCalcolo {
+    double applica(Noleggio noleggio);
+}
+                </code></pre>
+
+                <div class="code-filename">CalcolatoreCosto.java</div>
+                <pre><code class="language-java">
+import java.util.List;
+
+// La classe Context dello Strategy Pattern
+public class CalcolatoreCosto {
+    private final List<RegolaDiCalcolo> regole;
+
+    public CalcolatoreCosto(List<RegolaDiCalcolo> regole) {
+        this.regole = regole;
+    }
+    
+    public double calcolaCostoFinale(Noleggio noleggio) {
+        return regole.stream()
+                     .mapToDouble(regola -> regola.applica(noleggio))
+                     .sum();
+    }
+}
+                </code></pre>
+            </div>
+        </article>
+        
+        <article id="step5" class="content-section">
+            <h2 class="section-title">Step 5: Repository e Query Pattern</h2>
+            <div class="section-content">
+                <p>Il sistema deve gestire collezioni di oggetti (la flotta, i noleggi) e permettere ricerche complesse.</p>
+                <blockquote>
+                    ...la **flotta di barche disponibili**... `cercare disponibilità` di una barca con **date caratteristiche desiderate**...
+                </blockquote>
+
+                <h3 class="subsection-title">Ragionamento</h3>
+                <p>Usiamo classi **Repository** (`Flotta`, `BookingManager`) per gestire le collezioni. Per le ricerche complesse, applichiamo il **Query Object Pattern** basato su un'interfaccia funzionale (o Specification), che si combina perfettamente con il pattern **Composite** tramite `default methods`.</p>
+                
+                <div class="code-filename">CriterioRicercaBarca.java</div>
+                <pre><code class="language-java">
+@FunctionalInterface
+public interface CriterioRicercaBarca {
+    boolean isSatisfiedBy(Barca barca);
+    default CriterioRicercaBarca and(CriterioRicercaBarca other) { /* ... */ }
+    default CriterioRicercaBarca or(CriterioRicercaBarca other) { /* ... */ }
+}
+                </code></pre>
+
+                <div class="code-filename">Flotta.java</div>
+                <pre><code class="language-java">
+public class Flotta {
+    private final Set<Barca> barche = new HashSet<>();
+    
+    public void aggiungiBarca(Barca barca) { /* ... */ }
+    
+    public List<Barca> find(CriterioRicercaBarca criterio) {
+        return barche.stream()
+                     .filter(criterio::isSatisfiedBy)
+                     .collect(Collectors.toList());
+    }
+}
+                </code></pre>
+            </div>
+        </article>
+
+        <article id="step6" class="content-section">
+            <h2 class="section-title">Step 6: Facade (API) e Main</h2>
+            <div class="section-content">
+                <p>Infine, assembliamo il sistema e forniamo un punto di accesso semplice per il client, come richiesto dalla traccia.</p>
+                <blockquote>
+                    Si necessita di un'**API** che consenta di implementare queste **operazioni principali**... e un **Main** che funga da client...
+                </blockquote>
+                
+                <h3 class="subsection-title">Ragionamento</h3>
+                <p>La classe `API` applica il **Facade Pattern**. Nasconde la complessità dell'interazione tra `Flotta`, `BookingManager`, `CalcolatoreCosto` e `Factory`. Il `Main` interagisce solo con l'API, dimostrando un design ben disaccoppiato.</p>
+                
+                <div class="code-filename">API.java</div>
+                <pre><code class="language-java">
+public class API {
+    private final Flotta flotta;
+    private final BookingManager bookingManager;
+    private final CalcolatoreCosto calcolatoreCosto;
+    // ...
+
+    /**
+     * Prenota una barca, ...
+     * @return L'oggetto Noleggio creato e registrato.
+     * @throws BarcaNonDisponibileException se la barca non è disponibile.
+     */
+    public Noleggio prenota(...) throws BarcaNonDisponibileException {
+        // 1. Verifica disponibilità (usando BookingManager)
+        // 2. Crea il Noleggio (usando la Factory)
+        // 3. Aggiungi Extra
+        // 4. Calcola il costo finale (usando CalcolatoreCosto)
+        // 5. Registra il noleggio (in BookingManager)
+        // 6. Restituisce il Noleggio
+        // ...
+        return null; // TODO
+    }
+    
+    // ... altri metodi dell'API ...
+}
+                </code></pre>
+
+                <div class="code-filename">Main.java</div>
+                <pre><code class="language-java">
+public class Main {
+    public static void main(String[] args) {
+        API api = new API(); // Il client conosce solo l'API
+
+        // Scenario 1: Ricerca
+        CriterioRicercaBarca criterio = (b) -> b.getDimensioneMetri() >= 12;
+        List<Barca> barcheTrovate = api.cercaDisponibilita(criterio, ...);
+        
+        // Scenario 2: Prenotazione
+        if (!barcheTrovate.isEmpty()) {
+            try {
+                Noleggio noleggio = api.prenota(barcheTrovate.get(0), ...);
+                System.out.printf("Costo: %.2f €\n", noleggio.getCostoFinale());
+            } catch (BarcaNonDisponibileException e) {
+                System.err.println(e.getMessage());
+            }
+        }
+    }
+}
+                </code></pre>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2023 Appunti Corso Programmazione Orientata agli Oggetti</p>
+    </footer>
+
+    <!-- JS Comune e PrismJS -->
+    <script src="../assets/js/common.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>
