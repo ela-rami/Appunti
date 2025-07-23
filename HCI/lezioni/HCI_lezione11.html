@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 11: Il Processo di Design Centrato sull'Utente e i Principi di Norman</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 11: Il Processo di Design di Don Norman</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-design" class="sidebar-link">1. I Principi del Buon Design</a></li>
+            <li><a href="#affordance" class="sidebar-link">1.1. Affordance: Cosa "suggerisce" un oggetto</a></li>
+            <li><a href="#mapping" class="sidebar-link">1.2. Mapping: La relazione tra controlli ed effetti</a></li>
+            <li><a href="#feedback" class="sidebar-link">1.3. Feedback: Far sapere cosa è successo</a></li>
+            <li><a href="#modello-azione" class="sidebar-link">2. Il Modello a 7 Stadi dell'Azione</a></li>
+            <li><a href="#golfo-esecuzione" class="sidebar-link">2.1. Il Golfo dell'Esecuzione</a></li>
+            <li><a href="#golfo-valutazione" class="sidebar-link">2.2. Il Golfo della Valutazione</a></li>
+            <li><a href="#ridurre-golfi" class="sidebar-link">2.3. Come Ridurre i Golfi con un Buon Design</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="intro-design">
+                <h2 class="section-title">1. I Principi del Buon Design</h2>
+                <div class="section-content">
+                    <p>Donald Norman, nel suo libro fondamentale "La caffettiera del masochista" (titolo originale: "The Design of Everyday Things"), ha identificato alcuni principi psicologici chiave che rendono un prodotto o un'interfaccia facile e piacevole da usare. Questi principi non si basano sull'estetica, ma sulla psicologia della percezione e dell'azione umana.</p>
+                </div>
+            </section>
+
+            <section id="affordance">
+                <h3 class="subsection-title">1.1. Affordance: Cosa "suggerisce" un oggetto</h3>
+                <div class="section-content">
+                    <p>L'<strong>Affordance</strong> è la proprietà di un oggetto che suggerisce all'utente come interagire con esso. È la "qualità percepita" che invita a compiere un'azione. Non è qualcosa che deve essere spiegato; deve essere intuitivo.</p>
+                    <ul>
+                        <li><strong>Buona Affordance:</strong> Una maniglia di una porta "offre" (affords) la possibilità di essere afferrata e tirata/spinta. Un pulsante sporgente invita a essere premuto. Una corda suggerisce di essere tirata.</li>
+                        <li><strong>Cattiva Affordance:</strong> Un pannello di vetro liscio su una porta non dà alcun indizio su dove spingere. Un pulsante a sfioramento senza alcun rilievo visivo o tattile non "offre" la possibilità di essere premuto.</li>
+                    </ul>
+                     <div class="exercise-box">
+                        <strong>Esempio: lo scarico del Frecciarossa</strong>
+                        <p>Il pulsante di scarico dei primi bagni dei treni Frecciarossa era un pannello nero, liscio e senza rilievo, con un'icona poco chiara. Non aveva alcuna affordance di "pressione". Gli utenti non capivano cosa fare e non lo premevano. La soluzione "rattoppo" è stata aggiungere un cartello con la scritta "PREMERE", un chiaro segno che il design originale aveva fallito perché l'affordance era assente.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="mapping">
+                <h3 class="subsection-title">1.2. Mapping: La relazione tra controlli ed effetti</h3>
+                <div class="section-content">
+                    <p>Il **Mapping** (o mappatura) descrive la relazione tra i controlli di un sistema e i loro effetti. Un buon mapping è naturale e intuitivo, permettendo all'utente di capire immediatamente quale controllo agisce su quale funzione.</p>
+                     <div class="clarification-box">
+                        <strong>Esempio: le manopole del piano cottura</strong>
+                        <p>Il mapping è il motivo per cui alcune disposizioni dei fornelli sono facili da usare e altre sono fonte di continui errori.</p>
+                        <ul>
+                            <li><strong>Buon Mapping:</strong> Se ho quattro fornelli disposti a quadrato e quattro manopole disposte nello stesso modo, la relazione è immediata. La manopola in alto a sinistra controllerà il fornello in alto a sinistra.</li>
+                            <li><strong>Cattivo Mapping:</strong> Se ho quattro fornelli a quadrato e quattro manopole in linea retta, come faccio a sapere quale manopola controlla il fornello posteriore destro? Non c'è una relazione spaziale naturale. L'utente sarà costretto a procedere per tentativi o a memorizzare una convenzione arbitraria.</li>
+                        </ul>
+                    </div>
+                    <p>Un buon mapping sfrutta analogie spaziali, logiche o culturali per rendere la relazione tra azione ed effetto il più diretta possibile.</p>
+                </div>
+            </section>
+
+            <section id="feedback">
+                <h3 class="subsection-title">1.3. Feedback: Far sapere cosa è successo</h3>
+                <div class="section-content">
+                    <p>Il **Feedback** è l'informazione che il sistema restituisce all'utente dopo che ha compiuto un'azione. È essenziale per confermare che l'azione è stata ricevuta e per comunicarne il risultato. Un'interazione senza feedback è come parlare con qualcuno che non dà alcun segno di ascolto: è frustrante e disorientante.</p>
+                    <p>Il feedback deve essere:</p>
+                    <ul>
+                        <li><strong>Immediato:</strong> Deve arrivare subito dopo l'azione.</li>
+                        <li><strong>Informativo:</strong> Deve comunicare chiaramente cosa è successo.</li>
+                        <li><strong>Non invadente:</strong> Non deve interrompere inutilmente il flusso di lavoro dell'utente.</li>
+                    </ul>
+                    <p>Un click sonoro, un pulsante che si illumina, una barra di avanzamento, una vibrazione del telefono: sono tutte forme di feedback che rendono l'interazione più chiara e sicura.</p>
+                </div>
+            </section>
+            
+            <section id="modello-azione">
+                <h2 class="section-title">2. Il Modello a 7 Stadi dell'Azione</h2>
+                <div class="section-content">
+                    <p>Norman scompone ogni interazione umana in un ciclo di sette passaggi, che vanno dalla formulazione di un obiettivo all'esecuzione dell'azione e alla valutazione del risultato. Questo modello è uno strumento potentissimo per analizzare dove e perché un'interfaccia può fallire.</p>
+                    <div class="mermaid-container">
+                         <pre class="mermaid">
+                            graph TD
+                                Obiettivo --> G_Esecuzione(Golfo dell'Esecuzione)
+                                G_Esecuzione --> Azione
+                                Azione --> Mondo_Fisico(Sistema / Mondo)
+                                Mondo_Fisico --> G_Valutazione(Golfo della Valutazione)
+                                G_Valutazione --> Obiettivo
+
+                                subgraph G_Esecuzione
+                                    direction LR
+                                    Intenzione --> Sequenza_Azioni --> Esecuzione_Fisica
+                                end
+                                
+                                subgraph G_Valutazione
+                                    direction RL
+                                    Valutazione_Risultato --> Interpretazione_Stato --> Percezione_Stato
+                                end
+                         </pre>
+                     </div>
+                </div>
+            </section>
+
+            <section id="golfo-esecuzione">
+                <h3 class="subsection-title">2.1. Il Golfo dell'Esecuzione</h3>
+                <div class="section-content">
+                    <p>Il **Golfo dell'Esecuzione** rappresenta la difficoltà che un utente incontra nel tradurre il proprio obiettivo psicologico nelle azioni fisiche richieste dal sistema. È il divario tra "cosa voglio fare" e "come lo faccio?".</p>
+                    <p>Un golfo dell'esecuzione ampio si manifesta quando l'utente si pone domande come:</p>
+                    <ul>
+                        <li>"Cosa posso fare adesso con questo sistema?"</li>
+                        <li>"Dove trovo la funzione che mi serve?"</li>
+                        <li>"Come si usa questo controllo? Devo premerlo, girarlo, trascinarlo?"</li>
+                    </ul>
+                    <p>Un cattivo mapping e una scarsa affordance creano un ampio golfo dell'esecuzione. L'utente sa cosa vuole (es. "accendere il fornello dietro a destra"), ma l'interfaccia non rende chiaro come farlo.</p>
+                </div>
+            </section>
+
+            <section id="golfo-valutazione">
+                <h3 class="subsection-title">2.2. Il Golfo della Valutazione</h3>
+                <div class="section-content">
+                    <p>Il **Golfo della Valutazione** rappresenta la difficoltà che un utente incontra nel capire lo stato attuale del sistema e se le sue azioni lo hanno avvicinato al suo obiettivo. È il divario tra lo stato fisico del sistema e la sua rappresentazione mentale per l'utente.</p>
+                    <p>Un golfo della valutazione ampio si manifesta quando l'utente si pone domande come:</p>
+                    <ul>
+                        <li>"Cosa sta succedendo? Il sistema ha recepito il mio comando?"</li>
+                        <li>"L'operazione è andata a buon fine?"</li>
+                        <li>"Cosa significa questo messaggio di errore o questa spia lampeggiante?"</li>
+                    </ul>
+                    <p>La mancanza di un feedback chiaro e informativo crea un ampio golfo della valutazione. L'utente ha compiuto un'azione, ma non è in grado di interpretarne il risultato.</p>
+                </div>
+            </section>
+
+            <section id="ridurre-golfi">
+                <h3 class="subsection-title">2.3. Come Ridurre i Golfi con un Buon Design</h3>
+                <div class="section-content">
+                    <p>L'obiettivo finale del designer di interfacce è **ridurre al minimo l'ampiezza di entrambi i golfi**, rendendo l'interazione il più fluida e trasparente possibile.</p>
+                    <ul>
+                        <li><strong>Per ridurre il Golfo dell'Esecuzione:</strong>
+                            <ul>
+                                <li>Usare un buon **mapping** e una forte **affordance**.</li>
+                                <li>Rendere le funzioni visibili e coerenti.</li>
+                                <li>Fornire vincoli che guidino l'utente verso le azioni corrette.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Per ridurre il Golfo della Valutazione:</strong>
+                            <ul>
+                                <li>Fornire un **feedback** immediato, ricco e informativo.</li>
+                                <li>Creare un **modello concettuale** del sistema che sia chiaro e coerente con il modello mentale dell'utente.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
