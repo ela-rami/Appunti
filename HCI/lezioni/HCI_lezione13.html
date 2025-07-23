@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 13: Valutazione dell'Usabilità - Metodi Esperti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+        .heuristic-list li { margin-bottom: 1.2rem; }
+        .heuristic-list strong { color: var(--accent-secondary); }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 13: Valutazione con Metodi Esperti</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-valutazione" class="sidebar-link">1. Tipi di Valutazione dell'Usabilità</a></li>
+            <li><a href="#valutazione-euristica" class="sidebar-link">2. La Valutazione Euristica</a></li>
+            <li><a href="#dieci-euristiche" class="sidebar-link">2.1. Le 10 Euristiche di Usabilità di Nielsen</a></li>
+            <li><a href="#cognitive-walkthrough" class="sidebar-link">3. Il Cognitive Walkthrough</a></li>
+            <li><a href="#quattro-domande" class="sidebar-link">3.1. Le Quattro Domande Chiave</a></li>
+            <li><a href="#esperti-vs-utenti" class="sidebar-link">4. Vantaggi e Svantaggi dei Metodi Esperti</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="intro-valutazione">
+                <h2 class="section-title">1. Tipi di Valutazione dell'Usabilità</h2>
+                <div class="section-content">
+                    <p>La valutazione è una fase cruciale e iterativa del processo di design. Permette di identificare i problemi di usabilità di un'interfaccia prima che questa raggiunga gli utenti finali, risparmiando tempo e costi. I metodi di valutazione si dividono in due grandi famiglie:</p>
+                    <ul>
+                        <li><strong>Valutazione con Utenti:</strong> Coinvolge direttamente gli utenti finali attraverso test, interviste e osservazioni. Fornisce dati realistici su come le persone reali usano il sistema.</li>
+                        <li><strong>Valutazione senza Utenti (o con Esperti):</strong> Non coinvolge gli utenti finali, ma si affida al giudizio di esperti di usabilità o a modelli predittivi per analizzare un'interfaccia.</li>
+                    </ul>
+                    <p>In questa lezione ci concentriamo sui metodi basati sugli esperti, che sono particolarmente utili nelle fasi iniziali del design, quando un prototipo potrebbe non essere ancora pronto per essere testato dagli utenti.</p>
+                </div>
+            </section>
+
+            <section id="valutazione-euristica">
+                <h2 class="section-title">2. La Valutazione Euristica</h2>
+                <div class="section-content">
+                    <p>La <strong>valutazione euristica</strong> è uno dei metodi di ispezione più famosi ed efficaci. Consiste nel far analizzare un'interfaccia da un piccolo gruppo di esperti di usabilità (tipicamente 3-5 persone). Ciascun esperto esamina l'interfaccia in modo indipendente e la confronta con un insieme di principi di usabilità riconosciuti, noti come <strong>euristiche</strong>.</p>
+                    <p>Le euristiche non sono regole rigide, ma "regole del pollice", principi generali che tendono a portare a un buon design. Al termine dell'ispezione, i problemi individuati dai vari esperti vengono raccolti e classificati in base alla loro gravità.</p>
+                </div>
+            </section>
+            
+            <section id="dieci-euristiche">
+                <h3 class="subsection-title">2.1. Le 10 Euristiche di Usabilità di Nielsen</h3>
+                <div class="section-content">
+                    <p>L'insieme di euristiche più famoso è quello proposto da Jakob Nielsen. Queste dieci regole coprono gran parte degli aspetti fondamentali di una buona interfaccia.</p>
+                    <ol class="heuristic-list">
+                        <li><strong>Visibilità dello stato del sistema:</strong> Il sistema deve sempre tenere l'utente informato su ciò che sta accadendo, con un feedback appropriato entro un tempo ragionevole. (Es. barre di caricamento, indicatori di stato).</li>
+                        <li><strong>Corrispondenza tra sistema e mondo reale:</strong> Il sistema deve parlare la lingua dell'utente, con parole e concetti familiari, piuttosto che termini tecnici. Le informazioni devono apparire in un ordine naturale e logico.</li>
+                        <li><strong>Controllo e libertà dell'utente:</strong> Gli utenti commettono errori. Devono avere una "uscita di emergenza" chiaramente segnalata per abbandonare uno stato indesiderato. Supportare le funzioni di Annulla (Undo) e Ripristina (Redo) è fondamentale.</li>
+                        <li><strong>Coerenza e standard:</strong> Gli utenti non dovrebbero chiedersi se parole, situazioni o azioni diverse significano la stessa cosa. Seguire le convenzioni della piattaforma (es. usare icone standard).</li>
+                        <li><strong>Prevenzione degli errori:</strong> Un design attento che previene il verificarsi di un problema è meglio di un buon messaggio di errore. Eliminare le condizioni che portano a errori o chiedere una conferma prima di azioni distruttive.</li>
+                        <li><strong>Riconoscimento piuttosto che rievocazione (Recognition over Recall):</strong> Minimizzare il carico sulla memoria dell'utente rendendo oggetti, azioni e opzioni visibili. L'utente non dovrebbe dover ricordare informazioni da una parte all'altra dell'interfaccia.</li>
+                        <li><strong>Flessibilità ed efficienza d'uso:</strong> Il sistema dovrebbe essere efficiente sia per gli utenti inesperti che per quelli esperti. Consentire agli utenti di personalizzare le azioni frequenti (es. scorciatoie da tastiera, o <strong>accelerators</strong>).</li>
+                        <li><strong>Design estetico e minimalista:</strong> Le interfacce non dovrebbero contenere informazioni irrilevanti o raramente necessarie. Ogni unità di informazione in più in un dialogo compete con le unità rilevanti e ne diminuisce la visibilità relativa.</li>
+                        <li><strong>Aiutare gli utenti a riconoscere, diagnosticare e recuperare dagli errori:</strong> I messaggi di errore dovrebbero essere espressi in un linguaggio semplice (senza codici), indicare con precisione il problema e suggerire costruttivamente una soluzione.</li>
+                        <li><strong>Aiuto e documentazione:</strong> Anche se è meglio che il sistema possa essere usato senza documentazione, potrebbe essere necessario fornire aiuto. Tale informazione dovrebbe essere facile da cercare, focalizzata sul task dell'utente e presentare i passaggi concreti da eseguire.</li>
+                    </ol>
+                </div>
+            </section>
+
+            <section id="cognitive-walkthrough">
+                <h2 class="section-title">3. Il Cognitive Walkthrough</h2>
+                <div class="section-content">
+                    <p>Il <strong>Cognitive Walkthrough</strong> (letteralmente "percorso cognitivo") è un altro metodo di ispezione basato su esperti. A differenza della valutazione euristica, che è più generale, il walkthrough è focalizzato su un <strong>compito specifico (task)</strong>.</p>
+                    <p>Un esperto simula il percorso che un utente (spesso un nuovo utente) compirebbe per completare un task, passo dopo passo. Per ogni azione, l'esperto si pone una serie di domande per verificare se l'interfaccia guida l'utente in modo corretto verso il suo obiettivo.</p>
+                </div>
+            </section>
+
+            <section id="quattro-domande">
+                <h3 class="subsection-title">3.1. Le Quattro Domande Chiave</h3>
+                <div class="section-content">
+                    <p>Per ogni passo del task, l'esperto si chiede:</p>
+                    <ol>
+                        <li><strong>L'utente cercherà di ottenere l'effetto giusto?</strong> L'utente ha un obiettivo chiaro e l'interfaccia lo supporta o lo confonde?</li>
+                        <li><strong>L'utente noterà che l'azione corretta è disponibile?</strong> Il controllo necessario (pulsante, link, menù) è visibile e riconoscibile?</li>
+                        <li><strong>L'utente assocerà l'azione corretta all'effetto che vuole ottenere?</strong> L'etichetta dell'icona o del pulsante è chiara? L'utente capirà che premendo "Salva" salverà il documento?</li>
+                        <li><strong>Se l'azione corretta viene eseguita, l'utente vedrà che si sta facendo progressi verso il suo obiettivo?</strong> Il feedback fornito dal sistema è chiaro e conferma che l'utente è sulla strada giusta?</li>
+                    </ol>
+                    <p>Se la risposta a una di queste domande è "no", l'esperto ha identificato un potenziale problema di usabilità che deve essere documentato e corretto.</p>
+                </div>
+            </section>
+            
+            <section id="esperti-vs-utenti">
+                <h2 class="section-title">4. Vantaggi e Svantaggi dei Metodi Esperti</h2>
+                <div class="section-content">
+                    <p>La valutazione da parte di esperti è uno strumento prezioso, ma è importante conoscerne i limiti.</p>
+                    <div class="clarification-box">
+                        <strong>Vantaggi:</strong>
+                        <ul>
+                            <li><strong>Costo-Efficacia:</strong> È molto più veloce ed economico organizzare una sessione con 3 esperti che reclutare e testare 10 utenti finali.</li>
+                            <li><strong>Utilità nelle Fasi Iniziali:</strong> Può essere eseguita su prototipi a bassa fedeltà, schizzi o persino su semplici descrizioni dell'interfaccia, permettendo di individuare problemi gravi molto presto nel ciclo di design.</li>
+                            <li><strong>Identificazione di Problemi Specifici:</strong> Gli esperti, grazie alla loro conoscenza teorica, possono identificare problemi di coerenza o violazioni di standard che un utente comune potrebbe non notare o non saper articolare.</li>
+                        </ul>
+                    </div>
+                     <div class="note-box">
+                        <strong>Svantaggi:</strong>
+                        <ul>
+                            <li><strong>L'esperto non è l'utente:</strong> L'esperto può solo <strong>simulare</strong> il comportamento dell'utente. Non può replicare le conoscenze, le aspettative e i modelli mentali specifici del vero utente target.</li>
+                            <li><strong>Rischio di Falsi Positivi:</strong> L'esperto potrebbe segnalare un problema che, nella pratica, non infastidisce gli utenti reali.</li>
+                            <li><strong>Rischio di Falsi Negativi:</strong> L'esperto potrebbe non individuare un problema che emerge solo nel contesto d'uso reale, con le sue interruzioni e le sue pressioni.</li>
+                        </ul>
+                    </div>
+                    <p>In conclusione, i metodi esperti non sostituiscono i test con gli utenti, ma li <strong>complementano</strong>. Sono ideali per una "pulizia" iniziale del design, per eliminare i problemi più evidenti e preparare un prototipo più solido da sottoporre poi alla prova del fuoco: l'interazione con gli utenti reali.</p>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
