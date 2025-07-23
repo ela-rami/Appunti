@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 12: Strumenti di Analisi - Personas e Scenari</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 12: Personas, Scenari e Storyboard</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#analisi-task" class="sidebar-link">1. L'Analisi dei Task (Task Analysis)</a></li>
+            <li><a href="#personas" class="sidebar-link">2. Le Personas: Dare un Volto agli Utenti</a></li>
+            <li><a href="#perche-personas" class="sidebar-link">2.1. Perché Usare le Personas?</a></li>
+            <li><a href="#creare-personas" class="sidebar-link">2.2. Come si Creano le Personas?</a></li>
+            <li><a href="#scenari" class="sidebar-link">3. Gli Scenari: Raccontare l'Interazione</a></li>
+            <li><a href="#storyboard" class="sidebar-link">3.1. Dallo Scenario allo Storyboard</a></li>
+            <li><a href="#esempio-combinato" class="sidebar-link">3.2. Esempio Pratico Combinato</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="analisi-task">
+                <h2 class="section-title">1. L'Analisi dei Task (Task Analysis)</h2>
+                <div class="section-content">
+                    <p>Prima di progettare un'interfaccia, dobbiamo capire in profondità **cosa** gli utenti vogliono fare con il nostro sistema e **come** lo fanno attualmente. Questo processo di indagine è chiamato **Task Analysis**.</p>
+                    <p>L'obiettivo è scomporre le attività complesse degli utenti in task e sotto-task più semplici, identificando gli obiettivi, i passaggi necessari e i potenziali problemi. Per fare questo, si usano diverse tecniche:</p>
+                    <ul>
+                        <li><strong>Interviste agli utenti:</strong> Chiedere direttamente alle persone di descrivere il loro lavoro e i loro obiettivi.</li>
+                        <li><strong>Osservazione sul campo:</strong> Guardare gli utenti mentre svolgono le loro attività nel loro ambiente naturale.</li>
+                        <li><strong>Workshop e Questionari:</strong> Coinvolgere gruppi di utenti per raccogliere informazioni in modo strutturato.</li>
+                    </ul>
+                    <p>Dall'analisi dei task emergono i requisiti fondamentali del sistema. Per dare un volto e un contesto a questi requisiti, si usano due strumenti narrativi potentissimi: le Personas e gli Scenari.</p>
+                </div>
+            </section>
+
+            <section id="personas">
+                <h2 class="section-title">2. Le Personas: Dare un Volto agli Utenti</h2>
+                <div class="section-content">
+                    <p>Una **Persona** è un archetipo, un personaggio fittizio ma realistico, creato per rappresentare un intero gruppo di utenti con caratteristiche, obiettivi e comportamenti simili. Invece di progettare per un generico "utente", si progetta per "Maria, la studentessa di 22 anni che ha poco tempo e usa principalmente lo smartphone".</p>
+                    <p>Una scheda di una Persona tipicamente include:</p>
+                    <ul>
+                        <li>Un nome e una foto (spesso da stock).</li>
+                        <li>Dati demografici (età, professione, livello di istruzione).</li>
+                        <li>Obiettivi e motivazioni (Cosa vuole ottenere usando il sistema?).</li>
+                        <li>Frustrazioni e punti dolenti (Quali problemi incontra attualmente?).</li>
+                        <li>Competenze tecnologiche e dispositivi utilizzati.</li>
+                        <li>Una breve biografia o una citazione che riassuma la sua personalità.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="perche-personas">
+                <h3 class="subsection-title">2.1. Perché Usare le Personas?</h3>
+                <div class="section-content">
+                    <p>Le Personas sono uno strumento di design estremamente efficace per diversi motivi:</p>
+                    <ul>
+                        <li><strong>Empatia:</strong> Aiutano il team di sviluppo a immedesimarsi negli utenti finali, uscendo dalla propria prospettiva di esperti.</li>
+                        <li><strong>Focus:</strong> Forniscono un punto di riferimento comune per prendere decisioni di design. Invece di discutere su preferenze personali, il team si chiede: "Questa funzione aiuterebbe Maria a raggiungere il suo obiettivo?".</li>
+                        <li><strong>Comunicazione:</strong> Creano un linguaggio condiviso all'interno del team e con gli stakeholder per parlare degli utenti in modo concreto e memorabile.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="creare-personas">
+                <h3 class="subsection-title">2.2. Come si Creano le Personas?</h3>
+                <div class="section-content">
+                    <p>Le Personas non sono inventate di sana pianta. Vengono create sulla base dei **dati reali** raccolti durante la fase di ricerca e analisi (interviste, questionari, dati analitici). Il processo prevede di identificare dei pattern di comportamento e degli obiettivi comuni tra gli utenti e di raggrupparli in "cluster". Ogni Persona rappresenta uno di questi cluster.</p>
+                    <div class="note-box">
+                        <strong>Esempio: App per il Caffè</strong>
+                        <p>Analizzando gli utenti di una caffetteria, potremmo identificare due Personas principali:</p>
+                        <ul>
+                            <li><strong>"Janelle, la studentessa di fretta":</strong> Obiettivo: prendere il suo caffè preferito nel minor tempo possibile. Usa l'app per ordinare in anticipo e pagare online. Frustrazione: le lunghe code.</li>
+                            <li><strong>"Robert, il libero professionista":</strong> Obiettivo: trovare un posto tranquillo per lavorare per un'ora. Cerca un tavolo con una presa elettrica e una buona connessione Wi-Fi. Frustrazione: ambienti troppo rumorosi.</li>
+                        </ul>
+                        <p>Chiaramente, un'app progettata per Janelle avrà priorità diverse (velocità, pagamento facile) rispetto a una pensata per Robert (informazioni sui posti a sedere, disponibilità Wi-Fi).</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="scenari">
+                <h2 class="section-title">3. Gli Scenari: Raccontare l'Interazione</h2>
+                <div class="section-content">
+                    <p>Uno **scenario** è una breve storia che descrive come una Persona utilizza un sistema per raggiungere un suo obiettivo in un contesto specifico. È una narrazione, non un elenco di funzionalità. Lo scenario si concentra sul **perché** e sul **cosa**, lasciando il **come** (i dettagli dell'interfaccia) volutamente vago in questa fase iniziale.</p>
+                    <p>Gli scenari aiutano il team a esplorare il flusso dell'interazione dal punto di vista dell'utente e a identificare i passaggi chiave e le possibili difficoltà.</p>
+                </div>
+            </section>
+
+            <section id="storyboard">
+                <h3 class="subsection-title">3.1. Dallo Scenario allo Storyboard</h3>
+                <div class="section-content">
+                    <p>Uno **storyboard** è la rappresentazione visiva di uno scenario. Proprio come i fumetti o le sceneggiature dei film, uno storyboard scompone la storia in una sequenza di vignette. Ogni vignetta illustra un momento chiave dell'interazione, mostrando il contesto, le azioni dell'utente e la risposta del sistema.</p>
+                    <p>Lo storyboard è uno strumento potentissimo perché:</p>
+                    <ul>
+                        <li><strong>È concreto e visivo:</strong> Rende la storia immediatamente comprensibile a tutto il team, anche a chi non ha un background tecnico.</li>
+                        <li><strong>È economico e veloce:</strong> Può essere disegnato a mano su carta o post-it, permettendo di esplorare e scartare idee rapidamente senza investire in programmazione.</li>
+                        <li><strong>Mette in evidenza il contesto:</strong> Mostra non solo l'interfaccia, ma anche l'ambiente e lo stato emotivo dell'utente, aiutando a mantenere il focus sull'esperienza complessiva.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="esempio-combinato">
+                <h3 class="subsection-title">3.2. Esempio Pratico Combinato</h3>
+                <div class="section-content">
+                     <div class="clarification-box">
+                        <strong>Progettare un'app per monitorare il consumo energetico.</strong>
+                        <ol>
+                            <li><strong>Persona:</strong> Creiamo "Marco, 45 anni, padre di famiglia attento al budget". Il suo obiettivo è ridurre la bolletta elettrica. La sua frustrazione è non capire quali elettrodomestici consumino di più.</li>
+                            <li><strong>Scenario (testuale):</strong> "Marco è in salotto e riceve una notifica dall'app che lo avvisa di un consumo anomalo. Apre l'app e scopre che è il vecchio condizionatore in camera dei figli, rimasto acceso per errore. Dall'app, lo spegne a distanza e si sente soddisfatto per aver evitato uno spreco."</li>
+                            <li><strong>Storyboard (visivo):</strong>
+                                <ul>
+                                    <li><strong>Vignetta 1:</strong> Marco sul divano, guarda la TV. Il suo telefono vibra.</li>
+                                    <li><strong>Vignetta 2:</strong> Schermata del telefono con la notifica: "Consumo anomalo rilevato!".</li>
+                                    <li><strong>Vignetta 3:</strong> Marco apre l'app. Si vede un grafico che mostra un picco di consumo proveniente dalla "Camera ragazzi".</li>
+                                    <li><strong>Vignetta 4:</strong> Marco preme un pulsante virtuale "Spegni" accanto all'icona del condizionatore.</li>
+                                    <li><strong>Vignetta 5:</strong> Marco sorride, soddisfatto. Sullo schermo appare un messaggio di conferma: "Condizionatore spento. Risparmio stimato: 2€".</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                    <p>Questo processo narrativo e visivo permette al team di definire chiaramente le funzionalità necessarie (notifiche, monitoraggio per stanza, controllo remoto) e di progettare un flusso di interazione che risponda direttamente agli obiettivi e al contesto della Persona.</p>
+                </div>
+            </section>
+            
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
