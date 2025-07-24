@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 16: Accessibilità, Design Universale e Interazione Sociale</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 16: Accessibilità e Interazione Sociale</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#accessibilita" class="sidebar-link">1. Accessibilità: Progettare per Tutti</a></li>
+            <li><a href="#tipi-disabilita" class="sidebar-link">1.1. Tipologie di Disabilità</a></li>
+            <li><a href="#tecnologie-assistive" class="sidebar-link">1.2. Tecnologie Assistive</a></li>
+            <li><a href="#wcag" class="sidebar-link">1.3. Le Linee Guida WCAG</a></li>
+            <li><a href="#design-universale" class="sidebar-link">2. Il Design Universale</a></li>
+            <li><a href="#cscw" class="sidebar-link">3. CSCW: Computer-Supported Cooperative Work</a></li>
+            <li><a href="#matrice-cscw" class="sidebar-link">3.1. La Matrice Tempo/Luogo</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="accessibilita">
+                <h2 class="section-title">1. Accessibilità: Progettare per Tutti</h2>
+                <div class="section-content">
+                    <p>L'**accessibilità** è la pratica di progettare prodotti, dispositivi, servizi o ambienti in modo che siano utilizzabili dal maggior numero possibile di persone, indipendentemente dalle loro capacità fisiche, sensoriali o cognitive. Non è un "extra" o una funzione per pochi, ma un principio fondamentale di un design etico e inclusivo.</p>
+                    <p>In molti paesi, inclusa l'Italia (con la **Legge Stanca**), l'accessibilità dei servizi digitali, specialmente quelli pubblici, non è solo una buona pratica, ma un **obbligo normativo**.</p>
+                </div>
+            </section>
+
+            <section id="tipi-disabilita">
+                <h3 class="subsection-title">1.1. Tipologie di Disabilità</h3>
+                <div class="section-content">
+                    <p>Per progettare in modo accessibile, è necessario comprendere le diverse tipologie di disabilità che possono impattare l'interazione con la tecnologia:</p>
+                    <ul>
+                        <li><strong>Disabilità Visive:</strong> Includono un ampio spettro, dalla cecità totale all'ipovisione (visione ridotta), fino al daltonismo. Gli utenti possono necessitare di screen reader, ingranditori di schermo o alti contrasti cromatici.</li>
+                        <li><strong>Disabilità Uditive:</strong> Dalla sordità profonda all'ipoacusia (udito ridotto). Per i contenuti audio/video, sono essenziali alternative come sottotitoli, trascrizioni o interpreti della lingua dei segni.</li>
+                        <li><strong>Disabilità Motorie:</strong> Difficoltà nel controllo dei movimenti fini, tremori, o impossibilità di usare le mani. Questi utenti possono fare affidamento sulla navigazione tramite tastiera, comandi vocali, eye tracking o altri dispositivi di input alternativi.</li>
+                        <li><strong>Disabilità Cognitive:</strong> Includono difficoltà di apprendimento, di attenzione (come l'ADHD), di memoria o di comprensione del testo. Per questi utenti, sono cruciali un linguaggio semplice, un layout chiaro e prevedibile e la minimizzazione delle distrazioni.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="tecnologie-assistive">
+                <h3 class="subsection-title">1.2. Tecnologie Assistive</h3>
+                <div class="section-content">
+                    <p>Le **tecnologie assistive** sono strumenti hardware e software che aiutano le persone con disabilità a superare le barriere poste da interfacce non accessibili. Un buon design dovrebbe funzionare in armonia con queste tecnologie.</p>
+                    <div class="note-box">
+                        <strong>Esempi di Tecnologie Assistive:</strong>
+                        <ul>
+                            <li><strong>Screen Reader:</strong> Un software che legge ad alta voce il contenuto testuale di un'interfaccia. Per funzionare, richiede che le immagini abbiano un testo alternativo (attributo `alt`), che i moduli siano etichettati correttamente e che la struttura della pagina sia semanticamente valida.</li>
+                            <li><strong>Ingranditori di Schermo (Magnifiers):</strong> Software che ingrandisce una porzione dello schermo per utenti ipovedenti.</li>
+                            <li><strong>Tastiere Speciali:</strong> Tastiere con tasti più grandi (Big Keys), layout personalizzati o sistemi di input a singolo interruttore (switch access).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="wcag">
+                <h3 class="subsection-title">1.3. Le Linee Guida WCAG</h3>
+                <div class="section-content">
+                    <p>Le **Web Content Accessibility Guidelines (WCAG)** sono lo standard di riferimento internazionale per l'accessibilità dei contenuti web. Sono organizzate attorno a quattro principi fondamentali, noti con l'acronimo **POUR**:</p>
+                    <ol>
+                        <li><strong>Percepibile:</strong> Le informazioni e i componenti dell'interfaccia devono essere presentati agli utenti in modi che possano percepire. (Es. fornire alternative testuali per le immagini, sottotitoli per i video).</li>
+                        <li><strong>Utilizzabile (Operable):</strong> I componenti dell'interfaccia e la navigazione devono essere utilizzabili. (Es. tutta la funzionalità deve essere accessibile da tastiera, non ci devono essere contenuti che lampeggiano e possono causare crisi epilettiche).</li>
+                        <li><strong>Comprensibile (Understandable):</strong> Le informazioni e le operazioni dell'interfaccia devono essere comprensibili. (Es. il testo deve essere leggibile, l'interfaccia deve comportarsi in modo prevedibile, gli errori devono essere chiaramente indicati).</li>
+                        <li><strong>Robusto:</strong> Il contenuto deve essere abbastanza robusto da poter essere interpretato in modo affidabile da un'ampia gamma di user agent, incluse le tecnologie assistive. (Es. uso di HTML standard e semanticamente corretto).</li>
+                    </ol>
+                </div>
+            </section>
+
+            <section id="design-universale">
+                <h2 class="section-title">2. Il Design Universale</h2>
+                <div class="section-content">
+                    <p>Il **Design Universale (Universal Design)** è una filosofia di progettazione che va oltre il concetto di "adattamento per disabili". L'obiettivo è creare prodotti e ambienti che siano intrinsecamente utilizzabili da **tutti**, nella misura più ampia possibile, **senza la necessità di adattamenti o design specializzati**.</p>
+                    <p>Mentre l'accessibilità è spesso un approccio reattivo (rendo accessibile qualcosa che non lo è), il Design Universale è **proattivo**: progetta l'inclusività fin dall'inizio.</p>
+                    <div class="clarification-box">
+                        <strong>Esempio: Rampe vs. Scale</strong>
+                        <p>Una rampa di accesso a un edificio è un classico esempio di Design Universale. Non è utile solo per le persone in sedia a rotelle, ma anche per un genitore con un passeggino, una persona con le valigie, un anziano con difficoltà a fare le scale o un fattorino con un carrello. Un'unica soluzione progettata in modo inclusivo serve a una gamma molto più ampia di utenti e contesti rispetto a una soluzione separata (scale + montascale).</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="cscw">
+                <h2 class="section-title">3. CSCW: Computer-Supported Cooperative Work</h2>
+                <div class="section-content">
+                    <p>Fino ad ora, abbiamo parlato principalmente dell'interazione tra un singolo utente e un sistema. Tuttavia, gran parte del nostro lavoro e della nostra vita sociale è **collaborativa**. Il **Computer-Supported Cooperative Work (CSCW)**, o "lavoro cooperativo supportato dal computer", è il campo che studia come la tecnologia possa supportare le attività di gruppo.</p>
+                    <p>Il software progettato per questo scopo è chiamato **Groupware**.</p>
+                </div>
+            </section>
+            
+            <section id="matrice-cscw">
+                <h3 class="subsection-title">3.1. La Matrice Tempo/Luogo</h3>
+                <div class="section-content">
+                    <p>Un modo classico per classificare i sistemi di groupware è utilizzare la **matrice tempo/luogo**. Questa matrice categorizza le interazioni collaborative in base a due dimensioni:</p>
+                    <ul>
+                        <li><strong>Tempo:</strong> L'interazione è **sincrona** (avviene in tempo reale) o **asincrona** (avviene in tempi differiti)?</li>
+                        <li><strong>Luogo:</strong> I partecipanti sono **co-locati** (nello stesso luogo fisico) o **remoti** (in luoghi diversi)?</li>
+                    </ul>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+                        graph TD
+                            A("<b>Stesso Luogo (Co-locato)</b>")
+                            B("<b>Luogo Diverso (Remoto)</b>")
+                            C("<b>Stesso Tempo (Sincrono)</b>")
+                            D("<b>Tempo Diverso (Asincrono)</b>")
+
+                            subgraph C
+                                direction LR
+                                CS[<b>Face-to-Face</b><br>Lavagna interattiva<br>Videogiochi locali]
+                                CR[<b>Interazione Remota</b><br>Videoconferenze<br>Chat testuali<br>Mondi virtuali]
+                            end
+                            
+                            subgraph D
+                                direction LR
+                                AS[<b>Lavoro Asincrono</b><br>Lavagnetta in cucina<br>Post-it su monitor]
+                                AR[<b>Comunicazione e Coordinamento</b><br>Email<br>Forum<br>Sistemi di workflow]
+                            end
+
+                            A --> CS
+                            B --> CR
+                            A --> AS
+                            B --> AR
+                        </pre>
+                    </div>
+                    <p>Comprendere in quale quadrante si colloca un'attività collaborativa è il primo passo per progettare o scegliere lo strumento tecnologico più adatto a supportarla.</p>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
