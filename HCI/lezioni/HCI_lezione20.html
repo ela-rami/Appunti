@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 20: UX Avanzata - Flow, Presenza e Design Emozionale</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 20: UX Avanzata - Flow, Presenza e Design Emozionale</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-ux-avanzata" class="sidebar-link">1. Oltre l'Usabilità: l'Esperienza Ottimale</a></li>
+            <li><a href="#flow" class="sidebar-link">2. Lo Stato di Flow (Flusso)</a></li>
+            <li><a href="#challenge-skill" class="sidebar-link">2.1. Il Bilanciamento tra Sfida e Abilità</a></li>
+            <li><a href="#flow-design" class="sidebar-link">2.2. Progettare per il Flow</a></li>
+            <li><a href="#presenza-immersione" class="sidebar-link">3. Presenza e Immersione</a></li>
+            <li><a href="#definizione-presenza" class="sidebar-link">3.1. Presenza: la Sensazione di "Essere Lì"</a></li>
+            <li><a href="#design-emozionale" class="sidebar-link">4. Il Design Emozionale di Norman</a></li>
+            <li><a href="#tre-livelli" class="sidebar-link">4.1. I Tre Livelli del Cervello Emotivo</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="intro-ux-avanzata">
+                <h2 class="section-title">1. Oltre l'Usabilità: l'Esperienza Ottimale</h2>
+                <div class="section-content">
+                    <p>Abbiamo definito l'usabilità come un prerequisito fondamentale: un sistema deve essere efficace, efficiente e soddisfacente per funzionare bene. Tuttavia, una buona User Experience (UX) va oltre la semplice assenza di problemi. Mira a creare esperienze <strong>coinvolgenti, piacevoli e memorabili</strong>.</p>
+                    <p>In questa lezione approfondiremo alcuni concetti psicologici chiave che ci aiutano a progettare per un'esperienza utente ottimale: lo stato di Flow, il senso di Presenza e il Design Emozionale.</p>
+                </div>
+            </section>
+
+            <section id="flow">
+                <h2 class="section-title">2. Lo Stato di Flow (Flusso)</h2>
+                <div class="section-content">
+                    <p>Lo stato di <strong>Flow</strong>, teorizzato dallo psicologo Mihaly Csikszentmihalyi, è uno stato di coscienza in cui una persona è completamente immersa in un'attività. È l'esperienza ottimale, un momento in cui l'azione fluisce senza sforzo, la concentrazione è massima e si perde la percezione del tempo.</p>
+                    <p>Le caratteristiche principali dello stato di Flow includono:</p>
+                    <ul>
+                        <li><strong>Concentrazione intensa</strong> sul momento presente.</li>
+                        <li>Unione di <strong>azione e consapevolezza</strong>.</li>
+                        <li>Perdita dell'autoconsapevolezza (l'ego svanisce).</li>
+                        <li>Senso di <strong>controllo</strong> sulla situazione e sull'attività.</li>
+                        <li>Alterazione della <strong>percezione del tempo</strong> (il tempo sembra volare).</li>
+                        <li>L'esperienza è <strong>autotelica</strong>, ovvero gratificante di per sé.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="challenge-skill">
+                <h3 class="subsection-title">2.1. Il Bilanciamento tra Sfida e Abilità</h3>
+                <div class="section-content">
+                    <p>Secondo Csikszentmihalyi, la condizione fondamentale per entrare nello stato di Flow è un perfetto <strong>bilanciamento tra la difficoltà percepita di un compito (Challenge) e le abilità percepite dell'individuo (Skill)</strong>.</p>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+                        graph TD
+                            subgraph "Livello di Sfida (Challenge)"
+                                C_H(Alto)
+                                C_L(Basso)
+                            end
+                            subgraph "Livello di Abilità (Skill)"
+                                S_H(Alto)
+                                S_L(Basso)
+                            end
+
+                            C_H --- S_L --> Ansia
+                            C_L --- S_L --> Apatia
+                            C_L --- S_H --> Noia
+                            C_H --- S_H --> Flow(Flow)
+                        </pre>
+                    </div>
+                    <ul>
+                        <li>Se la sfida è troppo alta rispetto alle abilità, si prova <strong>ansia</strong> o frustrazione.</li>
+                        <li>Se la sfida è troppo bassa rispetto alle abilità, si prova <strong>noia</strong>.</li>
+                        <li>Se sia la sfida che le abilità sono basse, si prova <strong>apatia</strong>.</li>
+                        <li>Solo quando sia la sfida che le abilità sono alte e in equilibrio, si può sperimentare il <strong>Flow</strong>.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="flow-design">
+                <h3 class="subsection-title">2.2. Progettare per il Flow</h3>
+                <div class="section-content">
+                    <p>Il concetto di Flow è fondamentale nel design di videogiochi, ma si applica a qualsiasi interfaccia che richieda concentrazione e coinvolgimento. Per mantenere un utente nel "canale del Flow", il sistema deve adattare dinamicamente la difficoltà.</p>
+                     <div class="clarification-box">
+                        <strong>Esempio: la Curva di Difficoltà in un Videogioco</strong>
+                        <p>Un buon videogioco non è né troppo facile né troppo difficile. Introduce nuove meccaniche (sfide) in modo graduale, dando al giocatore il tempo di sviluppare le abilità necessarie per superarle. Man mano che il giocatore diventa più bravo (skill aumenta), il gioco introduce nemici più forti o puzzle più complessi (challenge aumenta), mantenendolo costantemente in uno stato di coinvolgimento ottimale.</p>
+                    </div>
+                    <p>In un contesto non ludico, progettare per il Flow significa rimuovere le distrazioni, fornire obiettivi chiari e un feedback immediato, e garantire che l'interfaccia non imponga un carico cognitivo inutile che possa interrompere la concentrazione dell'utente.</p>
+                </div>
+            </section>
+
+            <section id="presenza-immersione">
+                <h2 class="section-title">3. Presenza e Immersione</h2>
+                <div class="section-content">
+                    <p>Nei contesti di Realtà Virtuale (VR) e Realtà Aumentata (AR), l'obiettivo ultimo è generare un forte senso di <strong>Presenza</strong>. È importante distinguere questo concetto da quello di Immersione.</p>
+                    <ul>
+                        <li><strong>Immersione:</strong> È una caratteristica <strong>oggettiva e tecnica</strong> del sistema. Descrive la capacità della tecnologia di isolare l'utente dal mondo fisico e di fornire stimoli sensoriali ampi e coerenti. Parametri come un alto refresh rate, un ampio campo visivo (FoV) e un audio spaziale contribuiscono a un'alta immersività.</li>
+                        <li><strong>Presenza:</strong> È una reazione <strong>soggettiva e psicologica</strong> dell'utente. È la sensazione di "essere lì" (*the feeling of being there*), la percezione di trovarsi realmente nell'ambiente virtuale.</li>
+                    </ul>
+                    <p>Un sistema altamente immersivo *facilita* la generazione del senso di presenza, ma non la garantisce. La presenza può essere interrotta (il cosiddetto *break in presence*) se l'interfaccia si comporta in modo innaturale, se ci sono bug o se il mondo virtuale non risponde in modo coerente alle azioni dell'utente.</p>
+                </div>
+            </section>
+            
+            <section id="design-emozionale">
+                <h2 class="section-title">4. Il Design Emozionale di Norman</h2>
+                <div class="section-content">
+                    <p>Donald Norman, nel suo libro "Emotional Design", sostiene che non interagiamo con i prodotti solo a un livello funzionale, ma anche e soprattutto a un livello emotivo. Un buon design deve quindi considerare l'impatto che ha sulle nostre emozioni.</p>
+                    <p>Norman identifica tre livelli di elaborazione cognitiva ed emotiva che corrispondono a tre diversi livelli di design. Un prodotto di successo riesce a soddisfarli tutti e tre.</p>
+                </div>
+            </section>
+
+            <section id="tre-livelli">
+                <h3 class="subsection-title">4.1. I Tre Livelli del Cervello Emotivo</h3>
+                <div class="section-content">
+                    <ol>
+                        <li><strong>Livello Viscerale:</strong> È il livello più profondo, pre-cosciente e istintivo. Riguarda l'<strong>apparenza</strong> e la prima impressione. Un design viscerale è quello che provoca una reazione immediata e non mediata dal pensiero: "Bello!", "Brutto!". È legato all'estetica, ai materiali, alle sensazioni tattili.</li>
+                        <li><strong>Livello Comportamentale:</strong> È il livello dell'<strong>uso</strong> e della performance. Riguarda l'efficacia e il piacere d'uso, ovvero l'usabilità classica. Un buon design comportamentale fa sentire l'utente competente e in controllo, generando soddisfazione attraverso un'interazione fluida e senza sforzo. È il livello in cui si può entrare in uno stato di Flow.</li>
+                        <li><strong>Livello Riflessivo:</strong> È il livello più alto, cosciente e interpretativo. Riguarda il <strong>significato</strong>, la riflessione e la cultura. Un design riflessivo è quello che evoca ricordi, che si lega alla nostra identità e che racconta una storia su di noi. È il motivo per cui ci affezioniamo a un vecchio orologio o per cui un certo brand ci fa sentire parte di una community.
+                            <div class="exercise-box">
+                                <strong>Esempio: il caso Ringo</strong>
+                                <p>Il telefono Nokia Ringo era eccellente a livello comportamentale (iper-usabile) ma fallì a livello riflessivo. Possederlo comunicava un messaggio ("sono tecnologicamente incapace") che le persone non volevano associare alla propria identità, portando al suo fallimento commerciale nonostante la sua ottima usabilità.</p>
+                            </div>
+                        </li>
+                    </ol>
+                    <p>Un prodotto di successo, quindi, non solo funziona bene (comportamentale), ma è anche attraente (viscerale) e ha un significato per noi (riflessivo).</p>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>

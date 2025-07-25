@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 12b: La Prototipazione nel Design Centrato sull'Utente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 12b: Prototipazione e Livelli di Fedeltà</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-prototipazione" class="sidebar-link">1. Cos'è un Prototipo e Perché si Usa?</a></li>
+            <li><a href="#livelli-fedelta" class="sidebar-link">2. I Livelli di Fedeltà (Fidelity)</a></li>
+            <li><a href="#low-fidelity" class="sidebar-link">2.1. Prototipi a Bassa Fedeltà (Low-Fidelity)</a></li>
+            <li><a href="#high-fidelity" class="sidebar-link">2.2. Prototipi ad Alta Fedeltà (High-Fidelity)</a></li>
+            <li><a href="#fedelta-compromesso" class="sidebar-link">2.3. Fedeltà: un Compromesso Strategico</a></li>
+            <li><a href="#mago-di-oz" class="sidebar-link">3. Una Tecnica Speciale: il Mago di Oz</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="intro-prototipazione">
+                <h2 class="section-title">1. Cos'è un Prototipo e Perché si Usa?</h2>
+                <div class="section-content">
+                    <p>Dopo aver definito gli utenti (Personas) e le loro storie (Scenari e Storyboard), il passo successivo nel processo di design è creare un <strong>prototipo</strong>. Un prototipo non è il prodotto finale, ma una sua <strong>simulazione</strong>, un modello tangibile che permette di testare e validare le idee prima di investire risorse nello sviluppo vero e proprio.</p>
+                    <p>La prototipazione è il cuore del design iterativo e si usa per tre scopi principali:</p>
+                    <ul>
+                        <li><strong>Esplorazione:</strong> Permette di esplorare, testare e scartare rapidamente diverse soluzioni di design a un costo bassissimo. Sbagliare su carta o con un mockup è molto meno costoso che sbagliare con il codice.</li>
+                        <li><strong>Comunicazione:</strong> Un prototipo è uno strumento di comunicazione potentissimo. Mostrare un'idea invece che descriverla a parole allinea la visione di tutto il team (designer, sviluppatori, manager) e degli stakeholder.</li>
+                        <li><strong>Valutazione:</strong> È il motivo più importante. I prototipi permettono di raccogliere feedback dagli utenti finali fin dalle primissime fasi, identificando problemi di usabilità e di flusso prima che diventino difficili e costosi da correggere.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="livelli-fedelta">
+                <h2 class="section-title">2. I Livelli di Fedeltà (Fidelity)</h2>
+                <div class="section-content">
+                    <p>I prototipi non sono tutti uguali. La loro caratteristica principale è il <strong>livello di fedeltà</strong>, ovvero quanto fedelmente assomigliano al prodotto finale in termini di aspetto visivo, contenuto e interattività. Si distinguono principalmente due categorie: bassa e alta fedeltà.</p>
+                </div>
+            </section>
+            
+            <section id="low-fidelity">
+                <h3 class="subsection-title">2.1. Prototipi a Bassa Fedeltà (Low-Fidelity)</h3>
+                <div class="section-content">
+                    <p>I prototipi a bassa fedeltà (o Lo-Fi) sono rappresentazioni semplici e a basso costo, spesso create con carta e penna o con strumenti di wireframing molto basilari. Non si concentrano sui dettagli grafici (colori, font) ma sulla struttura, sul layout e sul flusso di interazione.</p>
+                    <p>Esempi tipici sono gli <strong>schizzi (sketches)</strong>, i <strong>wireframe</strong> e i <strong>prototipi cartacei</strong>, dove una persona simula il computer cambiando i fogli di carta in risposta alle azioni dell'utente.</p>
+                     <div class="clarification-box">
+                        <strong>Vantaggi:</strong>
+                        <ul>
+                            <li><strong>Velocità ed economicità:</strong> Si possono creare e modificare in pochi minuti.</li>
+                            <li><strong>Focus sulla struttura:</strong> L'assenza di dettagli grafici aiuta il team e gli utenti a concentrarsi sull'architettura dell'informazione e sul flusso dei task, senza essere distratti da elementi estetici.</li>
+                            <li><strong>Incoraggiano il feedback:</strong> Gli utenti si sentono più a loro agio nel criticare e proporre cambiamenti radicali su uno schizzo che su un'interfaccia che sembra già finita.</li>
+                        </ul>
+                    </div>
+                     <div class="note-box">
+                        <strong>Svantaggi:</strong>
+                        <ul>
+                            <li><strong>Poca realisticità:</strong> L'aspetto è molto lontano dal prodotto finale.</li>
+                            <li><strong>Interazione limitata:</strong> È difficile simulare interazioni complesse o animazioni.</li>
+                            <li><strong>Non adatti a test estetici:</strong> Non si può valutare l'impatto visivo o emozionale del design.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="high-fidelity">
+                <h3 class="subsection-title">2.2. Prototipi ad Alta Fedeltà (High-Fidelity)</h3>
+                <div class="section-content">
+                    <p>I prototipi ad alta fedeltà (o Hi-Fi) sono mockup digitali che assomigliano molto al prodotto finale sia nell'aspetto che nell'interazione. Sono creati con software specializzati (es. Figma, Adobe XD, Sketch) e possono essere così realistici da essere quasi indistinguibili dall'applicazione finita.</p>
+                    <p>Permettono di simulare click, transizioni, animazioni e flussi complessi.</p>
+                    <div class="clarification-box">
+                        <strong>Vantaggi:</strong>
+                        <ul>
+                            <li><strong>Realismo:</strong> Forniscono un'esperienza molto vicina a quella finale, permettendo test di usabilità più accurati.</li>
+                            <li><strong>Valutazione estetica:</strong> Permettono di testare l'impatto visivo, i colori, la tipografia e il "look and feel" generale.</li>
+                            <li><strong>Presentazioni efficaci:</strong> Sono ideali per presentare il progetto agli stakeholder e possono servire come specifica visuale per gli sviluppatori.</li>
+                        </ul>
+                    </div>
+                     <div class="note-box">
+                        <strong>Svantaggi:</strong>
+                        <ul>
+                            <li><strong>Costo e tempo:</strong> Richiedono molto più tempo e competenze tecniche per essere realizzati.</li>
+                            <li><strong>Feedback superficiale:</strong> C'è il rischio che gli utenti si concentrino su dettagli minori (es. "non mi piace questo tono di blu") invece che su problemi strutturali.</li>
+                            <li><strong>Riluttanza al cambiamento:</strong> Poiché il prototipo sembra "finito", sia il team che gli utenti potrebbero essere meno propensi a suggerire modifiche sostanziali.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="fedelta-compromesso">
+                <h3 class="subsection-title">2.3. Fedeltà: un Compromesso Strategico</h3>
+                <div class="section-content">
+                    <p>La scelta del livello di fedeltà non è una questione di "meglio" o "peggio", ma dipende dalla fase del progetto e dagli obiettivi del test. Un buon processo di design utilizza entrambi i tipi di prototipi in momenti diversi.</p>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+                        graph TD
+                            A(Idea Iniziale) --> B{Prototipo a Bassa Fedeltà};
+                            B --> C{Test su Struttura e Flusso};
+                            C --> D{Raffinamento};
+                            D --> E[Prototipo ad Alta Fedeltà];
+                            E --> F[Test su Usabilità e Estetica];
+                            F --> G(Sviluppo Finale);
+                        </pre>
+                    </div>
+                    <p>Si parte con prototipi a bassa fedeltà per validare il concetto e la struttura di base, per poi passare a quelli ad alta fedeltà per rifinire i dettagli visivi e l'interazione.</p>
+                </div>
+            </section>
+
+            <section id="mago-di-oz">
+                <h2 class="section-title">3. Una Tecnica Speciale: il Mago di Oz</h2>
+                <div class="section-content">
+                    <p>La tecnica del <strong>Mago di Oz</strong> è un tipo particolare di prototipazione in cui l'utente crede di interagire con un sistema pienamente funzionante, mentre in realtà le risposte del sistema sono fornite in tempo reale da un essere umano nascosto (il "mago").</p>
+                    <p>Questa tecnica è estremamente utile per testare concetti che sarebbero molto complessi, costosi o lunghi da implementare tecnicamente, come sistemi basati su Intelligenza Artificiale, riconoscimento vocale o algoritmi complessi.</p>
+                    <div class="exercise-box">
+                        <strong>Esempio: Testare un Chatbot</strong>
+                        <p>Vogliamo testare l'idea di un chatbot per l'assistenza clienti prima di investire nello sviluppo dell'IA.</p>
+                        <ol>
+                            <li>L'<strong>utente</strong> siede di fronte a un'interfaccia di chat e scrive le sue domande.</li>
+                            <li>In un'altra stanza, un <strong>membro del team (il "mago")</strong> legge le domande dell'utente e scrive le risposte, che appaiono nell'interfaccia dell'utente come se provenissero dal sistema.</li>
+                            <li>L'utente è convinto di parlare con un'IA, permettendoci di valutare la naturalezza della conversazione, l'utilità delle risposte e le reazioni dell'utente in modo realistico.</li>
+                        </ol>
+                        <p>In questo modo, possiamo progettare e testare la "personalità" e l'efficacia del chatbot prima ancora di aver scritto una singola riga di codice dell'algoritmo di IA.</p>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>

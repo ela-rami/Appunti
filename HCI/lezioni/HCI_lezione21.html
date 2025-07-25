@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 21: Dinamiche Sociali e Sostenibilità Avanzata</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 21: Dinamiche Sociali e Sostenibilità Avanzata</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-sociale" class="sidebar-link">1. L'Utente come Attore Sociale</a></li>
+            <li><a href="#reinvenzione-tecnologia" class="sidebar-link">2. La Reinvenzione della Tecnologia</a></li>
+            <li><a href="#esempio-squillo" class="sidebar-link">2.1. Esempi Classici: Emoticon e "Squillo"</a></li>
+            <li><a href="#ironie-automazione" class="sidebar-link">3. Le Ironie dell'Automazione</a></li>
+            <li><a href="#nuovi-errori" class="sidebar-link">3.1. Ironia 1: L'automazione crea nuovi errori</a></li>
+            <li><a href="#supervisore" class="sidebar-link">3.2. Ironia 2: L'automazione trasforma l'operatore in supervisore</a></li>
+            <li><a href="#dequalificazione" class="sidebar-link">3.3. Ironia 3: L'automazione dequalifica l'operatore</a></li>
+            <li><a href="#solitudine-digitale" class="sidebar-link">4. Il Paradosso della Connessione: la Solitudine Digitale</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="intro-sociale">
+                <h2 class="section-title">1. L'Utente come Attore Sociale</h2>
+                <div class="section-content">
+                    <p>Finora abbiamo analizzato l'utente principalmente come individuo che interagisce con un sistema. Tuttavia, specialmente con l'avvento dei social network e degli strumenti collaborativi, l'interazione è sempre più un'attività sociale. Le tecnologie non solo mediano le nostre conversazioni, ma modellano le nostre relazioni e la società stessa.</p>
+                    <p>In questa lezione affronteremo alcuni aspetti critici e dinamiche emergenti che caratterizzano l'interazione uomo-macchina in un contesto sociale e altamente automatizzato.</p>
+                </div>
+            </section>
+
+            <section id="reinvenzione-tecnologia">
+                <h2 class="section-title">2. La Reinvenzione della Tecnologia</h2>
+                <div class="section-content">
+                    <p>Un fenomeno fondamentale in HCI è che gli utenti non sono fruitori passivi della tecnologia. Al contrario, spesso si <strong>appropriano degli strumenti</strong> e li reinventano per scopi che i progettisti non avevano previsto. Questo processo di "reinvenzione" è una potente dimostrazione di come la creatività umana adatti la tecnologia ai propri bisogni sociali e comunicativi.</p>
+                </div>
+            </section>
+            
+            <section id="esempio-squillo">
+                <h3 class="subsection-title">2.1. Esempi Classici: Emoticon e "Squillo"</h3>
+                <div class="section-content">
+                    <p>Due esempi classici illustrano perfettamente questo concetto:</p>
+                    <ul>
+                        <li><strong>Le Emoticon:</strong> Nate spontaneamente nelle prime chat testuali (come `:-)`) per sopperire alla mancanza di indizi non verbali, le emoticon sono state un'invenzione dal basso. Gli utenti hanno "hackerato" il testo per reintrodurre un canale emotivo. Solo in seguito i sistemi hanno integrato questa invenzione, trasformandola in emoji grafiche.</li>
+                        <li><strong>Lo "Squillo" Telefonico:</strong> Agli albori della telefonia mobile, quando le chiamate e gli SMS avevano un costo, lo "squillo" (una chiamata brevissima interrotta prima della risposta) è stato reinventato come un sistema di messaggistica a costo zero. Aveva significati concordati socialmente ("Sono arrivato", "Ti sto pensando", "Richiamami") che non erano stati previsti dai gestori telefonici. Anche in questo caso, gli utenti hanno piegato la tecnologia a un bisogno non supportato.</li>
+                    </ul>
+                    <p>Questi esempi ci insegnano che il design non finisce con il rilascio di un prodotto. Bisogna osservare come gli utenti lo usano e essere pronti a imparare dalle loro reinvenzioni.</p>
+                </div>
+            </section>
+
+            <section id="ironie-automazione">
+                <h2 class="section-title">3. Le Ironie dell'Automazione</h2>
+                <div class="section-content">
+                    <p>L'automazione viene spesso introdotta per aumentare l'efficienza e ridurre l'errore umano. Tuttavia, la ricerca in HCI ha dimostrato che l'automazione non elimina i problemi, ma li sposta, creando nuove sfide complesse. Questi effetti paradossali sono noti come le <strong>"Ironie dell'Automazione"</strong>.</p>
+                </div>
+            </section>
+
+            <section id="nuovi-errori">
+                <h3 class="subsection-title">3.1. Ironia 1: L'automazione crea nuovi errori</h3>
+                <div class="section-content">
+                    <p>L'automazione elimina alcune categorie di errori umani (es. distrazioni, errori di calcolo), ma ne introduce di nuove e spesso più insidiose. Queste includono bug software, errori di progettazione dell'interfaccia uomo-macchina o fallimenti del sistema in situazioni impreviste (i cosiddetti "edge cases").</p>
+                    <div class="clarification-box">
+                        <strong>Esempio: l'Auto a Guida Autonoma</strong>
+                        <p>Un sistema di guida autonoma può fallire nel classificare un oggetto non previsto, come un ciclista che attraversa la strada spingendo la bici a mano. Per il sistema, non è né un pedone né un veicolo, e questa incertezza può portare a una decisione errata, con conseguenze potenzialmente tragiche. Un guidatore umano, al contrario, avrebbe usato il suo buon senso per interpretare la situazione correttamente.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="supervisore">
+                <h3 class="subsection-title">3.2. Ironia 2: L'automazione trasforma l'operatore in supervisore</h3>
+                <div class="section-content">
+                    <p>Invece di eliminare il lavoro umano, l'automazione spesso lo trasforma da un ruolo di "attore" a un ruolo di **"supervisore"**. L'operatore umano non deve più eseguire il compito, ma deve monitorare costantemente il sistema automatico per assicurarsi che funzioni correttamente. Questo nuovo compito è cognitivamente molto faticoso e può portare a noia e a un calo della vigilanza, rendendo difficile accorgersi di un problema quando si verifica.</p>
+                </div>
+            </section>
+
+            <section id="dequalificazione">
+                <h3 class="subsection-title">3.3. Ironia 3: L'automazione dequalifica l'operatore</h3>
+                <div class="section-content">
+                    <p>Quando un sistema è automatizzato per il 99% del tempo, l'operatore umano perde l'allenamento e le abilità pratiche necessarie per gestire il sistema manualmente. Questo fenomeno è noto come **dequalificazione** (deskilling). Il paradosso è che, proprio nel momento più critico (quando l'automazione fallisce e l'intervento umano è indispensabile), l'operatore è meno preparato a gestire la situazione, perché il sistema stesso gli ha impedito di fare pratica.</p>
+                </div>
+            </section>
+            
+            <section id="solitudine-digitale">
+                <h2 class="section-title">4. Il Paradosso della Connessione: la Solitudine Digitale</h2>
+                <div class="section-content">
+                    <p>Le tecnologie sociali ci permettono di essere costantemente connessi con centinaia di persone in tutto il mondo. Tuttavia, diversi studi hanno evidenziato un paradosso noto come <strong>"Solitudine Digitale"</strong> (Digital Loneliness): un uso eccessivo dei social network può essere correlato a un maggiore senso di isolamento e a una minore soddisfazione per le relazioni sociali.</p>
+                    <p>Le possibili cause sono molteplici:</p>
+                    <ul>
+                        <li><strong>Qualità vs. Quantità:</strong> Le interazioni online, spesso brevi e superficiali (like, commenti veloci), possono sostituire le interazioni faccia-a-faccia, che sono più profonde e gratificanti.</li>
+                        <li><strong>Confronto Sociale:</strong> I social media tendono a mostrare una versione idealizzata e "filtrata" della vita degli altri, portando a un costante confronto sociale che può generare invidia e sentimenti di inadeguatezza.</li>
+                        <li><strong>FOMO (Fear Of Missing Out):</strong> La paura di "essere tagliati fuori" può generare ansia e un bisogno compulsivo di controllare costantemente le notifiche, impedendo di concentrarsi sulle interazioni nel mondo reale.</li>
+                    </ul>
+                    <p>Questo ci ricorda che progettare sistemi socialmente sostenibili significa non solo massimizzare la "connettività", ma anche considerare l'impatto sulla qualità della vita e sul benessere psicologico degli utenti.</p>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>

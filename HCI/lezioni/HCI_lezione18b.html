@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 18b: Metodi di Valutazione Avanzati</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 18b: Valutazione di Sistemi CSCW e Dati Fisiologici</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-valutazione-avanzata" class="sidebar-link">1. Oltre la Valutazione Individuale</a></li>
+            <li><a href="#valutazione-cscw" class="sidebar-link">2. Valutazione di Sistemi CSCW</a></li>
+            <li><a href="#valutazione-longitudinale" class="sidebar-link">2.1. Studi Longitudinali</a></li>
+            <li><a href="#sna" class="sidebar-link">2.2. Social Network Analysis (SNA)</a></li>
+            <li><a href="#valutazione-fisiologica" class="sidebar-link">3. Valutazione con Dati Fisiologici</a></li>
+            <li><a href="#eda" class="sidebar-link">3.1. Conduttanza Cutanea (EDA/GSR)</a></li>
+            <li><a href="#ecg-emg" class="sidebar-link">3.2. Elettrocardiogramma (ECG) ed Elettromiografia (EMG)</a></li>
+            <li><a href="#vantaggi-svantaggi-fisiologici" class="sidebar-link">3.3. Vantaggi e Svantaggi</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="intro-valutazione-avanzata">
+                <h2 class="section-title">1. Oltre la Valutazione Individuale</h2>
+                <div class="section-content">
+                    <p>I metodi di valutazione visti finora (test di usabilità, euristiche, esperimenti) si concentrano principalmente sull'interazione di un singolo utente con un sistema. Tuttavia, molti sistemi moderni sono intrinsecamente <strong>collaborativi</strong> o mirano a generare <strong>esperienze emotive</strong> complesse.</p>
+                    <p>Per valutare questi aspetti, sono necessari metodi più avanzati che vadano oltre le classiche metriche di performance. In questa lezione, esploreremo due aree principali: la valutazione dei sistemi CSCW e la misurazione delle risposte fisiologiche dell'utente.</p>
+                </div>
+            </section>
+
+            <section id="valutazione-cscw">
+                <h2 class="section-title">2. Valutazione di Sistemi CSCW</h2>
+                <div class="section-content">
+                    <p>Valutare un sistema di Computer-Supported Cooperative Work (CSCW) è più complesso che valutare un'applicazione single-user. Non basta misurare l'efficienza individuale; bisogna analizzare come la tecnologia influisce sulle <strong>dinamiche di gruppo</strong>, sulla comunicazione e sul coordinamento. Questo richiede spesso approcci metodologici specifici.</p>
+                </div>
+            </section>
+            
+            <section id="valutazione-longitudinale">
+                <h3 class="subsection-title">2.1. Studi Longitudinali</h3>
+                <div class="section-content">
+                    <p>Le dinamiche di un gruppo non emergono in una sessione di test di un'ora. L'adozione di un nuovo strumento collaborativo, la formazione di norme sociali e l'emergere di problemi di coordinamento richiedono tempo. Per questo motivo, la valutazione di sistemi CSCW si basa spesso su <strong>studi longitudinali</strong>.</p>
+                     <ul>
+                         <li><strong>Definizione:</strong> Uno studio longitudinale osserva gli stessi utenti per un periodo di tempo prolungato (da settimane a mesi o addirittura anni).</li>
+                         <li><strong>Scopo:</strong> Permette di capire come l'uso del sistema e le dinamiche di gruppo evolvono nel tempo, superando la "novità" iniziale dello strumento. Si possono osservare fenomeni come l'appropriazione della tecnologia (quando gli utenti la adattano ai loro bisogni) o il suo progressivo abbandono.</li>
+                         <li><strong>Metodi:</strong> Spesso combinano osservazioni sul campo, analisi dei log di sistema e interviste periodiche per catturare l'evoluzione dell'esperienza.</li>
+                     </ul>
+                </div>
+            </section>
+
+            <section id="sna">
+                <h3 class="subsection-title">2.2. Social Network Analysis (SNA)</h3>
+                <div class="section-content">
+                    <p>La <strong>Social Network Analysis (SNA)</strong> è una metodologia quantitativa usata per mappare e analizzare le relazioni e le interazioni all'interno di un gruppo. Invece di chiedere agli utenti le loro percezioni, si analizzano i dati oggettivi delle loro comunicazioni (es. chi invia email a chi, chi risponde a chi in un forum).</p>
+                    <p>Il risultato è una visualizzazione a grafo, dove i nodi sono gli utenti e gli archi rappresentano le interazioni. Questa analisi permette di rispondere a domande come:</p>
+                    <ul>
+                        <li><strong>Chi sono i "hub" centrali del gruppo?</strong> (Le persone più connesse)</li>
+                        <li><strong>Chi è isolato dal resto del gruppo?</strong> (Potenziale problema di integrazione)</li>
+                        <li><strong>Esistono dei sottogruppi (cluster) che comunicano molto al loro interno ma poco con gli altri?</strong> (Potenziale problema di comunicazione interdipartimentale)</li>
+                    </ul>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+                        graph TD
+                            A(Anna) --> B(Marco);
+                            A --> C(Luca);
+                            B --> C;
+                            C --> A;
+                            D(Paolo) --> E(Sara);
+                            C --> D;
+                        </pre>
+                    </div>
+                    <p>L'SNA è uno strumento potente per diagnosticare la "salute" comunicativa di un gruppo che utilizza uno strumento CSCW e per identificare se la tecnologia sta facilitando o ostacolando la collaborazione.</p>
+                </div>
+            </section>
+
+            <section id="valutazione-fisiologica">
+                <h2 class="section-title">3. Valutazione con Dati Fisiologici</h2>
+                <div class="section-content">
+                    <p>I questionari e le interviste si basano su ciò che gli utenti *riferiscono* di aver provato, ma queste risposte possono essere influenzate da bias, dalla memoria o dalla difficoltà di articolare le proprie emozioni. La <strong>valutazione fisiologica</strong> mira a superare questi limiti misurando le risposte oggettive e involontarie del corpo umano a uno stimolo.</p>
+                    <p>Utilizzando sensori biometrici, possiamo ottenere una misura in tempo reale dello stato emotivo e cognitivo di un utente mentre interagisce con un sistema.</p>
+                </div>
+            </section>
+            
+            <section id="eda">
+                <h3 class="subsection-title">3.1. Conduttanza Cutanea (EDA/GSR)</h3>
+                <div class="section-content">
+                    <p>La **Conduttanza Cutanea** (nota anche come EDA - Electrodermal Activity o GSR - Galvanic Skin Response) misura le microscopiche variazioni nella sudorazione della pelle, tipicamente sulle dita. È un indicatore molto sensibile del livello di **arousal (attivazione) emotivo**.</p>
+                    <ul>
+                        <li><strong>Funzionamento:</strong> Un picco improvviso nella conduttanza cutanea indica che l'utente ha avuto una reazione emotiva (positiva o negativa).</li>
+                        <li><strong>Utilizzo:</strong> È molto usata per misurare l'impatto di eventi specifici in un'interfaccia (es. la comparsa di un nemico in un videogioco, un messaggio di errore inaspettato). Non ci dice *quale* emozione è stata provata, ma ci dice *che* un'emozione è stata provata.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="ecg-emg">
+                <h3 class="subsection-title">3.2. Elettrocardiogramma (ECG) ed Elettromiografia (EMG)</h3>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>Elettrocardiogramma (ECG):</strong> Misura l'attività elettrica del cuore. La variabilità della frequenza cardiaca (Heart Rate Variability) è un buon indicatore di stress e carico cognitivo.</li>
+                        <li><strong>Elettromiografia Facciale (EMG):</strong> Misura l'attività elettrica dei muscoli facciali. Posizionando elettrodi su muscoli specifici (es. zigomatici per il sorriso, corrugatori per l'aggrottamento della fronte), si può distinguere tra reazioni emotive positive (valenza positiva) e negative (valenza negativa), anche quando l'espressione facciale non è visibile a occhio nudo.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="vantaggi-svantaggi-fisiologici">
+                <h3 class="subsection-title">3.3. Vantaggi e Svantaggi</h3>
+                <div class="section-content">
+                    <div class="clarification-box">
+                        <strong>Vantaggi:</strong>
+                        <ul>
+                            <li><strong>Oggettività:</strong> Le risposte fisiologiche sono difficili da falsificare e non sono soggette a bias di auto-report.</li>
+                            <li><strong>Misurazione Continua:</strong> Forniscono un flusso di dati in tempo reale, permettendo di collegare una reazione a un evento preciso nell'interfaccia.</li>
+                            <li><strong>Sensibilità:</strong> Possono rilevare reazioni emotive che l'utente stesso potrebbe non aver notato consciamente.</li>
+                        </ul>
+                    </div>
+                     <div class="note-box">
+                        <strong>Svantaggi:</strong>
+                        <ul>
+                            <li><strong>Invasività e Costo:</strong> Richiedono l'applicazione di sensori e l'uso di attrezzatura specializzata, rendendo il setting di test più complesso e costoso.</li>
+                            <li><strong>Complessità di Analisi:</strong> I dati grezzi sono molto "rumorosi" e richiedono competenze specifiche per essere filtrati, analizzati e interpretati correttamente.</li>
+                            <li><strong>Ambiguità:</strong> Un picco di arousal (EDA) potrebbe essere dovuto a frustrazione, gioia o semplicemente a un colpo di tosse. Per questo, i dati fisiologici vengono quasi sempre usati in combinazione con altri metodi (osservazione video, interviste) per contestualizzare la misurazione.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
