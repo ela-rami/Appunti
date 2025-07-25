@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 18: Introduzione alla Valutazione e Metodi Esperti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 18: Valutazione con Osservazione</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#osservazione-utenti" class="sidebar-link">1. La Valutazione basata sull'Osservazione</a></li>
+            <li><a href="#lab-vs-campo" class="sidebar-link">1.1. Laboratorio vs. Campo: un Compromesso</a></li>
+            <li><a href="#test-laboratorio" class="sidebar-link">1.2. Il Test in Laboratorio</a></li>
+            <li><a href="#test-campo" class="sidebar-link">1.3. Lo Studio sul Campo</a></li>
+            <li><a href="#validita-affidabilita" class="sidebar-link">2. Affidabilità e Validità del Test</a></li>
+            <li><a href="#affidabilita" class="sidebar-link">2.1. Affidabilità: Gli Utenti sono Rappresentativi?</a></li>
+            <li><a href="#validita" class="sidebar-link">2.2. Validità: Stiamo Misurando la Cosa Giusta?</a></li>
+            <li><a href="#metriche-usabilita" class="sidebar-link">3. Metriche di Usabilità</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="osservazione-utenti">
+                <h2 class="section-title">1. La Valutazione basata sull'Osservazione</h2>
+                <div class="section-content">
+                    <p>I metodi di valutazione basati sull'osservazione sono il cuore della verifica dell'usabilità. Invece di chiedere agli utenti le loro opinioni, li **osserviamo direttamente** mentre interagiscono con il sistema per svolgere compiti specifici. Questo ci permette di raccogliere dati oggettivi sul loro comportamento, identificando dove incontrano difficoltà, dove commettono errori e dove l'interfaccia non supporta adeguatamente i loro obiettivi.</p>
+                    <p>La decisione fondamentale da prendere quando si organizza un test di osservazione riguarda il **luogo** in cui si svolgerà: in un ambiente artificiale e controllato (laboratorio) o nell'ambiente naturale dell'utente (campo).</p>
+                </div>
+            </section>
+
+            <section id="lab-vs-campo">
+                <h3 class="subsection-title">1.1. Laboratorio vs. Campo: un Compromesso</h3>
+                <div class="section-content">
+                    <p>La scelta tra laboratorio e campo rappresenta un classico compromesso tra controllo sperimentale e validità ecologica.</p>
+                     <div class="mermaid-container">
+                         <pre class="mermaid">
+                            graph TD
+                                A("<b>Laboratorio</b>") --> A1("Alto controllo sulle variabili");
+                                A --> A2("Facilità di raccolta dati (strumentazione)");
+                                A --> A3("Ambiente artificiale");
+                                A --> A4("Rischio di comportamento innaturale (effetto Hawthorne)");
+                                
+                                B("<b>Sul Campo</b>") --> B1("Basso controllo sulle variabili");
+                                B --> B2("Difficoltà di osservazione e raccolta dati");
+                                B --> B3("Contesto d'uso realistico");
+                                B --> B4("Comportamento naturale e spontaneo");
+                         </pre>
+                     </div>
+                </div>
+            </section>
+            
+            <section id="test-laboratorio">
+                <h3 class="subsection-title">1.2. Il Test in Laboratorio</h3>
+                <div class="section-content">
+                    <p>Un test di usabilità in laboratorio si svolge in un ambiente appositamente allestito. Tipicamente, l'utente siede a una postazione e svolge dei compiti, mentre i ricercatori lo osservano da una stanza separata attraverso uno specchio unidirezionale o telecamere.</p>
+                    <ul>
+                        <li><strong>Vantaggi:</strong> Permette un **alto grado di controllo**. È possibile standardizzare l'ambiente, usare strumentazione avanzata (come l'eye tracking) e registrare facilmente l'interazione. È ideale per confrontare due interfacce (A/B testing) perché si possono isolare le variabili.</li>
+                        <li><strong>Svantaggi:</strong> L'ambiente è **artificiale**. L'utente sa di essere osservato (<strong>effetto Hawthorne</strong>), e questo può alterare il suo comportamento, rendendolo più attento o ansioso del normale. Il contesto d'uso reale, con le sue interruzioni e distrazioni, è completamente assente.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="test-campo">
+                <h3 class="subsection-title">1.3. Lo Studio sul Campo</h3>
+                <div class="section-content">
+                    <p>Uno studio sul campo (o "in the wild") prevede di osservare gli utenti mentre usano il sistema nel loro ambiente naturale: l'ufficio, la casa, o in mobilità.</p>
+                    <ul>
+                        <li><strong>Vantaggi:</strong> Massima **validità ecologica**. Si osserva il comportamento reale dell'utente nel suo contesto naturale, comprese le interruzioni, le pressioni e le strategie di adattamento che emergono spontaneamente.</li>
+                        <li><strong>Svantaggi:</strong> È molto **difficile da controllare e da osservare**. Molte variabili incontrollabili (una telefonata, un collega che interrompe) possono "inquinare" i dati. La raccolta dati è più complessa e l'analisi richiede di distinguere i problemi di usabilità dagli eventi casuali del contesto.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="validita-affidabilita">
+                <h2 class="section-title">2. Affidabilità e Validità del Test</h2>
+                <div class="section-content">
+                    <p>Indipendentemente dal luogo, un buon test di usabilità deve soddisfare due criteri scientifici fondamentali: affidabilità e validità.</p>
+                </div>
+            </section>
+            
+            <section id="affidabilita">
+                <h3 class="subsection-title">2.1. Affidabilità: Gli Utenti sono Rappresentativi?</h3>
+                <div class="section-content">
+                    <p>L'**affidabilità** (reliability) riguarda la coerenza e la rappresentatività dei risultati. Un test è affidabile se, ripetendolo in condizioni simili, produce risultati simili. La domanda chiave è: **"Gli utenti che ho scelto rappresentano davvero il mio target di riferimento?"**</p>
+                     <div class="clarification-box">
+                        <strong>Esempio di Scarsa Affidabilità:</strong>
+                        <p>Sto progettando un'app per la gestione delle procedure di emergenza per medici di elisoccorso. Per testarla, recluto un gruppo di studenti di informatica.</p>
+                        <p>I risultati non saranno affidabili. Gli studenti non hanno le conoscenze mediche, l'esperienza e la pressione psicologica del vero utente target. Le loro performance e i loro feedback non sono rappresentativi di come un vero medico userebbe l'app in una situazione critica.</p>
+                    </div>
+                    <p>Per garantire l'affidabilità, è cruciale definire attentamente il profilo degli utenti (tramite le Personas) e reclutare partecipanti che corrispondano a quel profilo.</p>
+                </div>
+            </section>
+
+            <section id="validita">
+                <h3 class="subsection-title">2.2. Validità: Stiamo Misurando la Cosa Giusta?</h3>
+                <div class="section-content">
+                    <p>La **validità** (validity) riguarda la pertinenza di ciò che stiamo misurando. Un test è valido se le metriche scelte misurano effettivamente il costrutto che ci interessa studiare nel contesto appropriato.</p>
+                    <div class="clarification-box">
+                        <strong>Esempio di Scarsa Validità:</strong>
+                        <p>Sto progettando la stessa app per medici di elisoccorso e, come principale metrica di successo, misuro quanto gli utenti si sono **divertiti**.</p>
+                        <p>La misura non è valida. Sebbene il divertimento possa essere una metrica importante per un videogioco, è quasi del tutto irrilevante per un'applicazione safety-critical. Le metriche valide in questo contesto sarebbero il **tempo di completamento, il numero di errori e la chiarezza delle informazioni**, non il divertimento.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="metriche-usabilita">
+                <h2 class="section-title">3. Metriche di Usabilità</h2>
+                <div class="section-content">
+                    <p>Durante un test di osservazione, possiamo raccogliere diverse metriche quantitative per misurare oggettivamente la performance dell'utente.</p>
+                    <div class="note-box">
+                        <strong>Esempi di Metriche Comuni:</strong>
+                        <ul>
+                            <li><strong>Tempo di completamento del task:</strong> Quanto tempo impiega un utente per completare un'azione specifica.</li>
+                            <li><strong>Numero di errori:</strong> Quanti errori (sviste o sbagli) commette l'utente durante il task.</li>
+                            <li><strong>Tasso di successo/fallimento:</strong> L'utente è riuscito a completare il compito o ha abbandonato?</li>
+                            <li><strong>Numero di click:</strong> Quanti click sono necessari per raggiungere un obiettivo (indicatore di efficienza del percorso).</li>
+                            <li><strong>Tempo di esitazione:</strong> Quanto tempo l'utente rimane fermo su una schermata prima di agire, indicando possibile confusione.</li>
+                            <li><strong>Uso dell'aiuto (Help):</strong> Quante volte l'utente deve ricorrere alla documentazione o a una funzione di aiuto.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
