@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lezione 19: Strumenti di Raccolta Dati e Analisi Statistica</title>
+    <title>Lezione 19: Argomenti Emergenti - Agenti Conversazionali, Etica e Sostenibilità</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/common.css">
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <style>
         article { display: block !important; }
         section { margin-bottom: 3rem; }
@@ -15,7 +15,7 @@
 <body>
     <header>
         <button class="hamburger-menu" id="hamburger-btn">☰</button>
-        <h1>Lezione 19: Raccolta Dati e Analisi Statistica</h1>
+        <h1>Lezione 19: Agenti Conversazionali, Etica e Sostenibilità</h1>
         <div></div>
     </header>
 
@@ -25,126 +25,100 @@
         </div>
         <h2>Indice Argomenti</h2>
         <ul>
-            <li><a href="#questionari" class="sidebar-link">1. I Questionari (Self-Report)</a></li>
-            <li><a href="#scale-risposta" class="sidebar-link">1.1. Tipi di Scale di Risposta</a></li>
-            <li><a href="#questionario-sus" class="sidebar-link">1.2. Esempio: Il System Usability Scale (SUS)</a></li>
-            <li><a href="#interviste" class="sidebar-link">2. Le Interviste</a></li>
-            <li><a href="#conduzione-intervista" class="sidebar-link">2.1. Come Condurre un'Intervista Efficace</a></li>
-            <li><a href="#analisi-statistica" class="sidebar-link">3. Introduzione all'Analisi Statistica</a></li>
-            <li><a href="#p-value" class="sidebar-link">3.1. Significatività Statistica (p-value)</a></li>
-            <li><a href="#effect-size" class="sidebar-link">3.2. La Dimensione dell'Effetto (Effect Size)</a></li>
+            <li><a href="#agenti-conversazionali" class="sidebar-link">1. Gli Agenti Conversazionali (Chatbot)</a></li>
+            <li><a href="#evoluzione-agenti" class="sidebar-link">1.1. Dall'IA Simbolica all'IA Generativa</a></li>
+            <li><a href="#problemi-ia-generativa" class="sidebar-link">1.2. Sfide e Problemi delle IA Generative</a></li>
+            <li><a href="#etica-design" class="sidebar-link">2. Etica nel Design e Dark Patterns</a></li>
+            <li><a href="#sostenibilita-design" class="sidebar-link">3. Sostenibilità nel Design Digitale</a></li>
+            <li><a href="#sostenibilita-ambientale" class="sidebar-link">3.1. Sostenibilità Ambientale: l'E-waste</a></li>
+            <li><a href="#sostenibilita-sociale" class="sidebar-link">3.2. Sostenibilità Sociale: il Digital Divide</a></li>
         </ul>
     </nav>
 
     <main>
         <article>
-            <section id="questionari">
-                <h2 class="section-title">1. I Questionari (Self-Report)</h2>
+            <section id="agenti-conversazionali">
+                <h2 class="section-title">1. Gli Agenti Conversazionali (Chatbot)</h2>
                 <div class="section-content">
-                    <p>I <strong>questionari</strong> sono uno degli strumenti più diffusi per raccogliere dati soggettivi dagli utenti. Si basano sul principio del <strong>self-report</strong>, ovvero si chiede direttamente agli utenti di riportare le loro opinioni, percezioni e sensazioni.</p>
-                    <p>Sono molto utilizzati perché sono:</p>
+                    <p>Un <strong>agente conversazionale</strong>, o chatbot, è un programma software progettato per simulare una conversazione umana attraverso testo o voce. L'obiettivo è fornire un'interfaccia naturale in cui l'utente può esprimere le proprie richieste usando il linguaggio di tutti i giorni.</p>
+                </div>
+            </section>
+
+            <section id="evoluzione-agenti">
+                <h3 class="subsection-title">1.1. Dall'IA Simbolica all'IA Generativa</h3>
+                <div class="section-content">
+                    <p>La tecnologia dietro i chatbot ha subito un'evoluzione radicale:</p>
                     <ul>
-                        <li><strong>Economici:</strong> Possono essere somministrati a un gran numero di persone a basso costo, specialmente in formato digitale.</li>
-                        <li><strong>Veloci:</strong> Richiedono poco tempo sia per la compilazione da parte dell'utente che per l'analisi (spesso automatica) da parte del ricercatore.</li>
-                        <li><strong>Quantificabili:</strong> Le risposte fornite su scale numeriche possono essere facilmente analizzate con metodi statistici.</li>
+                        <li><strong>IA Simbolica (basata su regole):</strong> I primi chatbot, come <strong>ELIZA</strong> degli anni '60, funzionavano su un sistema di regole predefinite. Riconoscevano parole chiave (pattern matching) e rispondevano con frasi pre-impostate. Questi sistemi non "capivano" il significato, ma simulavano una conversazione in contesti molto ristretti. Molti assistenti clienti di prima generazione funzionavano così.</li>
+                        <li><strong>IA Generativa (basata su modelli probabilistici):</strong> I sistemi moderni come ChatGPT, Gemini, ecc., sono basati su Grandi Modelli Linguistici (LLM). Non seguono regole fisse, ma sono stati addestrati su enormi quantità di testo. Quando ricevono un input, non "cercano" una risposta, ma la <strong>generano</strong> parola per parola, calcolando la sequenza di parole più probabile che possa seguire la conversazione.</li>
                     </ul>
                 </div>
             </section>
 
-            <section id="scale-risposta">
-                <h3 class="subsection-title">1.1. Tipi di Scale di Risposta</h3>
+            <section id="problemi-ia-generativa">
+                <h3 class="subsection-title">1.2. Sfide e Problemi delle IA Generative</h3>
                 <div class="section-content">
-                    <p>La qualità di un questionario dipende molto dalla scelta delle scale di risposta.</p>
-                    <ul>
-                        <li><strong>Scala Likert:</strong> È la più comune. Chiede all'utente di esprimere il proprio grado di accordo o disaccordo con un'affermazione, tipicamente su una scala a 5 o 7 punti (es. da "Totalmente in disaccordo" a "Totalmente d'accordo"). Una scala con un numero dispari di punti permette una risposta neutrale al centro.</li>
-                        <li><strong>Differenziale Semantico:</strong> Chiede all'utente di posizionarsi tra due aggettivi opposti (es. "L'interfaccia è: Complessa --- Semplice").</li>
-                        <li><strong>Risposte Categoriali:</strong> L'utente sceglie tra un numero finito di opzioni predefinite (es. "Quale dispositivo usi principalmente? [ ] Smartphone [ ] Tablet [ ] PC").</li>
-                        <li><strong>Risposte Aperte:</strong> L'utente può scrivere liberamente. Utili per raccogliere feedback qualitativi inaspettati, ma molto più difficili e lunghe da analizzare.</li>
-                    </ul>
-                </div>
-            </section>
-            
-            <section id="questionario-sus">
-                <h3 class="subsection-title">1.2. Esempio: Il System Usability Scale (SUS)</h3>
-                <div class="section-content">
-                    <p>Il <strong>SUS</strong> è un questionario standardizzato, "quick and dirty", composto da 10 affermazioni per dare una valutazione complessiva dell'usabilità di un sistema. È uno degli strumenti più utilizzati al mondo per la sua semplicità e affidabilità.</p>
-                     <div class="note-box">
-                        <strong>Caratteristiche del SUS:</strong>
-                        <ul>
-                            <li>Consiste in 10 item su una scala Likert a 5 punti.</li>
-                            <li>Alterna affermazioni positive (es. "Penso che userei questo sistema frequentemente") e negative (es. "Ho trovato il sistema inutilmente complesso"). Questa alternanza serve a mantenere alta l'attenzione dell'utente ed evitare risposte automatiche.</li>
-                            <li>Il calcolo del punteggio finale produce un valore da 0 a 100. Un punteggio <strong>superiore a 68</strong> è generalmente considerato indicativo di un'usabilità sopra la media.</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            <section id="interviste">
-                <h2 class="section-title">2. Le Interviste</h2>
-                <div class="section-content">
-                    <p>Le <strong>interviste</strong> sono uno strumento di raccolta dati qualitativo. A differenza dei questionari, che sono rigidi, le interviste permettono di approfondire le risposte degli utenti, esplorare temi inaspettati e capire il "perché" dietro le loro opinioni.</p>
-                    <p>Esistono diverse tipologie di interviste:</p>
-                    <ul>
-                        <li><strong>Strutturate:</strong> L'intervistatore segue un copione fisso di domande, simile a un questionario orale.</li>
-                        <li><strong>Non strutturate:</strong> Una conversazione libera su un tema generale.</li>
-                        <li><strong>Semi-strutturate (le più comuni in HCI):</strong> L'intervistatore parte da una traccia di domande chiave, ma è libero di approfondire, porre nuove domande e adattare il flusso della conversazione in base alle risposte dell'utente.</li>
-                    </ul>
-                </div>
-            </section>
-
-            <section id="conduzione-intervista">
-                <h3 class="subsection-title">2.1. Come Condurre un'Intervista Efficace</h3>
-                <div class="section-content">
-                     <p>Condurre una buona intervista è un'arte che richiede preparazione e sensibilità.</p>
+                    <p>Questo nuovo approccio ha sbloccato capacità conversazionali impressionanti, ma ha anche introdotto nuove sfide per l'interazione uomo-macchina.</p>
                      <div class="clarification-box">
-                        <strong>Consigli Pratici:</strong>
-                        <ul>
-                            <li><strong>Creare un ambiente confortevole:</strong> L'utente deve sentirsi a proprio agio, come in una conversazione, non in un interrogatorio.</li>
-                            <li><strong>Essere neutrali:</strong> L'intervistatore non deve mai esprimere giudizi o influenzare le risposte. Anche un'espressione facciale può condizionare l'utente. Se l'utente critica un prodotto che hai progettato, devi rimanere impassibile e incoraggiarlo a spiegare.</li>
-                            <li><strong>Usare la riformulazione:</strong> Per assicurarsi di aver capito bene e per mostrare all'utente che lo si sta ascoltando, è utile riformulare le sue affermazioni ("Quindi, se ho capito bene, lei sta dicendo che...?").</li>
-                            <li><strong>Evitare domande chiuse:</strong> Preferire domande aperte ("Come descriverebbe questa esperienza?", "Cosa l'ha messa in difficoltà?") a domande che prevedono un "sì/no" come risposta.</li>
-                        </ul>
+                        <strong>Problema della "Verità" e delle Allucinazioni:</strong>
+                        <p>Poiché il modello genera la risposta più <strong>probabile</strong>, non la più <strong>vera</strong>, può produrre informazioni completamente false ma grammaticalmente perfette e molto plausibili. Questo fenomeno è noto come <strong>"allucinazione"</strong>. L'utente, di fronte a un testo così ben scritto, può essere indotto a credere a informazioni errate. Per mitigare questo, un buon design dovrebbe sempre includere avvisi chiari sui limiti del sistema ("Potrei commettere errori. Verifica le informazioni importanti.").</p>
                     </div>
-                </div>
-            </section>
-
-            <section id="analisi-statistica">
-                <h2 class="section-title">3. Introduzione all'Analisi Statistica</h2>
-                <div class="section-content">
-                    <p>Dopo aver raccolto i dati quantitativi (es. tempi, errori, punteggi di questionari), dobbiamo analizzarli per capire se le differenze che osserviamo sono "reali" o semplicemente dovute al caso. L'analisi statistica ci fornisce gli strumenti per farlo.</p>
-                </div>
-            </section>
-            
-            <section id="p-value">
-                <h3 class="subsection-title">3.1. Significatività Statistica (p-value)</h3>
-                <div class="section-content">
-                    <p>Supponiamo di aver confrontato due interfacce, A e B, e di aver misurato il tempo di completamento di un task. In media, gli utenti con l'interfaccia B sono stati 3 secondi più veloci. Questa differenza è reale o potrebbe essere solo una fluttuazione casuale?</p>
-                    <p>Il <strong>p-value (valore di probabilità)</strong> risponde a questa domanda. Rappresenta la probabilità di osservare una differenza grande come (o più grande di) quella che abbiamo misurato, se in realtà non ci fosse alcuna differenza reale tra le due interfacce (ipotesi nulla).</p>
-                    <ul>
-                        <li>Una convenzione scientifica molto diffusa stabilisce una soglia di significatività al <strong>5% (p < 0.05)</strong>.</li>
-                        <li>Se il nostro p-value è <strong>inferiore a 0.05</strong>, significa che c'è meno del 5% di probabilità che la nostra differenza sia dovuta al caso. Possiamo quindi concludere che la differenza è <strong>statisticamente significativa</strong>.</li>
-                        <li>Se il p-value è <strong>superiore a 0.05</strong> (es. p = 0.21, ovvero 21%), non possiamo escludere che la differenza sia dovuta al caso e quindi non possiamo affermare che un'interfaccia sia migliore dell'altra.</li>
-                    </ul>
-                </div>
-            </section>
-
-            <section id="effect-size">
-                <h3 class="subsection-title">3.2. La Dimensione dell'Effetto (Effect Size)</h3>
-                <div class="section-content">
-                    <p>Il p-value ci dice <strong>se</strong> una differenza è probabilmente reale, ma non ci dice <strong>quanto</strong> è grande o importante. Con campioni di utenti molto grandi (es. migliaia di persone), anche una differenza minuscola e irrilevante (es. 0.1 secondi) può risultare "statisticamente significativa".</p>
-                    <p>Per questo, al p-value si affianca la misura della <strong>dimensione dell'effetto (effect size)</strong>. Questo indicatore ci dice quanto è grande la differenza osservata, in termini pratici.</p>
                      <div class="note-box">
-                        <strong>Esempio: Significativo ma Irrilevante</strong>
-                        <p>Confrontiamo due interfacce su 10.000 utenti. L'interfaccia A richiede in media 18.00 secondi per un task, la B ne richiede 18.01. La differenza è di solo 0.01 secondi.</p>
-                        <ul>
-                            <li><strong>p-value:</strong> Potrebbe essere molto basso (es. p < 0.001), quindi la differenza è statisticamente significativa.</li>
-                            <li><strong>Effect Size:</strong> Sarà piccolissimo ("negligible"). La differenza, pur essendo reale, è così piccola da non avere alcuna importanza pratica per l'utente.</li>
-                        </ul>
+                        <strong>Stereotipi e Comportamento Umano:</strong>
+                        <p>Gli utenti tendono a interagire con i chatbot come se fossero umani, proiettando su di essi stereotipi e comportamenti sociali. Studi hanno mostrato che le persone tendono ad essere più aggressive verbalmente con chatbot con avatar femminili. Questo solleva questioni etiche su come progettare questi agenti e su come gestire interazioni inappropriate o dannose.</p>
                     </div>
-                    <p>Un'analisi completa, quindi, non si ferma alla significatività statistica, ma valuta anche la rilevanza pratica della differenza osservata.</p>
                 </div>
             </section>
 
+            <section id="etica-design">
+                <h2 class="section-title">2. Etica nel Design e Dark Patterns</h2>
+                <div class="section-content">
+                    <p>Non tutte le interfacce sono progettate per aiutare l'utente. I <strong>Dark Patterns</strong> sono elementi di design deliberatamente ingannevoli, creati per indurre gli utenti a compiere azioni che non intendono fare, a vantaggio dell'azienda.</p>
+                     <div class="exercise-box">
+                        <strong>Esempi di Dark Patterns:</strong>
+                        <ul>
+                            <li><strong>Trick Questions:</strong> Domande formulate in modo confuso per indurre l'utente a dare un consenso che non vorrebbe (es. una casella di controllo con una doppia negazione per l'iscrizione a una newsletter).</li>
+                            <li><strong>Roach Motel ("Entri ma non esci"):</strong> È molto facile iscriversi a un servizio, ma il processo per cancellare l'account è nascosto, lungo e complicato.</li>
+                            <li><strong>Bait and Switch ("Esca e scambio"):</strong> L'utente pensa di compiere un'azione (es. chiudere una pubblicità), ma il click ne innesca un'altra (es. aprire la pagina del prodotto).</li>
+                        </ul>
+                    </div>
+                    <p>Un design etico, al contrario, si basa sulla trasparenza, sul rispetto dell'autonomia dell'utente e sulla chiarezza delle informazioni, in linea con i principi di usabilità di Nielsen.</p>
+                </div>
+            </section>
+
+            <section id="sostenibilita-design">
+                <h2 class="section-title">3. Sostenibilità nel Design Digitale</h2>
+                <div class="section-content">
+                    <p>Il concetto di sostenibilità, applicato all'HCI, va oltre la semplice ecologia. Riguarda la progettazione di tecnologie che siano responsabili dal punto di vista ambientale, sociale ed economico, garantendone la longevità e l'impatto positivo nel tempo.</p>
+                </div>
+            </section>
+
+            <section id="sostenibilita-ambientale">
+                <h3 class="subsection-title">3.1. Sostenibilità Ambientale: l'E-waste</h3>
+                <div class="section-content">
+                    <p>La tecnologia digitale ha un impatto ambientale significativo, principalmente legato a due problemi:</p>
+                    <ul>
+                        <li><strong>Consumo Energetico:</strong> I data center, il training dei modelli di IA e il mining di criptovalute richiedono enormi quantità di energia.</li>
+                        <li><strong>Rifiuti Elettronici (E-waste):</strong> Il ciclo di vita dei dispositivi è sempre più breve. L'<strong>obsolescenza programmata</strong> (progettare un prodotto perché smetta di funzionare dopo un certo tempo) e la difficoltà di riparazione contribuiscono a una montagna crescente di rifiuti elettronici, spesso smaltiti in modo non corretto in paesi in via di sviluppo.</li>
+                    </ul>
+                     <div class="note-box">
+                        <strong>Principi di Design Sostenibile:</strong>
+                        <p>Il design può mitigare questo impatto promuovendo il <strong>diritto alla riparazione</strong>. Aziende come <strong>Fairphone</strong> progettano smartphone modulari in cui ogni componente (batteria, fotocamera, schermo) può essere facilmente sostituito dall'utente, estendendo la vita del dispositivo e riducendo i rifiuti.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sostenibilita-sociale">
+                <h3 class="subsection-title">3.2. Sostenibilità Sociale: il Digital Divide</h3>
+                <div class="section-content">
+                    <p>La sostenibilità sociale riguarda l'impatto della tecnologia sulle persone e sulla società.</p>
+                    <ul>
+                        <li><strong>Digital Divide:</strong> È il divario tra chi ha accesso alle tecnologie digitali e sa come usarle e chi ne è escluso per motivi economici, geografici, educativi o di disabilità. Quando servizi essenziali (bancari, sanitari, governativi) diventano esclusivamente digitali, si rischia di escludere intere fasce della popolazione.</li>
+                        <li><strong>Benessere Digitale (Digital Wellbeing):</strong> Riguarda la progettazione di tecnologie che rispettino il tempo e l'attenzione dell'utente, invece di sfruttare i meccanismi psicologici della dipendenza (es. notifiche infinite, scrolling infinito) per massimizzare il tempo di utilizzo.</li>
+                    </ul>
+                    <p>Progettare in modo sostenibile significa quindi non solo considerare l'impatto ecologico, ma anche garantire che la tecnologia sia uno strumento di inclusione e benessere, e non di esclusione e sfruttamento.</p>
+                </div>
+            </section>
         </article>
     </main>
 
