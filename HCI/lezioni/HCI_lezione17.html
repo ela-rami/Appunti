@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 17: CSCW e Comunicazione Mediata da Computer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        article { display: block !important; }
+        section { margin-bottom: 3rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 17: CSCW e Comunicazione Mediata</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="HCI_lezioni.html" class="sidebar-action-button">Torna alle Lezioni</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#comunicazione-f2f" class="sidebar-link">1. Analisi della Comunicazione Faccia-a-Faccia</a></li>
+            <li><a href="#social-cues" class="sidebar-link">1.1. Gli Indizi Sociali (Social Cues)</a></li>
+            <li><a href="#comunicazione-mediata" class="sidebar-link">2. La Comunicazione Mediata da Computer (CMC)</a></li>
+            <li><a href="#perdita-indizi" class="sidebar-link">2.1. La Perdita degli Indizi Non Verbali</a></li>
+            <li><a href="#modelli-teorici" class="sidebar-link">3. Modelli Teorici della CMC</a></li>
+            <li><a href="#rsc-model" class="sidebar-link">3.1. Il Modello Social Cues (RSC)</a></li>
+            <li><a href="#side-model" class="sidebar-link">3.2. Il Modello SIDE (Idealizzazione)</a></li>
+            <li><a href="#sip-model" class="sidebar-link">3.3. Il Modello SIP (Formazione delle Impressioni)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article>
+            <section id="comunicazione-f2f">
+                <h2 class="section-title">1. Analisi della Comunicazione Faccia-a-Faccia</h2>
+                <div class="section-content">
+                    <p>Per comprendere le peculiarità della comunicazione mediata da un computer (CMC), è utile partire dal nostro punto di riferimento: la **comunicazione faccia-a-faccia (F2F)**. Questa è la forma di interazione più ricca che conosciamo, poiché sfrutta simultaneamente molteplici canali per veicolare informazioni.</p>
+                </div>
+            </section>
+
+            <section id="social-cues">
+                <h3 class="subsection-title">1.1. Gli Indizi Sociali (Social Cues)</h3>
+                <div class="section-content">
+                    <p>Durante una conversazione F2F, non ci basiamo solo sulle parole (canale verbale), ma su un'ampia gamma di **indizi sociali (social cues)** non verbali che arricchiscono, qualificano e talvolta contraddicono il messaggio verbale.</p>
+                    <ul>
+                        <li><strong>Contatto Oculare:</strong> Regola i turni di parola, comunica attenzione e interesse.</li>
+                        <li><strong>Espressioni Facciali:</strong> Trasmettono emozioni fondamentali (gioia, sorpresa, rabbia) che contestualizzano il messaggio.</li>
+                        <li><strong>Linguaggio del Corpo (Gesti e Postura):</strong> Gesticolare, annuire, avvicinarsi o allontanarsi (prossemica) sono tutti segnali che aggiungono significato.</li>
+                        <li><strong>Aspetti Non Verbali della Voce (Paralinguistica):</strong> Il tono, il volume, il ritmo e le pause possono cambiare radicalmente il significato di una frase. "Bene" detto con un tono entusiasta è molto diverso da "bene" detto con un tono sarcastico.</li>
+                    </ul>
+                    <p>Tutti questi indizi ci aiutano a ridurre l'ambiguità, a gestire il flusso della conversazione e a percepire lo stato emotivo del nostro interlocutore.</p>
+                </div>
+            </section>
+            
+            <section id="comunicazione-mediata">
+                <h2 class="section-title">2. La Comunicazione Mediata da Computer (CMC)</h2>
+                <div class="section-content">
+                    <p>La **Comunicazione Mediata da Computer (CMC)** avviene quando l'interazione tra persone è filtrata da una tecnologia. A seconda del mezzo utilizzato (email, chat, videoconferenza), alcuni degli indizi sociali disponibili nella comunicazione F2F vengono persi o alterati.</p>
+                </div>
+            </section>
+
+            <section id="perdita-indizi">
+                <h3 class="subsection-title">2.1. La Perdita degli Indizi Non Verbali</h3>
+                <div class="section-content">
+                    <p>La caratteristica fondamentale della CMC è la **ridotta ricchezza del canale** comunicativo.</p>
+                     <div class="note-box">
+                        <strong>Esempio: da F2F a Email</strong>
+                        <ul>
+                            <li><strong>Comunicazione Faccia-a-Faccia:</strong> Tutti gli indizi sono presenti.</li>
+                            <li><strong>Videoconferenza:</strong> Mantiene la voce e gran parte del canale visivo (espressioni, gesti), ma perde la prossemica e il vero contatto oculare (spesso guardiamo lo schermo, non la webcam).</li>
+                            <li><strong>Telefonata:</strong> Mantiene solo la voce (verbale e paralinguistica), perdendo completamente il canale visivo.</li>
+                            <li><strong>Email / Chat Testuale:</strong> Perde tutti gli indizi non verbali. Rimane solo il testo scritto. È il canale più "povero".</li>
+                        </ul>
+                    </div>
+                    <p>Questa perdita di indizi è la causa principale dei fraintendimenti che avvengono così di frequente nella comunicazione testuale. Un commento ironico, facilmente riconoscibile dal tono di voce, può essere interpretato come un'offesa se letto in un'email.</p>
+                </div>
+            </section>
+            
+            <section id="modelli-teorici">
+                <h2 class="section-title">3. Modelli Teorici della CMC</h2>
+                <div class="section-content">
+                    <p>Diversi modelli teorici cercano di spiegare come le persone si adattano a questa povertà di canali e come riescono comunque a stabilire relazioni sociali significative online.</p>
+                </div>
+            </section>
+
+            <section id="rsc-model">
+                <h3 class="subsection-title">3.1. Il Modello Social Cues (RSC)</h3>
+                <div class="section-content">
+                    <p>Il modello **Reduced Social Cues (RSC)** è uno dei primi e più semplici. Sostiene che la mancanza di indizi sociali rende la comunicazione mediata più **impersonale, orientata al compito e meno calorosa** rispetto a quella F2F. Le persone si sentono più anonime e meno vincolate dalle norme sociali, il che può portare a comportamenti più disinibiti (il cosiddetto "flaming", ovvero gli insulti online).</p>
+                    <p>Questo modello, però, non spiega come mai le persone riescano a formare amicizie profonde e relazioni intime anche attraverso semplici chat testuali.</p>
+                </div>
+            </section>
+
+            <section id="side-model">
+                <h3 class="subsection-title">3.2. Il Modello SIDE (Idealizzazione)</h3>
+                <div class="section-content">
+                    <p>Il modello **SIDE (Social Identity De-individuation)** offre una spiegazione più sofisticata. Sostiene che in assenza di indizi personali, le persone non diventano semplicemente "anonime", ma tendono a basare le loro impressioni sull'**identità sociale** dell'interlocutore (es. "è uno studente come me", "è un tifoso della mia stessa squadra").</p>
+                    <p>Questo porta a due fenomeni:</p>
+                    <ul>
+                        <li><strong>De-individuazione:</strong> L'individuo viene percepito meno come una persona unica e più come un rappresentante del suo gruppo.</li>
+                        <li><strong>Idealizzazione:</strong> Tendiamo a "riempire i vuoti" lasciati dalla mancanza di indizi, proiettando sull'altra persona le caratteristiche stereotipiche del suo gruppo sociale. Se l'interlocutore appartiene a un gruppo che ci piace, tenderemo a idealizzarlo in positivo; al contrario, se appartiene a un gruppo rivale, lo idealizzeremo in negativo.</li>
+                    </ul>
+                    <p>Questo modello spiega bene perché le comunità online possano diventare molto coese al loro interno ma anche molto ostili verso l'esterno.</p>
+                </div>
+            </section>
+
+            <section id="sip-model">
+                <h3 class="subsection-title">3.3. Il Modello SIP (Formazione delle Impressioni)</h3>
+                <div class="section-content">
+                    <p>Il modello **SIP (Social Information Processing)** sostiene che gli esseri umani sono intrinsecamente motivati a formare relazioni sociali, indipendentemente dal mezzo. La CMC non impedisce questo processo, semplicemente lo **rallenta**.</p>
+                    <p>L'idea è che, sebbene il canale testuale sia più "povero", gli utenti trovano modi creativi per compensare la mancanza di indizi non verbali:</p>
+                    <ul>
+                        <li><strong>Contenuto del Messaggio:</strong> Si usano domande più dirette e si rivelano più informazioni personali per ridurre l'incertezza.</li>
+                        <li>**Stile del Linguaggio:** Si sviluppano convenzioni per veicolare emozioni, come l'uso di **emoticon**, emoji, maiuscole per "urlare", o punteggiatura espressiva (!!!, ???).</li>
+                        <li><strong>Tempo:</strong> Dato che ogni messaggio veicola meno informazioni sociali, sono necessarie più interazioni e più tempo per raggiungere lo stesso livello di intimità di una relazione F2F.</li>
+                    </ul>
+                    <p>Il modello SIP paragona la comunicazione testuale al **bere attraverso una cannuccia**: si può bere la stessa quantità di liquido, ma ci vuole solo più tempo.</p>
+                </div>
+            </section>
+
+        </article>
+    </main>
+
+    <footer>
+        <p>Appunti del Corso di Interazione Uomo-Macchina</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>
