@@ -136,8 +136,8 @@ for (long i = 0; i <= 1_000_000; i++) {
             <div class="section-content">
                 <p>Comprendere dove risiedono i dati è fondamentale per capire il comportamento del programma, specialmente per quanto riguarda la mutabilità e il passaggio di parametri.</p>
                 <ul>
-                    <li><strong>Stack (Pila):</strong> È una zona di memoria gestita con logica LIFO (Last-In, First-Out). Contiene i **tipi primitivi** e i **riferimenti agli oggetti**. Ogni chiamata a metodo crea un nuovo "frame" sullo stack per le sue variabili locali. Quando il metodo termina, il suo frame viene rimosso.</li>
-                    <li><strong>Heap:</strong> È una grande area di memoria dove vengono allocati dinamicamente tutti gli **oggetti** (creati con `new`). La gestione dello spazio nell'heap è compito del **Garbage Collector**, che dealloca automaticamente gli oggetti che non sono più raggiungibili (cioè, non ci sono più riferimenti attivi che puntano a loro).</li>
+                    <li><strong>Stack (Pila):</strong> È una zona di memoria gestita con logica LIFO (Last-In, First-Out). Contiene i <strong>tipi primitivi</strong> e i <strong>riferimenti agli oggetti</strong>. Ogni chiamata a metodo crea un nuovo "frame" sullo stack per le sue variabili locali. Quando il metodo termina, il suo frame viene rimosso.</li>
+                    <li><strong>Heap:</strong> È una grande area di memoria dove vengono allocati dinamicamente tutti gli <strong>oggetti</strong> (creati con `new`). La gestione dello spazio nell'heap è compito del <strong>Garbage Collector</strong>, che dealloca automaticamente gli oggetti che non sono più raggiungibili (cioè, non ci sono più riferimenti attivi che puntano a loro).</li>
                 </ul>
                 <div class="mermaid-container">
                     <pre class="mermaid">
@@ -178,8 +178,8 @@ System.out.println(s2); // Stampa "Ciao", perché s2 punta ancora all'oggetto or
                 <h3 class="subsection-title">Identità (`==`) vs. Uguaglianza (`.equals()`)</h3>
                 <p>Questa è una delle distinzioni più importanti in Java.</p>
                 <ul>
-                    <li><strong>Identità (`==`):</strong> Controlla se due variabili di riferimento puntano **allo stesso identico oggetto in memoria**. Per i tipi primitivi, controlla se i valori sono uguali.</li>
-                    <li><strong>Uguaglianza (`.equals()`):</strong> È un metodo che, per convenzione, dovrebbe controllare se due oggetti sono "logicamente" equivalenti, cioè se hanno lo stesso stato significativo. La classe `Object` fornisce un'implementazione di default che si comporta come `==`. Per ottenere un confronto basato sul contenuto, **è necessario fare l'override del metodo `.equals()`** (e, di conseguenza, anche di `.hashCode()`).</li>
+                    <li><strong>Identità (`==`):</strong> Controlla se due variabili di riferimento puntano <strong>allo stesso identico oggetto in memoria</strong>. Per i tipi primitivi, controlla se i valori sono uguali.</li>
+                    <li><strong>Uguaglianza (`.equals()`):</strong> È un metodo che, per convenzione, dovrebbe controllare se due oggetti sono "logicamente" equivalenti, cioè se hanno lo stesso stato significativo. La classe `Object` fornisce un'implementazione di default che si comporta come `==`. Per ottenere un confronto basato sul contenuto, <strong>è necessario fare l'override del metodo `.equals()`</strong> (e, di conseguenza, anche di `.hashCode()`).</li>
                 </ul>
 
                 <pre><code class="language-java">
@@ -217,12 +217,12 @@ System.out.println(sb1.equals(sb2));    // false! (StringBuilder non fa l'overri
                 <h3 class="subsection-title">Variabili di Istanza e Variabili di Classe</h3>
                 <ul>
                     <li><strong>Variabile di Istanza:</strong> Ogni oggetto ha la sua copia personale. Se `studente1.nome = "Mario"` e `studente2.nome = "Luigi"`, ogni oggetto ha il suo valore.</li>
-                    <li><strong>Variabile di Classe (`static`):</strong> Esiste una sola copia di questa variabile, condivisa da **tutte le istanze** della classe. È associata alla classe stessa, non ai singoli oggetti. È utile per contatori o costanti.</li>
+                    <li><strong>Variabile di Classe (`static`):</strong> Esiste una sola copia di questa variabile, condivisa da <strong>tutte le istanze</strong> della classe. È associata alla classe stessa, non ai singoli oggetti. È utile per contatori o costanti.</li>
                 </ul>
                 <h3 class="subsection-title">Modificatori di Visibilità</h3>
-                <p>La visibilità controlla chi può accedere a classi, metodi e variabili. È uno strumento fondamentale per l'**incapsulamento**.</p>
+                <p>La visibilità controlla chi può accedere a classi, metodi e variabili. È uno strumento fondamentale per l' <strong>incapsulamento</strong>.</p>
                 <ol>
-                    <li><strong>`private`</strong>: Accessibile solo dall'interno della stessa classe. **È la scelta di default per tutte le variabili di istanza per proteggere lo stato interno di un oggetto.**</li>
+                    <li><strong>`private`</strong>: Accessibile solo dall'interno della stessa classe. <strong>È la scelta di default per tutte le variabili di istanza per proteggere lo stato interno di un oggetto.</strong></li>
                     <li><strong>Package-private (nessun modificatore):</strong> Accessibile solo da classi nello stesso package.</li>
                     <li><strong>`protected`</strong>: Accessibile da classi nello stesso package E da sottoclassi (anche se in package diversi).</li>
                     <li><strong>`public`</strong>: Accessibile da qualsiasi classe, ovunque. Va usato con parsimonia per l'API pubblica di una classe.</li>
@@ -234,15 +234,15 @@ System.out.println(sb1.equals(sb2));    // false! (StringBuilder non fa l'overri
             <h2 class="section-title">6. Metodi: Overloading e Dispatching</h2>
             <div class="section-content">
                 <h3 class="subsection-title">Overloading</h3>
-                <p>L'overloading (o sovraccarico) consiste nel definire più metodi con lo **stesso nome** ma con una **lista di parametri diversa** (per numero o per tipo) all'interno della stessa classe. Il compilatore decide quale versione chiamare in base ai tipi *apparenti* degli argomenti passati.</p>
+                <p>L'overloading (o sovraccarico) consiste nel definire più metodi con lo <strong>stesso nome</strong> ma con una <strong>lista di parametri diversa</strong> (per numero o per tipo) all'interno della stessa classe. Il compilatore decide quale versione chiamare in base ai tipi <strong>apparenti</strong> degli argomenti passati.</p>
                 <p>Se esistono più conversioni possibili, il compilatore sceglie la versione "più specifica", cioè quella che richiede il minor numero di conversioni da tipo più specifico a tipo più generico (es. da `int` a `long` è preferibile che da `int` a `double`). Se la scelta è ambigua, si ottiene un errore di compilazione.</p>
 
                 <h3 class="subsection-title">Method Dispatching (Polimorfismo)</h3>
                 <p>Il dispatching è il processo con cui la JVM decide quale implementazione di un metodo eseguire. È alla base del polimorfismo.</p>
                 <p>La decisione si basa su due fattori:</p>
                 <ol>
-                    <li><strong>Il tipo apparente degli argomenti (Compile-time):</strong> Determina quale metodo *overload* viene selezionato.</li>
-                    <li><strong>Il tipo reale dell'oggetto su cui il metodo è chiamato (Run-time):</strong> Determina quale versione *overridden* (sovrascritta) del metodo viene eseguita.</li>
+                    <li><strong>Il tipo apparente degli argomenti (Compile-time):</strong> Determina quale metodo <strong>overload</strong> viene selezionato.</li>
+                    <li><strong>Il tipo reale dell'oggetto su cui il metodo è chiamato (Run-time):</strong> Determina quale versione <strong>overridden</strong> (sovrascritta) del metodo viene eseguita.</li>
                 </ol>
 
                 <div class="clarification-box">
