@@ -198,6 +198,16 @@ System.out.println(sb1 == sb2);         // false (due oggetti distinti)
 System.out.println(sb1.equals(sb2));    // false! (StringBuilder non fa l'override di equals, quindi usa il comportamento di Object, che è come ==)
                 </code></pre>
             </div>
+
+            <div class="warning-box">
+                <div class="box-title">⚠️ Il Contratto tra equals() e hashCode()</div>
+                <p>Quando si fa l'override del metodo <code>.equals()</code>, è <strong>obbligatorio</strong> fare l'override anche di <code>.hashCode()</code>. Il contratto ufficiale di Java richiede che:</p>
+                <ul>
+                    <li>Se due oggetti sono uguali secondo <code>.equals()</code>, allora devono avere lo stesso valore di <code>hashCode()</code>.</li>
+                    <li>Se due oggetti hanno lo stesso <code>hashCode()</code>, non è detto che siano uguali secondo <code>.equals()</code> (collisione hash).</li>
+                </ul>
+                <p>Violare questo contratto porta a comportamenti imprevedibili e a bug quando si usano gli oggetti in collezioni basate su hash come <code>HashSet</code> e <code>HashMap</code>.</p>
+            </div>
         </article>
 
         <article id="classes-objects" class="content-section">

@@ -172,6 +172,15 @@ public static int search(int[] array, int element) throws NoSuchElementException
 }
                  </code></pre>
             </div>
+
+            <div class="note-box">
+                <div class="box-title">💡 Strategie di Gestione: Masking e Reflecting</div>
+                <p>Quando un metodo cattura un'eccezione, può adottare due strategie principali:</p>
+                <ul>
+                    <li><strong>Masking (Mascheramento):</strong> Il metodo gestisce l'eccezione completamente all'interno del blocco <code>catch</code>, risolvendo il problema o gestendolo in modo tale che il chiamante non se ne accorga. L'eccezione viene "mascherata".</li>
+                    <li><strong>Reflecting (Riflessione):</strong> Il metodo cattura l'eccezione, esegue eventualmente delle operazioni, e poi la propaga al chiamante, o rilanciando la stessa eccezione (<code>throw e;</code>) o "avvolgendola" in una nuova eccezione più specifica per il contesto.</li>
+                </ul>
+            </div>
         </article>
 
         <article id="assertions" class="content-section">

@@ -245,6 +245,13 @@ public List<String> getPlayers() {
                     </code></pre>
                 </div>
             </div>
+
+            <h3 class="subsection-title">Clonazione: Shallow vs. Deep Copy</h3>
+<p>Un altro meccanismo per creare copie di oggetti è il metodo <code>.clone()</code>, ereditato da <code>Object</code>. È fondamentale capire la differenza tra:</p>
+<ul>
+    <li><strong>Shallow Copy (Copia Superficiale):</strong> Crea un nuovo oggetto ma copia solo i riferimenti ai campi interni. Se i campi sono oggetti mutabili, sia la copia che l'originale punteranno agli stessi oggetti interni, rompendo l'incapsulamento. È il comportamento di default di <code>Object.clone()</code>.</li>
+    <li><strong>Deep Copy (Copia Profonda):</strong> Crea un nuovo oggetto e copia ricorsivamente anche tutti gli oggetti interni, garantendo che l'originale e la copia siano completamente indipendenti. È spesso necessaria per ADT con stato mutabile.</li>
+</ul>
         </article>
     </main>
 
