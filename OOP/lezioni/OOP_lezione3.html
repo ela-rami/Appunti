@@ -58,8 +58,8 @@
         <article id="what-is-adt" class="content-section active-section">
             <h2 class="section-title">1. Cos'è un Tipo di Dato Astratto (ADT)?</h2>
             <div class="section-content">
-                <p>Un **Tipo di Dato Astratto (ADT)** è un modello matematico per un tipo di dato. È definito dal suo **comportamento** (le operazioni che si possono eseguire) e dal suo **valore** (lo stato che può assumere), dal punto di vista dell'utente (il *client*). Un ADT si concentra sul **"cosa"** un tipo di dato rappresenta e fa, ignorando completamente il **"come"** viene implementato.</p>
-                <p>L'obiettivo è creare nuovi tipi di dato che estendono il linguaggio, permettendo di modellare il dominio del problema in modo più naturale. In Java, gli ADT sono tipicamente realizzati tramite **classi e interfacce**.</p>
+                <p>Un <strong>Tipo di Dato Astratto (ADT)</strong> è un modello matematico per un tipo di dato. È definito dal suo <strong>comportamento</strong> (le operazioni che si possono eseguire) e dal suo <strong>valore</strong> (lo stato che può assumere), dal punto di vista dell'utente (il <strong>client</strong>). Un ADT si concentra sul <strong>"cosa"</strong> un tipo di dato rappresenta e fa, ignorando completamente il <strong>"come"</strong> viene implementato.</p>
+                <p>L'obiettivo è creare nuovi tipi di dato che estendono il linguaggio, permettendo di modellare il dominio del problema in modo più naturale. In Java, gli ADT sono tipicamente realizzati tramite <strong>classi e interfacce</strong>.</p>
                 
                 <div class="note-box">
                     <div class="box-title">💡 Esempi di ADT</div>
@@ -77,7 +77,7 @@
         <article id="adt-specification" class="content-section">
             <h2 class="section-title">2. La Specifica di un ADT</h2>
             <div class="section-content">
-                <p>Per definire formalmente un ADT, dobbiamo specificare due componenti principali, che insieme formano il suo **contratto pubblico**.</p>
+                <p>Per definire formalmente un ADT, dobbiamo specificare due componenti principali, che insieme formano il suo <strong>contratto pubblico</strong>.</p>
                 
                 <h3 class="subsection-title">Lo Stato Astratto</h3>
                 <p>Descrive l'insieme dei possibili valori che un'istanza dell'ADT può assumere, in termini puramente matematici o logici.</p>
@@ -87,7 +87,7 @@
                 </ul>
 
                 <h3 class="subsection-title">Il Protocollo (le Operazioni)</h3>
-                <p>È l'insieme delle operazioni (metodi) che possono essere eseguite sull'ADT. Ogni operazione è definita dal suo **contratto** (pre-condizioni, post-condizioni, `@throws`), che si riferisce sempre allo **stato astratto**, mai a quello concreto.</p>
+                <p>È l'insieme delle operazioni (metodi) che possono essere eseguite sull'ADT. Ogni operazione è definita dal suo <strong>contratto</strong> (pre-condizioni, post-condizioni, `@throws`), che si riferisce sempre allo <strong>stato astratto</strong>, mai a quello concreto.</p>
                  <pre><code class="language-java">
 // Esempio di contratto per il metodo insert di un IntSet
 
@@ -116,7 +116,7 @@ public void insert(int x);
         <article id="abstraction-function" class="content-section">
             <h3 class="subsection-title">3.1. Funzione di Astrazione (AF)</h3>
             <div class="section-content">
-                <p>La **Funzione di Astrazione (AF)** è una mappa che definisce come lo stato **concreto** (la rappresentazione interna) viene interpretato per rappresentare uno stato **astratto**. È il "ponte" che collega il mondo dell'implementazione al mondo del modello matematico.</p>
+                <p>La <strong>Funzione di Astrazione (AF)</strong> è una mappa che definisce come lo stato <strong>concreto</strong> (la rappresentazione interna) viene interpretato per rappresentare uno stato <strong>astratto</strong>. È il "ponte" che collega il mondo dell'implementazione al mondo del modello matematico.</p>
                 <div class="math-block concept-map">
                 AF : Stato Concreto \(\to\) Stato Astratto
                 </div>
@@ -133,7 +133,7 @@ public void insert(int x);
                         <li><code>AF([2, 1])</code> \(\to\) `{1, 2}` (lo stesso stato astratto!)</li>
                         <li><code>AF([1, 2, 1])</code> \(\to\) `{1, 2}` (gli insiemi non hanno duplicati)</li>
                     </ul>
-                    <p>La funzione di astrazione è spesso **molti-a-uno**: più stati concreti possono rappresentare lo stesso stato astratto. Questo è normale e desiderabile, in quanto dà libertà all'implementatore.</p>
+                    <p>La funzione di astrazione è spesso <strong>molti-a-uno</strong>: più stati concreti possono rappresentare lo stesso stato astratto. Questo è normale e desiderabile, in quanto dà libertà all'implementatore.</p>
                 </div>
             </div>
         </article>
@@ -141,7 +141,7 @@ public void insert(int x);
         <article id="representation-invariant" class="content-section">
             <h3 class="subsection-title">3.2. Invariante di Rappresentazione (RI)</h3>
             <div class="section-content">
-                <p>Non tutti i valori possibili dello stato concreto sono "validi" per rappresentare uno stato astratto. L'**Invariante di Rappresentazione (RI)** è una proprietà che definisce quali stati concreti sono ben formati. L'RI deve essere vero per ogni istanza della classe **prima e dopo l'esecuzione di ogni metodo pubblico**.</p>
+                <p>Non tutti i valori possibili dello stato concreto sono "validi" per rappresentare uno stato astratto. L'<strong>Invariante di Rappresentazione (RI)</strong> è una proprietà che definisce quali stati concreti sono ben formati. L'RI deve essere vero per ogni istanza della classe <strong>prima e dopo l'esecuzione di ogni metodo pubblico</strong>.</p>
                 <div class="math-block concept-map">
                 RI : Stato Concreto \(\to\) {true, false}
                 </div>
@@ -155,7 +155,7 @@ public void insert(int x);
                         <li>`elements` non deve contenere elementi `null`.</li>
                         <li>`elements` non deve contenere duplicati.</li>
                     </ol>
-                    <p>Lo stato concreto `[1, 2, 1]` viola la terza regola dell'RI, quindi è uno stato **invalido** che la nostra implementazione deve evitare di produrre. Uno stato `null` viola la prima regola. Invece, `[1, 2]` e `[2, 1]` sono entrambi stati concreti validi che rispettano l'RI.</p>
+                    <p>Lo stato concreto `[1, 2, 1]` viola la terza regola dell'RI, quindi è uno stato <strong>invalido</strong> che la nostra implementazione deve evitare di produrre. Uno stato `null` viola la prima regola. Invece, `[1, 2]` e `[2, 1]` sono entrambi stati concreti validi che rispettano l'RI.</p>
                 </div>
                 <p>L'RI è uno strumento potentissimo per il programmatore. Viene tipicamente controllato tramite un metodo `private boolean checkRep()` o `invariantOK()`, invocato con `assert` all'inizio e alla fine di ogni metodo pubblico per trovare bug durante lo sviluppo.</p>
                 <pre><code class="language-java">
@@ -182,8 +182,8 @@ public void insert(int x) {
              <div class="clarification-box">
                 <div class="box-title">🔍 AF vs. RI: Una Sintesi</div>
                 <ul>
-                    <li>L'**Invariante di Rappresentazione (RI)** filtra gli stati **concreti**, separando quelli "buoni" (validi) da quelli "cattivi" (invalidi).</li>
-                    <li>La **Funzione di Astrazione (AF)** si applica solo agli stati concreti "buoni" (che soddisfano l'RI) e li mappa ai loro corrispondenti valori **astratti**.</li>
+                    <li>L'<strong>Invariante di Rappresentazione (RI)</strong> filtra gli stati <strong>concreti</strong>, separando quelli "buoni" (validi) da quelli "cattivi" (invalidi).</li>
+                    <li>La <strong>Funzione di Astrazione (AF)</strong> si applica solo agli stati concreti "buoni" (che soddisfano l'RI) e li mappa ai loro corrispondenti valori <strong>astratti</strong>.</li>
                 </ul>
                 <div class="mermaid-container">
                     <pre class="mermaid">
@@ -212,7 +212,7 @@ public void insert(int x) {
         <article id="encapsulation" class="content-section">
             <h2 class="section-title">4. L'Importanza dell'Incapsulamento (Representation Exposure)</h2>
             <div class="section-content">
-                <p>Un ADT, per essere robusto e manutenibile, **NON DEVE MAI ESPORRE LA SUA RAPPRESENTAZIONE INTERNA**. Questo significa che le variabili di istanza devono essere `private` e nessun metodo deve restituire un riferimento diretto a un oggetto mutabile interno.</p>
+                <p>Un ADT, per essere robusto e manutenibile, <strong>NON DEVE MAI ESPORRE LA SUA RAPPRESENTAZIONE INTERNA</strong>. Questo significa che le variabili di istanza devono essere `private` e nessun metodo deve restituire un riferimento diretto a un oggetto mutabile interno.</p>
                 
                 <h3 class="subsection-title">Cosa succede se si espone la rappresentazione?</h3>
                 <p>Se un client ottiene un riferimento diretto allo stato concreto (es. al `Vector` `elements` del nostro `IntSet`), possono accadere due disastri:</p>
