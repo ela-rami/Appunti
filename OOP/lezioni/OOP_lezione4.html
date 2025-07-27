@@ -60,7 +60,7 @@
                 <p>Nelle lezioni precedenti, abbiamo visto come definire gli ADT in modo robusto, mantenendo l'incapsulamento della rappresentazione interna. Ma come facciamo a permettere al client di accedere (leggere) tutti gli elementi di una collezione (es. tutti i numeri di un `IntSet`) senza rompere l'incapsulamento?</p>
                 <p>Consideriamo un `IntSet` e l'esigenza di calcolare la somma di tutti i suoi elementi:</p>
                 
-                <h3 class.subsection-title">Approccio 1: Metodi Custom nell'ADT (Non Flessibile)</h3>
+                <h3 class="subsection-title">Approccio 1: Metodi Custom nell'ADT (Non Flessibile)</h3>
                 <p>Potremmo aggiungere un metodo `sum()` direttamente all'ADT `IntSet`.</p>
                 <pre><code class="language-java">
 public class IntSet {
@@ -77,14 +77,14 @@ public class IntSet {
                 </code></pre>
                 <div class="note-box">
                     <div class="box-title">💡 Pro e Contro</div>
-                    **Pro:** Rispettiamo l'incapsulamento (il client non vede la rappresentazione).<br>
-                    **Contro:** Se volessimo calcolare la somma dei quadrati, o la somma dei numeri pari, o il prodotto, dovremmo aggiungere un metodo diverso per ogni operazione, gonfiando l'ADT e violando il Single Responsibility Principle. L'ADT diventerebbe "troppo intelligente".
+                    <strong>Pro:</strong> Rispettiamo l'incapsulamento (il client non vede la rappresentazione).<br>
+                    <strong>Contro:</strong> Se volessimo calcolare la somma dei quadrati, o la somma dei numeri pari, o il prodotto, dovremmo aggiungere un metodo diverso per ogni operazione, gonfiando l'ADT e violando il Single Responsibility Principle. L'ADT diventerebbe "troppo intelligente".
                 </div>
 
-                <h3 class.subsection-title">Approccio 2: Esporre la Rappresentazione (PERICOLOSO)</h3>
+                <h3 class="subsection-title">Approccio 2: Esporre la Rappresentazione (PERICOLOSO)</h3>
                 <p>Potremmo esporre la rappresentazione interna con un getter pubblico (`public List<Integer> getElements()`). Ma come visto, questo è un disastro per l'incapsulamento e la manutenibilità.</p>
 
-                <h3 class.subsection-title">Approccio 3: Metodi Destruttivi (`choose()`/`remove()`)</h3>
+                <h3 class="subsection-title">Approccio 3: Metodi Destruttivi (`choose()`/`remove()`)</h3>
                 <p>Un metodo `choose()` che restituisce un elemento casuale e un `remove()` per eliminarlo dall'insieme permette di processare tutti gli elementi, ma distrugge l'insieme originale.</p>
                 <pre><code class="language-java">
 public int sum(IntSet s) { // METODO DANNOSO: modifica l'input
@@ -107,9 +107,9 @@ public int sum(IntSet s) { // METODO DANNOSO: modifica l'input
         <article id="iterator-pattern" class="content-section">
             <h2 class="section-title">2. Il Pattern Iterator</h2>
             <div class="section-content">
-                <p>La soluzione elegante e standard al problema della traversa delle collezioni è il **Pattern Iterator**. Un iteratore è un oggetto che permette di accedere sequenzialmente agli elementi di una collezione senza esporre la sua struttura interna.</p>
+                <p>La soluzione elegante e standard al problema della traversa delle collezioni è il <strong>Pattern Iterator</strong>. Un iteratore è un oggetto che permette di accedere sequenzialmente agli elementi di una collezione senza esporre la sua struttura interna.</p>
                 
-                <h3 class.subsection-title">Interfaccia `java.util.Iterator<E>`</h3>
+                <h3 class="subsection-title">Interfaccia `java.util.Iterator<E>`</h3>
                 <p>Java fornisce un'interfaccia standard per gli iteratori. Tutte le collezioni (`List`, `Set`, `Map` tramite `entrySet()`) la implementano o la espongono.</p>
                 <ul>
                     <li><code>boolean hasNext()</code>: Restituisce `true` se ci sono ancora elementi da visitare.</li>
@@ -142,12 +142,12 @@ System.out.println("Somma: " + sum);
         </article>
 
         <article id="implementing-iterators" class="content-section">
-            <h3 class.subsection-title">2.1. Implementazione di un Iteratore Custom</h3>
+            <h3 class="subsection-title">2.1. Implementazione di un Iteratore Custom</h3>
             <div class="section-content">
                 <p>Per un nostro ADT (es. `IntSet`), possiamo implementare un iteratore personalizzato, spesso come classe interna (`private inner class`).</p>
                 <div class="note-box">
                     <div class="box-title">💡 Il "Snapshot"</div>
-                    Per assicurare che l'iteratore non venga influenzato da modifiche all'ADT originale durante la traversa, l'iteratore dovrebbe operare su una **copia (snapshot)** dei dati al momento della sua creazione.
+                    Per assicurare che l'iteratore non venga influenzato da modifiche all'ADT originale durante la traversa, l'iteratore dovrebbe operare su una <strong>copia (snapshot)</strong> dei dati al momento della sua creazione.
                 </div>
                 <pre><code class="language-java">
 // Parte della classe IntSet
@@ -199,7 +199,7 @@ public class IntSet {
         </article>
         
         <article id="conc-mod-exception" class="content-section">
-            <h3 class.subsection-title">2.2. La `ConcurrentModificationException`</h3>
+            <h3 class="subsection-title">2.2. La `ConcurrentModificationException`</h3>
             <div class="section-content">
                 <p>Se un iteratore non opera su una copia (snapshot) e la collezione sottostante viene modificata durante la traversa, Java (nelle sue collezioni standard) lancia una `ConcurrentModificationException`. Questa è una "fail-fast exception": serve a segnalare immediatamente un problema, non a gestirlo.</p>
                 <div class="warning-box">
@@ -218,7 +218,7 @@ while (it.hasNext()) {
 // perché la lista è stata modificata 'dietro le quinte' dell'iteratore.
                     </code></pre>
                     <p><strong>Soluzione per le collezioni standard:</strong> Usare l'iteratore stesso per le modifiche (`it.remove()`) o modificare la collezione solo dopo aver finito l'iterazione.</p>
-                    <p>Per i nostri iteratori custom, la soluzione del **snapshot** previene questa eccezione, in quanto l'iteratore lavora su una copia isolata.</p>
+                    <p>Per i nostri iteratori custom, la soluzione del <strong>snapshot</strong> previene questa eccezione, in quanto l'iteratore lavora su una copia isolata.</p>
                 </div>
             </div>
         </article>
@@ -226,15 +226,15 @@ while (it.hasNext()) {
         <article id="functional-programming" class="content-section">
             <h2 class="section-title">3. Introduzione alla Programmazione Funzionale in Java</h2>
             <div class="section-content">
-                <p>Con Java 8, sono state introdotte le **Lambda Expressions** e la **Stream API**, che portano elementi di programmazione funzionale nel linguaggio. Questo permette di scrivere codice più conciso, leggibile e potente, specialmente per la manipolazione delle collezioni.</p>
+                <p>Con Java 8, sono state introdotte le <strong>Lambda Expressions</strong> e la <strong>Stream API</strong>, che portano elementi di programmazione funzionale nel linguaggio. Questo permette di scrivere codice più conciso, leggibile e potente, specialmente per la manipolazione delle collezioni.</p>
                 
-                <h3 class.subsection-title">Astrazione del Comportamento: L'Evoluzione</h3>
+                <h3 class="subsection-title">Astrazione del Comportamento: L'Evoluzione</h3>
                 <p>Ricordi il problema di filtrare una lista di `Person` (es. persone maggiorenni)? Abbiamo visto diverse evoluzioni:</p>
                 <ol>
                     <li><strong>Ciclo For Tradizionale:</strong> Logica di filtro mescolata alla logica di traversa.</li>
-                    <li><strong>Metodo `hasLegalAge()` nella classe `Person`:</strong> Migliora l'incapsulamento del *dato*, ma non del *comportamento* di filtro.</li>
+                    <li><strong>Metodo `hasLegalAge()` nella classe `Person`:</strong> Migliora l'incapsulamento del <strong>dato</strong>, ma non del <strong>comportamento</strong> di filtro.</li>
                     <li><strong>Classi Anonime con Interfaccia Custom (`MyTest`):</strong> Il comportamento di filtro viene passato come oggetto, ma la sintassi è verbosa.</li>
-                    <li>**Lambda Expressions (Java 8+):** Il comportamento di filtro (una funzione) viene passato in modo conciso.</li>
+                    <li><strong>Lambda Expressions (Java 8+):</strong> Il comportamento di filtro (una funzione) viene passato in modo conciso.</li>
                 </ol>
                 <pre><code class="language-java">
 // 3. Con Classe Anonima (prima di Java 8)
@@ -272,7 +272,7 @@ for (Person p : people) {
         </article>
 
         <article id="functional-interfaces" class="content-section">
-            <h3 class.subsection-title">3.1. Interfacce Funzionali Standard</h3>
+            <h3 class="subsection-title">3.1. Interfacce Funzionali Standard</h3>
             <div class="section-content">
                 <p>Java 8 ha introdotto un pacchetto (`java.util.function`) con molte interfacce funzionali predefinite, per evitare di doverle scrivere ogni volta:</p>
                 <ul>
@@ -286,12 +286,12 @@ for (Person p : people) {
         </article>
         
         <article id="stream-api" class="content-section">
-            <h3 class.subsection-title">3.2. La Stream API di Java</h3>
+            <h3 class="subsection-title">3.2. La Stream API di Java</h3>
             <div class="section-content">
-                <p>La **Stream API** (introdotta con Java 8) è una delle più grandi innovazioni. Permette di elaborare collezioni di dati in modo dichiarativo e funzionale, in una pipeline di operazioni.</p>
-                <p>Un **Stream** è una sequenza di elementi che supporta operazioni funzionali. Non è una struttura dati; non modifica la sorgente; e le operazioni sono lazy (valutate solo quando necessario).</p>
+                <p>La <strong>Stream API</strong> (introdotta con Java 8) è una delle più grandi innovazioni. Permette di elaborare collezioni di dati in modo dichiarativo e funzionale, in una pipeline di operazioni.</p>
+                <p>Un <strong>Stream</strong> è una sequenza di elementi che supporta operazioni funzionali. Non è una struttura dati; non modifica la sorgente; e le operazioni sono lazy (valutate solo quando necessario).</p>
                 
-                <h3 class.subsection-title">Flusso Tipico di un Stream</h3>
+                <h3 class="subsection-title">Flusso Tipico di un Stream</h3>
                 <ol>
                     <li><strong>Creazione dello Stream:</strong> Da una collezione (`list.stream()`), da un array (`Arrays.stream(array)`), da valori singoli (`Stream.of(...)`).</li>
                     <li><strong>Operazioni Intermedie (Lazy):</strong> Trasformano lo stream in un altro stream. Eseguite solo quando c'è un'operazione terminale. Esempi:
