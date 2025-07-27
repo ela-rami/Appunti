@@ -56,7 +56,7 @@
         <article id="intro-contracts" class="content-section active-section">
             <h2 class="section-title">1. Design by Contract (DbC)</h2>
             <div class="section-content">
-                <p>Il **Design by Contract (DbC)** è una metodologia di progettazione software che vede l'interazione tra i componenti software (classi, metodi) come un **contratto formale**. Questo approccio mira a creare software più robusto, documentato e verificabile.</p>
+                <p>Il <strong>Design by Contract (DbC)</strong> è una metodologia di progettazione software che vede l'interazione tra i componenti software (classi, metodi) come un <strong>contratto formale</strong>. Questo approccio mira a creare software più robusto, documentato e verificabile.</p>
                 <p>Un contratto tra un metodo (il "fornitore") e chi lo chiama (il "cliente") si basa su obblighi e benefici reciproci:</p>
                 <ul>
                     <li><strong>Il Cliente (Chi chiama il metodo):</strong> Ha l'obbligo di rispettare le pre-condizioni. Se lo fa, ha il beneficio di ottenere i risultati promessi dalle post-condizioni.</li>
@@ -64,13 +64,13 @@
                 </ul>
                 <h3 class="subsection-title">Gli Elementi del Contratto di un Metodo</h3>
                 <ol>
-                    <li><strong>Pre-condizioni (`REQUIRES`):</strong> Proprietà che devono essere vere **prima** che il metodo venga eseguito. Sono responsabilità del chiamante. Se una pre-condizione è violata, il comportamento del metodo è indefinito (può fare qualsiasi cosa).</li>
-                    <li><strong>Post-condizioni (`EFFECTS`, `RETURNS`):</strong> Proprietà che il metodo garantisce essere vere **al termine** della sua esecuzione, a patto che le pre-condizioni fossero soddisfatte. Sono responsabilità del metodo.</li>
+                    <li><strong>Pre-condizioni (`REQUIRES`):</strong> Proprietà che devono essere vere <strong>prima</strong> che il metodo venga eseguito. Sono responsabilità del chiamante. Se una pre-condizione è violata, il comportamento del metodo è indefinito (può fare qualsiasi cosa).</li>
+                    <li><strong>Post-condizioni (`EFFECTS`, `RETURNS`):</strong> Proprietà che il metodo garantisce essere vere <strong>al termine</strong> della sua esecuzione, a patto che le pre-condizioni fossero soddisfatte. Sono responsabilità del metodo.</li>
                     <li><strong>Effetti collaterali (`MODIFIES`):</strong> Una parte importante delle post-condizioni che specifica quali oggetti passati come parametro (o lo stato dell'oggetto stesso) vengono modificati.</li>
                 </ol>
                 <div class="note-box">
                     <div class="box-title">💡 Specifica vs. Implementazione</div>
-                    Il contratto definisce il **cosa** (what) fa un metodo, non il **come** (how) lo fa. Questo separa nettamente l'interfaccia pubblica dall'implementazione privata, un pilastro dell'incapsulamento.
+                    Il contratto definisce il <strong>cosa</strong> (what) fa un metodo, non il <strong>come</strong> (how) lo fa. Questo separa nettamente l'interfaccia pubblica dall'implementazione privata, un pilastro dell'incapsulamento.
                 </div>
             </div>
         </article>
@@ -140,8 +140,8 @@
                      </pre>
                  </div>
                  <ul>
-                    <li><strong>Checked Exceptions:</strong> Ereditano da `Exception` ma non da `RuntimeException`. Rappresentano condizioni eccezionali da cui un client **può ragionevolmente riprendersi** (es. `FileNotFoundException`, `IOException`). Il compilatore **obbliga** a gestirle: o con un blocco `try-catch` o dichiarandole nella firma del metodo con `throws`.</li>
-                    <li><strong>Unchecked Exceptions:</strong> Ereditano da `RuntimeException` (o `Error`). Rappresentano **errori di programmazione** (bug) che non dovrebbero accadere in un programma corretto (es. `NullPointerException`, `IndexOutOfBoundsException`). Il compilatore non obbliga a gestirle.</li>
+                    <li><strong>Checked Exceptions:</strong> Ereditano da `Exception` ma non da `RuntimeException`. Rappresentano condizioni eccezionali da cui un client <strong>può ragionevolmente riprendersi</strong> (es. `FileNotFoundException`, `IOException`). Il compilatore <strong>obbliga</strong> a gestirle: o con un blocco `try-catch` o dichiarandole nella firma del metodo con `throws`.</li>
+                    <li><strong>Unchecked Exceptions:</strong> Ereditano da `RuntimeException` (o `Error`). Rappresentano <strong>errori di programmazione</strong> (bug) che non dovrebbero accadere in un programma corretto (es. `NullPointerException`, `IndexOutOfBoundsException`). Il compilatore non obbliga a gestirle.</li>
                  </ul>
                  <h3 class="subsection-title">Come si usano nei Contratti</h3>
                  <p>Le eccezioni sostituiscono la clausola `REQUIRES` nel contratto. Un metodo non dice più "richiedo che `a` non sia nullo", ma "se `a` è nullo, lancio `NullPointerException`".</p>
@@ -186,16 +186,16 @@ public static int search(int[] array, int element) throws NoSuchElementException
         <article id="assertions" class="content-section">
             <h2 class="section-title">5. Le Asserzioni in Java</h2>
             <div class="section-content">
-                <p>Le asserzioni sono uno strumento di debugging per il programmatore. Servono a verificare le **assunzioni** che il programmatore fa sulla correttezza del proprio codice.</p>
+                <p>Le asserzioni sono uno strumento di debugging per il programmatore. Servono a verificare le <strong>assunzioni</strong> che il programmatore fa sulla correttezza del proprio codice.</p>
                 <h3 class="subsection-title">Sintassi e Comportamento</h3>
-                <p>Si scrivono con la parola chiave `assert`.</p>
+                <p>Si scrivono con la parola chiave <code>assert</code>.</p>
                 <pre><code class="language-java">
 assert (x > 0) : "x deve essere positivo, ma è " + x;
                 </code></pre>
-                <p>Se la condizione è `true`, non succede nulla. Se è `false`, viene lanciato un `AssertionError`, che tipicamente causa l'arresto del programma. Fondamentalmente, le asserzioni possono essere **disabilitate** dalla JVM (e lo sono di default). Quando disabilitate, non hanno alcun impatto sulle prestazioni.</p>
+                <p>Se la condizione è <code>true</code>, non succede nulla. Se è <code>false</code>, viene lanciato un <code>AssertionError</code>, che tipicamente causa l'arresto del programma. Fondamentalmente, le asserzioni possono essere <strong>disabilitate</strong> dalla JVM (e lo sono di default). Quando disabilitate, non hanno alcun impatto sulle prestazioni.</p>
                 
                 <h3 class="subsection-title">Quando Usarle?</h3>
-                <p>Le asserzioni sono perfette per verificare le "promesse" interne al codice, ovvero che il *vostro* codice stia funzionando come previsto.</p>
+                <p>Le asserzioni sono perfette per verificare le "promesse" interne al codice, ovvero che il <strong>vostro codice</strong> stia funzionando come previsto.</p>
                 <ul>
                     <li><strong>Invarianti di Rappresentazione (RI):</strong> Per controllare che lo stato interno di un oggetto sia sempre valido all'inizio e alla fine di un metodo pubblico.</li>
                     <li><strong>Post-condizioni:</strong> Per verificare che un metodo abbia prodotto il risultato atteso.</li>
@@ -224,8 +224,8 @@ private void setBalance(double newBalance) {
                 <div class="clarification-box">
                     <div class="box-title">⚖️ Regola Decisionale</div>
                     <ul>
-                        <li>Usa le <strong>Eccezioni</strong> per violazioni del contratto di metodi <strong>pubblici</strong>. Sono errori che un *client* può commettere. Devono funzionare anche in produzione.</li>
-                        <li>Usa le <strong>Asserzioni</strong> per verificare assunzioni sul tuo codice interno. Sono *bug* che tu, come programmatore, devi risolvere. Possono (e dovrebbero) essere disattivate in produzione.</li>
+                        <li>Usa le <strong>Eccezioni</strong> per violazioni del contratto di metodi <strong>pubblici</strong>. Sono errori che un <strong>client</strong> può commettere. Devono funzionare anche in produzione.</li>
+                        <li>Usa le <strong>Asserzioni</strong> per verificare assunzioni sul tuo codice interno. Sono <strong>bug</strong> che tu, come programmatore, devi risolvere. Possono (e dovrebbero) essere disattivate in produzione.</li>
                     </ul>
                 </div>
                 <p>In pratica: un'eccezione dice "Tu (client) hai sbagliato a usare il mio codice". Un'asserzione fallita dice "Io (programmatore) ho sbagliato a scrivere il mio codice".</p>

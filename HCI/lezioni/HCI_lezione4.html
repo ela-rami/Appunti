@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/common.css">
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         article { display: block !important; }
         section { margin-bottom: 3rem; }
@@ -32,6 +33,7 @@
             <li><a href="#potenzialita-gestures" class="sidebar-link">2.1. Le Potenzialità delle Gestures</a></li>
             <li><a href="#puntamento-3d" class="sidebar-link">3. Puntamento e Tracciamento in 3D</a></li>
             <li><a href="#gradi-liberta" class="sidebar-link">3.1. I 6 Gradi di Libertà (6DoF)</a></li>
+            <li><a href="#legge-fitts" class="sidebar-link">4. Modelli Predittivi: La Legge di Fitts</a></li>
         </ul>
     </nav>
 
@@ -149,6 +151,34 @@
                     <p>Dispositivi come i controller della Realtà Virtuale o i sistemi di motion capture sono in grado di tracciare tutti e 6 questi gradi di libertà, permettendo una mappatura molto più fedele e naturale dei movimenti dell'utente nello spazio virtuale.</p>
                 </div>
             </section>
+
+            <section id="legge-fitts">
+                <h2 class="section-title">4. Modelli Predittivi: La Legge di Fitts</h2>
+                <div class="section-content">
+                    <p>Oltre a descrivere come funzionano i dispositivi di puntamento, possiamo anche prevedere la performance umana nell'utilizzarli. La <strong>Legge di Fitts</strong> è un modello predittivo fondamentale in HCI che descrive il tempo necessario per raggiungere un'area target con un movimento rapido, come spostare un cursore su un pulsante.</p>
+                    <p>La legge afferma che il tempo per raggiungere un target (<strong>T</strong>) dipende dalla <strong>distanza</strong> dal target (<strong>D</strong>) e dalla <strong>larghezza</strong> del target (<strong>W</strong>). In parole semplici, ci vuole più tempo per raggiungere un target lontano e piccolo, e meno tempo per raggiungere un target vicino e grande.</p>
+                     <div class="clarification-box">
+                        <strong>Formula della Legge di Fitts:</strong>
+                        <p>$$ T = a + b \log_2 \left( \frac{D}{W} + 1 \right) $$</p>
+                        <ul>
+                            <li><strong>T:</strong> Tempo di movimento.</li>
+                            <li><strong>a, b:</strong> Costanti empiriche che dipendono dal dispositivo di input.</li>
+                            <li><strong>D:</strong> Distanza dall'inizio del movimento al centro del target.</li>
+                            <li><strong>W:</strong> Larghezza del target misurata lungo l'asse del movimento.</li>
+                        </ul>
+                        <p>Il termine `log₂(D/W + 1)` è chiamato <strong>Indice di Difficoltà (ID)</strong> e quantifica la difficoltà del task di puntamento.</p>
+                    </div>
+                    <h4 class="subsubsection-title">Implicazioni Pratiche per il Design</h4>
+                    <p>La Legge di Fitts fornisce una base scientifica per molte buone pratiche di design:</p>
+                    <ul>
+                        <li><strong>Rendere i target grandi:</strong> Pulsanti, icone e altri elementi cliccabili dovrebbero essere di dimensioni sufficientemente grandi per essere selezionati facilmente e rapidamente.</li>
+                        <li><strong>Minimizzare le distanze:</strong> I controlli correlati a un'azione dovrebbero apparire vicini all'oggetto su cui si sta agendo (es. menù contestuali che appaiono vicino al cursore).</li>
+                        <li><strong>Sfruttare i bordi e gli angoli dello schermo:</strong> I bordi e gli angoli di un'interfaccia hanno una "larghezza infinita" in una direzione. È impossibile "mancare" un target posizionato in un angolo, perché il cursore si ferma lì. Per questo motivo, il menù Start di Windows o il menù Apple su macOS sono posizionati negli angoli per essere estremamente facili da raggiungere.</li>
+                        <li><strong>Menù Radiali vs. Lineari:</strong> In un menù radiale (o "pie menu"), tutte le opzioni sono alla stessa breve distanza dal centro. Questo li rende, in media, più veloci da usare rispetto ai classici menù a tendina lineari, dove l'ultima voce è molto più distante della prima.</li>
+                    </ul>
+                </div>
+            </section>
+
         </article>
     </main>
 

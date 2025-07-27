@@ -31,6 +31,9 @@
             <li><a href="#visione-centrale-periferica" class="sidebar-link">2. Visione Centrale vs. Visione Periferica</a></li>
             <li><a href="#implicazioni-design" class="sidebar-link">2.1. Implicazioni per il Design delle Interfacce</a></li>
             <li><a href="#angolo-cieco" class="sidebar-link">3. L'Angolo Cieco e l'Elaborazione Cerebrale</a></li>
+            <li><a href="#colore-daltonismo" class="sidebar-link">4. Implicazioni del Colore e Daltonismo</a></li>
+            <li><a href="#tipi-icone" class="sidebar-link">5. Classificazione delle Icone e dei Simboli</a></li>
+            <li><a href="#leggi-gestalt" class="sidebar-link">6. Le Leggi della Gestalt nell'Organizzazione Visiva</a></li>
         </ul>
     </nav>
 
@@ -127,6 +130,97 @@
                     <p><strong>Perché non percepiamo un "buco" nel nostro campo visivo?</strong></p>
                     <p>Perché il nostro cervello "imbroglia". Svolge un'operazione di <strong>completamento automatico</strong>, riempiendo l'area mancante con le informazioni visive circostanti (colore, texture). È un processo simile a quello degli algoritmi di "content-aware fill" in programmi come Photoshop, ma che il nostro cervello esegue in tempo reale e in modo del tutto inconscio.</p>
                     <p>Questo fenomeno ci insegna una lezione fondamentale: ciò che "vediamo" non è una riproduzione fedele della realtà catturata dalla retina, ma una <strong>ricostruzione attiva e interpretata</strong> dal nostro cervello. Il cervello costantemente completa, corregge e dà un senso ai dati sensoriali grezzi e imperfetti che riceve.</p>
+                </div>
+            </section>
+
+            <section id="colore-daltonismo">
+                <h2 class="section-title">4. Implicazioni del Colore e Daltonismo</h2>
+                <div class="section-content">
+                    <p>La centralità dei coni nella percezione dei colori ha un'implicazione di design fondamentale, specialmente quando si considera l'accessibilità per persone con daltonismo (cecità ai colori). Il daltonismo, che colpisce circa l'8% della popolazione maschile, rende difficile o impossibile distinguere tra certi colori, più comunemente il rosso e il verde.</p>
+                    <p>Da questo deriva una delle regole più importanti del design accessibile:</p>
+                    <div class="clarification-box">
+                        <strong>Principio della Codifica Ridondante (Redundant Coding)</strong>
+                        <p>Non usare <strong>mai il colore come unico canale</strong> per veicolare un'informazione critica. L'informazione deve essere sempre comunicata attraverso almeno due canali diversi (es. colore + forma, colore + testo, colore + pattern).</p>
+                    </div>
+                    <div class="exercise-box">
+                        <strong>Esempio: Campi di un Form</strong>
+                        <p>Un errore di design comune è indicare i campi obbligatori o errati di un form usando solo il colore rosso.</p>
+                        <ul>
+                            <li><strong>Design NON accessibile:</strong> Un campo con bordo rosso per indicare un errore. Un utente con daltonismo rosso-verde potrebbe non percepire alcuna differenza rispetto a un campo con bordo nero o verde.</li>
+                            <li><strong>Design ACCESSIBILE:</strong> Si usa una codifica ridondante. Il campo errato ha:
+                                <ol>
+                                    <li>Un bordo rosso (canale colore).</li>
+                                    <li>Un'icona a forma di "X" o di punto esclamativo accanto (canale forma).</li>
+                                    <li>Un messaggio di testo sotto che spiega l'errore (canale testuale).</li>
+                                </ol>
+                            In questo modo, anche se l'utente non percepisce il colore, l'informazione critica viene comunque trasmessa dalla forma e dal testo.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tipi-icone">
+                <h2 class="section-title">5. Classificazione delle Icone e dei Simboli</h2>
+                <div class="section-content">
+                    <p>Le icone sono un elemento cruciale delle interfacce grafiche, ma non tutte comunicano allo stesso modo. La loro efficacia dipende da quanto sia facile per l'utente interpretare la relazione tra l'immagine e il suo significato. Possiamo classificarle lungo un continuum che va dalla rappresentazione diretta a quella puramente convenzionale.</p>
+                    <ul>
+                        <li>
+                            <strong>Rassomiglianti (Resemblance):</strong> Sono le icone più dirette. Rappresentano in modo letterale l'oggetto o il concetto a cui si riferiscono.
+                            <br><em>Esempio: l'icona di una nuvola per indicare il meteo nuvoloso.</em>
+                        </li>
+                        <li>
+                            <strong>Esemplari (Exemplar):</strong> Rappresentano un esempio tipico che appartiene a una categoria più ampia.
+                            <br><em>Esempio: l'icona di forchetta e coltello per indicare la categoria "Ristoranti".</em>
+                        </li>
+                        <li>
+                            <strong>Simboliche (Symbolic):</strong> Rappresentano un concetto astratto attraverso un'analogia condivisa culturalmente.
+                            <br><em>Esempio: un'icona a forma di bicchiere rotto per indicare "Fragile".</em>
+                        </li>
+                        <li>
+                            <strong>Arbitrarie (Arbitrary):</strong> La relazione tra icona e significato è puramente convenzionale e deve essere appresa.
+                            <br><em>Esempio: il triangolo per "Play".</em>
+                        </li>
+                    </ul>
+                    <div class="clarification-box">
+                        <strong>Un Continuum, non Categorie Rigide</strong>
+                        <p>Molte icone si trovano a metà strada tra una classificazione e l'altra. L'icona di un floppy disk per "Salva" era originariamente rassomigliante, ma per le nuove generazioni è diventata quasi completamente arbitraria.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="leggi-gestalt">
+                <h2 class="section-title">6. Le Leggi della Gestalt nell'Organizzazione Visiva</h2>
+                <div class="section-content">
+                    <p>Il nostro cervello non percepisce gli stimoli visivi come un insieme di elementi separati, ma tende a organizzarli in gruppi e pattern significativi. La psicologia della Gestalt ha identificato una serie di principi (o "leggi") che descrivono come avviene questa organizzazione automatica. Comprendere queste leggi è fondamentale per progettare interfacce chiare e intuitive.</p>
+                    
+                    <h4 class="subsubsection-title">Legge della Prossimità</h4>
+                    <p>Gli elementi che sono <strong>vicini</strong> tra loro nello spazio vengono percepiti come un unico gruppo. Questa è la legge più potente per l'organizzazione dei layout.</p>
+                    <div class="exercise-box">
+                        <strong>Esempio: Pulsanti di un'interfaccia</strong>
+                        <p>In un lettore musicale, i pulsanti "Play", "Pausa", "Avanti" e "Indietro" vengono raggruppati vicini perché sono funzionalmente correlati (controllo della riproduzione). Il pulsante "Volume" o "Impostazioni" viene posizionato più lontano, perché appartiene a un gruppo funzionale diverso. Lo spazio bianco è lo strumento principale per applicare questa legge.</p>
+                    </div>
+
+                    <h4 class="subsubsection-title">Legge della Somiglianza</h4>
+                    <p>Gli elementi che sono <strong>simili</strong> per forma, colore, dimensione o orientamento vengono percepiti come appartenenti allo stesso gruppo, anche se non sono vicini.</p>
+                     <div class="exercise-box">
+                        <strong>Esempio: Link in un testo</strong>
+                        <p>All'interno di un paragrafo, tutti i link sono tipicamente dello stesso colore blu e sottolineati. La loro somiglianza visiva ci fa capire immediatamente che condividono la stessa funzione (sono tutti cliccabili), distinguendoli dal resto del testo nero.</p>
+                    </div>
+
+                    <h4 class="subsubsection-title">Legge della Chiusura</h4>
+                    <p>La nostra mente tende a <strong>completare le forme incomplete o aperte</strong> per percepirle come figure intere e chiuse. Il cervello "riempie i vuoti" per dare un senso alla forma.</p>
+                     <div class="exercise-box">
+                        <strong>Esempio: I Contenitori Impliciti</strong>
+                        <p>Un gruppo di elementi circondato da un bordo rettangolare viene percepito come un'unità. Grazie alla legge della chiusura, non è necessario disegnare il bordo completo. È sufficiente disegnare solo gli angoli del rettangolo: la nostra mente completerà la forma e percepirà comunque gli elementi interni come raggruppati.</p>
+                    </div>
+
+                    <h4 class="subsubsection-title">Legge della Continuità (o della Buona Continuazione)</h4>
+                    <p>L'occhio umano tende a seguire il percorso più semplice e fluido. Elementi disposti lungo una linea o una curva vengono percepiti come un'unità continua piuttosto che come elementi separati.</p>
+                     <div class="exercise-box">
+                        <strong>Esempio: Menù di Navigazione</strong>
+                        <p>Le voci di un menù di navigazione orizzontale (Home, Chi Siamo, Contatti) vengono percepite come un unico gruppo perché i nostri occhi le seguono naturalmente lungo una linea retta da sinistra a destra.</p>
+                    </div>
                 </div>
             </section>
 

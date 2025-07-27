@@ -33,6 +33,8 @@
             <li><a href="#definizione-presenza" class="sidebar-link">3.1. Presenza: la Sensazione di "Essere Lì"</a></li>
             <li><a href="#design-emozionale" class="sidebar-link">4. Il Design Emozionale di Norman</a></li>
             <li><a href="#tre-livelli" class="sidebar-link">4.1. I Tre Livelli del Cervello Emotivo</a></li>
+            <li><a href="#modello-tam" class="sidebar-link">5. Il Modello di Accettazione della Tecnologia (TAM)</a></li>
+            <li><a href="#quattro-piaceri" class="sidebar-link">6. I Quattro Piaceri di Jordan</a></li>
         </ul>
     </nav>
 
@@ -139,6 +141,61 @@
                         </li>
                     </ol>
                     <p>Un prodotto di successo, quindi, non solo funziona bene (comportamentale), ma è anche attraente (viscerale) e ha un significato per noi (riflessivo).</p>
+                </div>
+            </section>
+
+            <section id="modello-tam">
+                <h2 class="section-title">5. Il Modello di Accettazione della Tecnologia (TAM)</h2>
+                <div class="section-content">
+                    <p>Oltre a valutare l'esperienza d'uso momentanea, è fondamentale capire quali fattori spingono un utente ad <strong>adottare e utilizzare nel tempo</strong> una nuova tecnologia. Il <strong>Technology Acceptance Model (TAM)</strong> è uno dei modelli teorici più influenti che cerca di prevedere l'accettazione di un sistema da parte degli utenti.</p>
+                    <p>Il modello, nella sua forma originale, sostiene che l'intenzione di un utente di usare una tecnologia è determinata principalmente da due credenze chiave:</p>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+                        graph TD
+                            PU(Perceived Usefulness<br><b>Utilità Percepita</b>) --> IU(Intention to Use<br><b>Intenzione d'Uso</b>)
+                            PEOU(Perceived Ease of Use<br><b>Facilità d'Uso Percepita</b>) --> IU
+                            PEOU --> PU
+                            IU --> AU(Actual System Use<br><b>Uso Effettivo del Sistema</b>)
+                        </pre>
+                    </div>
+                    <ol>
+                        <li>
+                            <strong>Utilità Percepita (Perceived Usefulness):</strong> La convinzione soggettiva che l'uso di un determinato sistema <strong>migliorerà la propria performance lavorativa o la propria vita</strong>. In pratica, l'utente si chiede: "Questo strumento mi serve davvero? Mi aiuterà a raggiungere i miei obiettivi in modo più efficace?".
+                        </li>
+                        <li>
+                            <strong>Facilità d'Uso Percepita (Perceived Ease of Use):</strong> La convinzione soggettiva che l'uso di un determinato sistema sarà <strong>privo di sforzo</strong>. L'utente si chiede: "Sarò in grado di usare questo strumento? Imparare a usarlo sarà complicato?". Questo concetto è strettamente legato all'usabilità classica.
+                        </li>
+                    </ol>
+                    <p>Secondo il modello TAM, la facilità d'uso percepita influenza direttamente sia l'utilità percepita (se uno strumento è facile da usare, è percepito anche come più utile) sia l'intenzione d'uso. Insieme, queste due credenze determinano l'intenzione comportamentale dell'utente, che a sua volta è il miglior predittore dell'uso effettivo del sistema.</p>
+                     <div class="clarification-box">
+                        <strong>Implicazioni per il Design</strong>
+                        <p>Il TAM ci insegna che non basta creare un sistema che sia facile da usare (alta usabilità). Se gli utenti non percepiscono chiaramente il suo <strong>valore aggiunto</strong> e la sua utilità per i loro scopi, semplicemente non lo adotteranno. Un buon design deve quindi non solo essere usabile, ma anche comunicare efficacemente il proprio valore all'utente.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="quattro-piaceri">
+                <h2 class="section-title">6. I Quattro Piaceri di Jordan</h2>
+                <div class="section-content">
+                    <p>Per comprendere meglio il concetto di "piacevolezza" nella User Experience, il designer Patrick Jordan ha proposto un framework che scompone il piacere derivante dall'interazione con un prodotto in quattro tipologie distinte. Questo modello aiuta a progettare esperienze che siano gratificanti a più livelli.</p>
+                    <ol>
+                        <li>
+                            <strong>Fisio-Piacere (Physio-Pleasure):</strong> È il piacere derivato dai **sensi**. Riguarda l'aspetto, il suono, l'odore, il gusto e le sensazioni tattili di un prodotto. È legato al livello viscerale del design di Norman.
+                            <br><em>Esempio: la sensazione tattile piacevole di un materiale liscio e freddo come l'alluminio, il suono soddisfacente del "click" di un pulsante, un'interfaccia visivamente armoniosa.</em>
+                        </li>
+                        <li>
+                            <strong>Socio-Piacere (Socio-Pleasure):</strong> È il piacere derivato dalle **relazioni con gli altri**. Riguarda i prodotti che facilitano l'interazione sociale o che comunicano uno status all'interno di un gruppo.
+                            <br><em>Esempio: i social network che ci permettono di sentirci connessi con amici e familiari; possedere un prodotto di un brand esclusivo che ci fa sentire parte di una community desiderabile.</em>
+                        </li>
+                        <li>
+                            <strong>Psico-Piacere (Psycho-Pleasure):</strong> È il piacere derivato dall'**uso del prodotto** e dal completamento di un compito. Riguarda l'efficacia, l'efficienza e l'assenza di frustrazione. Corrisponde al livello comportamentale del design di Norman e all'usabilità classica.
+                            <br><em>Esempio: la soddisfazione di completare un'attività complessa in modo fluido e senza errori grazie a un'interfaccia ben progettata; la sensazione di competenza che deriva dall'usare uno strumento che "funziona e basta".</em>
+                        </li>
+                        <li>
+                            <strong>Ideo-Piacere (Ideo-Pleasure):</strong> È il piacere derivato dai **valori e dalle aspirazioni** che un prodotto rappresenta. Riguarda l'etica, l'estetica e la coerenza del prodotto con la visione del mondo dell'utente. È legato al livello riflessivo del design di Norman.
+                            <br><em>Esempio: il piacere di utilizzare un prodotto realizzato con materiali sostenibili e riciclati (come il Fairphone), perché si allinea ai nostri valori ambientalisti; l'apprezzamento per un prodotto che incarna principi di design minimalista ed elegante.</em>
+                        </li>
+                    </ol>
                 </div>
             </section>
 
