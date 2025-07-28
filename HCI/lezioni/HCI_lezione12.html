@@ -25,20 +25,51 @@
         </div>
         <h2>Indice Argomenti</h2>
         <ul>
-            <li><a href="#analisi-task" class="sidebar-link">1. L'Analisi dei Task (Task Analysis)</a></li>
-            <li><a href="#personas" class="sidebar-link">2. Le Personas: Dare un Volto agli Utenti</a></li>
-            <li><a href="#perche-personas" class="sidebar-link">2.1. Perché Usare le Personas?</a></li>
-            <li><a href="#creare-personas" class="sidebar-link">2.2. Come si Creano le Personas?</a></li>
-            <li><a href="#scenari" class="sidebar-link">3. Gli Scenari: Raccontare l'Interazione</a></li>
-            <li><a href="#storyboard" class="sidebar-link">3.1. Dallo Scenario allo Storyboard</a></li>
-            <li><a href="#esempio-combinato" class="sidebar-link">3.2. Esempio Pratico Combinato</a></li>
+            <li><a href="#ciclo-ucd" class="sidebar-link">1. Il Ciclo di Vita del Design Centrato sull'Utente (UCD)</a></li>
+            <li><a href="#analisi-task" class="sidebar-link">2. L'Analisi dei Task (Task Analysis)</a></li>
+            <li><a href="#personas" class="sidebar-link">3. Le Personas: Dare un Volto agli Utenti</a></li>
+            <li><a href="#perche-personas" class="sidebar-link">3.1. Perché Usare le Personas?</a></li>
+            <li><a href="#creare-personas" class="sidebar-link">3.2. Come si Creano le Personas?</a></li>
+            <li><a href="#scenari" class="sidebar-link">4. Gli Scenari: Raccontare l'Interazione</a></li>
+            <li><a href="#storyboard" class="sidebar-link">4.1. Dallo Scenario allo Storyboard</a></li>
+            <li><a href="#esempio-combinato" class="sidebar-link">4.2. Esempio Pratico Combinato</a></li>
+            <li><a href="#stakeholder-analysis" class="sidebar-link">5. Analisi degli Stakeholder</a></li>
         </ul>
     </nav>
 
     <main>
         <article>
+
+            <section id="ciclo-ucd">
+                <h2 class="section-title">1. Il Ciclo di Vita del Design Centrato sull'Utente (UCD)</h2>
+                <div class="section-content">
+                    <p>Prima di analizzare i singoli strumenti, è fondamentale comprendere il processo di design che li contiene. Tutta la progettazione moderna in HCI si basa su un modello iterativo noto come <strong>Design Centrato sull'Utente (User-Centered Design - UCD)</strong>. Questo approccio mette l'utente al centro di ogni fase dello sviluppo e si contrappone al vecchio modello "a cascata" (waterfall).</p>
+                    <p>Il ciclo UCD si basa su quattro fasi principali, collegate da un ciclo di feedback che permette di raffinare continuamente il prodotto:</p>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+                        graph TD
+                            A(1. Analisi e Progettazione) --> B(2. Prototipazione);
+                            B --> C(3. Valutazione);
+                            C --> D{Il prototipo soddisfa i requisiti?};
+                            D -- No, servono modifiche --> B;
+                            D -- Sì, è valido --> E(4. Implementazione Finale);
+                        </pre>
+                    </div>
+                    <ul>
+                        <li><strong>Analisi e Progettazione:</strong> Si definiscono gli obiettivi e si comprendono gli utenti e i loro bisogni (tramite Personas, Scenari, etc.).</li>
+                        <li><strong>Prototipazione:</strong> Si costruisce una versione semplificata e testabile del sistema.</li>
+                        <li><strong>Valutazione:</strong> Si testa il prototipo con utenti reali o esperti per identificare i problemi.</li>
+                        <li><strong>Implementazione:</strong> Solo quando la valutazione dà esito positivo, si procede allo sviluppo del prodotto finale.</li>
+                    </ul>
+                    <div class="note-box">
+                        <strong>Il Cuore del Processo: l'Iterazione</strong>
+                        <p>La freccia che torna dalla "Valutazione" alla "Prototipazione" è il cuore del modello. Significa che il design è un processo ciclico di miglioramento continuo. Identificare un problema in fase di valutazione non è un fallimento, ma un successo, perché permette di correggerlo a un costo bassissimo (su un prototipo) prima che venga implementato nel codice finale.</p>
+                    </div>
+                </div>
+            </section>
+
             <section id="analisi-task">
-                <h2 class="section-title">1. L'Analisi dei Task (Task Analysis)</h2>
+                <h2 class="section-title">2. L'Analisi dei Task (Task Analysis)</h2>
                 <div class="section-content">
                     <p>Prima di progettare un'interfaccia, dobbiamo capire in profondità <strong>cosa</strong> gli utenti vogliono fare con il nostro sistema e <strong>come</strong> lo fanno attualmente. Questo processo di indagine è chiamato <strong>Task Analysis</strong>.</p>
                     <p>L'obiettivo è scomporre le attività complesse degli utenti in task e sotto-task più semplici, identificando gli obiettivi, i passaggi necessari e i potenziali problemi. Per fare questo, si usano diverse tecniche:</p>
@@ -52,7 +83,7 @@
             </section>
 
             <section id="personas">
-                <h2 class="section-title">2. Le Personas: Dare un Volto agli Utenti</h2>
+                <h2 class="section-title">3. Le Personas: Dare un Volto agli Utenti</h2>
                 <div class="section-content">
                     <p>Una <strong>Persona</strong> è un archetipo, un personaggio fittizio ma realistico, creato per rappresentare un intero gruppo di utenti con caratteristiche, obiettivi e comportamenti simili. Invece di progettare per un generico "utente", si progetta per "Maria, la studentessa di 22 anni che ha poco tempo e usa principalmente lo smartphone".</p>
                     <p>Una scheda di una Persona tipicamente include:</p>
@@ -68,7 +99,7 @@
             </section>
             
             <section id="perche-personas">
-                <h3 class="subsection-title">2.1. Perché Usare le Personas?</h3>
+                <h3 class="subsection-title">3.1. Perché Usare le Personas?</h3>
                 <div class="section-content">
                     <p>Le Personas sono uno strumento di design estremamente efficace per diversi motivi:</p>
                     <ul>
@@ -80,7 +111,7 @@
             </section>
 
             <section id="creare-personas">
-                <h3 class="subsection-title">2.2. Come si Creano le Personas?</h3>
+                <h3 class="subsection-title">3.2. Come si Creano le Personas?</h3>
                 <div class="section-content">
                     <p>Le Personas non sono inventate di sana pianta. Vengono create sulla base dei <strong>dati reali</strong> raccolti durante la fase di ricerca e analisi (interviste, questionari, dati analitici). Il processo prevede di identificare dei pattern di comportamento e degli obiettivi comuni tra gli utenti e di raggrupparli in "cluster". Ogni Persona rappresenta uno di questi cluster.</p>
                     <div class="note-box">
@@ -96,7 +127,7 @@
             </section>
             
             <section id="scenari">
-                <h2 class="section-title">3. Gli Scenari: Raccontare l'Interazione</h2>
+                <h2 class="section-title">4. Gli Scenari: Raccontare l'Interazione</h2>
                 <div class="section-content">
                     <p>Uno <strong>scenario</strong> è una breve storia che descrive come una Persona utilizza un sistema per raggiungere un suo obiettivo in un contesto specifico. È una narrazione, non un elenco di funzionalità. Lo scenario si concentra sul <strong>perché</strong> e sul <strong>cosa</strong>, lasciando il <strong>come</strong> (i dettagli dell'interfaccia) volutamente vago in questa fase iniziale.</p>
                     <p>Gli scenari aiutano il team a esplorare il flusso dell'interazione dal punto di vista dell'utente e a identificare i passaggi chiave e le possibili difficoltà.</p>
@@ -104,7 +135,7 @@
             </section>
 
             <section id="storyboard">
-                <h3 class="subsection-title">3.1. Dallo Scenario allo Storyboard</h3>
+                <h3 class="subsection-title">4.1. Dallo Scenario allo Storyboard</h3>
                 <div class="section-content">
                     <p>Uno <strong>storyboard</strong> è la rappresentazione visiva di uno scenario. Proprio come i fumetti o le sceneggiature dei film, uno storyboard scompone la storia in una sequenza di vignette. Ogni vignetta illustra un momento chiave dell'interazione, mostrando il contesto, le azioni dell'utente e la risposta del sistema.</p>
                     <p>Lo <strong>storyboard</strong> è uno strumento potentissimo perché:</p>
@@ -117,7 +148,7 @@
             </section>
 
             <section id="esempio-combinato">
-                <h3 class="subsection-title">3.2. Esempio Pratico Combinato</h3>
+                <h3 class="subsection-title">4.2. Esempio Pratico Combinato</h3>
                 <div class="section-content">
                      <div class="clarification-box">
                         <strong>Progettare un'app per monitorare il consumo energetico.</strong>
@@ -136,6 +167,32 @@
                         </ol>
                     </div>
                     <p>Questo processo narrativo e visivo permette al team di definire chiaramente le funzionalità necessarie (notifiche, monitoraggio per stanza, controllo remoto) e di progettare un flusso di interazione che risponda direttamente agli obiettivi e al contesto della Persona.</p>
+                </div>
+            </section>
+
+            <section id="stakeholder-analysis">
+                <h2 class="section-title">5. Analisi degli Stakeholder</h2>
+                <div class="section-content">
+                    <p>Prima di poter creare delle Personas rappresentative, è fondamentale identificare tutte le persone che hanno un "interesse" (in inglese, *stake*) nel sistema che stiamo progettando. Questi individui o gruppi sono chiamati <strong>stakeholder</strong>. L'analisi degli stakeholder ci permette di capire l'intero ecosistema umano attorno al prodotto e di non trascurare bisogni e punti di vista cruciali.</p>
+                    <p>Gli stakeholder vengono tipicamente classificati in tre categorie in base al loro grado di interazione con il sistema:</p>
+                    <ul>
+                        <li>
+                            <strong>Stakeholder Primari (o Utenti Diretti):</strong> Sono le persone che <strong>interagiscono direttamente</strong> con il sistema. Sono il target principale del design dell'interfaccia.
+                            <br><em>Esempio (pompa a infusione): l'infermiere che imposta la terapia e il paziente che subisce il trattamento.</em>
+                        </li>
+                        <li>
+                            <strong>Stakeholder Secondari (o Utenti Indiretti):</strong> Sono persone che non usano il sistema in prima persona, ma che ne utilizzano l'<strong>output</strong> o ne forniscono l'<strong>input</strong> attraverso un intermediario (l'utente primario).
+                            <br><em>Esempio: il medico che prescrive la terapia (fornisce l'input) e il farmacista che prepara il farmaco.</em>
+                        </li>
+                        <li>
+                            <strong>Stakeholder Terziari:</strong> Sono persone che non interagiscono con il sistema, ma che sono <strong>influenzate</strong> dalle sue conseguenze o hanno un interesse nel suo successo o fallimento.
+                            <br><em>Esempio: il direttore dell'ospedale (interessato all'efficienza e alla riduzione degli errori), i tecnici che si occupano della manutenzione, i parenti del paziente, gli enti regolatori.</em>
+                        </li>
+                    </ul>
+                     <div class="clarification-box">
+                        <strong>Perché questa distinzione è importante?</strong>
+                        <p>Un design che considera solo gli utenti primari rischia di fallire. Se il sistema è usabile per l'infermiere (primario) ma rende difficile per il medico (secondario) prescrivere la terapia in modo corretto, il processo complessivo sarà inefficiente e rischioso. Un'analisi completa degli stakeholder garantisce che vengano presi in considerazione i bisogni di tutto l'ecosistema.</p>
+                    </div>
                 </div>
             </section>
             

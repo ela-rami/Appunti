@@ -25,20 +25,59 @@
         </div>
         <h2>Indice Argomenti</h2>
         <ul>
-            <li><a href="#triangolo-interazione" class="sidebar-link">1. Il Triangolo dell'Interazione</a></li>
-            <li><a href="#importanza-contesto" class="sidebar-link">1.1. L'Importanza Cruciale del Contesto</a></li>
-            <li><a href="#casi-critici" class="sidebar-link">2. Casi di Studio: Quando l'HCI Fallisce</a></li>
-            <li><a href="#caso-three-mile-island" class="sidebar-link">2.1. Incidente Nucleare di Three Mile Island (1979)</a></li>
-            <li><a href="#caso-therac-25" class="sidebar-link">2.2. L'Incidente del Therac-25 (1985-1987)</a></li>
-            <li><a href="#caso-airbus-a320" class="sidebar-link">2.3. Incidenti dell'Airbus A320</a></li>
-            <li><a href="#caso-pompa-infusione" class="sidebar-link">2.4. Le Pompe a Infusione Medicali</a></li>
+            <li><a href="#definizioni-hci" class="sidebar-link">1. Le Diverse Facce dell'HCI</a></li>
+            <li><a href="#influenza-reciproca" class="sidebar-link">2. Tecnologia e Società: Un'Influenza Reciproca</a></li>
+            <li><a href="#impatto-sviluppo" class="sidebar-link">3. L'Impatto sullo Sviluppo Software</a></li>
+            <li><a href="#triangolo-interazione" class="sidebar-link">4. Il Triangolo dell'Interazione</a></li>
+            <li><a href="#importanza-contesto" class="sidebar-link">4.1. L'Importanza Cruciale del Contesto</a></li>
+            <li><a href="#casi-critici" class="sidebar-link">5. Casi di Studio: Quando l'HCI Fallisce</a></li>
+            <li><a href="#caso-three-mile-island" class="sidebar-link">5.1. Incidente Nucleare di Three Mile Island (1979)</a></li>
+            <li><a href="#caso-uss-vincennes" class="sidebar-link">5.2. L'Incidente della USS Vincennes (1988)</a></li>
+            <li><a href="#caso-therac-25" class="sidebar-link">5.3. L'Incidente del Therac-25 (1985-1987)</a></li>
+            <li><a href="#caso-airbus-a320" class="sidebar-link">5.4. Incidenti dell'Airbus A320</a></li>
+            <li><a href="#caso-pompa-infusione" class="sidebar-link">5.5. Le Pompe a Infusione Medicali</a></li>
         </ul>
     </nav>
 
     <main>
         <article>
+
+            <section id="definizioni-hci">
+                <h2 class="section-title">1. Le Diverse Facce dell'HCI</h2>
+                <div class="section-content">
+                    <p>Oltre alla definizione pratica vista nella prima lezione, è utile conoscere alcune definizioni più formali che evidenziano la natura multidisciplinare e l'evoluzione del campo.</p>
+                    <ul>
+                        <li><strong>Definizione ACM SIGCHI:</strong> L'associazione internazionale di riferimento (ACM SIGCHI) definisce l'HCI come "la disciplina che si occupa della progettazione, valutazione e implementazione di sistemi informatici interattivi per uso umano e lo studio dei fenomeni principali che li circondano".</li>
+                        <li><strong>Definizione di Dix et al.:</strong> Un'altra definizione classica descrive l'HCI come "lo studio delle persone, della tecnologia informatica e dei modi in cui queste si influenzano a vicenda".</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="influenza-reciproca">
+                <h2 class="section-title">2. Tecnologia e Società: Un'Influenza Reciproca</h2>
+                <div class="section-content">
+                    <p>Quest'ultima definizione introduce un concetto fondamentale: la relazione tra uomo e tecnologia non è a senso unico. Non solo noi progettiamo e usiamo la tecnologia come uno strumento, ma la tecnologia stessa, una volta diffusa, **cambia le nostre abitudini, la nostra società e il nostro modo di pensare**.</p>
+                    <div class="clarification-box">
+                        <strong>Esempio: la scomparsa delle cabine telefoniche</strong>
+                        <p>La diffusione di massa dei telefoni cellulari non ha semplicemente fornito un nuovo modo di fare chiamate; ha radicalmente cambiato il nostro rapporto con la comunicazione e lo spazio pubblico. Mentre una volta si cercava una cabina telefonica per necessità, oggi il non essere raggiungibili è diventata una scelta attiva. La tecnologia ha modificato la norma sociale.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="impatto-sviluppo">
+                <h2 class="section-title">3. L'Impatto sullo Sviluppo Software</h2>
+                <div class="section-content">
+                    <p>Dal punto di vista ingegneristico, l'HCI non è un aspetto secondario. È una componente massiccia e costosa dello sviluppo di qualsiasi prodotto software.</p>
+                    <div class="note-box">
+                        <strong>Statistica Chiave (Studio IBM)</strong>
+                        <p>Studi storici ma ancora validi concettualmente, condotti da IBM, hanno rivelato che circa il <strong>50% delle linee di codice</strong> di un'applicazione software non è dedicato alla logica di calcolo ("cosa fa" il programma), ma alla gestione dell'interfaccia utente ("come l'utente interagisce").</p>
+                    </div>
+                    <p>Questo dato dimostra che trascurare il design dell'interfaccia non è solo una questione estetica, ma significa ignorare metà del lavoro di sviluppo, con enormi impatti su costi, tempi e successo finale del prodotto.</p>
+                </div>
+            </section>
+
             <section id="triangolo-interazione">
-                <h2 class="section-title">1. Il Triangolo dell'Interazione</h2>
+                <h2 class="section-title">4. Il Triangolo dell'Interazione</h2>
                 <div class="section-content">
                     <p>Per comprendere appieno l'Interazione Uomo-Macchina, non possiamo considerare l'utente e la macchina come entità isolate. L'interazione avviene sempre all'interno di un <strong>contesto</strong> specifico, che influenza profondamente il modo in cui l'utente si comporta e percepisce il sistema.</p>
                     <p>Questo ci porta a definire il "triangolo dell'interazione", i cui vertici sono:</p>
@@ -51,7 +90,7 @@
             </section>
 
             <section id="importanza-contesto">
-                <h3 class="subsection-title">1.1. L'Importanza Cruciale del Contesto</h3>
+                <h3 class="subsection-title">4.1. L'Importanza Cruciale del Contesto</h3>
                 <div class="section-content">
                     <p>Il contesto è un fattore determinante che può trasformare un'interfaccia ben progettata in una inutilizzabile, e viceversa. Non esiste una "soluzione migliore" in assoluto; esiste solo la soluzione migliore per un dato contesto.</p>
                     <div class="note-box">
@@ -67,14 +106,14 @@
             </section>
 
             <section id="casi-critici">
-                <h2 class="section-title">2. Casi di Studio: Quando l'HCI Fallisce</h2>
+                <h2 class="section-title">5. Casi di Studio: Quando l'HCI Fallisce</h2>
                 <div class="section-content">
                     <p>Il modo migliore per comprendere l'importanza vitale di una buona progettazione HCI è analizzare i casi in cui un design scadente ha portato a conseguenze gravi o addirittura tragiche. Questi esempi storici sono diventati pilastri della disciplina, dimostrando che i problemi di usabilità non sono semplici "fastidi", ma possono essere causa di errori catastrofici.</p>
                 </div>
             </section>
 
             <section id="caso-three-mile-island">
-                <h3 class="subsection-title">2.1. Incidente Nucleare di Three Mile Island (1979)</h3>
+                <h3 class="subsection-title">5.1. Incidente Nucleare di Three Mile Island (1979)</h3>
                 <div class="section-content">
                     <p>Uno degli incidenti più famosi che ha dato il via a una seria riflessione sull'HCI in contesti critici.</p>
                     <ul>
@@ -86,7 +125,7 @@
             </section>
             
             <section id="caso-therac-25">
-                <h3 class="subsection-title">2.2. L'Incidente del Therac-25 (1985-1987)</h3>
+                <h3 class="subsection-title">5.2. L'Incidente del Therac-25 (1985-1987)</h3>
                 <div class="section-content">
                     <p>Un caso emblematico di come i bug software e una cattiva interfaccia possano avere conseguenze letali in ambito medico.</p>
                     <ul>
@@ -97,9 +136,21 @@
                     </ul>
                 </div>
             </section>
+
+            <section id="caso-uss-vincennes">
+                <h3 class="subsection-title">5.3. L'Incidente della USS Vincennes (1988)</h3>
+                <div class="section-content">
+                    <p>Un altro tragico esempio di come un'interfaccia ambigua possa portare a decisioni catastrofiche in un contesto di alta pressione.</p>
+                    <ul>
+                        <li><strong>Il Sistema:</strong> La USS Vincennes era dotata del sistema di combattimento Aegis, uno dei più avanzati dell'epoca, con un'interfaccia radar complessa.</li>
+                        <li><strong>Fallimento dell'Interfaccia:</strong> Il sistema rilevò un aereo di linea civile iraniano, ma lo mostrò con un'icona che non comunicava in modo chiaro un'informazione cruciale: l'aereo stava **salendo di quota** (profilo di volo non minaccioso) e non scendendo (profilo di attacco). Gli operatori, sotto stress, interpretarono l'informazione ambigua come una minaccia.</li>
+                        <li><strong>Conseguenza:</strong> La nave da guerra abbatté l'aereo di linea, causando la morte di 290 civili. L'errore fu causato da un'errata interpretazione dei dati, resa possibile da un'interfaccia che non forniva un feedback chiaro e inequivocabile.</li>
+                    </ul>
+                </div>
+            </section>
             
             <section id="caso-airbus-a320">
-                <h3 class="subsection-title">2.3. Incidenti dell'Airbus A320</h3>
+                <h3 class="subsection-title">5.4. Incidenti dell'Airbus A320</h3>
                 <div class="section-content">
                     <p>L'introduzione di interfacce altamente automatizzate e digitali ("glass cockpit") negli aerei ha introdotto nuove tipologie di errori.</p>
                     <ul>
@@ -110,7 +161,7 @@
             </section>
             
             <section id="caso-pompa-infusione">
-                <h3 class="subsection-title">2.4. Le Pompe a Infusione Medicali</h3>
+                <h3 class="subsection-title">5.5. Le Pompe a Infusione Medicali</h3>
                 <div class="section-content">
                     <p>Un esempio più recente e diffuso, che evidenzia problemi di design comuni in dispositivi di uso quotidiano in contesti critici come gli ospedali.</p>
                      <div class="exercise-box">
