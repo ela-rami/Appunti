@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 7: Routing Intra-Dominio (RIP & OSPF)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/css/common.css">
+</head>
+<body data-pdf-path="../slides/Computer Networks - Chapter 3 - Internetworking.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 7: Routing Intra-Dominio</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni_home.html" class="sidebar-action-button" id="lezioni-home-btn">Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-routing" class="sidebar-link">1. Control Plane vs Data Plane</a></li>
+            <li><a href="#routing-goals" class="sidebar-link">1.1. Obiettivi del Routing</a></li>
+            <li><a href="#distance-vector" class="sidebar-link">2. Algoritmi Distance Vector (es. RIP)</a></li>
+            <li><a href="#dv-how" class="sidebar-link">2.1. Come Funziona (Bellman-Ford)</a></li>
+            <li><a href="#count-to-infinity" class="sidebar-link">2.2. Problema: Count-to-Infinity</a></li>
+            <li><a href="#dv-solutions" class="sidebar-link">2.3. Soluzioni: Split Horizon & Poison Reverse</a></li>
+            <li><a href="#link-state" class="sidebar-link">3. Algoritmi Link State (es. OSPF)</a></li>
+            <li><a href="#ls-how" class="sidebar-link">3.1. Come Funziona (Dijkstra)</a></li>
+            <li><a href="#ls-flooding" class="sidebar-link">3.2. Reliable Flooding di LSP</a></li>
+            <li><a href="#dv-vs-ls" class="sidebar-link">4. Confronto: Distance Vector vs Link State</a></li>
+            <li><a href="#esercizi-consigliati" class="sidebar-link">5. Esercizi Consigliati</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-routing" class="content-section active-section">
+            <h2 class="section-title">1. Control Plane vs Data Plane</h2>
+            <div class="section-content">
+                <p>L'attività di un router si può dividere in due parti logiche:</p>
+                <ul>
+                    <li><strong>Data Plane (Piano Dati):</strong> È l'attività di inoltro (<em>forwarding</em>) dei singoli pacchetti. È un'operazione veloce, basata su una tabella di inoltro e spesso implementata in hardware. Risponde alla domanda: "Dato questo pacchetto, su quale porta devo inviarlo ORA?".</li>
+                    <li><strong>Control Plane (Piano di Controllo):</strong> È l'attività di routing. È il processo, più lento e complesso, che costruisce e mantiene aggiornate le tabelle di inoltro. Risponde alla domanda: "Qual è la topologia della rete e quali sono i percorsi migliori?".</li>
+                </ul>
+                <p>Questa lezione si concentra sul Control Plane e sugli algoritmi che lo implementano all'interno di un singolo <strong>Autonomous System (AS)</strong>, noti come protocolli di routing <strong>intra-dominio</strong> o <strong>Interior Gateway Protocols (IGP)</strong>.</p>
+            </div>
+        </article>
+        
+        <article id="routing-goals" class="content-section">
+            <h3 class="subsection-title">1.1. Obiettivi del Routing</h3>
+            <div class="section-content">
+                <p>L'obiettivo di un algoritmo di routing è trovare il cammino a <strong>costo minimo</strong> tra due nodi. Il "costo" di un link può rappresentare diverse metriche:</p>
+                <ul>
+                    <li>Numero di hop (il più semplice).</li>
+                    <li>Ritardo di trasmissione.</li>
+                    <li>Throughput (tipicamente si usa l'inverso: 1/throughput).</li>
+                    <li>Costo monetario.</li>
+                </ul>
+                <p>Esistono due famiglie principali di algoritmi di routing intra-dominio: Distance Vector e Link State.</p>
+            </div>
+        </article>
+        
+        <article id="distance-vector" class="content-section">
+            <h2 class="section-title">2. Algoritmi Distance Vector (es. RIP)</h2>
+            <div class="section-content">
+                <p>Gli algoritmi Distance Vector si basano su un approccio distribuito e iterativo, a volte riassunto come "routing by rumor". Ogni router non ha una mappa completa della rete, ma conosce solo:</p>
+                <ul>
+                    <li>Il costo per raggiungere i suoi vicini diretti.</li>
+                    <li>Le informazioni che i suoi vicini gli comunicano.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="dv-how" class="content-section">
+            <h3 class="subsection-title">2.1. Come Funziona (Algoritmo di Bellman-Ford)</h3>
+            <div class="section-content">
+                <p>Il processo è il seguente:</p>
+                <ol>
+                    <li>Ogni router mantiene una <strong>tabella di routing</strong> (un "vettore di distanze") che contiene la sua stima del costo minimo per raggiungere ogni altra destinazione nella rete.</li>
+                    <li>Periodicamente, ogni router invia il suo intero vettore di distanze a tutti i suoi vicini diretti.</li>
+                    <li>Quando un router `A` riceve un vettore dal suo vicino `B`, lo usa per aggiornare la propria tabella. Per ogni destinazione `D`, `A` calcola un nuovo costo: \( \text{costo}(A \to D)_{\text{via B}} = \text{costo}(A \to B) + \text{costo}(B \to D)_{\text{stimato da B}} \).</li>
+                    <li>Se questo nuovo costo è migliore di quello che `A` aveva già in tabella per `D`, `A` aggiorna la sua voce, annotando che il nuovo next-hop per `D` è `B`.</li>
+                </ol>
+                <p>Questo processo converge lentamente alla soluzione ottimale.</p>
+            </div>
+        </article>
+
+        <article id="count-to-infinity" class="content-section">
+            <h3 class="subsection-title">2.2. Problema: Count-to-Infinity</h3>
+            <div class="section-content">
+                <p>Il grande svantaggio degli algoritmi Distance Vector è la loro lenta reazione alle "cattive notizie" (un link che si guasta o il cui costo aumenta). Questo può portare al problema del <strong>count-to-infinity</strong>.</p>
+                <div class="clarification-box">
+                    <strong>Scenario del Count-to-Infinity:</strong>
+                    <p>Immagina una topologia A-B-C. A raggiunge C passando per B con costo 2.</p>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+graph LR
+    A -- 1 --> B -- 1 --> C
+                        </pre>
+                    </div>
+                    <ol>
+                        <li>Il link B-C si guasta. B si accorge che non può più raggiungere C direttamente e imposta il suo costo a \(\infty\).</li>
+                        <li><strong>PROBLEMA:</strong> Prima che B possa comunicare questa cattiva notizia, riceve un aggiornamento da A. A, ignaro del guasto, annuncia felice: "Posso raggiungere C con costo 2!".</li>
+                        <li>B, vedendo l'annuncio di A, pensa: "Fantastico! Se A raggiunge C in 2, e io raggiungo A in 1, allora posso raggiungere C passando per A con costo 1+2=3". B aggiorna la sua tabella con `Dest:C, Costo:3, NextHop:A`.</li>
+                        <li>Al prossimo aggiornamento, B annuncia ad A: "Posso raggiungere C con costo 3". A, che passava per B, aggiorna la sua rotta: `Costo(A->C) = 1 + Costo(B->C) = 1+3=4`.</li>
+                        <li>Questo ping-pong di informazioni errate continua, con i costi che aumentano lentamente ("contano fino all'infinito") fino a raggiungere una soglia massima. Durante questo tempo, si crea un <strong>loop di routing</strong> (A invia a B, B invia ad A).</li>
+                    </ol>
+                </div>
+            </div>
+        </article>
+
+        <article id="dv-solutions" class="content-section">
+            <h3 class="subsection-title">2.3. Soluzioni: Split Horizon & Poison Reverse</h3>
+            <div class="section-content">
+                <p>Per mitigare il count-to-infinity, si usano delle euristiche:</p>
+                <ul>
+                    <li><strong>Split Horizon:</strong> "Non dire a chi ti ha dato un'informazione la stessa informazione". Se un router `A` impara una rotta per `D` dal suo vicino `B`, `A` non includerà mai quella rotta negli aggiornamenti che invia a `B`.</li>
+                    <li><strong>Split Horizon with Poison Reverse:</strong> Una versione più forte. `A` includerà la rotta per `D` negli aggiornamenti per `B`, ma la annuncerà con un costo infinito. Questo "avvelena" la rotta, informando esplicitamente `B` di non provare a usare `A` per raggiungere `D`.</li>
+                </ul>
+                <p>Queste tecniche risolvono i loop semplici a due nodi, ma non quelli più complessi. Per questo, protocolli come <strong>RIP (Routing Information Protocol)</strong> usano un "infinito finito" (tipicamente 16 hop) per terminare il conteggio.</p>
+                <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 17 Gennaio 2024, Q9:</strong> Data una topologia, fornire la tabella di routing iniziale e finale per un algoritmo Distance Vector.</li>
+                        <li><strong>Esame 17 Febbraio 2023, Q9:</strong> Data una topologia, analizzare la possibilità di instabilità (count-to-infinity) in seguito a un guasto.</li>
+                        <li><strong>Esame 10 Luglio 2023, Q9:</strong> Fornire la tabella di instradamento e il vettore di distanze inviato dopo la convergenza (con split horizon/poison reverse).</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        
+        <article id="link-state" class="content-section">
+            <h2 class="section-title">3. Algoritmi Link State (es. OSPF)</h2>
+            <div class="section-content">
+                <p>Gli algoritmi Link State adottano un approccio completamente diverso. Invece di scambiarsi stime di distanze, ogni router si assicura di avere una <strong>mappa completa e identica</strong> dell'intera topologia della rete.</p>
+            </div>
+        </article>
+        
+        <article id="ls-how" class="content-section">
+            <h3 class="subsection-title">3.1. Come Funziona (Algoritmo di Dijkstra)</h3>
+            <div class="section-content">
+                <p>Il processo si articola in due fasi:</p>
+                <ol>
+                    <li>
+                        <strong>Costruzione della Mappa:</strong> Ogni router monitora lo stato ("link state") e il costo dei suoi link diretti. Quando rileva un cambiamento (un link che cade/si ripristina o un costo che cambia), crea un <strong>Link State Packet (LSP)</strong> contenente queste informazioni e lo diffonde a tutti gli altri router della rete tramite <strong>reliable flooding</strong>.
+                    </li>
+                    <li>
+                        <strong>Calcolo dei Percorsi:</strong> Una volta che un router ha ricevuto gli LSP da tutti gli altri, possiede una mappa completa del grafo della rete. A questo punto, esegue localmente un algoritmo per calcolare i cammini minimi, come l'<strong>algoritmo di Dijkstra</strong> (visto nel corso di ASD), per costruire la propria tabella di inoltro.
+                    </li>
+                </ol>
+            </div>
+        </article>
+        
+        <article id="ls-flooding" class="content-section">
+            <h3 class="subsection-title">3.2. Reliable Flooding di LSP</h3>
+            <div class="section-content">
+                <p>Il flooding degli LSP deve essere affidabile per garantire che tutti i router convergano alla stessa mappa. Questo si ottiene usando:</p>
+                <ul>
+                    <li><strong>Numeri di Sequenza:</strong> Ogni LSP contiene un numero di sequenza. Un router accetta e propaga un LSP solo se ha un numero di sequenza superiore a quello che già possiede per quel router sorgente.</li>
+                    <li><strong>Time-To-Live (TTL):</strong> Per evitare che vecchi LSP circolino all'infinito.</li>
+                    <li><strong>Riscontri (Acknowledgements):</strong> Per garantire la consegna su ogni link.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="dv-vs-ls" class="content-section">
+            <h2 class="section-title">4. Confronto: Distance Vector vs Link State</h2>
+            <div class="section-content">
+                <table style="width:100%; border-collapse: collapse;">
+                    <tr style="background-color: var(--bg-header);">
+                        <th style="padding: 1rem; border: 1px solid var(--border-soft);">Caratteristica</th>
+                        <th style="padding: 1rem; border: 1px solid var(--border-soft);">Distance Vector (RIP)</th>
+                        <th style="padding: 1rem; border: 1px solid var(--border-soft);">Link State (OSPF)</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem; border: 1px solid var(--border-soft);">Conoscenza della Rete</td>
+                        <td style="padding: 1rem; border: 1px solid var(--border-soft);">Conosce solo i vicini (vista locale).</td>
+                        <td style="padding: 1rem; border: 1px solid var(--border-soft);">Conosce l'intera topologia (vista globale).</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem; border: 1px solid var(--border-soft);">Messaggi scambiati</td>
+                        <td style="padding: 1rem; border: 1px solid var(--border-soft);">Scambia l'intero vettore di distanze con i vicini.</td>
+                        <td style="padding: 1rem; border: 1px solid var(--border-soft);">Scambia solo lo stato dei propri link con tutti.</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem; border: 1px solid var(--border-soft);">Convergenza</td>
+                        <td style="padding: 1rem; border: 1px solid var(--border-soft);">Lenta, soggetta a count-to-infinity.</td>
+                        <td style="padding: 1rem; border: 1px solid var(--border-soft);">Veloce e robusta.</td>
+                    </tr>
+                     <tr>
+                        <td style="padding: 1rem; border: 1px solid var(--border-soft);">Complessità</td>
+                        <td style="padding: 1rem; border: 1px solid var(--border-soft);">Bassa (calcoli semplici).</td>
+                        <td style="padding: 1rem; border: 1px solid var(--border-soft);">Alta (Dijkstra richiede più CPU/memoria).</td>
+                    </tr>
+                </table>
+                <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 15 Luglio 2024, Q9:</strong> Domanda concettuale su Link State (tempo di propagazione LSP e criteri di selezione).</li>
+                        <li><strong>Esame 4 Settembre 2023, Q9:</strong> Domanda sulla differenza tra OSPF e protocolli Distance Vector riguardo il count-to-infinity.</li>
+                        <li><strong>Esame 1 Febbraio 2022, Q9:</strong> Data una topologia, fornire la tabella di routing finale per un algoritmo Link State.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizi-consigliati" class="content-section">
+            <h2 class="section-title">5. Esercizi Consigliati per la Lezione 7</h2>
+            <div class="section-content">
+                <p>Per questo argomento, è fondamentale capire le differenze concettuali e saper analizzare scenari di guasto.</p>
+                <div class="clarification-box">
+                    <strong>Set di Esercizi Chiave:</strong>
+                    <ol>
+                        <li>
+                            <strong>Distance Vector in Pratica:</strong>
+                            <ul>
+                                <li><strong>Esame 17 Gennaio 2024, Q9.</strong> Questo esercizio ti chiede di compilare la tabella di routing INIZIALE e FINALE. Ti costringe a simulare mentalmente il processo di convergenza, passo dopo passo.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Analisi di Instabilità (Count-to-Infinity):</strong>
+                            <ul>
+                                <li><strong>Esame 17 Febbraio 2023, Q9.</strong> La domanda chiave: "È possibile che si crei un'instabilità?". Devi analizzare la topologia e identificare uno scenario di guasto che potrebbe innescare un loop di routing, spiegando perché. Questo testa la tua comprensione profonda del problema.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Link State in Pratica:</strong>
+                            <ul>
+                                <li><strong>Esame 15 Luglio 2024, Q9.</strong> Questo esercizio è puramente concettuale su Link State. Chiede quanto tempo impiega un LSP a propagarsi (risposta: il tempo del percorso più lungo nel flooding) e su quali criteri si basa la selezione degli LSP (indirizzo del generatore e numero di sequenza). Testa la conoscenza del meccanismo di flooding.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Risolvendo questi tre esercizi, avrai una visione completa dei due approcci al routing intra-dominio e sarai in grado di rispondere sia a domande di analisi di tabelle che a domande concettuali sulle loro differenze e vulnerabilità.</p>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti di Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/js/common.js"></script>
+    <script>
+    // ... script comune per Mermaid e gestione sezioni ...
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'dark',
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    mainBkg: 'transparent',
+                }
+            });
+            
+            const renderMermaidInSection = (section) => {
+                section.querySelectorAll('.mermaid').forEach(async (diag) => {
+                    if (diag.dataset.rendered) return;
+                    const id = diag.id || `mermaid-diag-${Math.random().toString(36).substr(2, 9)}`;
+                    diag.id = id;
+                    const code = diag.textContent.trim();
+                    diag.innerHTML = 'Loading diagram...';
+                    
+                    try {
+                        const { svg } = await mermaid.render(id, code);
+                        diag.innerHTML = svg;
+                        diag.dataset.rendered = 'true';
+                    } catch(e) {
+                        console.error("Mermaid rendering error:", e);
+                        diag.innerHTML = `<p style="color:red;">Error rendering diagram</p>`;
+                    }
+                });
+            };
+
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', () => renderMermaidInSection(section));
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                renderMermaidInSection(initiallyActiveSection);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
