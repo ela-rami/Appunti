@@ -229,8 +229,8 @@ p, .math-notation, .mermaid-container, .array-representation, .exam-question-lis
     overflow-x: auto;
 }
 
-.mermaid {
-     text-align: center;
+.mermaid { 
+    text-align: center; 
 }
 
 ul, ol {

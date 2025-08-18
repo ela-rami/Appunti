@@ -9,26 +9,23 @@ document.addEventListener('DOMContentLoaded', function () {
     const body = document.body;
     const sidebarLinks = document.querySelectorAll('#sidebar a.sidebar-link');
 
+    // --- LOGICA DELLA SIDEBAR E LAYOUT (invariata) ---
     function adjustLayoutForSidebar() {
         if (headerElement) { headerHeight = headerElement.offsetHeight; }
         if (window.innerWidth > 992) {
             sidebar.style.top = headerHeight + 'px';
             sidebar.style.height = `calc(100% - ${headerHeight}px)`;
-            
             const isHidden = localStorage.getItem('sidebarState') === 'hidden';
             sidebar.classList.toggle('hidden', isHidden);
             body.classList.toggle('sidebar-hidden', isHidden);
-            
             sidebar.classList.remove('open');
             body.classList.remove('sidebar-overlay-active');
             if (overlay) overlay.style.display = 'none';
-
-        } else { // Mobile view
+        } else {
             sidebar.style.top = '0';
             sidebar.style.height = '100vh';
-            body.classList.add('sidebar-hidden'); // Main content always full width
-            sidebar.classList.add('hidden'); // Sidebar always hidden by default
-
+            body.classList.add('sidebar-hidden');
+            sidebar.classList.add('hidden');
             if (sidebar.classList.contains('open')) {
                 sidebar.classList.remove('hidden');
                 body.classList.add('sidebar-overlay-active');
@@ -39,17 +36,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     }
-    
     window.addEventListener('resize', adjustLayoutForSidebar);
-
     if (hamburgerBtn) {
         hamburgerBtn.addEventListener('click', () => {
-            if (window.innerWidth > 992) { // Desktop toggle
+            if (window.innerWidth > 992) {
                 const isCurrentlyHidden = body.classList.contains('sidebar-hidden');
                 sidebar.classList.toggle('hidden', isCurrentlyHidden);
                 body.classList.toggle('sidebar-hidden', isCurrentlyHidden);
                 localStorage.setItem('sidebarState', isCurrentlyHidden ? 'visible' : 'hidden');
-            } else { // Mobile toggle
+            } else {
                 const isCurrentlyOpen = sidebar.classList.contains('open');
                 sidebar.classList.toggle('open', !isCurrentlyOpen);
                 sidebar.classList.toggle('hidden', isCurrentlyOpen);
@@ -58,7 +53,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-
     if (overlay) {
         overlay.addEventListener('click', () => {
             sidebar.classList.remove('open');
@@ -68,6 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // --- GESTIONE SEZIONI E LINK (con evento personalizzato) ---
     function showSection(targetId, smoothScroll = true) {
         allContentSections.forEach(s => {
             s.classList.remove('active-section');
@@ -78,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
             targetSection.classList.add('active-section');
             targetSection.style.display = 'block';
 
-            // Dispatch custom event for Mermaid rendering
+            // *** NUOVA PARTE: Emetti l'evento per Mermaid ***
             const event = new CustomEvent('sectionshown', { detail: { sectionId: targetId } });
             targetSection.dispatchEvent(event);
 
@@ -91,38 +86,31 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     }
-    
+
     sidebarLinks.forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
             const targetId = this.getAttribute('href').substring(1);
-            
             sidebarLinks.forEach(link => link.classList.remove('active-link'));
             this.classList.add('active-link');
-
             showSection(targetId);
             history.pushState(null, null, `#${targetId}`);
-
             if (window.innerWidth <= 992) {
-                hamburgerBtn.click(); // Simulate click to close
+                hamburgerBtn.click();
             }
         });
     });
-    
+
     function handleInitialLoad() {
         let targetId = window.location.hash.substring(1);
         const targetElement = document.getElementById(targetId);
-
         if (!targetId || !targetElement) {
             targetId = allContentSections.length > 0 ? allContentSections[0].id : null;
         }
-
         if (targetId) {
             showSection(targetId, false);
             const activeLink = document.querySelector(`#sidebar a[href="#${targetId}"]`);
             if(activeLink) activeLink.classList.add('active-link');
-            
-            // Scroll into view after a short delay to ensure layout is stable
             setTimeout(() => {
                 const elementToScroll = document.getElementById(targetId);
                 if (elementToScroll) {
@@ -133,11 +121,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Initial setup
     adjustLayoutForSidebar();
     handleInitialLoad();
 
-    // Link PDF path from body data attribute to the button
+    // Link PDF
     const appuntiProfButton = document.getElementById('appunti-prof-btn');
     if (appuntiProfButton) {
         const pdfPath = document.body.dataset.pdfPath;
@@ -145,6 +132,64 @@ document.addEventListener('DOMContentLoaded', function () {
             appuntiProfButton.href = pdfPath;
         } else {
             appuntiProfButton.style.display = 'none';
+        }
+    }
+
+    // --- GESTIONE DI MERMAID (copiata da OOP funzionante) ---
+    if (typeof mermaid !== 'undefined') {
+        mermaid.initialize({
+            startOnLoad: false, 
+            theme: 'dark', 
+            darkMode: true,
+            fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim(),
+            themeVariables: {
+                primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                mainBkg: 'transparent',
+            },
+            fontSize: '14px',
+        });
+        
+        const mermaidOriginalDefinitions = new Map();
+        document.querySelectorAll('.mermaid').forEach((diag, index) => {
+            const id = diag.id || `mermaid-dynamic-init-${index}`;
+            diag.id = id;
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = diag.innerHTML; 
+            let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+            mermaidOriginalDefinitions.set(id, decodedContent);
+            diag.innerHTML = ''; 
+            diag.style.visibility = 'hidden'; 
+        });
+        
+        async function renderMermaidDiagram(diagElement) {
+            const diagramId = diagElement.id;
+            const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+            if (!diagramDefinition) { return; }
+            diagElement.innerHTML = ''; 
+            try {
+                const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                diagElement.innerHTML = svg;
+                diagElement.style.visibility = 'visible';
+            } catch (e) {
+                console.error("Mermaid rendering error:", e);
+                diagElement.innerHTML = `<p style="color:red;">Error rendering diagram</p>`;
+                diagElement.style.visibility = 'visible';
+            }
+        }
+        
+        allContentSections.forEach(section => {
+            section.addEventListener('sectionshown', function() {
+                this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            });
+        });
+        
+        const initiallyActiveSection = document.querySelector('.content-section.active-section');
+        if (initiallyActiveSection) {
+            initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
         }
     }
 });
