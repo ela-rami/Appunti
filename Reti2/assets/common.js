@@ -156,9 +156,20 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.mermaid').forEach((diag, index) => {
             const id = diag.id || `mermaid-dynamic-init-${index}`;
             diag.id = id;
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = diag.innerHTML; 
-            let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+            
+            // Estrazione più robusta del contenuto
+            let decodedContent = '';
+            if (diag.tagName.toLowerCase() === 'pre') {
+                // Se è un elemento <pre>, prendi il textContent direttamente
+                decodedContent = diag.textContent.trim();
+            } else {
+                // Altrimenti usa il metodo precedente
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+            }
+            
+            
             mermaidOriginalDefinitions.set(id, decodedContent);
             diag.innerHTML = ''; 
             diag.style.visibility = 'hidden'; 
