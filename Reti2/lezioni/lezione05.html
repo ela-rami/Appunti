@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 5: Indirizzamento IP e Inoltro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body data-pdf-path="../slides/Computer Networks - Chapter 3 - Internetworking.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 5: Indirizzamento IP e Inoltro</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni_home.html" class="sidebar-action-button" id="lezioni-home-btn">Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-ip" class="sidebar-link">1. Il Protocollo IP</a></li>
+            <li><a href="#header-ipv4" class="sidebar-link">1.1. L'Header IPv4</a></li>
+            <li><a href="#fragmentation" class="sidebar-link">2. Frammentazione e Riassemblaggio</a></li>
+            <li><a href="#fragmentation-calc" class="sidebar-link">2.1. Calcolo della Frammentazione</a></li>
+            <li><a href="#addressing" class="sidebar-link">3. Indirizzamento IP</a></li>
+            <li><a href="#classful" class="sidebar-link">3.1. Indirizzamento Classful (Storico)</a></li>
+            <li><a href="#subnetting" class="sidebar-link">3.2. Subnetting</a></li>
+            <li><a href="#cidr" class="sidebar-link">4. CIDR: Indirizzamento Senza Classi</a></li>
+            <li><a href="#route-aggregation" class="sidebar-link">4.1. Aggregazione delle Rotte</a></li>
+            <li><a href="#longest-match" class="sidebar-link">4.2. Inoltro con Longest Prefix Match</a></li>
+            <li><a href="#esercizi-consigliati" class="sidebar-link">5. Esercizi Consigliati</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-ip" class="content-section active-section">
+            <h2 class="section-title">1. Il Protocollo IP (Internet Protocol)</h2>
+            <div class="section-content">
+                <p>Il protocollo IP è il cuore di Internet. Fornisce un servizio di consegna di pacchetti (chiamati anche <strong>datagrammi</strong>) di tipo <strong>connectionless</strong> e <strong>best-effort</strong>. Questo significa che IP non garantisce la consegna, né l'ordine di arrivo, né l'assenza di duplicati. Semplicemente, "fa del suo meglio" per inoltrare i pacchetti verso la loro destinazione.</p>
+                <p>La sua grande forza è quella di creare un'astrazione che nasconde l'eterogeneità delle tecnologie di rete sottostanti (Ethernet, WiFi, fibra ottica, etc.), permettendo a reti diverse di comunicare tra loro (da cui il nome <em>internetworking</em>).</p>
+            </div>
+        </article>
+
+        <article id="header-ipv4" class="content-section">
+            <h3 class="subsection-title">1.1. L'Header IPv4</h3>
+            <div class="section-content">
+                <p>Ogni pacchetto IP contiene un header con le informazioni necessarie per il suo inoltro. Per gli esami, i campi più importanti da conoscere sono:</p>
+                <ul>
+                    <li><strong>Source/Destination Address:</strong> Indirizzi IP a 32 bit del mittente e del destinatario.</li>
+                    <li><strong>TTL (Time To Live):</strong> Un contatore che viene decrementato da ogni router. Quando arriva a 0, il pacchetto viene scartato. Questo meccanismo previene loop di routing infiniti.</li>
+                    <li><strong>Protocol:</strong> Un numero che indica a quale protocollo di trasporto (es. TCP=6, UDP=17) consegnare il payload una volta arrivato a destinazione.</li>
+                    <li><strong>Flags e Fragment Offset:</strong> Tre bit e un campo da 13 bit usati per gestire la frammentazione.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="fragmentation" class="content-section">
+            <h2 class="section-title">2. Frammentazione e Riassemblaggio</h2>
+            <div class="section-content">
+                <p>Reti diverse possono avere diverse <strong>MTU (Maximum Transmission Unit)</strong>, ovvero la dimensione massima del payload di un frame di livello 2. Ad esempio, l'MTU di Ethernet è 1500 byte, mentre quella di altre tecnologie può essere maggiore o minore.</p>
+                <p>Quando un router deve inoltrare un pacchetto IP su un link la cui MTU è più piccola della dimensione del pacchetto, deve suddividerlo in pezzi più piccoli: questo processo è la <strong>frammentazione</strong>.</p>
+                <ul>
+                    <li>La frammentazione avviene nei router.</li>
+                    <li>Il riassemblaggio avviene solo nell'host di destinazione finale.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="fragmentation-calc" class="content-section">
+            <h3 class="subsection-title">2.1. Calcolo della Frammentazione</h3>
+            <div class="section-content">
+                <p>Le regole per la frammentazione sono un classico esercizio d'esame:</p>
+                <ul>
+                    <li>Il payload di ogni frammento (tranne l'ultimo) deve essere il <strong>massimo multiplo di 8 byte</strong> possibile che, sommato all'header IP (di solito 20 byte), non superi l'MTU.</li>
+                    <li>Il campo <strong>Fragment Offset</strong> nell'header di ogni frammento indica la posizione del payload di quel frammento all'interno del datagramma originale, misurata in unità di 8 byte.</li>
+                    <li>Il flag <strong>MF (More Fragments)</strong> è impostato a 1 per tutti i frammenti tranne l'ultimo.</li>
+                    <li>Il flag <strong>DF (Don't Fragment)</strong>, se impostato a 1, impedisce la frammentazione. Se un pacchetto con DF=1 non passa, il router lo scarta e invia un errore ICMP al mittente.</li>
+                </ul>
+                <div class="calculation-box">
+                    <strong>Esempio di Calcolo (tipo esame Gennaio '24, Q7)</strong>
+                    <p>Un pacchetto con payload di 1200 byte (e header IP di 20 byte) deve essere inoltrato su un'interfaccia con MTU di 400 byte.</p>
+                    <ol>
+                        <li><strong>Calcolo payload massimo per frammento:</strong>
+                            <ul>
+                                <li>Spazio disponibile per payload: \( \text{MTU} - \text{Header IP} = 400 - 20 = 380 \text{ byte} \).</li>
+                                <li>Massimo multiplo di 8 minore o uguale a 380: \( \lfloor \frac{380}{8} \rfloor \times 8 = 47 \times 8 = 376 \text{ byte} \).</li>
+                            </ul>
+                        </li>
+                        <li><strong>Creazione dei frammenti:</strong>
+                            <ul>
+                                <li><strong>Frammento 1:</strong> Payload di 376 byte. Offset = 0 / 8 = 0. MF = 1.</li>
+                                <li><strong>Frammento 2:</strong> Payload di 376 byte. Offset = 376 / 8 = 47. MF = 1.</li>
+                                <li><strong>Frammento 3:</strong> Payload di 376 byte. Offset = (376+376) / 8 = 94. MF = 1.</li>
+                                <li><strong>Frammento 4 (ultimo):</strong> Payload rimanente = \( 1200 - (3 \times 376) = 1200 - 1128 = 72 \text{ byte} \). Offset = (376*3) / 8 = 141. MF = 0.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Risultato:</strong> Si formano 4 frammenti. Il primo ha un payload di 376 byte.</li>
+                    </ol>
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                         <li><strong>Esame 29 Gennaio 2024, Q7:</strong> Calcolo del numero di frammenti e dimensione del payload del primo.</li>
+                         <li><strong>Esame 15 Giugno 2023, Q7:</strong> Calcolo del numero di frammenti e dimensione del payload del primo.</li>
+                         <li><strong>Esame 16 Giugno 2022, Q7:</strong> Calcolo del payload del primo e dell'ultimo frammento.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="addressing" class="content-section">
+            <h2 class="section-title">3. Indirizzamento IP</h2>
+            <div class="section-content">
+                <p>L'indirizzamento IP è gerarchico. Un indirizzo IP a 32 bit è diviso in due parti: una parte che identifica la <strong>rete</strong> e una parte che identifica l'<strong>host</strong> all'interno di quella rete.</p>
+            </div>
+        </article>
+
+        <article id="classful" class="content-section">
+            <h3 class="subsection-title">3.1. Indirizzamento Classful (Storico)</h3>
+            <div class="section-content">
+                <p>Originariamente, gli indirizzi IP erano divisi in classi (A, B, C) con prefissi di rete di lunghezza fissa (rispettivamente 8, 16 e 24 bit). Questo approccio era rigido e inefficiente, portando a un grande spreco di indirizzi.</p>
+            </div>
+        </article>
+
+        <article id="subnetting" class="content-section">
+            <h3 class="subsection-title">3.2. Subnetting</h3>
+            <div class="section-content">
+                <p>Il subnetting è stato introdotto per permettere a un'organizzazione di suddividere un singolo blocco di indirizzi di rete in più sottoreti fisiche interne. Si "prende in prestito" una parte dei bit della porzione host per creare un identificatore di sottorete. La <strong>subnet mask</strong> è una sequenza di 32 bit che, tramite un'operazione di AND bit a bit con l'indirizzo IP, rivela l'indirizzo della sottorete.</p>
+            </div>
+        </article>
+
+        <article id="cidr" class="content-section">
+            <h2 class="section-title">4. CIDR: Classless Inter-Domain Routing</h2>
+            <div class="section-content">
+                <p>Il CIDR ha abbandonato la nozione di classi, permettendo di usare prefissi di rete di lunghezza variabile. Un blocco di indirizzi è rappresentato come `indirizzo/lunghezza_prefisso` (es. `192.168.0.0/16`). Questo ha risolto due problemi:</p>
+                <ol>
+                    <li><strong>Assegnazione efficiente degli indirizzi:</strong> Si possono assegnare blocchi di indirizzi di dimensioni adeguate alle necessità reali.</li>
+                    <li><strong>Scalabilità delle tabelle di routing:</strong> Permette l'aggregazione delle rotte.</li>
+                </ol>
+            </div>
+        </article>
+        
+        <article id="route-aggregation" class="content-section">
+            <h3 class="subsection-title">4.1. Aggregazione delle Rotte</h3>
+            <div class="section-content">
+                <p>L'aggregazione (o summarization) è il processo di combinare più prefissi di rete contigui in un unico prefisso più corto (super-rete). Ad esempio, le reti `10.1.2.0/24` e `10.1.3.0/24` possono essere aggregate nel prefisso `10.1.2.0/23`.</p>
+                <p>Questo riduce drasticamente il numero di voci nelle tabelle di routing dei router di backbone.</p>
+                <div class="calculation-box">
+                    <strong>Esempio di Calcolo (tipo esame Febbraio '22, Q6)</strong>
+                    <p>Trovare la sottorete più piccola che contiene gli indirizzi 192.168.5.9 e 192.168.6.14.</p>
+                    <ol>
+                        <li><strong>Converti in binario (solo le parti che cambiano):</strong>
+                            <ul>
+                                <li>`5` = `00000101`</li>
+                                <li>`6` = `00000110`</li>
+                            </ul>
+                        </li>
+                        <li><strong>Trova il prefisso comune più lungo:</strong> Confrontando i due ottetti, i primi 6 bit (`000001`) sono uguali. Il bit successivo è diverso (`0` vs `1`). Quindi il prefisso comune è di `8 + 8 + 6 = 22` bit.</li>
+                        <li><strong>Calcola l'indirizzo di rete:</strong> Prendi uno degli indirizzi (es. 192.168.5.9) e metti a zero tutti i bit dopo il 22°:
+                            <ul>
+                                <li>`192.168.00000101.00001001`</li>
+                                <li>Maschera /22: `11111111.11111111.11111100.00000000`</li>
+                                <li>Risultato (AND): `192.168.00000100.00000000` = `192.168.4.0`</li>
+                            </ul>
+                        </li>
+                        <li><strong>Risultato finale:</strong> `192.168.4.0/22`.</li>
+                    </ol>
+                </div>
+            </div>
+        </article>
+        
+        <article id="longest-match" class="content-section">
+            <h3 class="subsection-title">4.2. Inoltro con Longest Prefix Match</h3>
+            <div class="section-content">
+                <p>Con CIDR, le tabelle di inoltro possono contenere prefissi che si sovrappongono. Ad esempio, una tabella potrebbe avere sia una rotta per `10.1.0.0/16` che una più specifica per `10.1.2.0/24`.</p>
+                <p>Quando un pacchetto arriva, il router confronta l'indirizzo di destinazione con tutte le voci della tabella. Se ci sono più corrispondenze, il router sceglie sempre la rotta con il <strong>prefisso più lungo (longest prefix match)</strong>, perché è la più specifica.</p>
+            </div>
+        </article>
+
+        <article id="esercizi-consigliati" class="content-section">
+            <h2 class="section-title">5. Esercizi Consigliati per la Lezione 5</h2>
+            <div class="section-content">
+                <p>Questa lezione è quasi interamente basata su calcoli. Padroneggiare questi esercizi è fondamentale per l'esame.</p>
+                <div class="clarification-box">
+                    <strong>Set di Esercizi Chiave:</strong>
+                    <ol>
+                        <li>
+                            <strong>Calcolo Frammentazione IP (Algoritmo):</strong>
+                            <ul>
+                                <li><strong>Esame 29 Gennaio 2024, Q7.</strong> È un esempio perfetto e completo che ti costringe a calcolare il payload massimo (multiplo di 8) e a determinare il numero e la dimensione dei vari frammenti.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Progettazione di Sottoreti (Applicazione CIDR):</strong>
+                            <ul>
+                                <li><strong>Esame 19 Febbraio 2024, Q7.</strong> Ti chiede di creare tre sottoreti di dimensioni diverse partendo da un blocco dato. Questo testa la tua capacità di "pensare in CIDR" e di allocare gli spazi di indirizzi in modo contiguo ed efficiente.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Aggregazione di Rotte (Sintesi):</strong>
+                            <ul>
+                                <li><strong>Esame 17 Giugno 2024, Q7.</strong> Ti dà tre indirizzi IP e ti chiede di trovare la rete più piccola che li contiene tutti. È l'esercizio perfetto per praticare la ricerca del prefisso comune più lungo.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Se riesci a risolvere questi tre tipi di esercizi con sicurezza, hai coperto la maggior parte delle domande difficili sul livello di rete.</p>
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Lista Completa Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 17 Giugno 2024, Q7:</strong> Trovare la rete più piccola che contiene 3 host.</li>
+                        <li><strong>Esame 29 Gennaio 2024, Q7:</strong> Calcolo frammentazione IP.</li>
+                        <li><strong>Esame 19 Febbraio 2024, Q7:</strong> Progettazione di 3 sottoreti contigue.</li>
+                        <li><strong>Esame 15 Luglio 2024, Q1 (c):</strong> Domanda teorica sullo stack protocollare di un router (livello 3).</li>
+                        <li><strong>Esame 16 Settembre 2024, Q7:</strong> Compilare una tabella di inoltro (routing table).</li>
+                        <li><strong>Esame 17 Febbraio 2023, Q8:</strong> Domanda su ARP e broadcast in una sottorete (collega a Lezione 6).</li>
+                        <li><strong>Esame 15 Giugno 2023, Q7:</strong> Calcolo frammentazione IP.</li>
+                        <li><strong>Esame 10 Luglio 2023, Q7:</strong> Trovare la sottorete più piccola che contiene 2 indirizzi.</li>
+                        <li><strong>Esame 4 Settembre 2023, Q7:</strong> Progettazione di 3 sottoreti contigue.</li>
+                        <li><strong>Esame 1 Febbraio 2022, Q6:</strong> Trovare la sottorete più piccola che contiene 2 indirizzi.</li>
+                        <li><strong>Esame 17 Febbraio 2022, Q7:</strong> Progettazione di 3 sottoreti contigue.</li>
+                        <li><strong>Esame 13 Luglio 2022, Q7:</strong> Verifica di appartenenza di indirizzi a reti CIDR.</li>
+                        <li><strong>Esame 5 Settembre 2022, Q7:</strong> Compilare una tabella di inoltro.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti di Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'dark',
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    mainBkg: 'transparent',
+                }
+            });
+            
+            const renderMermaidInSection = (section) => {
+                section.querySelectorAll('.mermaid').forEach(async (diag) => {
+                    if (diag.dataset.rendered) return;
+                    const id = diag.id || `mermaid-diag-${Math.random().toString(36).substr(2, 9)}`;
+                    diag.id = id;
+                    const code = diag.textContent.trim();
+                    diag.innerHTML = 'Loading diagram...';
+                    
+                    try {
+                        const { svg } = await mermaid.render(id, code);
+                        diag.innerHTML = svg;
+                        diag.dataset.rendered = 'true';
+                    } catch(e) {
+                        console.error("Mermaid rendering error:", e);
+                        diag.innerHTML = `<p style="color:red;">Error rendering diagram</p>`;
+                    }
+                });
+            };
+
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', () => renderMermaidInSection(section));
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                renderMermaidInSection(initiallyActiveSection);
+            }
+        }
+    });
+    </script>
+</body>
+</html>

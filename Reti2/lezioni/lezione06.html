@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 6: Protocolli di Servizio IP (ARP, DHCP, NAT, ICMP)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body data-pdf-path="../slides/Computer Networks - Chapter 3 - Internetworking.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 6: Protocolli di Servizio IP</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni_home.html" class="sidebar-action-button" id="lezioni-home-btn">Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-ancillary" class="sidebar-link">1. Protocolli Ausiliari di IP</a></li>
+            <li><a href="#arp" class="sidebar-link">2. ARP: Address Resolution Protocol</a></li>
+            <li><a href="#arp-how" class="sidebar-link">2.1. Come Funziona ARP</a></li>
+            <li><a href="#dhcp" class="sidebar-link">3. DHCP: Dynamic Host Configuration Protocol</a></li>
+            <li><a href="#dhcp-how" class="sidebar-link">3.1. Il Processo DORA</a></li>
+            <li><a href="#nat" class="sidebar-link">4. NAT: Network Address Translation</a></li>
+            <li><a href="#nat-how" class="sidebar-link">4.1. Come Funziona NAT/PAT</a></li>
+            <li><a href="#icmp" class="sidebar-link">5. ICMP: Internet Control Message Protocol</a></li>
+            <li><a href="#icmp-tools" class="sidebar-link">5.1. Ping e Traceroute</a></li>
+            <li><a href="#esercizi-consigliati" class="sidebar-link">6. Esercizi Consigliati</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-ancillary" class="content-section active-section">
+            <h2 class="section-title">1. Protocolli Ausiliari di IP</h2>
+            <div class="section-content">
+                <p>Il protocollo IP è progettato per essere semplice e si occupa solo dell'inoltro "best-effort" dei pacchetti. Per funzionare correttamente, però, ha bisogno del supporto di altri protocolli che gestiscono compiti essenziali come la configurazione degli host, la mappatura degli indirizzi e la segnalazione degli errori. Questi protocolli operano "a fianco" di IP e sono fondamentali per l'operatività di qualsiasi rete.</p>
+            </div>
+        </article>
+
+        <article id="arp" class="content-section">
+            <h2 class="section-title">2. ARP: Address Resolution Protocol</h2>
+            <div class="section-content">
+                <p><strong>Problema:</strong> Per inviare un pacchetto IP a un altro host sulla stessa rete locale (LAN), un dispositivo ha bisogno di conoscere l'indirizzo MAC di destinazione per poter costruire il frame di livello 2 (es. Ethernet).</p>
+                <p><strong>Soluzione:</strong> L'<strong>Address Resolution Protocol (ARP)</strong> si occupa di mappare dinamicamente un indirizzo IP a un indirizzo MAC.</p>
+            </div>
+        </article>
+        
+        <article id="arp-how" class="content-section">
+            <h3 class="subsection-title">2.1. Come Funziona ARP</h3>
+            <div class="section-content">
+                <p>Il processo è semplice e basato su un meccanismo di richiesta-risposta:</p>
+                <ol>
+                    <li>L'host A vuole inviare un pacchetto all'IP di B, ma non conosce il suo MAC. Prima controlla nella sua <strong>ARP cache</strong> locale.</li>
+                    <li>Se l'informazione non è in cache, A costruisce una richiesta ARP contenente l'IP di B e la invia in <strong>broadcast</strong> sulla LAN. Il messaggio significa: "Chi ha l'IP `192.168.1.10`? Per favore, mandami il tuo indirizzo MAC".</li>
+                    <li>Tutti i dispositivi sulla LAN ricevono la richiesta, ma solo B (che possiede quell'IP) risponde.</li>
+                    <li>B invia una risposta ARP in <strong>unicast</strong> direttamente ad A, contenente il suo indirizzo MAC.</li>
+                    <li>A riceve la risposta, aggiorna la sua ARP cache e può finalmente inviare il pacchetto IP a B.</li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Punto chiave per l'esame:</strong> Se un host deve inviare un pacchetto a una rete esterna, non userà ARP per trovare il MAC della destinazione finale, ma per trovare il MAC del suo <strong>default gateway (router)</strong>. Il pacchetto IP avrà come destinazione l'IP finale, ma il frame Ethernet avrà come destinazione il MAC del router.
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 17 Giugno 2024, Q8:</strong> Domanda concettuale su cosa fa un host che riceve una richiesta ARP o una risposta ARP.</li>
+                        <li><strong>Esame 17 Febbraio 2023, Q8:</strong> Identificare quale MAC address deve essere scoperto (quello del router) e l'indirizzo di destinazione della richiesta ARP.</li>
+                        <li><strong>Esame 4 Settembre 2023, Q8:</strong> Domanda concettuale sullo scenario in cui un host riceve più di una risposta ARP.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="dhcp" class="content-section">
+            <h2 class="section-title">3. DHCP: Dynamic Host Configuration Protocol</h2>
+            <div class="section-content">
+                <p><strong>Problema:</strong> Configurare manualmente l'indirizzo IP, la subnet mask, il default gateway e i server DNS su ogni dispositivo di una rete è un'operazione noiosa, dispendiosa in termini di tempo e soggetta a errori.</p>
+                <p><strong>Soluzione:</strong> Il <strong>Dynamic Host Configuration Protocol (DHCP)</strong> automatizza questo processo.</p>
+            </div>
+        </article>
+
+        <article id="dhcp-how" class="content-section">
+            <h3 class="subsection-title">3.1. Il Processo DORA (Discover, Offer, Request, ACK)</h3>
+            <div class="section-content">
+                <p>Un host appena connesso alla rete ottiene la sua configurazione tramite uno scambio di 4 messaggi con un server DHCP:</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: 1. DHCP DISCOVER (Broadcast)
+    Server->>Client: 2. DHCP OFFER (Broadcast/Unicast)
+    Client->>Server: 3. DHCP REQUEST (Broadcast)
+    Server->>Client: 4. DHCP ACK (Broadcast/Unicast)
+                    </pre>
+                </div>
+                <ol>
+                    <li><strong>Discover:</strong> Il client, non avendo ancora un IP, invia un messaggio in broadcast sulla rete: "C'è un server DHCP qui?".</li>
+                    <li><strong>Offer:</strong> Uno o più server DHCP sulla rete rispondono con un'offerta, proponendo un indirizzo IP e altri parametri di configurazione.</li>
+                    <li><strong>Request:</strong> Il client sceglie una delle offerte (di solito la prima che arriva) e invia un altro messaggio in broadcast per comunicare a tutti i server quale offerta ha accettato.</li>
+                    <li><strong>ACK (Acknowledge):</strong> Il server scelto conferma l'assegnazione (chiamata "lease", affitto, perché ha una durata) e invia la configurazione finale.</li>
+                </ol>
+                <div class="note-box">
+                    <strong>Punto chiave per l'esame:</strong> Le domande su DHCP sono quasi sempre concettuali. Devi sapere a cosa serve, conoscere le 4 fasi dello scambio e capire cosa succede se il server non risponde (l'host si auto-configura con un indirizzo APIPA, `169.254.x.x`).
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 16 Settembre 2024, Q8:</strong> A cosa serve DHCP e condizione per avere più server attivi.</li>
+                        <li><strong>Esame 10 Luglio 2023, Q8:</strong> Domanda concettuale su cosa succede se il server DHCP non risponde.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="nat" class="content-section">
+            <h2 class="section-title">4. NAT: Network Address Translation</h2>
+            <div class="section-content">
+                <p><strong>Problema:</strong> Gli indirizzi IPv4 pubblici sono una risorsa scarsa e ormai esaurita. Come si possono connettere a Internet le migliaia di dispositivi di una rete privata (aziendale o domestica) usando un solo (o pochi) indirizzi IP pubblici?</p>
+                <p><strong>Soluzione:</strong> Il <strong>Network Address Translation (NAT)</strong>. Un router NAT, posto al confine tra la rete privata e Internet, si occupa di tradurre gli indirizzi IP privati (es. `192.168.1.x`) nell'unico indirizzo IP pubblico a sua disposizione, e viceversa.</p>
+            </div>
+        </article>
+
+        <article id="nat-how" class="content-section">
+            <h3 class="subsection-title">4.1. Come Funziona NAT/PAT</h3>
+            <div class="section-content">
+                <p>Il NAT semplice ("one-to-one") mappa un IP privato a un IP pubblico. Molto più comune è il <strong>PAT (Port and Address Translation)</strong>, anche chiamato "NAT overload", che permette a più dispositivi privati di condividere un unico IP pubblico.</p>
+                <p>Il meccanismo si basa sulla traduzione non solo dell'IP, ma anche della porta sorgente:</p>
+                <ol>
+                    <li><strong>Traffico in Uscita:</strong> Un host privato (es. `192.168.1.10:50000`) invia un pacchetto a un server su Internet. Il router NAT intercetta il pacchetto, sostituisce l'IP e la porta sorgente con il proprio IP pubblico e una porta effimera univoca (es. `80.81.82.83:12345`) e memorizza questa mappatura `(192.168.1.10:50000 -> 80.81.82.83:12345)` in una tabella.</li>
+                    <li><strong>Traffico in Entrata:</strong> Quando il server risponde a `80.81.82.83:12345`, il router NAT consulta la sua tabella, trova la mappatura originale e traduce l'IP e la porta di destinazione a `192.168.1.10:50000`, inoltrando il pacchetto all'host corretto nella rete privata.</li>
+                </ol>
+                <div class="note-box">
+                    <strong>Punto chiave per l'esame:</strong> Le domande su NAT sono spesso scenari "what-if". Ad esempio: "Cosa succede a una connessione TCP attiva se l'indirizzo IP pubblico del router NAT cambia?". La risposta è che la connessione si interrompe, perché i pacchetti di ritorno dal server verrebbero inviati all'indirizzo pubblico vecchio e non arriverebbero più al router.
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 29 Gennaio 2024, Q8:</strong> Scenario "what-if" sull'impatto del cambio di IP pubblico di un router NAT su una connessione TCP.</li>
+                        <li><strong>Esame 1 Febbraio 2022, Q8:</strong> Stesso scenario dell'esercizio precedente.</li>
+                        <li><strong>Esame 13 Luglio 2022, Q8:</strong> Scenario su NAT "one-to-one" e cosa succede a pacchetti inattesi.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        
+        <article id="icmp" class="content-section">
+            <h2 class="section-title">5. ICMP: Internet Control Message Protocol</h2>
+            <div class="section-content">
+                <p><strong>Problema:</strong> IP è inaffidabile e non ha meccanismi per segnalare errori. Cosa succede se un router non può inoltrare un pacchetto? O se la destinazione non esiste?</p>
+                <p><strong>Soluzione:</strong> L'<strong>Internet Control Message Protocol (ICMP)</strong> è il protocollo di servizio usato da router e host per scambiarsi messaggi di controllo e di errore relativi al livello IP.</p>
+                <p>I messaggi ICMP più importanti per l'esame sono:</p>
+                <ul>
+                    <li><strong>Destination Unreachable:</strong> Inviato quando un router o un host non può consegnare un pacchetto.</li>
+                    <li><strong>Time Exceeded:</strong> Inviato da un router quando scarta un pacchetto perché il suo TTL è arrivato a 0.</li>
+                    <li><strong>Echo Request / Echo Reply:</strong> Usati dal comando `ping` per verificare la raggiungibilità di un host.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="icmp-tools" class="content-section">
+            <h3 class="subsection-title">5.1. Ping e Traceroute</h3>
+            <div class="section-content">
+                <p>Questi due strumenti di diagnostica, spesso oggetto di domande, si basano su ICMP.</p>
+                <ul>
+                    <li><strong>Ping:</strong> Invia una serie di messaggi `ICMP Echo Request` a una destinazione e misura il tempo di attesa per le risposte (`ICMP Echo Reply`), calcolando così il **Round-Trip Time (RTT)**.</li>
+                    <li><strong>Traceroute (o tracert):</strong> Sfrutta in modo ingegnoso il campo TTL e i messaggi ICMP `Time Exceeded` per scoprire il percorso (la sequenza di router) verso una destinazione. Invia una serie di pacchetti con TTL crescente (1, 2, 3...):
+                        <ul>
+                            <li>Il primo pacchetto (TTL=1) viene scartato dal primo router, che risponde con un `ICMP Time Exceeded`, rivelando il suo indirizzo IP.</li>
+                            <li>Il secondo pacchetto (TTL=2) passa il primo router, ma viene scartato dal secondo, che risponde a sua volta, e così via.</li>
+                        </ul>
+                    </li>
+                </ul>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 5 Settembre 2022, Q8:</strong> Domanda diretta sui parametri e protocolli usati da `ping`.</li>
+                        <li><strong>Esame 15 Luglio 2024, Q8:</strong> Domanda sul protocollo sottostante a ICMP e sulla gestione del TTL scaduto.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizi-consigliati" class="content-section">
+            <h2 class="section-title">6. Esercizi Consigliati per la Lezione 6</h2>
+            <div class="section-content">
+                <p>Gli argomenti di questa lezione sono prevalentemente concettuali. Gli esercizi testano la tua capacità di applicare la conoscenza del funzionamento di questi protocolli a scenari specifici.</p>
+                <div class="clarification-box">
+                    <strong>Set di Esercizi Chiave:</strong>
+                    <ol>
+                        <li>
+                            <strong>ARP (Funzionamento Pratico):</strong>
+                            <ul>
+                                <li><strong>Esame 17 Febbraio 2023, Q8.</strong> Questo esercizio è ottimo perché ti chiede di pensare a un caso realistico: un host che vuole contattare un server su Internet. Ti costringe a capire che l'ARP request non è per l'IP del server finale, ma per quello del gateway.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>DHCP (Concetto Base):</strong>
+                            <ul>
+                                <li><strong>Esame 16 Settembre 2024, Q8.</strong> Domanda diretta e fondamentale: a cosa serve DHCP e qual è la condizione per avere più server sulla stessa LAN? Testa la conoscenza di base del protocollo.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>NAT (Scenario Dinamico):</strong>
+                            <ul>
+                                <li><strong>Esame 29 Gennaio 2024, Q8.</strong> Questo è un eccellente esercizio di "problem solving". Ti presenta uno scenario in cui un parametro critico (l'IP pubblico) cambia e ti chiede di dedurne le conseguenze su una connessione esistente.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>ICMP (Applicazione e Scopo):</strong>
+                            <ul>
+                                <li><strong>Esame 15 Luglio 2024, Q8.</strong> Ti chiede cosa fa un router quando il TTL scade. È una domanda diretta che verifica la conoscenza di uno dei meccanismi di controllo più importanti di Internet.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Risolvendo questi quattro esercizi avrai coperto il funzionamento e le implicazioni pratiche di tutti i protocolli di servizio chiave del livello di rete.</p>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti di Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'dark',
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    mainBkg: 'transparent',
+                }
+            });
+            
+            const renderMermaidInSection = (section) => {
+                section.querySelectorAll('.mermaid').forEach(async (diag) => {
+                    if (diag.dataset.rendered) return;
+                    const id = diag.id || `mermaid-diag-${Math.random().toString(36).substr(2, 9)}`;
+                    diag.id = id;
+                    const code = diag.textContent.trim();
+                    diag.innerHTML = 'Loading diagram...';
+                    
+                    try {
+                        const { svg } = await mermaid.render(id, code);
+                        diag.innerHTML = svg;
+                        diag.dataset.rendered = 'true';
+                    } catch(e) {
+                        console.error("Mermaid rendering error:", e);
+                        diag.innerHTML = `<p style="color:red;">Error rendering diagram</p>`;
+                    }
+                });
+            };
+
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', () => renderMermaidInSection(section));
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                renderMermaidInSection(initiallyActiveSection);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
