@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 3: Accesso al Mezzo Condiviso (Ethernet & WiFi)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/css/common.css">
+</head>
+<body data-pdf-path="../slides/Computer Networks - Chapter 2 - Getting Connected.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 3: Accesso al Mezzo Condiviso</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni_home.html" class="sidebar-action-button" id="lezioni-home-btn">Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-mac" class="sidebar-link">1. Il Problema del Media Access Control (MAC)</a></li>
+            <li><a href="#ethernet-csmacd" class="sidebar-link">2. Ethernet: CSMA/CD</a></li>
+            <li><a href="#collision-detection" class="sidebar-link">2.1. Rilevamento delle Collisioni e Slot Time</a></li>
+            <li><a href="#backoff" class="sidebar-link">2.2. Backoff Esponenziale Troncato</a></li>
+            <li><a href="#wifi-csmaca" class="sidebar-link">3. WiFi: CSMA/CA</a></li>
+            <li><a href="#wireless-problems" class="sidebar-link">3.1. Problemi del Canale Radio</a></li>
+            <li><a href="#rts-cts" class="sidebar-link">3.2. Soluzione: RTS/CTS (MACA)</a></li>
+            <li><a href="#wifi-intervals" class="sidebar-link">3.3. Intervalli e Overhead (SIFS, DIFS)</a></li>
+            <li><a href="#performance-calc" class="sidebar-link">4. Calcolo delle Performance e Overhead</a></li>
+            <li><a href="#esercizi-consigliati" class="sidebar-link">5. Esercizi Consigliati</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-mac" class="content-section active-section">
+            <h2 class="section-title">1. Il Problema del Media Access Control (MAC)</h2>
+            <div class="section-content">
+                <p>Quando più dispositivi condividono lo stesso mezzo di trasmissione (come un cavo coassiale in Ethernet classica o l'etere in WiFi), sorge un problema fondamentale: chi ha il diritto di trasmettere e quando? Se due o più nodi trasmettono contemporaneamente, i loro segnali si sovrappongono, creando una <strong>collisione</strong> che corrompe i dati.</p>
+                <p>I protocolli di <strong>Media Access Control (MAC)</strong> sono le regole che i dispositivi seguono per coordinarsi e minimizzare le collisioni, garantendo un accesso equo ed efficiente al canale condiviso.</p>
+            </div>
+        </article>
+
+        <article id="ethernet-csmacd" class="content-section">
+            <h2 class="section-title">2. Ethernet Classica: CSMA/CD</h2>
+            <div class="section-content">
+                <p>L'Ethernet originale su cavo coassiale utilizzava un protocollo chiamato <strong>CSMA/CD (Carrier Sense Multiple Access with Collision Detection)</strong>.</p>
+                <ul>
+                    <li><strong>Carrier Sense (CS):</strong> "Ascolta prima di parlare". Una stazione controlla se il canale è libero (nessuna portante elettrica) prima di iniziare a trasmettere.</li>
+                    <li><strong>Multiple Access (MA):</strong> Tutti i nodi hanno uguale diritto di accedere al canale quando lo trovano libero.</li>
+                    <li><strong>Collision Detection (CD):</strong> "Ascolta mentre parli". Una stazione, mentre trasmette, continua ad ascoltare il canale. Se ciò che ascolta è diverso da ciò che sta trasmettendo, significa che è avvenuta una collisione.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="collision-detection" class="content-section">
+            <h3 class="subsection-title">2.1. Rilevamento delle Collisioni e Slot Time</h3>
+            <div class="section-content">
+                <p>Affinché il meccanismo di Collision Detection funzioni, una stazione deve essere in grado di rilevare una collisione prima di aver terminato la trasmissione del suo frame. Il caso peggiore si verifica quando due stazioni A e B si trovano alle estremità opposte del cavo.</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+sequenceDiagram
+    participant A
+    participant B
+    A->>B: Inizio trasmissione frame (t=0)
+    Note right of B: Il segnale di A arriva a B (t=t_prop)
+    B->>A: B inizia a trasmettere un istante prima, collisione!
+    Note left of A: B rileva la collisione e invia jamming signal
+    Note left of A: A rileva la collisione solo a t = 2 * t_prop
+                    </pre>
+                </div>
+                <p>Per garantire che A rilevi la collisione mentre sta ancora trasmettendo, il tempo di trasmissione del frame più piccolo possibile (\(T_{tx\_min}\)) deve essere maggiore o uguale al tempo di andata e ritorno del segnale sul cavo (\(2 \cdot t_{prop}\)).</p>
+                <div class="math-block">
+                \( T_{tx\_min} \ge 2 \cdot t_{prop} \)
+                </div>
+                <p>Questa relazione definisce due parametri fondamentali dell'Ethernet classica:</p>
+                <ul>
+                    <li>Lo <strong>Slot Time</strong>: Definito come \(2 \cdot t_{prop}\), è il tempo massimo per rilevare una collisione. Per Fast Ethernet (100 Mbps) è <strong>51.2 µs</strong>.</li>
+                    <li>La <strong>Dimensione Minima del Frame</strong>: È il numero di bit che possono essere trasmessi in uno Slot Time. Per Fast Ethernet, sono 512 bit, ovvero <strong>64 byte</strong>.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="backoff" class="content-section">
+            <h3 class="subsection-title">2.2. Algoritmo di Backoff Esponenziale Troncato</h3>
+            <div class="section-content">
+                <p>Quando una stazione rileva una collisione, interrompe la trasmissione, invia un segnale di "jamming" per assicurarsi che tutti i nodi vedano la collisione, e poi attende un tempo casuale prima di ritentare. Questo tempo di attesa è calcolato con l'algoritmo di <strong>backoff esponenziale</strong>.</p>
+                <p>Dopo la \(n\)-esima collisione consecutiva per lo stesso frame:</p>
+                <ol>
+                    <li>Si sceglie un numero intero casuale `k` nell'intervallo \([0, 2^n - 1]\).</li>
+                    <li>Si attende un tempo pari a \( k \cdot \text{SlotTime} \).</li>
+                    <li>Dopo l'attesa, si aggiunge il tempo fisso dell'<strong>Inter-Packet Gap (IPG)</strong>, che è il tempo minimo che deve intercorrere tra due trasmissioni successive (per Ethernet a 10/100 Mbps, è <strong>9.6 µs</strong>).</li>
+                </ol>
+                <p>L'intervallo di attesa raddoppia ad ogni collisione (da qui "esponenziale"), riducendo la probabilità di nuove collisioni. L'algoritmo è "troncato" perché l'esponente `n` viene limitato (di solito a 10), e dopo un numero massimo di tentativi (di solito 16), il frame viene scartato.</p>
+                <div class="calculation-box">
+                    <strong>Esempio di Calcolo (tipo esame Luglio '24, Q4)</strong>
+                    <p>Una stazione rileva una collisione per la seconda volta (n=2). Calcolare il tempo di attesa medio prima di ritentare. Dati: IPG = 9.6 µs, Slot Time = 51.2 µs.</p>
+                    <ol>
+                        <li><strong>Identificare l'intervallo per k:</strong> Per n=2, `k` viene scelto a caso in \([0, 2^2 - 1] = \{0, 1, 2, 3\}\).</li>
+                        <li><strong>Calcolare la media di k:</strong> \( k_{\text{medio}} = \frac{0+1+2+3}{4} = 1.5 \).</li>
+                        <li><strong>Calcolare il tempo di backoff medio:</strong> \( T_{\text{backoff\_medio}} = k_{\text{medio}} \cdot \text{SlotTime} = 1.5 \cdot 51.2 \mu s = 76.8 \mu s \).</li>
+                        <li><strong>Aggiungere l'IPG:</strong> \( T_{\text{attesa\_medio}} = T_{\text{backoff\_medio}} + \text{IPG} = 76.8 \mu s + 9.6 \mu s = 86.4 \mu s \).</li>
+                    </ol>
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                         <li><strong>Esame 15 Luglio 2024, Q4:</strong> Calcolo del tempo di attesa medio dopo la 2ª collisione.</li>
+                         <li><strong>Esame 17 Febbraio 2023, Q4:</strong> Calcolo del tempo di attesa medio dopo la 1ª collisione.</li>
+                         <li><strong>Esame 13 Luglio 2022, Q4:</strong> Calcolo del tempo di attesa medio dopo la 2ª collisione.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        
+        <article id="wifi-csmaca" class="content-section">
+            <h2 class="section-title">3. WiFi (802.11): CSMA/CA</h2>
+            <div class="section-content">
+                <p>Nelle reti wireless, il Collision Detection (CD) non è praticabile, poiché un'antenna non può trasmettere e ricevere contemporaneamente sullo stesso canale (il segnale trasmesso "assorderebbe" quello ricevuto). Inoltre, il canale radio presenta problemi unici.</p>
+                <p>Per questo, il WiFi usa un protocollo diverso: <strong>CSMA/CA (Carrier Sense Multiple Access with Collision Avoidance)</strong>.</p>
+            </div>
+        </article>
+
+        <article id="wireless-problems" class="content-section">
+            <h3 class="subsection-title">3.1. Problemi del Canale Radio</h3>
+            <div class="section-content">
+                <ol>
+                    <li><strong>Problema del Nodo Nascosto (Hidden Node):</strong> Due stazioni, A e C, sono nel raggio di copertura di un Access Point (B), ma non si sentono a vicenda. Se entrambe iniziano a trasmettere verso B, i loro segnali collideranno su B, ma né A né C se ne accorgeranno.</li>
+                    <li><strong>Problema del Nodo Esposto (Exposed Node):</strong> Una stazione B sta trasmettendo ad A. Una stazione C, vicina a B ma lontana da A, sente il canale occupato e si astiene dal trasmettere, anche se la sua trasmissione verso un'altra stazione D non interferirebbe con la ricezione di A.</li>
+                </ol>
+                <div class="mermaid-container">
+                     <pre class="mermaid">
+graph TD
+    subgraph "Nodo Nascosto"
+        A((A)) -- no-link --> C((C))
+        A --- B((B))
+        C --- B
+        style A fill:#818cf8
+        style C fill:#818cf8
+        style B fill:#60a5fa
+    end
+    subgraph "Nodo Esposto"
+        B2((B)) --- C2((C))
+        B2 --- A2((A))
+        C2 --- D2((D))
+        style B2 fill:#818cf8
+        style C2 fill:#818cf8
+        style A2 fill:#60a5fa
+        style D2 fill:#60a5fa
+    end
+                     </pre>
+                </div>
+            </div>
+        </article>
+        
+        <article id="rts-cts" class="content-section">
+            <h3 class="subsection-title">3.2. La Soluzione: RTS/CTS (MACA)</h3>
+            <div class="section-content">
+                <p>CSMA/CA risolve questi problemi con un meccanismo di "prenotazione" del canale, spesso chiamato <strong>MACA (Multiple Access with Collision Avoidance)</strong>. Prima di inviare i dati, il mittente e il ricevitore si scambiano due brevi frame di controllo:</p>
+                <ul>
+                    <li><strong>RTS (Request to Send):</strong> Il mittente invia un RTS al destinatario, dicendo "Voglio trasmettere per X microsecondi".</li>
+                    <li><strong>CTS (Clear to Send):</strong> Se il destinatario è libero, risponde con un CTS, dicendo "Ok, canale libero per X microsecondi".</li>
+                </ul>
+                <p>Questo scambio risolve entrambi i problemi:</p>
+                <ul>
+                    <li><strong>Risoluzione Nodo Nascosto:</strong> Qualsiasi stazione che sente il CTS (anche se non ha sentito l'RTS) sa che il ricevitore sta per ricevere dati e deve rimanere in silenzio per la durata indicata.</li>
+                    <li><strong>Risoluzione Nodo Esposto:</strong> Qualsiasi stazione che sente l'RTS ma non il CTS sa che il mittente sta trasmettendo, ma che il destinatario è fuori dal suo raggio di interferenza, quindi è libera di trasmettere a sua volta (verso un altro nodo).</li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="wifi-intervals" class="content-section">
+            <h3 class="subsection-title">3.3. Intervalli e Overhead (SIFS, DIFS)</h3>
+            <div class="section-content">
+                <p>Per coordinare questo scambio, 802.11 definisce diversi intervalli di tempo (Inter-Frame Spaces):</p>
+                <ul>
+                    <li><strong>SIFS (Short Inter-Frame Space):</strong> Il tempo di attesa più breve. Usato per operazioni ad alta priorità, come per un ricevitore che deve rispondere con un CTS a un RTS, o con un ACK a un frame di dati.</li>
+                    <li><strong>DIFS (Distributed Inter-Frame Space):</strong> Il tempo di attesa standard che una stazione deve attendere dopo aver trovato il canale libero, prima di poter iniziare una nuova trasmissione (inviando un RTS). È più lungo del SIFS.</li>
+                </ul>
+                <p>Il processo completo di trasmissione di un frame di dati diventa quindi: Attesa DIFS -> invio RTS -> attesa SIFS -> ricezione CTS -> attesa SIFS -> invio Dati -> attesa SIFS -> ricezione ACK.</p>
+            </div>
+        </article>
+
+        <article id="performance-calc" class="content-section">
+            <h2 class="section-title">4. Calcolo delle Performance e Overhead</h2>
+            <div class="section-content">
+                <p>Negli esami è spesso richiesto di calcolare il tempo totale o l'efficienza di una trasmissione, sommando i tempi di tutti i componenti.</p>
+                <div class="calculation-box">
+                    <strong>Esempio di Calcolo (tipo esame Settembre '23, Q5)</strong>
+                    <p>Due stazioni 802.11ac comunicano con un bitrate di 240 Mbps. Calcolare il tempo minimo per trasmettere un payload di 500 byte.
+                    Dati: RTS=20B, CTS=14B, ACK=14B, Header Dati=30B, CRC=4B (32 bit), SIFS=16µs, DIFS=34µs.</p>
+                    <ol>
+                        <li><strong>Calcolo dei byte totali da trasmettere:</strong>
+                            <p>\( \text{Byte Totali} = \text{RTS} + \text{CTS} + \text{Header} + \text{Payload} + \text{CRC} + \text{ACK} \)</p>
+                            <p>\( = 20 + 14 + 30 + 500 + 4 + 14 = 582 \text{ byte} \)</p>
+                        </li>
+                        <li><strong>Calcolo del tempo di trasmissione totale (Tx):</strong>
+                            <p>\( \text{Bit Totali} = 582 \text{ byte} \times 8 \text{ bit/byte} = 4656 \text{ bit} \)</p>
+                            <p>\( T_{tx} = \frac{4656 \text{ bit}}{240 \cdot 10^6 \text{ bps}} = 19.4 \cdot 10^{-6} s = 19.4 \mu s \)</p>
+                        </li>
+                        <li><strong>Calcolo del tempo totale degli intervalli (Overhead):</strong>
+                            <p>Una transazione completa richiede 1 DIFS e 3 SIFS.</p>
+                            <p>\( T_{\text{overhead}} = 1 \cdot \text{DIFS} + 3 \cdot \text{SIFS} = 34 \mu s + 3 \cdot 16 \mu s = 34 + 48 = 82 \mu s \)</p>
+                        </li>
+                        <li><strong>Calcolo del tempo totale della transazione:</strong>
+                            <p>\( T_{\text{totale}} = T_{tx} + T_{\text{overhead}} = 19.4 \mu s + 82 \mu s = 101.4 \mu s \)</p>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </article>
+        
+        <article id="esercizi-consigliati" class="content-section">
+            <h2 class="section-title">5. Esercizi Consigliati per la Lezione 3</h2>
+            <div class="section-content">
+                <p>Questi argomenti sono tra i più importanti dell'intero corso. Se riesci a risolvere questi esercizi, hai una solida base per l'esame.</p>
+                <div class="clarification-box">
+                    <strong>Set di Esercizi Chiave:</strong>
+                    <ol>
+                        <li>
+                            <strong>Backoff Esponenziale (Calcolo Diretto):</strong>
+                            <ul>
+                                <li><strong>Esame 15 Luglio 2024, Q4.</strong> È l'esercizio perfetto per verificare la tua comprensione dell'algoritmo di backoff. È un calcolo standard che richiede di ricordare la formula e i parametri corretti (IPG e Slot Time).</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Performance e Overhead WiFi (Calcolo Completo):</strong>
+                            <ul>
+                                <li><strong>Esame 4 Settembre 2023, Q5.</strong> Questo è l'esercizio più completo sull'argomento. Ti costringe a sommare tutti i componenti (tempi di trasmissione dei vari frame + tempi degli intervalli SIFS/DIFS) per ottenere il tempo totale. Padroneggiare questo esercizio significa aver capito tutto l'overhead di una transazione 802.11.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Concetti WiFi (Domanda Teorica):</strong>
+                            <ul>
+                                <li><strong>Esame 29 Gennaio 2024, Q5.</strong> Chiede come una stazione si accorge di una collisione (mancata ricezione del CTS). È una domanda teorica fondamentale per verificare che tu abbia capito lo scopo del meccanismo RTS/CTS.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Risolvere questi tre esercizi ti darà una preparazione completa sui meccanismi di accesso al mezzo, coprendo sia i calcoli dettagliati che i concetti chiave richiesti all'esame.</p>
+                     <div class="exam-question-list">
+                        <h4>Lista Completa Esercizi d'Esame Correlati</h4>
+                        <ul>
+                             <li><strong>Esame 17 Giugno 2024, Q5:</strong> Calcolo capacità netta Bluetooth (TDM).</li>
+                             <li><strong>Esame 29 Gennaio 2024, Q5:</strong> Domanda concettuale sulla collision detection in WiFi (mancato CTS).</li>
+                             <li><strong>Esame 19 Febbraio 2024, Q4:</strong> Probabilità di successo trasmissione con backoff esponenziale (caso A, B vs C).</li>
+                             <li><strong>Esame 15 Luglio 2024, Q4:</strong> Calcolo tempo di attesa medio dopo la 2ª collisione (backoff).</li>
+                             <li><strong>Esame 16 Settembre 2024, Q5:</strong> Calcolo tempo totale transazione Bluetooth LE.</li>
+                             <li><strong>Esame 17 Febbraio 2023, Q4:</strong> Calcolo tempo di attesa medio dopo la 1ª collisione (backoff).</li>
+                             <li><strong>Esame 15 Giugno 2023, Q4 & Q5:</strong> Dimensione minima frame Ethernet e definizioni SIFS/DIFS.</li>
+                             <li><strong>Esame 10 Luglio 2023, Q5:</strong> Calcolo capacità per slave in Bluetooth (TDM).</li>
+                             <li><strong>Esame 4 Settembre 2023, Q5:</strong> Calcolo tempo minimo per trasmettere un payload in 802.11ac (RTS/CTS, SIFS/DIFS).</li>
+                             <li><strong>Esame 17 Febbraio 2022, Q5:</strong> Domanda concettuale su nodi nascosti in WiFi.</li>
+                             <li><strong>Esame 13 Luglio 2022, Q4:</strong> Calcolo tempo di attesa medio dopo la 2ª collisione (backoff).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </article>
+        
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti di Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/js/common.js"></script>
+    <script>
+    // Questo script è solo per la gestione di Mermaid, se necessario.
+    // Il JS principale è in common.js
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                }
+            });
+            
+            function renderAllMermaid() {
+                document.querySelectorAll('.mermaid').forEach(async (diag) => {
+                    if (diag.dataset.rendered) return; // Avoid re-rendering
+                    const id = diag.id || `mermaid-diag-${Math.random().toString(36).substr(2, 9)}`;
+                    diag.id = id;
+                    const code = diag.textContent.trim();
+                    diag.innerHTML = '';
+                    try {
+                        const { svg } = await mermaid.render(id, code);
+                        diag.innerHTML = svg;
+                        diag.dataset.rendered = true;
+                    } catch(e) {
+                        console.error("Mermaid rendering error:", e);
+                        diag.innerHTML = "Error rendering diagram";
+                    }
+                });
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', renderAllMermaid);
+            });
+            if(document.querySelector('.content-section.active-section')) {
+                renderAllMermaid();
+            }
+        }
+    });
+    </script>
+</body>
+</html>
