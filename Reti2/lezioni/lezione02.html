@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 2: Livello Data Link - Framing e Controllo Errori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body data-pdf-path="../slides/Computer Networks - Chapter 2 - Getting Connected.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 2: Framing e Controllo Errori</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni_home.html" class="sidebar-action-button" id="lezioni-home-btn">Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-framing" class="sidebar-link">1. Framing: Delimitare i Dati</a></li>
+            <li><a href="#byte-stuffing" class="sidebar-link">1.1. Protocolli Byte-Oriented (BISYNC)</a></li>
+            <li><a href="#bit-stuffing" class="sidebar-link">1.2. Protocolli Bit-Oriented (HDLC)</a></li>
+            <li><a href="#error-detection" class="sidebar-link">2. Rilevamento degli Errori</a></li>
+            <li><a href="#prob-errore" class="sidebar-link">2.1. Calcolo Probabilità di Errore</a></li>
+            <li><a href="#crc" class="sidebar-link">2.2. CRC: Cyclic Redundancy Check</a></li>
+            <li><a href="#crc-calcolo" class="sidebar-link">2.3. Calcolo del CRC con Divisione Polinomiale</a></li>
+            <li><a href="#reliable-tx" class="sidebar-link">3. Cenni sulla Trasmissione Affidabile</a></li>
+            <li><a href="#stop-wait" class="sidebar-link">3.1. Stop-and-Wait e la sua Efficienza</a></li>
+            <li><a href="#sliding-window" class="sidebar-link">3.2. Sliding Window Protocol</a></li>
+            <li><a href="#esercizi-consigliati" class="sidebar-link">4. Esercizi Consigliati</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-framing" class="content-section active-section">
+            <h2 class="section-title">1. Framing: Delimitare i Dati</h2>
+            <div class="section-content">
+                <p>Il livello fisico trasmette un flusso continuo di bit. Il primo compito del livello Data Link è organizzare questo flusso in blocchi discreti chiamati <strong>frame</strong>. Questo processo, chiamato <strong>framing</strong>, permette al ricevitore di capire dove inizia e finisce un'unità di dati significativa.</p>
+                <p>Esistono diverse tecniche per il framing. Quelle rilevanti per l'esame si basano sull'uso di sequenze speciali (sentinelle) per marcare l'inizio e la fine dei frame.</p>
+            </div>
+        </article>
+
+        <article id="byte-stuffing" class="content-section">
+            <h3 class="subsection-title">1.1. Protocolli Byte-Oriented (es. BISYNC) e Byte Stuffing</h3>
+            <div class="section-content">
+                <p>In un protocollo byte-oriented, i dati vengono visti come una sequenza di byte (caratteri). Si usano caratteri speciali come <strong>STX (Start of Text)</strong> e <strong>ETX (End of Text)</strong> per delimitare il payload.</p>
+                <p><strong>Il problema:</strong> cosa succede se il carattere ETX compare all'interno dei dati? Il ricevitore terminerebbe prematuramente la lettura del frame.</p>
+                <p><strong>La soluzione:</strong> il <strong>Byte Stuffing</strong> (o Character Stuffing). Si introduce un carattere speciale di escape, chiamato <strong>DLE (Data Link Escape)</strong>. La regola è:</p>
+                <ul>
+                    <li>Il trasmettitore inserisce un DLE prima di ogni carattere ETX o DLE che compare naturalmente nei dati.</li>
+                    <li>Il ricevitore, quando vede un DLE, sa che il carattere successivo è parte dei dati e non un carattere di controllo, quindi rimuove il DLE e continua la lettura.</li>
+                </ul>
+                <div class="calculation-box">
+                    <strong>Esempio (tipo esame Luglio '23, Q3)</strong>
+                    <p>Dato un payload di byte `48 3 3 50 3` dove `ETX = 3` e `DLE = 10`, come viene trasmesso?</p>
+                    <p><strong>Soluzione:</strong> Bisogna "escapare" ogni occorrenza di ETX (valore 3) inserendo un DLE (valore 10) prima di essa.</p>
+                    <p>Payload originale: <code>48 | 3 | 3 | 50 | 3</code></p>
+                    <p>Sequenza trasmessa: <code>48 | 10 | 3 | 10 | 3 | 50 | 10 | 3</code></p>
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 10 Luglio 2023, Q3:</strong> Applicazione diretta del byte stuffing con DLE ed ETX.</li>
+                        <li><strong>Esame 19 Febbraio 2024, Q3:</strong> Applicazione diretta del byte stuffing con DLE ed ETX.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        
+        <article id="bit-stuffing" class="content-section">
+            <h3 class="subsection-title">1.2. Protocolli Bit-Oriented (es. HDLC) e Bit Stuffing</h3>
+            <div class="section-content">
+                <p>In un protocollo bit-oriented, i dati sono visti come una sequenza di bit. Si usa una sequenza di bit speciale (flag) come sentinella, ad esempio <code>01111110</code> in HDLC.</p>
+                <p><strong>Il problema:</strong> cosa succede se la sequenza `01111110` compare nei dati?</p>
+                <p><strong>La soluzione:</strong> il <strong>Bit Stuffing</strong>.</p>
+                <ul>
+                    <li>Il trasmettitore, dopo aver trasmesso <strong>cinque '1' consecutivi</strong>, inserisce sempre uno <strong>'0'</strong> nel flusso di bit, indipendentemente dal bit successivo.</li>
+                    <li>Il ricevitore, quando vede cinque '1' consecutivi, esamina il bit successivo:
+                        <ul>
+                            <li>Se è uno <strong>'0'</strong>, sa che è uno '0' di stuffing, lo scarta e continua.</li>
+                            <li>Se è un <strong>'1'</strong>, sa che sta guardando la sequenza flag di fine frame.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="error-detection" class="content-section">
+            <h2 class="section-title">2. Rilevamento degli Errori</h2>
+            <div class="section-content">
+                <p>La trasmissione su un canale fisico non è perfetta e i bit possono essere alterati (flippati) a causa del rumore. Il livello Data Link implementa meccanismi per rilevare questi errori, aggiungendo bit ridondanti al frame.</p>
+            </div>
+        </article>
+
+        <article id="prob-errore" class="content-section">
+            <h3 class="subsection-title">2.1. Calcolo della Probabilità di Errore</h3>
+            <div class="section-content">
+                <p>Dato un <strong>Bit Error Rate (BER)</strong>, indicato con `p`, che è la probabilità che un singolo bit sia errato, possiamo calcolare la probabilità che un intero frame arrivi integro o meno.</p>
+                <div class="calculation-box">
+                    <strong>Esempio (tipo esame Giugno '24, Q3)</strong>
+                    <p>Una linea ha un BER `p = 10⁻⁴`. Si trasmettono due frame da 500 byte. Qual è la probabilità che <strong>almeno uno</strong> dei due arrivi senza errori?</p>
+                    <ol>
+                        <li><strong>Dimensione del frame in bit:</strong> \( N = 500 \text{ byte} \times 8 \text{ bit/byte} = 4000 \text{ bit} \)</li>
+                        <li><strong>Probabilità che un bit sia corretto:</strong> \( 1 - p \)</li>
+                        <li><strong>Probabilità che un frame sia corretto (P_corr):</strong> Tutti i suoi N bit devono essere corretti. \( P_{\text{corr}} = (1 - p)^N = (1 - 10^{-4})^{4000} \approx 0.6703 \)</li>
+                        <li><strong>Probabilità che un frame sia sbagliato (P_err):</strong> \( P_{\text{err}} = 1 - P_{\text{corr}} \approx 1 - 0.6703 = 0.3297 \)</li>
+                        <li><strong>Probabilità che entrambi i frame siano sbagliati:</strong> \( P_{\text{entrambi err}} = P_{\text{err}} \times P_{\text{err}} = (0.3297)^2 \approx 0.1087 \)</li>
+                        <li><strong>Probabilità che ALMENO UNO sia corretto:</strong> È il complementare dell'evento "entrambi sono sbagliati". \( P(\text{almeno uno corretto}) = 1 - P_{\text{entrambi err}} \approx 1 - 0.1087 = 0.8913 = 89.13\% \)</li>
+                    </ol>
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 17 Giugno 2024, Q3:</strong> Calcolo probabilità che almeno uno di due frame arrivi integro.</li>
+                        <li><strong>Esame 17 Febbraio 2022, Q3:</strong> Calcolo probabilità che almeno una di due copie arrivi integra.</li>
+                        <li><strong>Esame 5 Settembre 2022, Q3:</strong> Calcolo probabilità binomiale (es. esattamente 2 errori in un frame).</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="crc" class="content-section">
+            <h3 class="subsection-title">2.2. CRC: Cyclic Redundancy Check</h3>
+            <div class="section-content">
+                <p>Il CRC è il meccanismo di controllo degli errori più importante e testato all'esame. Si basa sull'aritmetica polinomiale in modulo 2 (dove le somme e le sottrazioni sono equivalenti all'operazione di XOR bit a bit, senza riporto).</p>
+                <p>L'idea è trattare la sequenza di bit del messaggio `M` come i coefficienti di un polinomio `M(x)`. Sia `G(x)` un polinomio generatore di grado `r`, noto sia al mittente che al destinatario.</p>
+                <p>L'obiettivo è calcolare una sequenza di `r` bit (il CRC) da aggiungere alla fine del messaggio `M`, in modo che il messaggio risultante `M'` sia esattamente divisibile per `G(x)`.</p>
+                <div class="note-box">
+                    <strong>Standard CRC comuni:</strong>
+                    <p>Esistono diversi polinomi generatori standardizzati, scelti per le loro ottime proprietà di rilevamento degli errori. Non è necessario memorizzarli per l'esame, ma è utile sapere che esistono diverse varianti:</p>
+                    <ul>
+                        <li><strong>CRC-8, CRC-16:</strong> Usati in vari protocolli a basso livello.</li>
+                        <li><strong>CRC-32:</strong> È lo standard usato in tecnologie onnipresenti come <strong>Ethernet</strong> e <strong>802.11 (WiFi)</strong>. Il suo polinomio generatore ha grado 32 e offre una protezione molto robusta contro gli errori di trasmissione più comuni.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="crc-calcolo" class="content-section">
+            <h3 class="subsection-title">2.3. Calcolo del CRC con Divisione Polinomiale</h3>
+            <div class="section-content">
+                <p>L'algoritmo per calcolare il CRC è il seguente:</p>
+                <ol>
+                    <li>Dato un polinomio generatore di grado `r`, aggiungi `r` zeri alla fine del messaggio `M`. Questo corrisponde a calcolare \( M(x) \cdot x^r \).</li>
+                    <li>Dividi il polinomio risultante \( M(x) \cdot x^r \) per il polinomio generatore `G(x)` usando la divisione polinomiale in modulo 2.</li>
+                    <li>Il <strong>resto</strong> di questa divisione, che avrà al massimo `r` bit, è il CRC.</li>
+                    <li>Sottrai (o somma, è lo stesso in mod 2) il resto dal messaggio con gli zeri aggiunti. In pratica, sostituisci gli `r` zeri con il resto per formare il messaggio finale da trasmettere.</li>
+                </ol>
+                <p>Il ricevitore esegue la stessa divisione sul messaggio ricevuto (dati + CRC). Se il resto è zero, il frame è considerato corretto. Se è diverso da zero, è corrotto e viene scartato.</p>
+                 <div class="calculation-box">
+                    <strong>Esempio di Calcolo (tipo esame Luglio '24, Q3)</strong>
+                    <p>Un'interfaccia riceve la sequenza `110101110111`. Il polinomio generatore è \(x^4 + x^2 + 1\), che corrisponde alla sequenza di bit `10101`. La sequenza è corretta?</p>
+                    <p><strong>Soluzione:</strong> Eseguiamo la divisione del messaggio ricevuto per il generatore. Se il resto è 0, è corretta.</p>
+                    <pre><code>
+   110101110111 | 10101
+-  10101        |---------
+   -----        | 11111101... (il quoziente non è rilevante)
+    11111
+-   10101
+    -----
+     10101
+-    10101
+     -----
+      000011101
+-         00000
+          -----
+           11101
+-          10101
+           -----
+            10001
+-           10101
+            -----
+             01001 ... (etc.)
+  ... alla fine il resto NON è 0.
+                    </code></pre>
+                    <p>Eseguendo la divisione completa (XOR bit a bit), si trova che il resto è diverso da zero. Ad esempio, la soluzione dell'esame del 15 Luglio 2024 mostra che il resto è `10`. Pertanto, la sequenza è **errata**.</p>
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 15 Luglio 2024, Q3:</strong> Verificare la correttezza di una sequenza ricevuta.</li>
+                        <li><strong>Esame 17 Febbraio 2023, Q3:</strong> Calcolare il CRC da aggiungere a una sequenza data.</li>
+                        <li><strong>Esame 4 Settembre 2023, Q3:</strong> Verificare la correttezza di una sequenza ricevuta.</li>
+                        <li><strong>Esame 1 Febbraio 2022, Q3:</strong> Verificare la correttezza di una sequenza ricevuta.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="reliable-tx" class="content-section">
+            <h2 class="section-title">3. Cenni sulla Trasmissione Affidabile</h2>
+            <div class="section-content">
+                <p>Una volta che un errore viene rilevato, il frame corrotto viene scartato. Per garantire una consegna affidabile, è necessario un meccanismo per ritrasmettere i frame persi o scartati. Questo è il compito dei protocolli di trasmissione affidabile.</p>
+            </div>
+        </article>
+
+        <article id="stop-wait" class="content-section">
+            <h3 class="subsection-title">3.1. Stop-and-Wait e la sua Efficienza</h3>
+            <div class="section-content">
+                <p>Il protocollo più semplice è lo <strong>Stop-and-Wait</strong>. Il mittente invia un frame e attende un riscontro (ACK) prima di inviare il successivo. Se l'ACK non arriva entro un certo timeout, il frame viene ritrasmesso.</p>
+                <p>Il tempo totale per trasmettere un singolo frame è la somma del tempo di trasmissione, del ritardo di andata, del tempo di trasmissione dell'ACK e del ritardo di ritorno. La somma dei ritardi di andata e ritorno è il **Round-Trip Time (RTT)**.</p>
+                <div class="calculation-box">
+                    <strong>Esempio (tipo esame Settembre '23, Q4)</strong>
+                    <p>Due host usano Stop-and-Wait. Il ritardo (solo propagazione) è di 3 µs. La trasmissione di un frame dati da 1000 byte impiega 100 µs, e un ACK impiega 2 µs. Qual è la capacità netta?</p>
+                    <ol>
+                        <li><strong>Tempo totale per un ciclo:</strong> \( T_{\text{ciclo}} = T_{\text{tx\_dati}} + T_{\text{prop\_andata}} + T_{\text{tx\_ack}} + T_{\text{prop\_ritorno}} \)</li>
+                        <li><strong>Sostituire i valori:</strong> \( T_{\text{ciclo}} = 100\mu s + 3\mu s + 2\mu s + 3\mu s = 108\mu s \)</li>
+                        <li><strong>Dati utili trasmessi per ciclo:</strong> 1000 byte.</li>
+                        <li><strong>Capacità Netta (C):</strong> \( C = \frac{\text{Dati Utili}}{\text{Tempo Totale}} = \frac{1000 \text{ byte}}{108 \mu s} = \frac{1000 \text{ byte}}{108 \cdot 10^{-6} s} \approx 9.26 \cdot 10^6 \text{ byte/s} = 9.26 \text{ MB/s} \)</li>
+                        <li><strong>Conversione in Mbps:</strong> \( 9.26 \text{ MB/s} \times 8 \text{ bit/byte} \approx 74 \text{ Mbps} \)</li>
+                    </ol>
+                </div>
+                <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 4 Settembre 2023, Q4:</strong> Calcolo della capacità netta con Stop-and-Wait.</li>
+                        <li><strong>Esame 15 Giugno 2023, Q3:</strong> Calcolo della velocità di trasferimento con Stop-and-Wait.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        
+        <article id="sliding-window" class="content-section">
+            <h3 class="subsection-title">3.2. Sliding Window Protocol</h3>
+            <div class="section-content">
+                <p>Lo Stop-and-Wait è inefficiente su canali con un alto prodotto banda-ritardo. Per questo si usa il <strong>Sliding Window Protocol</strong>, che permette al mittente di inviare più frame (`window size`) prima di dover attendere un ACK.</p>
+                <p>Negli esami, questo protocollo è trattato in dettaglio nel contesto del Livello di Trasporto (TCP), ma a volte compaiono domande concettuali anche a questo livello.</p>
+                <div class="note-box">
+                    <strong>Concetto chiave per l'esame:</strong> Il numero di tag (o numeri di sequenza) disponibili deve essere almeno il doppio della dimensione della finestra di invio (`SWS`) per evitare ambiguità. Se hai `k` bit per i tag, hai \(2^k\) tag disponibili, e la finestra massima è \(2^{k-1}\).
+                </div>
+                <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 17 Giugno 2024, Q4:</strong> Domanda concettuale sul numero di frame inviabili in uno scenario di Sliding Window.</li>
+                        <li><strong>Esame 2 Febbraio 2023, Q4:</strong> Calcolo della dimensione massima della finestra dati i bit per le etichette.</li>
+                        <li><strong>Esame 16 Giugno 2022, Q4:</strong> Calcolo della dimensione massima della finestra dati i bit per le etichette.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizi-consigliati" class="content-section">
+            <h2 class="section-title">4. Esercizi Consigliati per la Lezione 2</h2>
+            <div class="section-content">
+                <p>Per consolidare gli argomenti di questa lezione e sentirti pronto a passare alla successiva, ti consiglio di svolgere questo set minimo ma completo di esercizi.</p>
+                <div class="clarification-box">
+                    <strong>Set di Esercizi Chiave:</strong>
+                    <ol>
+                        <li>
+                            <strong>Byte Stuffing (Pratica diretta):</strong>
+                            <ul>
+                                <li><strong>Esame 10 Luglio 2023, Q3.</strong> È un esercizio veloce che testa la tua comprensione del meccanismo di escape. Se lo fai correttamente, hai capito il concetto.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Calcolo Probabilità di Errore (Logica e Matematica):</strong>
+                            <ul>
+                                <li><strong>Esame 17 Giugno 2024, Q3.</strong> Questo esercizio è perfetto perché ti costringe a ragionare in termini di eventi complementari ("almeno uno" vs "nessuno"), un passaggio logico fondamentale.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Calcolo del CRC (Abilità algoritmica):</strong>
+                            <ul>
+                                <li><strong>Esame 17 Febbraio 2023, Q3.</strong> A differenza degli esercizi di verifica, questo ti chiede di *calcolare* il CRC da zero. È l'esercizio più completo sull'argomento, perché se sai calcolarlo, sai anche verificarlo.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Efficienza Stop-and-Wait (Applicazione formule di performance):</strong>
+                            <ul>
+                                <li><strong>Esame 4 Settembre 2023, Q4.</strong> Un classico. Ti costringe a sommare correttamente tutti i ritardi (trasmissione e propagazione per dati e ACK) e a calcolare la capacità netta.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Una volta risolti correttamente questi 4 esercizi, avrai coperto tutte le principali tipologie di domande relative a Framing e Controllo degli Errori che compaiono negli esami.</p>
+                </div>
+            </div>
+        </article>
+        
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti di Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                }
+            });
+
+            function renderAllMermaid() {
+                document.querySelectorAll('.mermaid').forEach(async (diag) => {
+                    const id = diag.id || `mermaid-diag-${Math.random().toString(36).substr(2, 9)}`;
+                    diag.id = id;
+                    const code = diag.textContent.trim();
+                    diag.innerHTML = '';
+                    try {
+                        const { svg } = await mermaid.render(id, code);
+                        diag.innerHTML = svg;
+                    } catch(e) {
+                        console.error("Mermaid rendering error:", e);
+                        diag.innerHTML = "Error rendering diagram";
+                    }
+                });
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', renderAllMermaid);
+            });
+            if(document.querySelector('.content-section.active-section')) {
+                renderAllMermaid();
+            }
+        }
+    });
+    </script>
+</body>
+</html>

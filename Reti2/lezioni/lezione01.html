@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 1: Fondamenti di Trasmissione e Performance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body data-pdf-path="../slides/Computer Networks - Chapter 2 - Getting Connected.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 1: Fondamenti e Performance</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni_home.html" class="sidebar-action-button" id="lezioni-home-btn">Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-performance" class="sidebar-link">1. Metriche di Performance</a></li>
+            <li><a href="#throughput-bandwidth" class="sidebar-link">1.1. Throughput vs Bandwidth</a></li>
+            <li><a href="#latency-delay" class="sidebar-link">1.2. Latenza (Delay)</a></li>
+            <li><a href="#shannon-hartley" class="sidebar-link">2. Capacità del Canale: Shannon-Hartley</a></li>
+            <li><a href="#formula-shannon" class="sidebar-link">2.1. La Formula Fondamentale</a></li>
+            <li><a href="#snr-decibel" class="sidebar-link">2.2. SNR e Decibel (dB)</a></li>
+            <li><a href="#calcolo-shannon-esempi" class="sidebar-link">2.3. Esempi di Calcolo</a></li>
+            <li><a href="#codifiche-linea" class="sidebar-link">3. Codifiche di Linea e Bitrate Netto</a></li>
+            <li><a href="#efficienza-4b5b" class="sidebar-link">3.1. Efficienza della Codifica (es. 4B/5B)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-performance" class="content-section active-section">
+            <h2 class="section-title">1. Metriche Fondamentali di Performance</h2>
+            <div class="section-content">
+                <p>Per analizzare e progettare una rete, è essenziale comprendere le due metriche fondamentali che ne descrivono le performance: la "velocità" con cui i dati viaggiano (throughput) e il "tempo" che impiegano per arrivare (latenza).</p>
+            </div>
+        </article>
+
+        <article id="throughput-bandwidth" class="content-section">
+            <h3 class="subsection-title">1.1. Throughput vs Bandwidth</h3>
+            <div class="section-content">
+                <p>Sebbene spesso usati come sinonimi, questi due termini hanno significati tecnici diversi, come sottolineato dal professore:</p>
+                <ul>
+                    <li><strong>Bandwidth (Larghezza di Banda):</strong> È una proprietà fisica del canale di comunicazione. Si misura in Hertz (Hz) e rappresenta l'ampiezza dello spettro di frequenze che il canale può trasportare. Un canale con una larghezza di banda maggiore può, in linea di principio, trasportare più informazioni.</li>
+                    <li><strong>Throughput (o Bitrate):</strong> È la misura effettiva della quantità di dati (bit) che vengono trasmessi con successo in un'unità di tempo. Si misura in <strong>bit per secondo (bps)</strong>, con i suoi multipli (kbps, Mbps, Gbps).</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Per l'esame:</strong> Il professore usa spesso il termine "banda" o "capacità" per riferirsi al throughput in bps. La distinzione è importante concettualmente, ma nei calcoli il termine "banda" va quasi sempre interpretato come bitrate.
+                </div>
+            </div>
+        </article>
+
+        <article id="latency-delay" class="content-section">
+            <h3 class="subsection-title">1.2. Latenza (Delay)</h3>
+            <div class="section-content">
+                <p>La latenza, o ritardo, è il tempo totale che un messaggio impiega per viaggiare dalla sorgente alla destinazione. È la somma di diverse componenti:</p>
+                <div class="math-block">
+                \( \text{Latenza Totale} = T_{\text{propagazione}} + T_{\text{trasmissione}} + T_{\text{coda}} + T_{\text{elaborazione}} \)
+                </div>
+                <ol>
+                    <li><strong>Tempo di Propagazione (\(T_{\text{prop}}\)):</strong> Il tempo che il segnale impiega a percorrere fisicamente il mezzo. Dipende solo dalla distanza e dalla velocità della luce nel mezzo.
+                        <div class="math-block">\( T_{\text{prop}} = \frac{\text{Distanza}}{\text{Velocità di propagazione}} \)</div>
+                    </li>
+                    <li><strong>Tempo di Trasmissione (\(T_{\text{tx}}\)):</strong> Il tempo necessario per "immettere" tutti i bit del messaggio sul canale. Dipende dalla dimensione del messaggio e dal throughput del link.
+                        <div class="math-block">\( T_{\text{tx}} = \frac{\text{Dimensione Messaggio (bit)}}{\text{Throughput (bps)}} \)</div>
+                    </li>
+                    <li><strong>Tempo di Coda (\(T_{\text{coda}}\)):</strong> Il tempo che un pacchetto passa in attesa nei buffer dei dispositivi di rete (router, switch) prima di essere elaborato o trasmesso. È l'unica componente che dipende dal traffico e dalla congestione della rete.</li>
+                    <li><strong>Tempo di Elaborazione (\(T_{\text{proc}}\)):</strong> Tempo impiegato dal router per esaminare l'header del pacchetto, decidere dove inoltrarlo, ecc. Spesso trascurabile e omesso negli esercizi.</li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Analogia del Treno:</strong> Immagina un treno (il messaggio) che deve percorrere un binario (il canale).
+                    <ul>
+                        <li>Il <strong>tempo di propagazione</strong> è il tempo che la locomotiva impiega per andare dalla stazione di partenza a quella di arrivo.</li>
+                        <li>Il <strong>tempo di trasmissione</strong> è il tempo che serve a tutto il treno per uscire dalla stazione di partenza ed entrare nel binario. Un treno lungo (messaggio grande) o una stazione lenta (basso throughput) aumentano questo tempo.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        
+        <article id="shannon-hartley" class="content-section">
+            <h2 class="section-title">2. Capacità del Canale: Il Teorema di Shannon-Hartley</h2>
+            <div class="section-content">
+                <p>Questo teorema è uno degli argomenti di calcolo più frequenti e importanti dell'esame. Stabilisce il limite teorico massimo del throughput (chiamato Capacità, `C`) di un canale di comunicazione in presenza di rumore.</p>
+            </div>
+        </article>
+
+        <article id="formula-shannon" class="content-section">
+            <h3 class="subsection-title">2.1. La Formula Fondamentale</h3>
+            <div class="section-content">
+                <p>La capacità `C` di un canale è data da:</p>
+                <div class="math-block">
+                \( C = B \cdot \log_{2}(1 + S/N) \)
+                </div>
+                <p>Dove:</p>
+                <ul>
+                    <li>`C` = Capacità massima del canale in <strong>bit per secondo (bps)</strong>.</li>
+                    <li>`B` = Larghezza di banda del canale in <strong>Hertz (Hz)</strong>.</li>
+                    <li>`S/N` = Rapporto segnale/rumore (Signal-to-Noise Ratio), un numero puro che indica la potenza del segnale rispetto alla potenza del rumore di fondo.</li>
+                </ul>
+                <p>Questo teorema ci dice che per aumentare la capacità di un canale possiamo agire su due fronti: aumentare la larghezza di banda fisica (`B`) o migliorare la qualità del segnale riducendo il rumore (aumentando `S/N`).</p>
+            </div>
+        </article>
+
+        <article id="snr-decibel" class="content-section">
+            <h3 class="subsection-title">2.2. SNR e Decibel (dB)</h3>
+            <div class="section-content">
+                <p>Negli esercizi, l'SNR è quasi sempre espresso in <strong>decibel (dB)</strong>. È fondamentale saper convertire tra la scala logaritmica (dB) e il rapporto numerico (S/N) per usare la formula di Shannon.</p>
+                <p><strong>Conversione da dB a S/N (la più comune negli esercizi):</strong></p>
+                <div class="math-block">
+                \( S/N = 10^{\frac{\text{SNR}_{dB}}{10}} \)
+                </div>
+                <p><strong>Conversione da S/N a dB:</strong></p>
+                <div class="math-block">
+                \( \text{SNR}_{dB} = 10 \cdot \log_{10}(S/N) \)
+                </div>
+            </div>
+        </article>
+        
+        <article id="calcolo-shannon-esempi" class="content-section">
+            <h3 class="subsection-title">2.3. Esempi di Calcolo</h3>
+            <div class="section-content">
+                <div class="calculation-box">
+                    <strong>Esempio 1: Calcolare la capacità `C` (tipo esame Febbraio '24, Q2)</strong>
+                    <p>Un canale ha una larghezza di banda di 20 MHz e un SNR di 15 dB. Qual è la capacità massima?</p>
+                    <ol>
+                        <li><strong>Convertire SNR:</strong> \( S/N = 10^{15/10} = 10^{1.5} \approx 31.62 \)</li>
+                        <li><strong>Applicare Shannon:</strong> \( C = 20 \cdot 10^6 \cdot \log_{2}(1 + 31.62) = 20 \cdot 10^6 \cdot \log_{2}(32.62) \)</li>
+                        <li>\( C \approx 20 \cdot 10^6 \cdot 5.027 \approx 100.54 \cdot 10^6 \text{ bps} = 100.54 \text{ Mbps} \)</li>
+                    </ol>
+                </div>
+                <div class="calculation-box">
+                    <strong>Esempio 2: Calcolare l'SNR minimo (tipo esame Settembre '24, Q2)</strong>
+                    <p>Si vuole una capacità di almeno 100 Mbps su un canale con banda di 20 MHz. Qual è l'SNR minimo accettabile in dB?</p>
+                    <ol>
+                        <li><strong>Isolare S/N dalla formula:</strong> \( \frac{C}{B} = \log_{2}(1 + S/N) \implies 2^{C/B} = 1 + S/N \implies S/N = 2^{C/B} - 1 \)</li>
+                        <li><strong>Sostituire i valori:</strong> \( S/N = 2^{(100 \cdot 10^6) / (20 \cdot 10^6)} - 1 = 2^5 - 1 = 32 - 1 = 31 \)</li>
+                        <li><strong>Convertire in dB:</strong> \( \text{SNR}_{dB} = 10 \cdot \log_{10}(31) \approx 10 \cdot 1.491 \approx 14.91 \text{ dB} \)</li>
+                    </ol>
+                </div>
+            </div>
+        </article>
+        
+        <article id="codifiche-linea" class="content-section">
+            <h2 class="section-title">3. Codifiche di Linea e Bitrate Netto</h2>
+            <div class="section-content">
+                <p>La capacità calcolata con Shannon è un limite teorico "grezzo". Nella pratica, per garantire una trasmissione robusta (es. per evitare lunghe sequenze di 0 o 1 e facilitare la sincronizzazione), si usano codifiche di linea come la <strong>4B/5B</strong>.</p>
+                <p>Queste codifiche introducono un overhead: per ogni `N` bit di dati utili, vengono trasmessi `M` bit sul canale, con `M > N`.</p>
+            </div>
+        </article>
+        
+        <article id="efficienza-4b5b" class="content-section">
+            <h3 class="subsection-title">3.1. Efficienza della Codifica (es. 4B/5B)</h3>
+            <div class="section-content">
+                <p>La codifica 4B/5B, usata ad esempio in Fast Ethernet, codifica 4 bit di dati in un simbolo di 5 bit. L'efficienza di questa codifica è:</p>
+                <div class="math-block">
+                \( \text{Efficienza} = \frac{\text{Bit Dati}}{\text{Bit Trasmessi}} = \frac{4}{5} = 0.8 = 80\% \)
+                </div>
+                <p>Questo significa che la capacità *netta* (quella disponibile per i dati reali) è l'80% della capacità *grezza* del canale.</p>
+                <div class="calculation-box">
+                    <strong>Esempio 3: Calcolare la capacità netta (tipo esame Giugno '24, Q2)</strong>
+                    <p>Un canale ha una capacità grezza di 100.5 Mbps. Se si adotta una codifica 4B/5B, qual è la capacità netta ottenibile?</p>
+                    <ul>
+                        <li><strong>Calcolo:</strong> \( C_{\text{netta}} = C_{\text{grezza}} \cdot \text{Efficienza} = 100.5 \text{ Mbps} \cdot \frac{4}{5} = 80.4 \text{ Mbps} \)</li>
+                    </ul>
+                </div>
+
+                <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati a Questa Lezione</h4>
+                    <ul>
+                        <li><strong>Esame 17 Giugno 2024, Q2:</strong> Calcolo della capacità netta data una banda, un SNR e una codifica 4B/5B.</li>
+                        <li><strong>Esame 19 Febbraio 2024, Q2:</strong> Calcolo della larghezza di banda necessaria dati SNR e capacità desiderata.</li>
+                        <li><strong>Esame 15 Luglio 2024, Q2:</strong> Calcolo di tempo di trasmissione ed efficienza (include anche overhead di protocollo, anticipando Lezione 3).</li>
+                        <li><strong>Esame 16 Settembre 2024, Q2:</strong> Calcolo dell'SNR minimo date capacità e banda.</li>
+                        <li><strong>Esame 17 Febbraio 2023, Q2:</strong> Calcolo della capacità grezza (Shannon) e dei bit per simbolo.</li>
+                        <li><strong>Esame 15 Giugno 2023, Q2:</strong> Calcolo della banda minima dati bitrate, S/R e modulazione (implicita nel baudrate).</li>
+                        <li><strong>Esame 4 Settembre 2023, Q2:</strong> Calcolo del rapporto S/N dati throughput, frame rate, dimensione frame e banda.</li>
+                        <li><strong>Esame 1 Febbraio 2022, Q2:</strong> Calcolo della larghezza di banda dati potenza segnale, potenza rumore e capacità.</li>
+                        <li><strong>Esame 17 Febbraio 2022, Q2:</strong> Calcolo della capacità (Shannon) e dei bit per simbolo.</li>
+                        <li><strong>Esame 13 Luglio 2022, Q2:</strong> Calcolo della potenza del segnale S dati rumore, banda e capacità.</li>
+                        <li><strong>Esame 5 Settembre 2022, Q2:</strong> Calcolo dell'SNR massimo (in dB) dati capacità e banda.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti di Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    // Questo script è solo per la gestione di Mermaid, se necessario.
+    // Il JS principale è in common.js
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: true, 
+                theme: 'dark',
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
+            });
+        }
+    });
+    </script>
+</body>
+</html>

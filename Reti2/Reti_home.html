@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reti di Calcolatori - Appunti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header.page-header {
+            background-color: var(--bg-header);
+            color: var(--text-primary);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+        }
+        header.page-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin: 0;
+        }
+         header.page-header p {
+            margin-top: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+            text-align: center;
+        }
+        main { width: 100%; }
+        .content-category {
+            background-color: var(--bg-card);
+            padding: 2.5rem;
+            border-radius: var(--border-radius-main);
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px var(--shadow-soft);
+        }
+        .content-category h2 {
+            font-size: 1.6rem;
+            color: var(--accent-secondary);
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 0.75rem;
+        }
+        .nav-button {
+            display: inline-block;
+            padding: 0.9rem 2rem;
+            margin: 0.5rem;
+            background-color: var(--accent-primary);
+            color: var(--bg-deep-space);
+            text-decoration: none;
+            border-radius: var(--border-radius-small);
+            font-weight: 600;
+            text-align: center;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            font-size: 1rem;
+        }
+        .nav-button:hover {
+            background-color: var(--accent-secondary);
+            transform: translateY(-2px);
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap; 
+            gap: 1.5rem; 
+            padding: 1rem 0; 
+        }
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-secondary);
+            margin-top: auto; 
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            header.page-header h1 { font-size: 1.8rem; }
+            .container { margin-top: 2rem; }
+            .content-category { padding: 2rem 1.5rem; }
+            .content-category h2 { font-size: 1.4rem; }
+            .nav-button { width: 100%; margin: 0.5rem 0; }
+        }
+    </style>
+</head>
+<body>
+    <header class="page-header">
+        <h1>Appunti di Reti di Calcolatori</h1>
+        <p>Una guida strategica per superare l'esame del Prof. Marino Miculan</p>
+    </header>
+
+    <div class="container">
+        <main>
+            <section class="content-category">
+                <h2>Menu Principale</h2>
+                <div class="button-container">
+                    <a href="lezioni/Reti_lezioni_home.html" class="nav-button">Indice delle Lezioni</a>
+                    <a href="#" class="nav-button" style="background-color: #374151; cursor: not-allowed;" title="In preparazione...">Esercizi e Temi d'Esame</a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>Realizzato sulla base dell'analisi di esami e slide del corso.</p>
+    </footer>
+</body>
+</html>

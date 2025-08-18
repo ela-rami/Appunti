@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indice Lezioni - Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep-space: #111827;
+            --bg-card: #1f2937;
+            --bg-header: #1A202C;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #818cf8;
+            --border-soft: rgba(107, 114, 128, 0.2);
+            --shadow-soft: rgba(0, 0, 0, 0.25);
+            --font-main: 'Nunito Sans', sans-serif;
+            --border-radius-main: 12px;
+            --border-radius-small: 6px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-main);
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-deep-space);
+        }
+        header.page-header {
+            background-color: var(--bg-header);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px var(--shadow-soft);
+            border-bottom: 1px solid var(--border-soft);
+            display: flex;
+            align-items: center;
+        }
+        .back-link {
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-size: 1.8rem;
+            margin-right: 1.5rem;
+            transition: color 0.2s ease;
+        }
+        .back-link:hover { color: var(--accent-primary); }
+        header.page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .lesson-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        .lesson-card {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius-main);
+            overflow: hidden;
+            box-shadow: 0 4px 12px var(--shadow-soft);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid var(--border-soft);
+            display: flex;
+            flex-direction: column;
+        }
+        .lesson-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px var(--shadow-soft);
+        }
+        .lesson-card-header {
+            background-color: var(--bg-header);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        .lesson-card-header h3 {
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            margin: 0;
+        }
+        .lesson-card-body {
+            padding: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            flex-grow: 1;
+        }
+        .lesson-card-footer {
+            padding: 1rem 1.5rem;
+            margin-top: auto;
+            border-top: 1px solid var(--border-soft);
+            text-align: right;
+        }
+        .lesson-link {
+            text-decoration: none;
+            color: var(--accent-secondary);
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+        .lesson-link:hover {
+            color: var(--accent-primary);
+        }
+        .disabled-link {
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        @media (max-width: 768px) {
+             header.page-header h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="page-header">
+        <a href="../Reti_home.html" class="back-link" title="Torna alla Home del Corso">←</a>
+        <h1>Indice delle Lezioni</h1>
+    </header>
+
+    <div class="container">
+        <div class="lesson-grid">
+
+            <!-- Lezione 1 -->
+            <div class="lesson-card">
+                <div class="lesson-card-header"><h3>Lezione 1: Fondamenti e Performance</h3></div>
+                <div class="lesson-card-body">Concetti di base: Latenza (Propagazione, Trasmissione, Coda), Teorema di Shannon, SNR e codifiche di linea. I calcoli fondamentali per l'esame.</div>
+                <div class="lesson-card-footer"><a href="lezione01.html" class="lesson-link">Vai alla lezione →</a></div>
+            </div>
+
+            <!-- Lezione 2 -->
+            <div class="lesson-card">
+                <div class="lesson-card-header"><h3>Lezione 2: Livello Data Link</h3></div>
+                <div class="lesson-card-body">Meccanismi di Framing (Bit/Byte Stuffing), controllo degli errori con CRC (divisione polinomiale) e protocolli base di trasmissione affidabile (Stop-and-Wait).</div>
+                <div class="lesson-card-footer"><a href="#" class="lesson-link disabled-link">In preparazione...</a></div>
+            </div>
+            
+            <!-- Lezione 3 -->
+            <div class="lesson-card">
+                <div class="lesson-card-header"><h3>Lezione 3: Accesso al Mezzo</h3></div>
+                <div class="lesson-card-body">Ethernet con CSMA/CD, calcolo dello Slot Time, Backoff Esponenziale. WiFi con CSMA/CA, problemi del canale radio (Nodo Nascosto/Esposto) e RTS/CTS.</div>
+                <div class="lesson-card-footer"><a href="#" class="lesson-link disabled-link">In preparazione...</a></div>
+            </div>
+
+            <!-- Lezione 4 -->
+            <div class="lesson-card">
+                <div class="lesson-card-header"><h3>Lezione 4: Switching</h3></div>
+                <div class="lesson-card-body">Funzionamento degli Switch di Livello 2: auto-apprendimento (learning) e flooding. Algoritmo Spanning Tree (STP) per la gestione dei loop.</div>
+                <div class="lesson-card-footer"><a href="#" class="lesson-link disabled-link">In preparazione...</a></div>
+            </div>
+
+            <!-- Lezione 5 -->
+            <div class="lesson-card">
+                <div class="lesson-card-header"><h3>Lezione 5: Indirizzamento IP</h3></div>
+                <div class="lesson-card-body">Header IPv4, frammentazione, Subnetting e CIDR. Esercizi pratici su aggregazione di rotte e creazione di tabelle di inoltro. Regola del Longest Prefix Match.</div>
+                <div class="lesson-card-footer"><a href="#" class="lesson-link disabled-link">In preparazione...</a></div>
+            </div>
+
+            <!-- Lezione 6 -->
+            <div class="lesson-card">
+                <div class="lesson-card-header"><h3>Lezione 6: Protocolli di Servizio IP</h3></div>
+                <div class="lesson-card-body">ARP (mappatura IP-MAC), DHCP (configurazione automatica), NAT/PAT (traduzione indirizzi) e ICMP (diagnostica con ping e traceroute).</div>
+                <div class="lesson-card-footer"><a href="#" class="lesson-link disabled-link">In preparazione...</a></div>
+            </div>
+
+            <!-- Lezione 7 -->
+            <div class="lesson-card">
+                <div class="lesson-card-header"><h3>Lezione 7: Routing Intra-Dominio</h3></div>
+                <div class="lesson-card-body">Algoritmi di routing interni: Distance Vector (RIP) con il problema del "Count-to-Infinity" e Link State (OSPF) basato su flooding di LSP e algoritmo di Dijkstra.</div>
+                <div class="lesson-card-footer"><a href="#" class="lesson-link disabled-link">In preparazione...</a></div>
+            </div>
+
+            <!-- Lezione 8 -->
+            <div class="lesson-card">
+                <div class="lesson-card-header"><h3>Lezione 8: Routing Inter-Dominio e IPv6</h3></div>
+                <div class="lesson-card-body">Introduzione agli Autonomous Systems. Protocollo Path Vector BGP per il routing tra AS. Cenni su IPv6 e meccanismi di transizione.</div>
+                <div class="lesson-card-footer"><a href="#" class="lesson-link disabled-link">In preparazione...</a></div>
+            </div>
+
+            <!-- Lezione 9 -->
+            <div class="lesson-card">
+                <div class="lesson-card-header"><h3>Lezione 9: Livello di Trasporto</h3></div>
+                <div class="lesson-card-body">UDP e TCP. Macchina a Stati di TCP (handshake, chiusura, TIME_WAIT). Controllo di Flusso con la Sliding Window e Algoritmo di Nagle.</div>
+                <div class="lesson-card-footer"><a href="#" class="lesson-link disabled-link">In preparazione...</a></div>
+            </div>
+
+            <!-- Lezione 10 -->
+            <div class="lesson-card">
+                <div class="lesson-card-header"><h3>Lezione 10: Controllo Congestione</h3></div>
+                <div class="lesson-card-body">Algoritmi di controllo congestione di TCP: AIMD, Slow Start, ssthresh. Differenze tra TCP Tahoe e Reno: Fast Retransmit e Fast Recovery.</div>
+                <div class="lesson-card-footer"><a href="#" class="lesson-link disabled-link">In preparazione...</a></div>
+            </div>
+
+            <!-- Lezione 11 -->
+            <div class="lesson-card">
+                <div class="lesson-card-header"><h3>Lezione 11: Sicurezza - Crittografia Simmetrica</h3></div>
+                <div class="lesson-card-body">Triade CIA, attacchi. Cifrari a flusso e a blocchi (RC4, AES). Modalità operative (ECB, CBC), Funzioni Hash e MAC. Caso di studio: attacco a WEP.</div>
+                <div class="lesson-card-footer"><a href="#" class="lesson-link disabled-link">In preparazione...</a></div>
+            </div>
+            
+            <!-- Lezione 12 -->
+            <div class="lesson-card">
+                <div class="lesson-card-header"><h3>Lezione 12: Sicurezza - Crittografia Asimmetrica</h3></div>
+                <div class="lesson-card-body">Crittografia a chiave pubblica (RSA), firme digitali. Scambio chiavi Diffie-Hellman e attacco MITM. PKI, Certificati X.509 e analisi di protocolli challenge-response.</div>
+                <div class="lesson-card-footer"><a href="#" class="lesson-link disabled-link">In preparazione...</a></div>
+            </div>
+            
+        </div>
+    </div>
+
+</body>
+</html>
