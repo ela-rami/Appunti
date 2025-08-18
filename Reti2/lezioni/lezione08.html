@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 8: Routing Inter-Dominio (BGP) e IPv6</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body data-pdf-path="../slides/Computer Networks - Chapter 4 - Advanced Internetworking.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 8: Routing Inter-Dominio e IPv6</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni_home.html" class="sidebar-action-button" id="lezioni-home-btn">Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-interdomain" class="sidebar-link">1. Il Problema della Scalabilità Globale</a></li>
+            <li><a href="#as" class="sidebar-link">2. Autonomous Systems (AS)</a></li>
+            <li><a href="#as-types" class="sidebar-link">2.1. Tipi di AS: Stub, Multihomed, Transit</a></li>
+            <li><a href="#bgp" class="sidebar-link">3. BGP: Border Gateway Protocol</a></li>
+            <li><a href="#path-vector" class="sidebar-link">3.1. BGP come Protocollo Path Vector</a></li>
+            <li><a href="#policy-routing" class="sidebar-link">3.2. Routing basato su Policy</a></li>
+            <li><a href="#ipv6-intro" class="sidebar-link">4. IPv6: La Nuova Generazione di IP</a></li>
+            <li><a href="#ipv6-features" class="sidebar-link">4.1. Caratteristiche e Indirizzi</a></li>
+            <li><a href="#ipv6-transition" class="sidebar-link">4.2. Meccanismi di Transizione</a></li>
+            <li><a href="#esercizi-consigliati" class="sidebar-link">5. Esercizi Consigliati</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-interdomain" class="content-section active-section">
+            <h2 class="section-title">1. Il Problema della Scalabilità Globale</h2>
+            <div class="section-content">
+                <p>Gli algoritmi di routing intra-dominio come OSPF e RIP non possono scalare all'intera Internet per due motivi principali:</p>
+                <ol>
+                    <li><strong>Scalabilità Tecnica:</strong> Le tabelle di routing diventerebbero enormi e il traffico di controllo per mantenere aggiornate le mappe di rete sarebbe insostenibile.</li>
+                    <li><strong>Scalabilità Amministrativa:</strong> Internet non è una singola rete, ma una "rete di reti" gestite da entità amministrative diverse e indipendenti (ISP, università, grandi aziende). Ogni entità ha le proprie policy di routing, spesso basate su accordi commerciali, che non possono essere modellate da un semplice costo numerico.</li>
+                </p>
+                <p>La soluzione a questo problema è una gerarchia di routing a due livelli.</p>
+            </div>
+        </article>
+        
+        <article id="as" class="content-section">
+            <h2 class="section-title">2. Autonomous Systems (AS)</h2>
+            <div class="section-content">
+                <p>Internet è suddivisa in migliaia di <strong>Sistemi Autonomi (AS)</strong>. Un AS è una rete (o un insieme di reti) sotto un'unica amministrazione, che presenta al mondo esterno una politica di routing coerente.</p>
+                <p>La gerarchia è la seguente:</p>
+                <ul>
+                    <li><strong>Routing Intra-AS (IGP):</strong> All'interno di un AS, i router usano un Interior Gateway Protocol (come OSPF o RIP) per scambiarsi informazioni e calcolare i percorsi interni. Per il resto del mondo, come questo avvenga è irrilevante.</li>
+                    <li><strong>Routing Inter-AS (EGP):</strong> Per comunicare tra AS diversi, si usa un Exterior Gateway Protocol. L'unico EGP utilizzato oggi è BGP.</li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="as-types" class="content-section">
+            <h3 class="subsection-title">2.1. Tipi di AS: Stub, Multihomed, Transit</h3>
+            <div class="section-content">
+                <p>Gli AS possono essere classificati in base al loro ruolo e alla loro connettività. Queste definizioni sono un classico d'esame:</p>
+                <ul>
+                    <li><strong>Stub AS:</strong> Un AS che ha una sola connessione verso un altro AS. Un AS stub non permette il transito di traffico: il traffico può solo originare o terminare al suo interno. (Es: una piccola azienda).</li>
+                    <li><strong>Multihomed AS:</strong> Un AS connesso a più di un altro AS, ma che **rifiuta di far transitare traffico**. Lo fa per ridondanza o per bilanciare il carico, ma non offre servizio di trasporto ad altri. (Es: una grande azienda connessa a due ISP).</li>
+                    <li><strong>Transit AS:</strong> Un AS connesso a più di un altro AS e che è progettato per far transitare traffico tra di loro. Questi sono tipicamente gli Internet Service Provider (ISP).</li>
+                </ul>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+graph TD
+    ISP1(Transit AS) --- ISP2(Transit AS)
+    Azienda1(Stub AS) --- ISP1
+    Azienda2(Multihomed AS) --- ISP1
+    Azienda2 --- ISP2
+                    </pre>
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 10 Luglio 2023, Q10:</strong> Identificare quale AS deve essere di transito per garantire la connettività.</li>
+                        <li><strong>Esame 15 Luglio 2024, Q10:</strong> Domanda concettuale sui ruoli degli AS in una topologia data.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="bgp" class="content-section">
+            <h2 class="section-title">3. BGP: Border Gateway Protocol</h2>
+            <div class="section-content">
+                <p>BGP è il protocollo che tiene insieme Internet. Il suo scopo non è trovare il percorso "più breve" in senso tecnico, ma trovare un percorso **valido e privo di loop** che rispetti le policy di tutti gli AS attraversati.</p>
+            </div>
+        </article>
+
+        <article id="path-vector" class="content-section">
+            <h3 class="subsection-title">3.1. BGP come Protocollo Path Vector</h3>
+            <div class="section-content">
+                <p>BGP non appartiene né alla famiglia Distance Vector né a Link State. È un protocollo <strong>Path Vector</strong>.</p>
+                <p>Quando un router BGP ("BGP speaker") annuncia una rotta per un certo prefisso di rete, non annuncia solo la destinazione e un costo, ma annuncia l'**intero percorso di AS** che deve essere attraversato per raggiungere quella destinazione.</p>
+                <p>Ad esempio, un annuncio potrebbe essere: "Per raggiungere la rete `123.45.0.0/16`, il percorso è: `AS65001 -> AS3356 -> AS1239`".</p>
+                <p>Questo meccanismo ha un enorme vantaggio: la **prevenzione dei loop è triviale**. Quando un AS riceve un annuncio di rotta, controlla l'AS-PATH. Se il proprio numero di AS è già presente nel percorso, significa che si è creato un loop, e l'annuncio viene scartato.</p>
+            </div>
+        </article>
+        
+        <article id="policy-routing" class="content-section">
+            <h3 class="subsection-title">3.2. Routing basato su Policy</h3>
+            <div class="section-content">
+                <p>Il vero cuore di BGP è la gestione delle policy. Un AS può decidere quali rotte accettare dai suoi vicini e quali rotte annunciare ai suoi vicini in base a:</p>
+                <ul>
+                    <li><strong>Accordi commerciali:</strong> Un AS potrebbe decidere di non annunciare a un suo peer (con cui ha un accordo di peering gratuito) le rotte che ha imparato dal suo provider di transito (che paga).</li>
+                    <li><strong>Politiche interne:</strong> Un AS multihomed può usare un provider per il traffico principale e l'altro solo come backup.</li>
+                </ul>
+                <p>Queste policy rendono impossibile calcolare un "costo" oggettivo. L'obiettivo di BGP è semplicemente trovare un percorso che non violi nessuna policy lungo il cammino.</p>
+            </div>
+        </article>
+        
+        <article id="ipv6-intro" class="content-section">
+            <h2 class="section-title">4. IPv6: La Nuova Generazione di IP</h2>
+            <div class="section-content">
+                <p>Il motivo principale per l'introduzione di IPv6 è stato l'**esaurimento degli indirizzi IPv4**. Il pool di indirizzi IPv4 non allocati è ufficialmente terminato nel 2019.</p>
+            </div>
+        </article>
+        
+        <article id="ipv6-features" class="content-section">
+            <h3 class="subsection-title">4.1. Caratteristiche e Indirizzi</h3>
+            <div class="section-content">
+                <ul>
+                    <li><strong>Indirizzi a 128 bit:</strong> Risolve il problema dell'esaurimento, fornendo uno spazio di indirizzi virtualmente illimitato (\(2^{128}\)).</li>
+                    <li><strong>Notazione Esadecimale:</strong> Gli indirizzi sono scritti come 8 gruppi di 4 cifre esadecimali, separati da due punti (es. `2001:0db8:85a3:0000:0000:8a2e:0370:7334`). Zeri consecutivi possono essere compressi con `::`.</li>
+                    <li><strong>Header Semplificato:</strong> L'header di base di IPv6 è più semplice di quello di IPv4. Campi come checksum e opzioni sono stati rimossi o spostati in "extension headers" opzionali. Questo rende l'elaborazione da parte dei router più veloce.</li>
+                    <li><strong>Flow Label:</strong> Un nuovo campo per etichettare pacchetti appartenenti allo stesso flusso, facilitando la gestione della Quality of Service (QoS).</li>
+                </ul>
+            </div>
+        </article>
+        
+        <article id="ipv6-transition" class="content-section">
+            <h3 class="subsection-title">4.2. Meccanismi di Transizione</h3>
+            <div class="section-content">
+                <p>Poiché IPv4 e IPv6 non sono direttamente compatibili, la transizione è un processo lungo e graduale. Sono state definite tre tecniche per garantire la coesistenza:</p>
+                <ol>
+                    <li><strong>Dual Stack:</strong> Un dispositivo (host o router) implementa entrambi gli stack protocollari, IPv4 e IPv6. Può comunicare nativamente con entrambi i tipi di rete. È la soluzione più comune.</li>
+                    <li><strong>Tunneling:</strong> Per attraversare una rete solo IPv4, i pacchetti IPv6 vengono incapsulati all'interno di pacchetti IPv4. I router ai bordi della rete IPv4 creano un "tunnel" virtuale.</li>
+                    <li><strong>Header Translation:</strong> Un meccanismo simile a NAT (chiamato NAT64) che traduce gli header da IPv6 a IPv4 e viceversa, permettendo a host solo IPv6 di comunicare con host solo IPv4.</li>
+                </ol>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 17 Giugno 2024, Q10:</strong> Domanda concettuale su come permettere la comunicazione tra due host IPv6 (con o senza router in mezzo).</li>
+                        <li><strong>Esame 5 Settembre 2022, Q10:</strong> Gestione del campo Hop Limit (equivalente del TTL) nel tunneling.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        
+        <article id="esercizi-consigliati" class="content-section">
+            <h2 class="section-title">5. Esercizi Consigliati per la Lezione 8</h2>
+            <div class="section-content">
+                <p>Gli argomenti di questa lezione sono quasi esclusivamente concettuali. Gli esercizi d'esame verificano la comprensione delle definizioni e dei principi di funzionamento.</p>
+                <div class="clarification-box">
+                    <strong>Set di Esercizi Chiave:</strong>
+                    <ol>
+                        <li>
+                            <strong>Tipi di Autonomous System (Definizione):</strong>
+                            <ul>
+                                <li><strong>Esame 15 Luglio 2024, Q10.</strong> Questo esercizio è perfetto per verificare la tua comprensione dei ruoli degli AS. Ti viene data una topologia e devi identificare quale AS deve essere di transito, multihomed, ecc., e giustificare la risposta.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Funzionamento di BGP (Concetto):</strong>
+                            <ul>
+                                <li><strong>Esame 10 Luglio 2023, Q10.</strong> Una domanda che chiede "a cosa serve il collegamento tra R1 e R2" in una rete BGP multihomed. Testa la tua comprensione del perché si usa il multihoming (ridondanza/traffico diretto).</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Transizione IPv6 (Meccanismo):</strong>
+                            <ul>
+                                <li><strong>Esame 17 Giugno 2024, Q10.</strong> Ti chiede quali funzionalità deve supportare un router per far comunicare due host IPv6. La risposta tocca i concetti di routing IPv6 e la non necessità del tunneling se la rete è omogenea.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Concentrandoti su questi esercizi, consoliderai la comprensione dei meccanismi che permettono a Internet di funzionare su scala globale.</p>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti di Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'dark',
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    mainBkg: 'transparent',
+                }
+            });
+            
+            const renderMermaidInSection = (section) => {
+                section.querySelectorAll('.mermaid').forEach(async (diag) => {
+                    if (diag.dataset.rendered) return;
+                    const id = diag.id || `mermaid-diag-${Math.random().toString(36).substr(2, 9)}`;
+                    diag.id = id;
+                    const code = diag.textContent.trim();
+                    diag.innerHTML = 'Loading diagram...';
+                    
+                    try {
+                        const { svg } = await mermaid.render(id, code);
+                        diag.innerHTML = svg;
+                        diag.dataset.rendered = 'true';
+                    } catch(e) {
+                        console.error("Mermaid rendering error:", e);
+                        diag.innerHTML = `<p style="color:red;">Error rendering diagram</p>`;
+                    }
+                });
+            };
+
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', () => renderMermaidInSection(section));
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                renderMermaidInSection(initiallyActiveSection);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
