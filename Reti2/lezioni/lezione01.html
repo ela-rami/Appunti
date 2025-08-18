@@ -198,18 +198,5 @@
     </footer>
 
     <script src="../assets/common.js"></script>
-    <script>
-    // Questo script è solo per la gestione di Mermaid, se necessario.
-    // Il JS principale è in common.js
-    document.addEventListener('DOMContentLoaded', function () {
-        if (typeof mermaid !== 'undefined') {
-            mermaid.initialize({
-                startOnLoad: true, 
-                theme: 'dark',
-                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim()
-            });
-        }
-    });
-    </script>
 </body>
 </html>
