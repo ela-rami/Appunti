@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/common.css">
 </head>
 <body data-pdf-path="../slides/Computer Networks - Chapter 2 - Getting Connected.pdf">
     <div class="overlay"></div>
@@ -70,7 +70,7 @@ sequenceDiagram
     A->>B: Inizio trasmissione frame (t=0)
     Note right of B: Il segnale di A arriva a B (t=t_prop)
     B->>A: B inizia a trasmettere un istante prima, collisione!
-    Note left of A: B rileva la collisione e invia jamming signal
+    Note right of B: B rileva la collisione e invia jamming signal
     Note left of A: A rileva la collisione solo a t = 2 * t_prop
                     </pre>
                 </div>
@@ -80,8 +80,8 @@ sequenceDiagram
                 </div>
                 <p>Questa relazione definisce due parametri fondamentali dell'Ethernet classica:</p>
                 <ul>
-                    <li>Lo <strong>Slot Time</strong>: Definito come \(2 \cdot t_{prop}\), è il tempo massimo per rilevare una collisione. Per Fast Ethernet (100 Mbps) è <strong>51.2 µs</strong>.</li>
-                    <li>La <strong>Dimensione Minima del Frame</strong>: È il numero di bit che possono essere trasmessi in uno Slot Time. Per Fast Ethernet, sono 512 bit, ovvero <strong>64 byte</strong>.</li>
+                    <li>Lo <strong>Slot Time</strong>: Definito come \(2 \cdot t_{prop}\), è il tempo massimo per rilevare una collisione. Per Ethernet (10 Mbps) è <strong>51.2 µs</strong>.</li>
+                    <li>La <strong>Dimensione Minima del Frame</strong>: È il numero di bit che possono essere trasmessi in uno Slot Time. Per Ethernet, sono 512 bit, ovvero <strong>64 byte</strong>.</li>
                 </ul>
             </div>
         </article>
@@ -92,11 +92,11 @@ sequenceDiagram
                 <p>Quando una stazione rileva una collisione, interrompe la trasmissione, invia un segnale di "jamming" per assicurarsi che tutti i nodi vedano la collisione, e poi attende un tempo casuale prima di ritentare. Questo tempo di attesa è calcolato con l'algoritmo di <strong>backoff esponenziale</strong>.</p>
                 <p>Dopo la \(n\)-esima collisione consecutiva per lo stesso frame:</p>
                 <ol>
-                    <li>Si sceglie un numero intero casuale `k` nell'intervallo \([0, 2^n - 1]\).</li>
+                    <li>Si sceglie un numero intero casuale `k` nell'intervallo \([0, 2^{\min(n, 10)} - 1]\). L'esponente è "troncato" a 10.</li>
                     <li>Si attende un tempo pari a \( k \cdot \text{SlotTime} \).</li>
-                    <li>Dopo l'attesa, si aggiunge il tempo fisso dell'<strong>Inter-Packet Gap (IPG)</strong>, che è il tempo minimo che deve intercorrere tra due trasmissioni successive (per Ethernet a 10/100 Mbps, è <strong>9.6 µs</strong>).</li>
+                    <li>Dopo l'attesa, si aggiunge il tempo fisso dell'<strong>Inter-Packet Gap (IPG)</strong>, che è il tempo minimo che deve intercorrere tra due trasmissioni (per Ethernet a 10/100 Mbps, è <strong>9.6 µs</strong>).</li>
                 </ol>
-                <p>L'intervallo di attesa raddoppia ad ogni collisione (da qui "esponenziale"), riducendo la probabilità di nuove collisioni. L'algoritmo è "troncato" perché l'esponente `n` viene limitato (di solito a 10), e dopo un numero massimo di tentativi (di solito 16), il frame viene scartato.</p>
+                <p>Dopo 16 tentativi falliti, il frame viene scartato.</p>
                 <div class="calculation-box">
                     <strong>Esempio di Calcolo (tipo esame Luglio '24, Q4)</strong>
                     <p>Una stazione rileva una collisione per la seconda volta (n=2). Calcolare il tempo di attesa medio prima di ritentare. Dati: IPG = 9.6 µs, Slot Time = 51.2 µs.</p>
@@ -104,15 +104,15 @@ sequenceDiagram
                         <li><strong>Identificare l'intervallo per k:</strong> Per n=2, `k` viene scelto a caso in \([0, 2^2 - 1] = \{0, 1, 2, 3\}\).</li>
                         <li><strong>Calcolare la media di k:</strong> \( k_{\text{medio}} = \frac{0+1+2+3}{4} = 1.5 \).</li>
                         <li><strong>Calcolare il tempo di backoff medio:</strong> \( T_{\text{backoff\_medio}} = k_{\text{medio}} \cdot \text{SlotTime} = 1.5 \cdot 51.2 \mu s = 76.8 \mu s \).</li>
-                        <li><strong>Aggiungere l'IPG:</strong> \( T_{\text{attesa\_medio}} = T_{\text{backoff\_medio}} + \text{IPG} = 76.8 \mu s + 9.6 \mu s = 86.4 \mu s \).</li>
+                        <li><strong>Aggiungere l'IPG:</strong> \( T_{\text{attesa\_medio}} = \text{IPG} + T_{\text{backoff\_medio}} = 9.6 \mu s + 76.8 \mu s = 86.4 \mu s \).</li>
                     </ol>
                 </div>
                  <div class="exam-question-list">
                     <h4>Esercizi d'Esame Correlati</h4>
                     <ul>
-                         <li><strong>Esame 15 Luglio 2024, Q4:</strong> Calcolo del tempo di attesa medio dopo la 2ª collisione.</li>
-                         <li><strong>Esame 17 Febbraio 2023, Q4:</strong> Calcolo del tempo di attesa medio dopo la 1ª collisione.</li>
-                         <li><strong>Esame 13 Luglio 2022, Q4:</strong> Calcolo del tempo di attesa medio dopo la 2ª collisione.</li>
+                         <li><strong>Esame 15 Luglio 2024, Q4:</strong> Calcolo tempo di attesa medio dopo la 2ª collisione.</li>
+                         <li><strong>Esame 17 Febbraio 2023, Q4:</strong> Calcolo tempo di attesa medio dopo la 1ª collisione.</li>
+                         <li><strong>Esame 13 Luglio 2022, Q4:</strong> Calcolo tempo di attesa medio dopo la 2ª collisione.</li>
                     </ul>
                 </div>
             </div>
@@ -136,22 +136,22 @@ sequenceDiagram
                 <div class="mermaid-container">
                      <pre class="mermaid">
 graph TD
-    subgraph "Nodo Nascosto"
-        A((A)) -- no-link --> C((C))
+    subgraph "Nodo Nascosto: A e C non si vedono, ma entrambi vedono B"
+        A((A)) --"no link"--- C((C))
         A --- B((B))
         C --- B
-        style A fill:#818cf8
-        style C fill:#818cf8
-        style B fill:#60a5fa
+        style A fill:#818cf8, stroke-width:0
+        style C fill:#818cf8, stroke-width:0
+        style B fill:#60a5fa, stroke-width:0
     end
-    subgraph "Nodo Esposto"
-        B2((B)) --- C2((C))
-        B2 --- A2((A))
+    subgraph "Nodo Esposto: C sente B, ma C->D non interferirebbe con B->A"
+        B2((B)) --- A2((A))
+        B2 --- C2((C))
         C2 --- D2((D))
-        style B2 fill:#818cf8
-        style C2 fill:#818cf8
-        style A2 fill:#60a5fa
-        style D2 fill:#60a5fa
+        style B2 fill:#818cf8, stroke-width:0
+        style C2 fill:#818cf8, stroke-width:0
+        style A2 fill:#60a5fa, stroke-width:0
+        style D2 fill:#60a5fa, stroke-width:0
     end
                      </pre>
                 </div>
@@ -268,10 +268,8 @@ graph TD
         <p>© 2024 Appunti di Reti di Calcolatori</p>
     </footer>
 
-    <script src="../assets/js/common.js"></script>
+    <script src="../assets/common.js"></script>
     <script>
-    // Questo script è solo per la gestione di Mermaid, se necessario.
-    // Il JS principale è in common.js
     document.addEventListener('DOMContentLoaded', function () {
         if (typeof mermaid !== 'undefined') {
             mermaid.initialize({
@@ -282,32 +280,37 @@ graph TD
                     primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
                     primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
                     lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    mainBkg: 'transparent',
                 }
             });
             
-            function renderAllMermaid() {
+            function renderAllVisibleMermaid() {
                 document.querySelectorAll('.mermaid').forEach(async (diag) => {
-                    if (diag.dataset.rendered) return; // Avoid re-rendering
-                    const id = diag.id || `mermaid-diag-${Math.random().toString(36).substr(2, 9)}`;
-                    diag.id = id;
-                    const code = diag.textContent.trim();
-                    diag.innerHTML = '';
-                    try {
-                        const { svg } = await mermaid.render(id, code);
-                        diag.innerHTML = svg;
-                        diag.dataset.rendered = true;
-                    } catch(e) {
-                        console.error("Mermaid rendering error:", e);
-                        diag.innerHTML = "Error rendering diagram";
+                    // Check if the element is visible and not already rendered
+                    if (diag.offsetParent !== null && !diag.dataset.rendered) {
+                        const id = diag.id || `mermaid-diag-${Math.random().toString(36).substr(2, 9)}`;
+                        diag.id = id;
+                        const code = diag.textContent.trim();
+                        diag.innerHTML = ''; // Clear placeholder
+                        try {
+                            const { svg } = await mermaid.render(id, code);
+                            diag.innerHTML = svg;
+                            diag.dataset.rendered = true; // Mark as rendered
+                        } catch(e) {
+                            console.error("Mermaid rendering error:", e);
+                            diag.innerHTML = "Error rendering diagram";
+                        }
                     }
                 });
             }
             
             document.querySelectorAll('.content-section').forEach(section => {
-                section.addEventListener('sectionshown', renderAllMermaid);
+                section.addEventListener('sectionshown', renderAllVisibleMermaid);
             });
+
+            // Initial render for the active section
             if(document.querySelector('.content-section.active-section')) {
-                renderAllMermaid();
+                renderAllVisibleMermaid();
             }
         }
     });
