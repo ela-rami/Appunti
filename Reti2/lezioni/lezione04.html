@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 4: Switching e LAN Estese (Spanning Tree)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body data-pdf-path="../slides/Computer Networks - Chapter 3 - Internetworking.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 4: Switching e LAN Estese</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni_home.html" class="sidebar-action-button" id="lezioni-home-btn">Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-switching" class="sidebar-link">1. Bridge e Switch di Livello 2</a></li>
+            <li><a href="#learning-bridges" class="sidebar-link">1.1. Auto-apprendimento (Learning)</a></li>
+            <li><a href="#forwarding-flooding" class="sidebar-link">1.2. Inoltro (Forwarding) e Diffusione (Flooding)</a></li>
+            <li><a href="#loop-problem" class="sidebar-link">2. Il Problema dei Loop</a></li>
+            <li><a href="#stp" class="sidebar-link">3. Spanning Tree Protocol (STP)</a></li>
+            <li><a href="#stp-idea" class="sidebar-link">3.1. L'Idea di Base</a></li>
+            <li><a href="#stp-algorithm" class="sidebar-link">3.2. L'Algoritmo STP in 3 Passi</a></li>
+            <li><a href="#stp-example" class="sidebar-link">3.3. Esempio di Esecuzione STP</a></li>
+            <li><a href="#esercizi-consigliati" class="sidebar-link">4. Esercizi Consigliati</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-switching" class="content-section active-section">
+            <h2 class="section-title">1. Bridge e Switch di Livello 2</h2>
+            <div class="section-content">
+                <p>Mentre l'Ethernet classica con hub e cavo coassiale creava un unico grande dominio di collisione, l'introduzione dei <strong>bridge</strong> (e dei loro successori moderni, gli <strong>switch</strong>) ha rivoluzionato le LAN.</p>
+                <p>Uno switch è un dispositivo di livello 2 (Data Link) che opera in modalità <strong>store-and-forward</strong>: riceve un intero frame su una porta, ne controlla il CRC e, se valido, decide su quale altra porta inoltrarlo. A differenza di un hub (che è un ripetitore multiporta e invia ciecamente i bit a tutti), uno switch prende decisioni intelligenti basate sugli indirizzi MAC.</p>
+                <p>La caratteristica fondamentale di uno switch è che <strong>ogni porta è un dominio di collisione separato</strong>. Questo elimina le collisioni (in modalità full-duplex) e aumenta drasticamente le performance della rete.</p>
+            </div>
+        </article>
+        
+        <article id="learning-bridges" class="content-section">
+            <h3 class="subsection-title">1.1. Auto-apprendimento (Learning)</h3>
+            <div class="section-content">
+                <p>Come fa uno switch a sapere dove inoltrare un frame? Invece di richiedere una configurazione manuale, gli switch moderni utilizzano un meccanismo di <strong>auto-apprendimento</strong>.</p>
+                <p>Ogni switch mantiene una <strong>tabella di inoltro (forwarding table)</strong> che mappa gli indirizzi MAC alle porte dello switch. Questa tabella viene costruita dinamicamente:</p>
+                <blockquote>
+                Quando un frame arriva su una porta, lo switch ispeziona l'<strong>indirizzo MAC sorgente</strong> del frame. Associa quell'indirizzo MAC alla porta da cui è arrivato e memorizza questa associazione nella sua tabella di inoltro.
+                </blockquote>
+                <p>Le voci in questa tabella hanno una scadenza (timeout) per gestire i casi in cui un dispositivo viene spostato su un'altra porta.</p>
+            </div>
+        </article>
+        
+        <article id="forwarding-flooding" class="content-section">
+            <h3 class="subsection-title">1.2. Inoltro (Forwarding) e Diffusione (Flooding)</h3>
+            <div class="section-content">
+                <p>Una volta popolata (anche parzialmente) la tabella, il comportamento dello switch è il seguente:</p>
+                <ol>
+                    <li>Lo switch riceve un frame e ispeziona l'<strong>indirizzo MAC di destinazione</strong>.</li>
+                    <li>
+                        <strong>Caso 1 (Destinazione Nota):</strong> Se l'indirizzo MAC di destinazione è presente nella tabella, lo switch inoltra (<strong>forward</strong>) il frame esclusivamente sulla porta associata. Questo è il comportamento efficiente.
+                    </li>
+                    <li>
+                        <strong>Caso 2 (Destinazione Sconosciuta o Broadcast):</strong> Se l'indirizzo MAC di destinazione non è nella tabella (o è l'indirizzo di broadcast `FF:FF:FF:FF:FF:FF`), lo switch non sa dove inviare il frame. In questo caso, effettua un'operazione di <strong>flooding</strong>: invia una copia del frame su tutte le porte, tranne quella da cui è arrivato.
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Esempio di scenario d'esame: Switch appena resettato (tipo esame Febbraio '24, Q6)</strong>
+                    <p>Una rete ha più switch appena resettati (quindi con tabelle di inoltro vuote). L'host A invia un frame all'host B. Cosa succede?</p>
+                    <ul>
+                        <li>A invia il frame al suo switch S1. S1 non conosce la destinazione B, quindi fa flooding. Contemporaneamente, impara che A si trova sulla sua porta.</li>
+                        <li>Il frame arriva agli altri switch (es. S2, S3) collegati a S1. Anche loro non conoscono B e fanno flooding sulle loro porte (tranne quella da cui è arrivato il frame). Anche loro imparano la posizione di A.</li>
+                        <li>Alla fine, il frame arriva a tutti gli host della rete, incluso B. Quando B risponderà ad A, il percorso di ritorno sarà più efficiente, perché tutti gli switch nel frattempo hanno imparato dove si trova A.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="loop-problem" class="content-section">
+            <h2 class="section-title">2. Il Problema dei Loop</h2>
+            <div class="section-content">
+                <p>Il meccanismo di flooding, sebbene necessario per l'auto-apprendimento, diventa catastrofico se la topologia della rete contiene dei <strong>loop (cicli)</strong>. I loop vengono spesso creati intenzionalmente per fornire ridondanza in caso di guasti a un link o a uno switch.</p>
+                <p>Se esiste un ciclo, un frame destinato a un indirizzo sconosciuto o a un indirizzo di broadcast verrà inoltrato in un ciclo infinito. Verrà duplicato a ogni passaggio, consumando tutta la banda disponibile e mandando in crash la rete. Questo fenomeno è noto come <strong>broadcast storm</strong>.</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+graph TD
+    A((Host A)) --- S1(Switch 1)
+    S1 --- S2(Switch 2)
+    S1 --- S3(Switch 3)
+    S2 --- S3
+    S2 --- B((Host B))
+    
+    subgraph "Broadcast Storm"
+        direction LR
+        S1 -- Frame --> S2
+        S2 -- Frame --> S3
+        S3 -- Frame --> S1
+    end
+
+    linkStyle 2 stroke-dasharray: 5 5
+    linkStyle 3 stroke-dasharray: 5 5
+                    </pre>
+                </div>
+            </div>
+        </article>
+
+        <article id="stp" class="content-section">
+            <h2 class="section-title">3. Spanning Tree Protocol (STP)</h2>
+            <div class="section-content">
+                <p>Per permettere topologie ridondanti senza creare broadcast storm, gli switch implementano lo <strong>Spanning Tree Protocol (STP)</strong>. Lo scopo di STP è mantenere una topologia fisica con loop, ma creare una **topologia logica ad albero** (quindi senza cicli) disattivando selettivamente alcune porte.</p>
+            </div>
+        </article>
+
+        <article id="stp-idea" class="content-section">
+            <h3 class="subsection-title">3.1. L'Idea di Base</h3>
+            <div class="section-content">
+                <p>STP tratta la rete di switch come un grafo e calcola un suo albero di copertura (spanning tree). Gli archi (link) che non fanno parte di questo albero vengono "bloccati": le porte corrispondenti non inoltrano frame di dati (ma continuano a scambiare messaggi STP, chiamati BPDU).</p>
+                <p>Se un link attivo dovesse cadere, l'algoritmo ricalcola l'albero e può riattivare una delle porte precedentemente bloccate per ripristinare la connettività.</p>
+            </div>
+        </article>
+
+        <article id="stp-algorithm" class="content-section">
+            <h3 class="subsection-title">3.2. L'Algoritmo STP in 3 Passi</h3>
+            <div class="section-content">
+                <p>L'algoritmo per costruire lo spanning tree si basa su un processo di elezione distribuito. Ogni switch ha un ID univoco (tipicamente una combinazione di una priorità configurabile e il suo indirizzo MAC). Il processo si svolge in tre fasi:</p>
+                <ol>
+                    <li>
+                        <strong>Elezione del Root Bridge:</strong>
+                        <p>Tutti gli switch si scambiano messaggi (BPDU). Lo switch con l'<strong>ID più basso</strong> viene eletto <strong>Root Bridge</strong>. Sarà la radice dell'albero logico.</p>
+                    </li>
+                    <li>
+                        <strong>Selezione delle Root Port:</strong>
+                        <p>Ogni switch non-root calcola il suo percorso a costo minimo verso il Root Bridge. La porta su quello switch che fa parte del percorso più breve è eletta <strong>Root Port</strong>. Questa porta rimane sempre attiva.</p>
+                    </li>
+                    <li>
+                        <strong>Selezione delle Designated Port:</strong>
+                        <p>Per ogni segmento di rete (link tra due switch), bisogna decidere quale dei due switch sarà responsabile dell'inoltro del traffico su quel segmento. Lo switch che offre il percorso a costo più basso verso la radice diventa il <strong>Designated Bridge</strong> per quel segmento, e la sua porta su quel link diventa la <strong>Designated Port</strong> (e rimane attiva). La porta sull'altro switch (quello non designato) viene <strong>bloccata</strong>.</p>
+                </ol>
+                <div class="note-box">
+                    <strong>Regole per spareggiare:</strong> Se i costi dei percorsi sono uguali, si usa l'ID dello switch per spareggiare (vince l'ID più basso).
+                </div>
+            </div>
+        </article>
+        
+        <article id="stp-example" class="content-section">
+            <h3 class="subsection-title">3.3. Esempio di Esecuzione STP</h3>
+            <div class="section-content">
+                <div class="calculation-box">
+                    <strong>Scenario d'esame (tipo Gennaio '24, Q6)</strong>
+                    <p>Data la seguente topologia, con gli ID dei bridge B1 < B2 < B3 < B4. Quali switch/porte si disattivano?</p>
+                    <div class="mermaid-container">
+                        <pre class="mermaid">
+graph TD
+    subgraph LAN_N1
+        B1 --- B2
+    end
+    subgraph LAN_N4
+        B1 --- B4
+    end
+    subgraph LAN_tra_B2_B4
+        B2 --- B4
+    end
+    subgraph LAN_N2
+        B2 --- B3
+    end
+    subgraph LAN_N3
+        B4 --- B3
+    end
+                        </pre>
+                    </div>
+                    <ol>
+                        <li><strong>Elezione Root Bridge:</strong> B1 ha l'ID più basso, quindi <strong>B1 è il Root Bridge</strong>. Tutte le sue porte sono Designated Port e rimangono attive.</li>
+                        <li><strong>Selezione Root Port:</strong>
+                            <ul>
+                                <li><strong>Per B2:</strong> Il percorso più breve per B1 è il link diretto B2-B1. La porta di B2 su questo link diventa la sua Root Port.</li>
+                                <li><strong>Per B4:</strong> Il percorso più breve per B1 è il link diretto B4-B1. La porta di B4 su questo link diventa la sua Root Port.</li>
+                                <li><strong>Per B3:</strong> B3 può raggiungere B1 via B2 o via B4. Supponendo costi uguali, entrambi i percorsi hanno costo 1. B3 deve scegliere il percorso attraverso il vicino con ID più basso. Poiché B2 < B4, il percorso scelto è B3 -> B2 -> B1. La porta di B3 verso B2 diventa la sua Root Port.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Selezione Designated Port e Porte Bloccate:</strong>
+                            <ul>
+                                <li><strong>Segmento B2-B4:</strong> B2 è più vicino alla radice (costo 1) di B4 (costo 1), ma B2 ha ID più basso. Quindi B2 è il Designated Bridge. La sua porta verso B4 è Designated, mentre la porta di B4 verso B2 viene <strong>bloccata</strong>.</li>
+                                <li><strong>Segmento B3-B4:</strong> B4 (costo 1) è più vicino alla radice di B3 (costo 2). Quindi B4 è il Designated Bridge. La sua porta verso B3 è Designated, mentre la porta di B3 verso B4 viene <strong>bloccata</strong>.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p><strong>Conclusione:</strong> La porta di B3 verso B4 e la porta di B4 verso B2 vengono bloccate. A seconda della topologia esatta, una di queste potrebbe essere sufficiente a rompere tutti i cicli. Negli esami, spesso una domanda come questa si traduce nell'identificare che lo switch B3, non essendo Designated Bridge su nessuno dei suoi segmenti e avendo una sola Root Port, di fatto non inoltra traffico di transito (disattivandosi in pratica per certi percorsi).</p>
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 29 Gennaio 2024, Q6:</strong> Data una topologia, identificare lo switch che si disattiva (o le porte).</li>
+                        <li><strong>Esame 13 Luglio 2022, Q6:</strong> Identificare gli switch disattivati dall'algoritmo STP.</li>
+                        <li><strong>Esame 15 Giugno 2023, Q6:</strong> Data una topologia, analizzare le conseguenze di una rottura di un link attivo e di uno disattivato.</li>
+                        <li><strong>Esame 19 Febbraio 2024, Q6:</strong> Analisi di uno scenario con switch appena resettati (quindi senza STP ancora convergente).</li>
+                        <li><strong>Esame 16 Settembre 2024, Q6:</strong> Data una topologia con STP convergente, analizzare cosa succede quando un host viene spostato.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizi-consigliati" class="content-section">
+            <h2 class="section-title">4. Esercizi Consigliati per la Lezione 4</h2>
+            <div class="section-content">
+                <p>Per questo argomento, la pratica è fondamentale. Risolvi questi due esercizi per coprire i principali scenari d'esame.</p>
+                <div class="clarification-box">
+                    <strong>Set di Esercizi Chiave:</strong>
+                    <ol>
+                        <li>
+                            <strong>Scenario con Switch Resettato (Learning/Flooding):</strong>
+                            <ul>
+                                <li><strong>Esame 19 Febbraio 2024, Q6.</strong> Questo esercizio è perfetto per verificare la tua comprensione del meccanismo di auto-apprendimento e flooding. Ti costringe a ragionare su una rete "vuota" e a prevedere il percorso (e i loop!) di un frame.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Esecuzione Algoritmo STP (Analisi Topologica):</strong>
+                            <ul>
+                                <li><strong>Esame 29 Gennaio 2024, Q6.</strong> Questo esercizio è un classico. Ti viene data una topologia con ID e devi eseguire mentalmente i 3 passi dell'algoritmo STP per identificare il Root Bridge, le Root Port e le porte bloccate. Se riesci a risolverlo, hai capito il cuore di STP.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Dopo aver risolto questi due esercizi, avrai una solida comprensione di come funzionano gli switch e come gestiscono la ridondanza, che sono le competenze chiave testate in questa parte del programma.</p>
+                </div>
+            </div>
+        </article>
+        
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti di Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    mainBkg: 'transparent',
+                }
+            });
+            
+            const renderMermaidInSection = (section) => {
+                section.querySelectorAll('.mermaid').forEach(async (diag) => {
+                    if (diag.dataset.rendered) return;
+                    const id = diag.id || `mermaid-diag-${Math.random().toString(36).substr(2, 9)}`;
+                    diag.id = id;
+                    const code = diag.textContent.trim();
+                    diag.innerHTML = 'Loading diagram...';
+                    
+                    try {
+                        const { svg } = await mermaid.render(id, code);
+                        diag.innerHTML = svg;
+                        diag.dataset.rendered = 'true';
+                    } catch(e) {
+                        console.error("Mermaid rendering error:", e);
+                        diag.innerHTML = `<p style="color:red;">Error rendering diagram</p>`;
+                    }
+                });
+            };
+
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', () => renderMermaidInSection(section));
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                renderMermaidInSection(initiallyActiveSection);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
