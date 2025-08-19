@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 9: Protocolli di Trasporto (UDP & TCP)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body data-pdf-path="../slides/Computer Networks - Chapter 5 - End-to-End protocols.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 9: Protocolli di Trasporto</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni_home.html" class="sidebar-action-button" id="lezioni-home-btn">Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-transport" class="sidebar-link">1. Il Livello di Trasporto</a></li>
+            <li><a href="#udp" class="sidebar-link">2. UDP: User Datagram Protocol</a></li>
+            <li><a href="#tcp-intro" class="sidebar-link">3. TCP: Transmission Control Protocol</a></li>
+            <li><a href="#tcp-service" class="sidebar-link">3.1. Servizio e Caratteristiche</a></li>
+            <li><a href="#tcp-fsm" class="sidebar-link">3.2. La Macchina a Stati di TCP</a></li>
+            <li><a href="#tcp-handshake" class="sidebar-link">3.3. Apertura: 3-Way Handshake</a></li>
+            <li><a href="#tcp-closing" class="sidebar-link">3.4. Chiusura e lo Stato TIME_WAIT</a></li>
+            <li><a href="#tcp-flow-control" class="sidebar-link">4. Controllo di Flusso in TCP</a></li>
+            <li><a href="#tcp-sliding-window" class="sidebar-link">4.1. Sliding Window basata su Byte</a></li>
+            <li><a href="#tcp-nagle" class="sidebar-link">5. Algoritmo di Nagle</a></li>
+            <li><a href="#esercizi-consigliati" class="sidebar-link">6. Esercizi Consigliati</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-transport" class="content-section active-section">
+            <h2 class="section-title">1. Il Livello di Trasporto</h2>
+            <div class="section-content">
+                <p>Il livello di rete (IP) fornisce un servizio di consegna <strong>host-to-host</strong> inaffidabile. Tuttavia, le applicazioni non girano sull'host in generale, ma sono <strong>processi</strong> specifici in esecuzione su di esso. Il compito del livello di Trasporto è estendere il servizio di rete per fornire una comunicazione logica <strong>process-to-process</strong>.</p>
+                <p>Questo viene realizzato tramite il concetto di <strong>porta</strong>. Una porta è un numero a 16 bit che identifica un endpoint di comunicazione all'interno di un host. Una comunicazione di rete è quindi univocamente identificata dalla tupla a 5 elementi: `(protocollo, IP sorgente, porta sorgente, IP destinazione, porta destinazione)`.</p>
+            </div>
+        </article>
+        
+        <article id="udp" class="content-section">
+            <h2 class="section-title">2. UDP: User Datagram Protocol</h2>
+            <div class="section-content">
+                <p>UDP è il più semplice dei protocolli di trasporto. Fa poco più che estendere il servizio di IP per la comunicazione tra processi.</p>
+                <ul>
+                    <li><strong>Servizio:</strong> Fornisce un servizio di consegna di datagrammi <strong>connectionless</strong> e <strong>inaffidabile</strong> (best-effort), esattamente come IP.</li>
+                    <li><strong>Funzioni:</strong>
+                        <ul>
+                            <li><strong>Multiplexing/Demultiplexing:</strong> La sua funzione principale, realizzata tramite le porte sorgente e destinazione nel suo header.</li>
+                            <li><strong>Controllo degli errori (opzionale):</strong> Ha un campo checksum per verificare l'integrità del payload, ma il suo uso è opzionale in IPv4.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Casi d'uso:</strong> DNS, streaming video/audio, giochi online, e qualsiasi applicazione dove la velocità e il basso overhead sono più importanti dell'affidabilità completa, o che preferisce gestire l'affidabilità a livello applicativo.</li>
+                </ul>
+                <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 17 Giugno 2024, Q11:</strong> Domanda sui protocolli di trasporto più idonei per vari servizi (query DB, sensori, allarme).</li>
+                        <li><strong>Esame 11 Luglio 2023, Q11:</strong> Domanda sui protocolli più adatti per streaming, email e accesso remoto.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="tcp-intro" class="content-section">
+            <h2 class="section-title">3. TCP: Transmission Control Protocol</h2>
+            <div class="section-content">
+                <p>TCP è il cavallo di battaglia di Internet. Il suo obiettivo è trasformare il servizio inaffidabile di IP in un servizio di comunicazione <strong>affidabile</strong> e <strong>ordinato</strong> tra due processi.</p>
+            </div>
+        </article>
+        
+        <article id="tcp-service" class="content-section">
+            <h3 class="subsection-title">3.1. Servizio e Caratteristiche</h3>
+            <div class="section-content">
+                <ul>
+                    <li><strong>Connection-Oriented:</strong> Prima di scambiare dati, i due processi devono stabilire una connessione tramite una procedura di handshake.</li>
+                    <li><strong>Reliable:</strong> Garantisce che ogni byte inviato venga consegnato senza errori e senza duplicati. Utilizza numeri di sequenza, riscontri (ACK) e timeout per ritrasmettere i dati persi.</li>
+                    <li><strong>Byte-Stream:</strong> Offre all'applicazione l'astrazione di un "flusso di byte" bidirezionale, come se fosse un file. TCP si occupa di spezzettare questo flusso in segmenti di dimensione appropriata (MSS - Maximum Segment Size).</li>
+                    <li><strong>Full-Duplex:</strong> I dati possono scorrere in entrambe le direzioni contemporaneamente sulla stessa connessione.</li>
+                    <li><strong>Flow Control:</strong> Assicura che il mittente non "inondi" il ricevitore inviando dati più velocemente di quanto quest'ultimo possa elaborarli.</li>
+                    <li><strong>Congestion Control:</strong> Modula la velocità di invio per non sovraccaricare la rete stessa (argomento della Lezione 10).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="tcp-fsm" class="content-section">
+            <h3 class="subsection-title">3.2. La Macchina a Stati di TCP</h3>
+            <div class="section-content">
+                <p>Per gestire una connessione, ogni endpoint TCP mantiene uno stato. Le transizioni tra stati sono governate dagli eventi (chiamate dell'applicazione come `connect()` o `close()`, e ricezione di segmenti con flag specifici come SYN, FIN, ACK).</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+stateDiagram-v2
+    [*] --> CLOSED
+    CLOSED --> LISTEN: Passive Open
+    LISTEN --> SYN_RECEIVED: Recv SYN / Send SYN,ACK
+    SYN_RECEIVED --> ESTABLISHED: Recv ACK
+    
+    CLOSED --> SYN_SENT: Active Open / Send SYN
+    SYN_SENT --> SYN_RECEIVED: Recv SYN / Send SYN,ACK
+    SYN_SENT --> ESTABLISHED: Recv SYN,ACK / Send ACK
+    
+    ESTABLISHED --> FIN_WAIT_1: Close / Send FIN
+    FIN_WAIT_1 --> FIN_WAIT_2: Recv ACK
+    FIN_WAIT_2 --> TIME_WAIT: Recv FIN / Send ACK
+    
+    ESTABLISHED --> CLOSE_WAIT: Recv FIN / Send ACK
+    CLOSE_WAIT --> LAST_ACK: Close / Send FIN
+    LAST_ACK --> CLOSED: Recv ACK
+    
+    TIME_WAIT --> CLOSED: Timeout (2*MSL)
+                    </pre>
+                </div>
+            </div>
+        </article>
+        
+        <article id="tcp-handshake" class="content-section">
+            <h3 class="subsection-title">3.3. Apertura della Connessione: 3-Way Handshake</h3>
+            <div class="section-content">
+                <p>La connessione viene stabilita con uno scambio di 3 messaggi per sincronizzare i numeri di sequenza (ISN - Initial Sequence Number) di entrambi i lati:</p>
+                <ol>
+                    <li><strong>Client → Server:</strong> Invia un segmento con il flag <strong>SYN</strong> (Synchronize) e un numero di sequenza iniziale casuale `Seq=x`. (Stato: `SYN_SENT`)</li>
+                    <li><strong>Server → Client:</strong> Risponde con un segmento con i flag <strong>SYN</strong> e <strong>ACK</strong>. L'ACK riscontra il SYN del client (`Ack=x+1`), e il server sceglie il suo ISN `Seq=y`. (Stato: `SYN_RECEIVED`)</li>
+                    <li><strong>Client → Server:</strong> Invia un ultimo segmento con il flag <strong>ACK</strong> per riscontrare il SYN del server (`Ack=y+1`). (Stato: `ESTABLISHED` su entrambi i lati).</li>
+                </ol>
+            </div>
+        </article>
+        
+        <article id="tcp-closing" class="content-section">
+            <h3 class="subsection-title">3.4. Chiusura della Connessione e lo Stato TIME_WAIT</h3>
+            <div class="section-content">
+                <p>La chiusura è un processo a 4 fasi perché ogni direzione del flusso di dati viene chiusa indipendentemente ("half-close"):</p>
+                <ol>
+                    <li><strong>Lato A → Lato B:</strong> A, avendo finito di inviare dati, manda un <strong>FIN</strong> (`Seq=p`). (Stato: `FIN_WAIT_1`)</li>
+                    <li><strong>Lato B → Lato A:</strong> B riscontra il FIN (`Ack=p+1`). A questo punto, A non può più inviare dati, ma B sì. (Stato di A: `FIN_WAIT_2`, Stato di B: `CLOSE_WAIT`)</li>
+                    <li><strong>Lato B → Lato A:</strong> Quando anche B ha finito di inviare dati, manda il suo <strong>FIN</strong> (`Seq=q`). (Stato: `LAST_ACK`)</li>
+                    <li><strong>Lato A → Lato B:</strong> A riscontra il FIN di B (`Ack=q+1`). A questo punto, B chiude la connessione. (Stato di B: `CLOSED`)</li>
+                </ol>
+                <p><strong>Lo stato TIME_WAIT:</strong> Dopo aver inviato l'ultimo ACK, A non passa subito a `CLOSED`, ma entra nello stato `TIME_WAIT` per una durata di **2*MSL (Maximum Segment Lifetime)**, tipicamente 60 secondi.</p>
+                <div class="note-box">
+                    <strong>Perché TIME_WAIT è cruciale?</strong>
+                    <ol>
+                        <li><strong>Per gestire la perdita dell'ultimo ACK:</strong> Se l'ultimo ACK di A si perde, B andrà in timeout e ritrasmetterà il suo FIN. A, essendo ancora in `TIME_WAIT`, può semplicemente inviare di nuovo l'ACK. Se fosse già in `CLOSED`, non saprebbe come rispondere.</li>
+                        <li><strong>Per evitare che pacchetti "vaganti" di una vecchia connessione corrompano una nuova:</strong> Impedisce che una nuova connessione con la stessa coppia di IP e porte venga creata troppo presto, dando tempo ai pacchetti ritardati della vecchia connessione di "morire" nella rete.</li>
+                    </ol>
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 19 Febbraio 2024, Q12:</strong> Domanda sulla durata dello stato TIME_WAIT e sul perché è necessario.</li>
+                        <li><strong>Esame 17 Giugno 2024, Q12:</strong> Domanda sul passaggio allo stato FIN-WAIT-1 e sulla possibilità di ricevere ancora dati.</li>
+                        <li><strong>Esame 16 Settembre 2024, Q12:</strong> Cosa fare se si riceve un SYN in stato ESTABLISHED.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="tcp-flow-control" class="content-section">
+            <h2 class="section-title">4. Controllo di Flusso in TCP</h2>
+            <div class="section-content">
+                <p>Il controllo di flusso serve a evitare che il mittente invii dati più velocemente di quanto il ricevitore possa leggerli dal suo buffer. TCP implementa il controllo di flusso usando una variante del protocollo a finestra scorrevole (sliding window).</p>
+            </div>
+        </article>
+
+        <article id="tcp-sliding-window" class="content-section">
+            <h3 class="subsection-title">4.1. Sliding Window basata su Byte</h3>
+            <div class="section-content">
+                <p>La finestra di TCP è basata sui byte, non sui pacchetti. Il ricevitore, in ogni segmento che invia, pubblicizza la quantità di spazio libero nel suo buffer tramite il campo <strong>AdvertisedWindow</strong>.</p>
+                <p>Il mittente deve rispettare questo limite. La quantità di dati che può inviare è governata dalla regola:</p>
+                <div class="math-block">
+                \( \text{LastByteSent} - \text{LastByteAcked} \le \text{AdvertisedWindow} \)
+                </div>
+                <p>Questo definisce la <strong>EffectiveWindow</strong>, cioè lo spazio realmente disponibile per inviare nuovi dati:</p>
+                <div class="math-block">
+                \( \text{EffectiveWindow} = \text{AdvertisedWindow} - (\text{LastByteSent} - \text{LastByteAcked}) \)
+                </div>
+                <div class="calculation-box">
+                    <strong>Esempio di Calcolo (tipo esame Febbraio '24, Q13)</strong>
+                    <p>Una socket ha un buffer di 10000 byte. In un dato istante: `LastByteAcked=1000`, `AdvertisedWindow=4000`, `LastByteSent=3000`, `LastByteWritten=4000`. Quanti byte si possono inviare immediatamente?</p>
+                    <ol>
+                        <li><strong>Dati "in volo" (non ancora riscontrati):</strong> \( \text{InFlight} = \text{LastByteSent} - \text{LastByteAcked} = 3000 - 1000 = 2000 \text{ byte} \).</li>
+                        <li><strong>Finestra effettiva secondo il ricevitore:</strong> \( \text{EffectiveWindow} = \text{AdvertisedWindow} - \text{InFlight} = 4000 - 2000 = 2000 \text{ byte} \).</li>
+                        <li><strong>Dati pronti nel buffer del mittente:</strong> \( \text{BufferedData} = \text{LastByteWritten} - \text{LastByteSent} = 4000 - 3000 = 1000 \text{ byte} \).</li>
+                        <li><strong>Dati inviabili:</strong> Il mittente può inviare il minimo tra lo spazio concesso dal ricevitore e i dati che ha pronti. \( \min(\text{EffectiveWindow}, \text{BufferedData}) = \min(2000, 1000) = 1000 \text{ byte} \).</li>
+                    </ol>
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 19 Febbraio 2024, Q13:</strong> Calcolo dei byte inviabili immediatamente.</li>
+                        <li><strong>Esame 16 Settembre 2024, Q13:</strong> Calcolo dei byte inviabili e dello spazio libero nel buffer.</li>
+                        <li><strong>Esame 17 Gennaio 2024, Q13:</strong> Calcolo dei byte che l'applicazione può consumare e del valore di Acknowledgment da inviare.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="tcp-nagle" class="content-section">
+            <h2 class="section-title">5. Algoritmo di Nagle</h2>
+            <div class="section-content">
+                <p><strong>Problema (Silly Window Syndrome):</strong> In applicazioni interattive (es. Telnet), l'utente potrebbe inviare un byte alla volta. Se TCP inviasse subito un segmento per ogni byte, il 97.5% della banda verrebbe sprecato in header (40 byte di header per 1 byte di dati).</p>
+                <p><strong>Soluzione (Algoritmo di Nagle):</strong> È un'euristica per aggregare piccoli pezzi di dati in segmenti più grandi. La regola è:</p>
+                <blockquote>
+                Finché ci sono dati inviati ma non ancora riscontrati (dati "in volo"), continua a bufferizzare i nuovi dati in uscita. Invia un nuovo segmento solo quando arriva un ACK per i dati precedenti OPPURE quando hai accumulato abbastanza dati da riempire un segmento di dimensione massima (MSS).
+                </blockquote>
+                <p>In pratica, permette di avere al massimo un solo piccolo segmento non riscontrato in rete. Questo migliora drasticamente l'efficienza senza introdurre troppa latenza.</p>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 17 Giugno 2024, Q13:</strong> Calcolo del numero di segmenti inviati al secondo, applicando l'algoritmo di Nagle.</li>
+                        <li><strong>Esame 4 Settembre 2023, Q13:</strong> Calcolo della dimensione del payload dei segmenti inviati, applicando l'algoritmo di Nagle.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizi-consigliati" class="content-section">
+            <h2 class="section-title">6. Esercizi Consigliati per la Lezione 9</h2>
+            <div class="section-content">
+                <p>Questa lezione è densa di concetti e meccanismi interconnessi. Gli esercizi sono fondamentali per verificarne la comprensione.</p>
+                <div class="clarification-box">
+                    <strong>Set di Esercizi Chiave:</strong>
+                    <ol>
+                        <li>
+                            <strong>Macchina a Stati (Domanda Concettuale):</strong>
+                            <ul>
+                                <li><strong>Esame 19 Febbraio 2024, Q12.</strong> Questo esercizio testa la tua comprensione dello stato `TIME_WAIT`, uno dei concetti più importanti e meno intuitivi della chiusura di TCP. Se sai spiegare la sua durata e il suo scopo, hai capito bene la logica di robustezza del protocollo.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Sliding Window (Calcolo Pratico):</strong>
+                            <ul>
+                                <li><strong>Esame 19 Febbraio 2024, Q13.</strong> È l'esercizio perfetto per la pratica sul controllo di flusso. Ti costringe a calcolare correttamente i dati "in volo", la finestra effettiva e i dati realmente inviabili, considerando tutti i vincoli.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Algoritmo di Nagle (Analisi di Performance):</strong>
+                            <ul>
+                                <li><strong>Esame 17 Giugno 2024, Q13.</strong> Questo esercizio ti chiede di applicare la logica di Nagle per capire quanti dati vengono accumulati prima dell'invio in un RTT, e da lì calcolare il numero di segmenti al secondo. Testa la tua comprensione dell'impatto di Nagle sulle performance.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Se riesci a risolvere questi tre esercizi, hai una padronanza solida dei meccanismi fondamentali di TCP (stati, controllo di flusso e ottimizzazione della trasmissione).</p>
+                </div>
+            </div>
+        </article>
+        
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti di Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+</body>
+</html>
