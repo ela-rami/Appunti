@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 12: Sicurezza - Crittografia Asimmetrica e Protocolli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body data-pdf-path="../slides/Computer Networks - Chapter 8 - Network Security.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 12: Crittografia Asimmetrica e Protocolli</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni_home.html" class="sidebar-action-button" id="lezioni-home-btn">Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-asymmetric" class="sidebar-link">1. Crittografia a Chiave Pubblica</a></li>
+            <li><a href="#asymmetric-apps" class="sidebar-link">1.1. Applicazioni: Cifratura e Firma</a></li>
+            <li><a href="#rsa" class="sidebar-link">1.2. L'algoritmo RSA</a></li>
+            <li><a href="#digital-signature" class="sidebar-link">2. La Firma Digitale</a></li>
+            <li><a href="#diffie-hellman" class="sidebar-link">3. Scambio Chiavi Diffie-Hellman</a></li>
+            <li><a href="#mitm-attack" class="sidebar-link">3.1. Attacco Man-in-the-Middle (MITM)</a></li>
+            <li><a href="#pki" class="sidebar-link">4. PKI e Certificati Digitali (X.509)</a></li>
+            <li><a href="#auth-protocols" class="sidebar-link">5. Protocolli di Autenticazione</a></li>
+            <li><a href="#challenge-response" class="sidebar-link">5.1. Il Modello Challenge-Response</a></li>
+            <li><a href="#tls-handshake" class="sidebar-link">6. Cenni sul TLS Handshake</a></li>
+            <li><a href="#esercizi-consigliati" class="sidebar-link">7. Esercizi Consigliati</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-asymmetric" class="content-section active-section">
+            <h2 class="section-title">1. Crittografia a Chiave Pubblica (Asimmetrica)</h2>
+            <div class="section-content">
+                <p>La crittografia asimmetrica risolve il problema principale di quella simmetrica: come scambiarsi la chiave segreta in modo sicuro? In questo paradigma, ogni partecipante possiede una <strong>coppia di chiavi</strong> matematicamente correlate:</p>
+                <ul>
+                    <li>Una <strong>chiave pubblica</strong>, che può essere distribuita liberamente a chiunque.</li>
+                    <li>Una <strong>chiave privata</strong>, che deve essere mantenuta assolutamente segreta dal proprietario.</li>
+                </ul>
+                <p>La loro proprietà fondamentale è che ciò che viene cifrato con una chiave può essere decifrato solo con l'altra chiave della coppia. Si basano su "funzioni a senso unico" (one-way functions): facili da calcolare in una direzione, ma computazionalmente infattibili da invertire senza conoscere un'informazione segreta (la chiave privata).</p>
+            </div>
+        </article>
+
+        <article id="asymmetric-apps" class="content-section">
+            <h3 class="subsection-title">1.1. Applicazioni: Cifratura e Firma Digitale</h3>
+            <div class="section-content">
+                <p>La coppia di chiavi può essere usata in due modi opposti per ottenere due servizi di sicurezza diversi:</p>
+                <ol>
+                    <li><strong>Cifratura per la Confidenzialità:</strong>
+                        <ul>
+                            <li>Alice vuole inviare un messaggio segreto a Bob.</li>
+                            <li>Alice prende la <strong>chiave pubblica di Bob</strong> e la usa per cifrare il messaggio.</li>
+                            <li>Solo Bob, con la sua <strong>chiave privata</strong>, può decifrare il messaggio.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Firma Digitale per Autenticazione e Non Ripudio:</strong>
+                        <ul>
+                            <li>Alice vuole inviare un messaggio a Bob, e vuole che Bob sia sicuro che il messaggio provenga da lei e non sia stato alterato.</li>
+                            <li>Alice usa la sua <strong>chiave privata</strong> per "firmare" il messaggio (in pratica, cifra l'hash del messaggio).</li>
+                            <li>Chiunque, inclusa Bob, può usare la <strong>chiave pubblica di Alice</strong> per verificare la firma. Se la verifica ha successo, si ha la garanzia che solo il possessore della chiave privata di Alice può averla creata.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="rsa" class="content-section">
+            <h3 class="subsection-title">1.2. L'algoritmo RSA (Rivest-Shamir-Adleman)</h3>
+            <div class="section-content">
+                <p>RSA è l'algoritmo a chiave pubblica più famoso. La sua sicurezza si basa sulla difficoltà computazionale di <strong>fattorizzare numeri primi molto grandi</strong>. Sebbene non sia necessario conoscere i dettagli matematici per l'esame, è importante capire il principio.</p>
+                <div class="security-analysis-box">
+                    <strong>Vulnerabilità della Firma RSA "Pura" (tipo esame Settembre '22, Q17)</strong>
+                    <p>Se si firma direttamente il messaggio `M` calcolando \( S = M^d \pmod{n} \), un attaccante può compiere un attacco di tipo "existential forgery". Se un attaccante intercetta la firma `S` per un messaggio `M=5`, può calcolare `S' = S * S`. Questo `S'` è una firma valida per il messaggio `M' = 25`, perché \( (S')^e = (S^2)^e = (S^e)^2 = M^2 = 25 \pmod{n} \). L'attaccante ha creato una firma per un messaggio che Alice non ha mai firmato.</p>
+                    <p><strong>Soluzione:</strong> Non si firma mai il messaggio direttamente, ma si firma sempre il suo <strong>hash crittografico</strong>: \( S = (H(M))^d \pmod{n} \). Questo rompe le proprietà matematiche e rende l'attacco infattibile.</p>
+                </div>
+            </div>
+        </article>
+        
+        <article id="digital-signature" class="content-section">
+            <h2 class="section-title">2. La Firma Digitale</h2>
+            <div class="section-content">
+                <p>Una firma digitale, basata sulla crittografia asimmetrica, fornisce tre importantissimi servizi di sicurezza:</p>
+                <ul>
+                    <li><strong>Autenticazione dell'origine:</strong> Solo chi possiede la chiave privata può aver creato la firma.</li>
+                    <li><strong>Integrità dei dati:</strong> Poiché si firma l'hash del messaggio, qualsiasi modifica al messaggio invaliderebbe la firma.</li>
+                    <li><strong>Non Ripudio:</strong> Il mittente non può negare di aver inviato il messaggio, poiché solo lui possiede la chiave privata con cui è stato firmato. Questa è una proprietà che un MAC non può fornire, perché in un MAC la chiave è condivisa.</li>
+                </ul>
+                <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                         <li><strong>Esame 15 Luglio 2024, Q15:</strong> Associare la firma digitale al suo scopo (autenticità, non ripudio).</li>
+                         <li><strong>Esame 5 Settembre 2022, Q15:</strong> Associare la firma digitale al suo scopo (autenticità, non ripudio).</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="diffie-hellman" class="content-section">
+            <h2 class="section-title">3. Scambio Chiavi Diffie-Hellman (DH)</h2>
+            <div class="section-content">
+                <p>Diffie-Hellman è un protocollo ingegnoso che permette a due parti, Alice e Bob, di concordare una chiave segreta condivisa comunicando esclusivamente su un canale insicuro, senza che un attaccante (Eve) che ascolta possa scoprire la chiave.</p>
+                <p>Si basa sulla difficoltà del problema del <strong>logaritmo discreto</strong>. L'analogia comune è quella dei colori: Alice e Bob si accordano su un colore pubblico. Ognuno aggiunge il proprio colore segreto, si scambiano il risultato e poi aggiungono di nuovo il proprio colore segreto. Alla fine, entrambi ottengono lo stesso colore finale, che Eve non può ricreare.</p>
+            </div>
+        </article>
+
+        <article id="mitm-attack" class="content-section">
+            <h3 class="subsection-title">3.1. Attacco Man-in-the-Middle (MITM)</h3>
+            <div class="section-content">
+                <p>La versione "pura" di Diffie-Hellman è vulnerabile a un <strong>attacco Man-in-the-Middle</strong>. Poiché le "mezze chiavi" pubbliche scambiate non sono autenticate, un attaccante attivo (Mallory) può interporsi tra Alice e Bob:</p>
+                <ol>
+                    <li>Alice invia la sua mezza chiave a Bob. Mallory la intercetta e invia a Bob la *sua* mezza chiave.</li>
+                    <li>Bob invia la sua mezza chiave ad Alice. Mallory la intercetta e invia ad Alice la *sua* mezza chiave.</li>
+                    <li>Mallory stabilisce una chiave segreta con Alice e una chiave segreta separata con Bob.</li>
+                    <li>Alice e Bob credono di comunicare in modo sicuro tra loro, ma in realtà Mallory è in mezzo, in grado di decifrare, leggere, modificare e ricifrare tutto il traffico.</li>
+                </ol>
+                <p><strong>Soluzione:</strong> Per rendere sicuro Diffie-Hellman, le mezze chiavi scambiate devono essere <strong>autenticate</strong>, tipicamente tramite firma digitale.</p>
+            </div>
+        </article>
+
+        <article id="pki" class="content-section">
+            <h2 class="section-title">4. PKI e Certificati Digitali (X.509)</h2>
+            <div class="section-content">
+                <p><strong>Problema:</strong> Come faccio a sapere che una chiave pubblica appartiene davvero ad Alice e non a un impostore?</p>
+                <p><strong>Soluzione:</strong> La <strong>Public Key Infrastructure (PKI)</strong>. Il sistema si basa su entità fidate chiamate <strong>Certificate Authority (CA)</strong>.</p>
+                <p>Un <strong>certificato digitale (standard X.509)</strong> è un documento elettronico che lega un'identità (es. una persona, un sito web) a una chiave pubblica. Questo documento è a sua volta firmato digitalmente dalla chiave privata di una CA.</p>
+                <p>Il processo è:
+                <ol>
+                    <li>Alice genera la sua coppia di chiavi.</li>
+                    <li>Alice invia la sua chiave pubblica e una prova della sua identità a una CA.</li>
+                    <li>La CA verifica l'identità di Alice e, se corretta, emette un certificato contenente i dati di Alice e la sua chiave pubblica, firmando il tutto con la propria chiave privata.</li>
+                    <li>Quando Alice vuole autenticarsi con Bob, invia a Bob il suo certificato. Bob, che si fida della CA (il cui certificato è pre-installato nel suo browser/OS), usa la chiave pubblica della CA per verificare la firma sul certificato di Alice. Se la verifica ha successo, Bob è sicuro che la chiave pubblica nel certificato appartenga davvero ad Alice.</li>
+                </ol>
+                <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                         <li><strong>Esame 19 Febbraio 2024, Q18:</strong> Domanda sui contenuti di un certificato X.509.</li>
+                         <li><strong>Esame 17 Febbraio 2023, Q17:</strong> Domanda sui contenuti di un certificato X.509.</li>
+                         <li><strong>Esame 16 Settembre 2024, Q18:</strong> Domanda su chi genera la chiave privata e chi decide la durata di un certificato.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="auth-protocols" class="content-section">
+            <h2 class="section-title">5. Protocolli di Autenticazione</h2>
+            <div class="section-content">
+                <p>I protocolli di autenticazione sono il pane quotidiano degli esercizi di sicurezza. L'obiettivo è permettere a un'entità (claimant) di provare la propria identità a un'altra (verifier).</p>
+            </div>
+        </article>
+
+        <article id="challenge-response" class="content-section">
+            <h3 class="subsection-title">5.1. Il Modello Challenge-Response</h3>
+            <div class="section-content">
+                <p>Per evitare attacchi di replay, l'autenticazione non può basarsi su una semplice password inviata in chiaro. Si usa un meccanismo di <strong>challenge-response</strong>:</p>
+                <ol>
+                    <li>Il <strong>verifier (B)</strong> invia al <strong>claimant (A)</strong> una "sfida" (<strong>challenge</strong>), che è un numero casuale fresco, generato sul momento, chiamato <strong>nonce</strong> (number used once).</li>
+                    <li>Il <strong>claimant (A)</strong> deve fornire una <strong>response</strong> che dimostri il possesso di un segreto (es. una chiave condivisa o una chiave privata) senza rivelare il segreto stesso. Tipicamente, la response è la nonce cifrata o firmata con la chiave.</li>
+                    <li>Il <strong>verifier (B)</strong> controlla se la response è corretta.</li>
+                </ol>
+                <div class="security-analysis-box">
+                    <strong>La "Ricetta" per Analizzare i Protocolli d'Esame</strong>
+                    <p>Quando analizzi un protocollo, poniti queste domande:</p>
+                    <ul>
+                        <li><strong>Chi genera la nonce?</strong> Per autenticare A verso B, la nonce <strong>deve</strong> essere generata da B. Se la genera A, il protocollo è vulnerabile a un attacco di replay: un attaccante può registrare l'intera comunicazione e riprodurla in seguito, e B non avrebbe modo di sapere che non è "live".</li>
+                        <li><strong>La response dipende dalla nonce?</strong> La risposta di A deve includere in qualche modo la nonce di B (cifrata, firmata, o usata in un hash). Questo lega la risposta alla specifica sessione.</li>
+                        <li><strong>La response dimostra il possesso di un segreto?</strong> La response deve essere qualcosa che solo il vero A può produrre (es. cifrare con una chiave condivisa con B, o firmare con la sua chiave privata).</li>
+                    </ul>
+                </div>
+                 <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati (Tutti di questo tipo)</h4>
+                    <ul>
+                         <li><strong>Esame 17 Giugno 2024, Q17 & Q18</strong></li>
+                         <li><strong>Esame 29 Gennaio 2024, Q17</strong></li>
+                         <li><strong>Esame 19 Febbraio 2024, Q17</strong></li>
+                         <li><strong>Esame 15 Luglio 2024, Q17</strong></li>
+                         <li><strong>Esame 16 Settembre 2024, Q17</strong></li>
+                         <li><strong>Esame 17 Febbraio 2023, Q18</strong></li>
+                         <li><strong>Esame 10 Luglio 2023, Q17</strong></li>
+                         <li><strong>Esame 4 Settembre 2023, Q17</strong></li>
+                         <li><strong>Esame 1 Febbraio 2022, Q16, Q18</strong></li>
+                         <li><strong>Esame 17 Febbraio 2022, Q17</strong></li>
+                         <li><strong>Esame 13 Luglio 2022, Q17</strong></li>
+                         <li><strong>Esame 5 Settembre 2022, Q18</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="tls-handshake" class="content-section">
+            <h2 class="section-title">6. Cenni sul TLS Handshake</h2>
+            <div class="section-content">
+                <p>Il protocollo <strong>TLS (Transport Layer Security)</strong>, che protegge le connessioni HTTPS, è un esempio perfetto di come tutti questi meccanismi vengono usati insieme:</p>
+                <ol>
+                    <li>Il client e il server si scambiano le loro capacità e negoziano una *cipher suite*.</li>
+                    <li>Il server si autentica inviando il suo certificato X.509.</li>
+                    <li>Usano un protocollo di scambio chiavi (tipicamente Diffie-Hellman effimero, DHE) per concordare una chiave di sessione segreta. Le mezze chiavi DH vengono firmate digitalmente per prevenire attacchi MITM.</li>
+                    <li>Tutta la comunicazione successiva viene cifrata e autenticata usando la chiave di sessione appena generata e algoritmi simmetrici (es. AES e HMAC).</li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="esercizi-consigliati" class="content-section">
+            <h2 class="section-title">7. Esercizi Consigliati per la Lezione 12</h2>
+            <div class="section-content">
+                <p>Questa lezione è la più critica per le domande di sicurezza. La pratica sull'analisi dei protocolli è assolutamente essenziale.</p>
+                <div class="clarification-box">
+                    <strong>Set di Esercizi Chiave:</strong>
+                    <ol>
+                        <li>
+                            <strong>Analisi di un Protocollo di Autenticazione (Fondamentale):</strong>
+                            <ul>
+                                <li><strong>Esame 15 Luglio 2024, Q17.</strong> Questo esercizio è un archetipo perfetto. Include una nonce, una firma e un messaggio. Devi applicare la "ricetta" del challenge-response per determinare se A è autenticato, se B è autenticato e se il messaggio è protetto da replay. Se sai risolvere questo, sai risolvere il 90% degli esercizi di sicurezza.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Scambio Chiavi Diffie-Hellman Autenticato:</strong>
+                            <ul>
+                                <li><strong>Esame 17 Giugno 2024, Q18.</strong> Questo esercizio presenta una variante di Diffie-Hellman e chiede di completarla per renderla sicura da attacchi MITM. La soluzione consiste nell'aggiungere un HMAC o una firma alle mezze chiavi scambiate, testando la tua comprensione della vulnerabilità di base di DH.</li>
+                            </ul>
+                        </li>
+                         <li>
+                            <strong>Concetti di PKI e Certificati:</strong>
+                            <ul>
+                                <li><strong>Esame 16 Settembre 2024, Q18.</strong> Una domanda concettuale che verifica la tua comprensione della gestione dei certificati: chi crea la chiave privata (il soggetto) e chi ne decide la validità (l'issuer/CA).</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Padroneggiare l'analisi dei protocolli tramite il modello challenge-response è la competenza più importante da acquisire in questa lezione.</p>
+                </div>
+            </div>
+        </article>
+        
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti di Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+</body>
+</html>
