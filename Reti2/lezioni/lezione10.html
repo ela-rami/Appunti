@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 10: Controllo della Congestione in TCP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body data-pdf-path="../slides/Computer Networks - Chapter 6 - Congestion Control and Resource Allocation.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 10: Controllo della Congestione</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni_home.html" class="sidebar-action-button" id="lezioni-home-btn">Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-congestion" class="sidebar-link">1. Congestione: il Problema</a></li>
+            <li><a href="#congestion-window" class="sidebar-link">2. La Finestra di Congestione (cwnd)</a></li>
+            <li><a href="#aimd" class="sidebar-link">3. AIMD: Additive Increase / Multiplicative Decrease</a></li>
+            <li><a href="#slow-start" class="sidebar-link">4. Slow Start</a></li>
+            <li><a href="#ssthresh" class="sidebar-link">4.1. Il Ruolo della Soglia (ssthresh)</a></li>
+            <li><a href="#fast-retransmit" class="sidebar-link">5. Fast Retransmit e Fast Recovery</a></li>
+            <li><a href="#tahoe-vs-reno" class="sidebar-link">5.1. TCP Tahoe vs TCP Reno</a></li>
+            <li><a href="#summary-graph" class="sidebar-link">6. Grafico Riassuntivo dell'Evoluzione di cwnd</a></li>
+            <li><a href="#queuing" class="sidebar-link">7. Cenni su QoS e Discipline di Accodamento</a></li>
+            <li><a href="#esercizi-consigliati" class="sidebar-link">8. Esercizi Consigliati</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-congestion" class="content-section active-section">
+            <h2 class="section-title">1. Il Problema della Congestione</h2>
+            <div class="section-content">
+                <p>Mentre il controllo di flusso (Lezione 9) protegge il ricevitore, il controllo della congestione protegge la <strong>rete</strong>. La congestione si verifica quando i router e i link intermedi vengono sovraccaricati da un volume di traffico superiore alla loro capacità. Questo causa l'aumento delle code nei buffer dei router, con due conseguenze negative:</p>
+                <ul>
+                    <li><strong>Aumento della Latenza:</strong> I pacchetti passano più tempo in coda.</li>
+                    <li><strong>Perdita di Pacchetti:</strong> Quando i buffer si riempiono, i pacchetti in arrivo vengono scartati (<em>tail drop</em>).</li>
+                </ul>
+                <p>Prima dell'introduzione del controllo di congestione, Internet era soggetta a fenomeni di <strong>collasso da congestione</strong>, dove un aumento del carico portava a un crollo del throughput effettivo a causa delle continue ritrasmissioni.</p>
+            </div>
+        </article>
+
+        <article id="congestion-window" class="content-section">
+            <h2 class="section-title">2. La Finestra di Congestione (cwnd)</h2>
+            <div class="section-content">
+                <p>La soluzione di TCP è un meccanismo di controllo a anello chiuso e basato sull'host. Ogni mittente TCP mantiene una nuova variabile di stato, la <strong>Congestion Window (`cwnd`)</strong>, che rappresenta una stima di quanti dati possono essere "in volo" nella rete senza causare congestione.</p>
+                <p>La quantità massima di dati non riscontrati che un mittente può avere in transito è quindi il minimo tra la finestra di flusso e la finestra di congestione:</p>
+                <div class="math-block">
+                \( \text{MaxWindow} = \min(\text{cwnd}, \text{AdvertisedWindow}) \)
+                </div>
+                <p>Il mittente percepisce la congestione in modo implicito: **la perdita di un pacchetto (rilevata tramite timeout o ACK duplicati) viene interpretata come un segnale di congestione.**</p>
+            </div>
+        </article>
+
+        <article id="aimd" class="content-section">
+            <h2 class="section-title">3. AIMD: Additive Increase / Multiplicative Decrease</h2>
+            <div class="section-content">
+                <p>AIMD è la strategia di base usata da TCP per adattare la `cwnd` alle condizioni della rete. Consiste in due fasi:</p>
+                <ul>
+                    <li><strong>Additive Increase (Aumento Additivo):</strong> Finché non si rileva congestione (cioè, gli ACK arrivano regolarmente), il mittente aumenta la `cwnd` in modo lineare e cauto. Aggiunge <strong>1 MSS (Maximum Segment Size)</strong> alla `cwnd` per ogni Round-Trip Time (RTT) in cui tutti i dati sono stati riscontrati.</li>
+                    <li><strong>Multiplicative Decrease (Diminuzione Moltiplicativa):</strong> Quando viene rilevata una perdita, il mittente reagisce in modo aggressivo. La `cwnd` viene **dimezzata** (\( \text{cwnd} = \text{cwnd} / 2 \)).</li>
+                </ul>
+                <p>Questo comportamento "gentile nell'aumentare, drastico nel diminuire" permette a TCP di sondare la capacità disponibile senza sovraccaricare la rete per troppo tempo, e di reagire rapidamente ai segnali di congestione.</p>
+            </div>
+        </article>
+
+        <article id="slow-start" class="content-section">
+            <h2 class="section-title">4. Slow Start</h2>
+            <div class="section-content">
+                <p>L'aumento additivo è troppo lento per iniziare una connessione da zero. Per questo, TCP usa una fase iniziale chiamata <strong>Slow Start</strong> (nome ironico, perché è molto veloce).</p>
+                <p>In fase di Slow Start, la `cwnd` inizia da un valore basso (tipicamente 1-10 MSS) e <strong>raddoppia ad ogni RTT</strong>. L'aumento è esponenziale: per ogni ACK ricevuto, la `cwnd` viene incrementata di 1 MSS.</p>
+                <div class="math-block">
+                `cwnd` in Slow Start: \( 1 \to 2 \to 4 \to 8 \to 16 \to \dots \) (MSS)
+                </div>
+            </div>
+        </article>
+
+        <article id="ssthresh" class="content-section">
+            <h3 class="subsection-title">4.1. Il Ruolo della Soglia (ssthresh)</h3>
+            <div class="section-content">
+                <p>La crescita esponenziale di Slow Start non può continuare all'infinito. TCP utilizza una variabile di soglia, chiamata <strong>Slow Start Threshold (`ssthresh`)</strong>, per decidere quando passare da Slow Start ad Additive Increase.</p>
+                <ul>
+                    <li>Finché \( \text{cwnd} < \text{ssthresh} \), TCP rimane in fase di <strong>Slow Start</strong> (crescita esponenziale).</li>
+                    <li>Quando \( \text{cwnd} \ge \text{ssthresh} \), TCP passa alla fase di <strong>Congestion Avoidance</strong> (crescita lineare, ovvero Additive Increase).</li>
+                </ul>
+                <p>Quando si verifica un evento di perdita, `ssthresh` viene aggiornata:</p>
+                <div class="math-block">
+                \( \text{ssthresh} = \frac{\text{cwnd}}{2} \)
+                </div>
+                <p>Questo meccanismo permette a TCP di "ricordare" a che punto si è verificata l'ultima congestione e di avvicinarsi a quel punto in modo più cauto le volte successive.</p>
+            </div>
+        </article>
+
+        <article id="fast-retransmit" class="content-section">
+            <h2 class="section-title">5. Fast Retransmit e Fast Recovery</h2>
+            <div class="section-content">
+                <p>Aspettare un timeout per rilevare una perdita è inefficiente. Un timeout è un evento "grave", che indica che molti pacchetti potrebbero essere andati persi. Spesso, però, si perde solo un singolo pacchetto mentre i successivi arrivano correttamente.</p>
+                <p>Quando il ricevitore riceve pacchetti fuori ordine, continua a inviare ACK per il primo byte che sta ancora aspettando. Questo genera <strong>ACK duplicati</strong>.</p>
+                <ul>
+                    <li><strong>Fast Retransmit:</strong> Quando il mittente riceve <strong>3 ACK duplicati</strong> (per un totale di 4 ACK per lo stesso dato), assume che il segmento successivo sia andato perso e lo ritrasmette immediatamente, senza aspettare il timeout.</li>
+                    <li><strong>Fast Recovery (TCP Reno):</strong> Invece di far ripartire la connessione da Slow Start con `cwnd=1` (come faceva la versione più vecchia, TCP Tahoe), Fast Recovery è un'ottimizzazione che presuppone che la rete sia ancora parzialmente funzionante. Dopo un Fast Retransmit:
+                        <ol>
+                            <li>`ssthresh` viene impostato a `cwnd / 2`.</li>
+                            <li>`cwnd` viene impostato al nuovo `ssthresh` (invece che a 1).</li>
+                            <li>La connessione riparte direttamente dalla fase di Additive Increase.</li>
+                        </ol>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="tahoe-vs-reno" class="content-section">
+            <h3 class="subsection-title">5.1. TCP Tahoe vs TCP Reno</h3>
+            <div class="section-content">
+                <p>Questa è la differenza fondamentale tra le due versioni classiche di TCP, spesso oggetto di domande:</p>
+                <ul>
+                    <li><strong>TCP Tahoe (più vecchia):</strong> Reagisce a **qualsiasi** perdita di pacchetti (sia timeout che 3 ACK duplicati) nello stesso modo: imposta `ssthresh = cwnd / 2` e `cwnd = 1`, ripartendo sempre da Slow Start.</li>
+                    <li><strong>TCP Reno (più moderna):</strong> Distingue i due eventi:
+                        <ul>
+                            <li>In caso di **Timeout**: si comporta come Tahoe (reazione drastica).</li>
+                            <li>In caso di **3 ACK duplicati**: applica Fast Recovery (reazione più "morbida").</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="summary-graph" class="content-section">
+            <h2 class="section-title">6. Grafico Riassuntivo dell'Evoluzione di cwnd (TCP Reno)</h2>
+            <div class="section-content">
+                 <div class="mermaid-container">
+                     <pre class="mermaid">
+flowchart TD
+    A["Start: cwnd = 1<br/>ssthresh = 20"] --> B["Slow Start<br/>cwnd raddoppia ogni RTT"]
+    B --> C{cwnd >= ssthresh?}
+    C -->|"Sì (RTT 5)<br/>cwnd = 20"| D["Congestion Avoidance<br/>cwnd += 1 ogni RTT"]
+    C -->|No| B
+    D --> E{Perdita rilevata?}
+    E -->|"3 ACK duplicati<br/>(RTT 9)"| F["Fast Recovery<br/>ssthresh = cwnd/2 = 12<br/>cwnd = 12"]
+    E -->|"Timeout<br/>(RTT 13)"| G["Ripartenza drastica<br/>ssthresh = cwnd/2 = 8<br/>cwnd = 1"]
+    F --> D
+    G --> B
+    E -->|No| D
+
+    style A fill:#e1f5fe
+    style F fill:#fff3e0
+    style G fill:#ffebee
+    style D fill:#f1f8e9
+                     </pre>
+                 </div>
+            </div>
+        </article>
+
+        <article id="queuing" class="content-section">
+            <h2 class="section-title">7. Cenni su QoS e Discipline di Accodamento</h2>
+            <div class="section-content">
+                <p>Mentre TCP gestisce la congestione dal lato degli host, i router possono implementare politiche di gestione delle code per allocare le risorse in modo più intelligente del semplice FIFO con tail-drop. Argomenti come **Fair Queuing** e **Random Early Detection (RED)** sono stati oggetto d'esame in passato, anche se con minore frequenza negli appelli più recenti.</p>
+                <ul>
+                    <li><strong>Fair Queuing (FQ):</strong> Un router mantiene una coda separata per ogni flusso e le serve in modo equo (simulando un round-robin bit-by-bit) per evitare che un flusso aggressivo penalizzi gli altri.</li>
+                    <li><strong>Random Early Detection (RED):</strong> Invece di aspettare che la coda si riempia, un router inizia a scartare pacchetti con una probabilità crescente man mano che la lunghezza media della coda aumenta, segnalando proattivamente la congestione.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="esercizi-consigliati" class="content-section">
+            <h2 class="section-title">8. Esercizi Consigliati per la Lezione 10</h2>
+            <div class="section-content">
+                <p>La comprensione dell'evoluzione della `cwnd` è la competenza più testata. Questi esercizi ti permetteranno di padroneggiare tutti gli scenari.</p>
+                <div class="clarification-box">
+                    <strong>Set di Esercizi Chiave:</strong>
+                    <ol>
+                        <li>
+                            <strong>Slow Start e Fase Additiva (Calcolo Base):</strong>
+                            <ul>
+                                <li><strong>Esame 17 Gennaio 2024, Q14.</strong> Questo esercizio è perfetto per iniziare. Ti chiede di calcolare l'evoluzione della `cwnd` in una situazione senza perdite, per verificare che tu sappia gestire il passaggio da Slow Start ad Additive Increase una volta raggiunta la `ssthresh`.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Reazione a Timeout (Scenario Completo):</strong>
+                            <ul>
+                                <li><strong>Esame 16 Settembre 2024, Q14.</strong> Questo esercizio testa la reazione a un evento "grave" come un timeout. Devi dimostrare di saper calcolare correttamente i nuovi valori di `ssthresh` e `cwnd` e di capire che il protocollo riparte da Slow Start.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Risolvendo questi esercizi, sarai preparato ad analizzare i grafici di evoluzione della finestra di congestione, che sono una delle tipologie di domanda più complesse dell'esame.</p>
+                </div>
+                <div class="exam-question-list">
+                    <h4>Lista Completa Esercizi d'Esame Correlati</h4>
+                    <ul>
+                        <li><strong>Esame 17 Giugno 2024, Q14:</strong> Domanda concettuale sull'efficacia di RED con flussi TCP vs UDP.</li>
+                        <li><strong>Esame 17 Gennaio 2024, Q14:</strong> Calcolo evoluzione `cwnd` in fase additiva dopo N round.</li>
+                        <li><strong>Esame 19 Febbraio 2024, Q14:</strong> Domanda concettuale su RED e RTT.</li>
+                        <li><strong>Esame 16 Settembre 2024, Q14:</strong> Calcolo evoluzione `cwnd` in fase additiva e reazione a un timeout.</li>
+                        <li><strong>Esame 13 Luglio 2022, Q14:</strong> Calcolo evoluzione `cwnd` in fase additiva con N ACK ricevuti.</li>
+                        <li><strong>Esame 1 Febbraio 2022, Q14:</strong> Calcolo evoluzione `cwnd` e `ssthresh` in risposta a un triplo ACK duplicato (Fast Recovery).</li>
+                        <li><strong>Esame 16 Giugno 2022, Q14:</strong> Calcolo evoluzione `cwnd` e `ssthresh` in risposta a un triplo ACK duplicato.</li>
+                        <li><strong>Esame 5 Settembre 2022, Q14:</strong> Calcolo `cwnd` all'inizio del 4° round dopo una perdita.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti di Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+</body>
+</html>

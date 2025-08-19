@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lezione 11: Sicurezza - Fondamenti e Crittografia Simmetrica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body data-pdf-path="../slides/Computer Networks - Chapter 8 - Network Security.pdf">
+    <div class="overlay"></div>
+    <header>
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Lezione 11: Sicurezza - Fondamenti e Crittografia Simmetrica</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="Reti_lezioni_home.html" class="sidebar-action-button" id="lezioni-home-btn">Indice Lezioni</a>
+            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Slide Prof (PDF)</a>
+        </div>
+        <h2>Indice Argomenti</h2>
+        <ul>
+            <li><a href="#intro-security" class="sidebar-link">1. Principi di Sicurezza di Rete</a></li>
+            <li><a href="#cia-triad" class="sidebar-link">1.1. La Triade CIA</a></li>
+            <li><a href="#attack-types" class="sidebar-link">1.2. Classificazione degli Attacchi</a></li>
+            <li><a href="#symmetric-crypto" class="sidebar-link">2. Crittografia Simmetrica</a></li>
+            <li><a href="#kerckhoffs" class="sidebar-link">2.1. Il Principio di Kerckhoffs</a></li>
+            <li><a href="#stream-vs-block" class="sidebar-link">2.2. Cifrari a Flusso vs. a Blocchi</a></li>
+            <li><a href="#block-modes" class="sidebar-link">3. Modalità Operative dei Cifrari a Blocchi</a></li>
+            <li><a href="#cbc-mode" class="sidebar-link">3.1. ECB vs CBC</a></li>
+            <li><a href="#integrity-auth" class="sidebar-link">4. Integrità e Autenticazione</a></li>
+            <li><a href="#hash-mac" class="sidebar-link">4.1. Funzioni Hash e MAC</a></li>
+            <li><a href="#wep-case-study" class="sidebar-link">5. Caso Studio: Attacchi a WEP</a></li>
+            <li><a href="#esercizi-consigliati" class="sidebar-link">6. Esercizi Consigliati</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="intro-security" class="content-section active-section">
+            <h2 class="section-title">1. Principi di Sicurezza di Rete</h2>
+            <div class="section-content">
+                <p>La sicurezza non è una funzionalità aggiuntiva, ma una proprietà fondamentale di un sistema di comunicazione. L'obiettivo è proteggere le informazioni e le risorse dagli avversari. Per farlo, si definiscono degli obiettivi di sicurezza e si implementano meccanismi per contrastare le minacce.</p>
+            </div>
+        </article>
+
+        <article id="cia-triad" class="content-section">
+            <h3 class="subsection-title">1.1. La Triade CIA</h3>
+            <div class="section-content">
+                <p>Gli obiettivi fondamentali della sicurezza informatica sono riassunti dalla <strong>triade CIA</strong>:</p>
+                <ul>
+                    <li><strong>Confidentiality (Confidenzialità):</strong> Assicura che le informazioni siano accessibili solo alle parti autorizzate. Protegge contro lo spionaggio (*snooping*). Il meccanismo primario è la <strong>crittografia</strong>.</li>
+                    <li><strong>Integrity (Integrità):</strong> Assicura che i dati non vengano alterati (modificati, cancellati o aggiunti) in modo non autorizzato durante la trasmissione. I meccanismi primari sono le <strong>funzioni di hash</strong> e i <strong>MAC</strong>.</li>
+                    <li><strong>Availability (Disponibilità):</strong> Assicura che i servizi e le risorse siano disponibili agli utenti autorizzati quando necessario. Protegge contro attacchi come il <strong>Denial of Service (DoS)</strong>.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="attack-types" class="content-section">
+            <h3 class="subsection-title">1.2. Classificazione degli Attacchi</h3>
+            <div class="section-content">
+                <p>Gli attacchi si possono classificare in base al loro impatto sul sistema:</p>
+                <ul>
+                    <li><strong>Attacchi Passivi:</strong> L'attaccante si limita a osservare la comunicazione (es. intercettazione, sniffing) senza alterarla. Violano la <strong>confidenzialità</strong>. Sono difficili da rilevare.</li>
+                    <li><strong>Attacchi Attivi:</strong> L'attaccante modifica la comunicazione o altera lo stato del sistema. Esempi:
+                        <ul>
+                            <li><strong>Modification:</strong> Altera il contenuto dei messaggi.</li>
+                            <li><strong>Masquerading (Spoofing):</strong> Finge di essere un'altra entità.</li>
+                            <li><strong>Replay:</strong> Riregistra e ritrasmette un messaggio valido in un secondo momento.</li>
+                            <li><strong>Denial of Service (DoS):</strong> Rende un servizio inutilizzabile.</li>
+                        </ul>
+                        Questi attacchi violano l'<strong>integrità</strong> e/o la <strong>disponibilità</strong>.
+                    </li>
+                </ul>
+                <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                         <li><strong>Esame 16 Settembre 2024, Q15:</strong> Classificare diversi attacchi (attivo/passivo e CIA).</li>
+                         <li><strong>Esame 29 Gennaio 2024, Q15:</strong> Classificare attacchi su un firewall (attivo/passivo e CIA).</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="symmetric-crypto" class="content-section">
+            <h2 class="section-title">2. Crittografia Simmetrica</h2>
+            <div class="section-content">
+                <p>La crittografia simmetrica (o a chiave privata) è un meccanismo in cui mittente e destinatario condividono la <strong>stessa chiave segreta</strong>. Questa chiave viene usata sia per cifrare il plaintext che per decifrare il ciphertext.</p>
+                <div class="mermaid-container">
+                    <pre class="mermaid">
+graph LR
+    subgraph Mittente
+        P1(Plaintext) --> E(Encryption)
+        K(Chiave Segreta) --> E
+    end
+    subgraph Destinatario
+        D(Decryption) --> P2(Plaintext)
+        K --> D
+    end
+    E -- Ciphertext --> D
+                    </pre>
+                </div>
+                <p>La sicurezza di questo sistema dipende interamente dalla robustezza dell'algoritmo e, soprattutto, dalla <strong>segretezza della chiave</strong>.</p>
+            </div>
+        </article>
+
+        <article id="kerckhoffs" class="content-section">
+            <h3 class="subsection-title">2.1. Il Principio di Kerckhoffs</h3>
+            <div class="section-content">
+                <p>Un principio fondamentale della crittografia moderna, sempre valido per l'analisi dei protocolli:</p>
+                <blockquote>
+                La sicurezza di un sistema crittografico non deve dipendere dalla segretezza dell'algoritmo, ma solo ed esclusivamente dalla segretezza della chiave.
+                </blockquote>
+                <p>Questo significa che dobbiamo sempre assumere che l'attaccante conosca perfettamente l'algoritmo che stiamo usando (e il codice che lo implementa). L'unica cosa che non conosce è la chiave segreta.</p>
+            </div>
+        </article>
+
+        <article id="stream-vs-block" class="content-section">
+            <h3 class="subsection-title">2.2. Cifrari a Flusso (Stream Cipher) vs. a Blocchi (Block Cipher)</h3>
+            <div class="section-content">
+                <p>Esistono due tipi principali di cifrari simmetrici:</p>
+                <ul>
+                    <li><strong>Stream Cipher (es. RC4):</strong> Cifra i dati un bit o un byte alla volta. Genera una sequenza pseudo-casuale di bit (<strong>keystream</strong>) a partire dalla chiave, e poi combina questa keystream con il plaintext tramite un'operazione di XOR. È veloce ma delicato.</li>
+                    <li><strong>Block Cipher (es. AES):</strong> Cifra i dati in blocchi di dimensione fissa (es. 128 bit per AES). Ogni blocco di plaintext viene mappato in un blocco di ciphertext. È più robusto e versatile.</li>
+                </ul>
+                <div class="security-analysis-box">
+                    <strong>Vulnerabilità Critica degli Stream Cipher:</strong> È assolutamente vietato riutilizzare la stessa keystream per cifrare due messaggi diversi. Se lo si fa, un attaccante può calcolare `C1 ⊕ C2 = (P1 ⊕ KS) ⊕ (P2 ⊕ KS) = P1 ⊕ P2`, ottenendo lo XOR dei due plaintext, il che compromette gravemente la confidenzialità. Questa è la vulnerabilità alla base degli attacchi a WEP.
+                </div>
+            </div>
+        </article>
+
+        <article id="block-modes" class="content-section">
+            <h2 class="section-title">3. Modalità Operative dei Cifrari a Blocchi</h2>
+            <div class="section-content">
+                <p>Un cifrario a blocchi, di per sé, sa solo come cifrare un singolo blocco. Per cifrare messaggi più lunghi, si usano delle "modalità operative". Le più importanti da conoscere sono ECB e CBC.</p>
+            </div>
+        </article>
+
+        <article id="cbc-mode" class="content-section">
+            <h3 class="subsection-title">3.1. Electronic Codebook (ECB) vs Cipher Block Chaining (CBC)</h3>
+            <div class="section-content">
+                <ul>
+                    <li><strong>ECB (Electronic Codebook):</strong> È la modalità più semplice. Ogni blocco di plaintext viene cifrato in modo indipendente dagli altri.
+                        <ul>
+                            <li><strong>Vulnerabilità:</strong> Blocchi di plaintext identici producono blocchi di ciphertext identici. Questo non nasconde i pattern statistici del messaggio, rendendolo insicuro per la maggior parte delle applicazioni (come si vede dall'immagine del pinguino Tux cifrato in ECB).</li>
+                        </ul>
+                    </li>
+                    <li><strong>CBC (Cipher Block Chaining):</strong> Per risolvere il problema di ECB, ogni blocco di plaintext viene messo in XOR con il blocco di ciphertext *precedente* prima di essere cifrato. Per il primo blocco, si usa un <strong>Vettore di Inizializzazione (IV)</strong> casuale.
+                        <ul>
+                            <li><strong>Vantaggio:</strong> Blocchi di plaintext identici producono blocchi di ciphertext diversi, nascondendo i pattern.</li>
+                            <li><strong>Propagazione degli errori:</strong> Un errore in un bit del ciphertext corrompe l'intero blocco corrispondente in plaintext e il bit corrispondente nel blocco successivo. Un errore nel plaintext si propaga a tutti i blocchi di ciphertext successivi.</li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                         <li><strong>Esame 19 Febbraio 2024, Q16:</strong> Domanda sulla propagazione degli errori in modalità CBC.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="integrity-auth" class="content-section">
+            <h2 class="section-title">4. Integrità e Autenticazione</h2>
+            <div class="section-content">
+                <p>La sola cifratura garantisce la confidenzialità, ma non protegge dalla modifica dei messaggi. Un attaccante potrebbe non essere in grado di leggere un messaggio, ma potrebbe comunque alterare il ciphertext. Per questo servono meccanismi specifici per l'integrità e l'autenticazione.</p>
+            </div>
+        </article>
+
+        <article id="hash-mac" class="content-section">
+            <h3 class="subsection-title">4.1. Funzioni Hash e MAC</h3>
+            <div class="section-content">
+                <ul>
+                    <li><strong>Funzione Hash Crittografica (es. SHA-256):</strong> Prende in input un messaggio di lunghezza arbitraria e produce un output a lunghezza fissa (digest). È una "impronta digitale" del messaggio. Fornisce <strong>solo integrità</strong>: se il ricevitore ricalcola l'hash e corrisponde a quello ricevuto, sa che il messaggio non è stato alterato. Non dice nulla su chi ha creato il messaggio.</li>
+                    <li><strong>MAC (Message Authentication Code, es. HMAC):</strong> È un hash "con chiave". Viene calcolato usando sia il messaggio che una chiave segreta condivisa. Fornisce sia <strong>integrità</strong> che <strong>autenticazione dell'origine dei dati</strong>: solo chi possiede la chiave segreta può aver generato quel MAC per quel messaggio.</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Punto chiave per l'esame:</strong> Ricorda la differenza! Hash = solo integrità. MAC = integrità + autenticazione. La firma digitale (Lezione 12) aggiunge il non ripudio.
+                </div>
+                <div class="exam-question-list">
+                    <h4>Esercizi d'Esame Correlati</h4>
+                    <ul>
+                         <li><strong>Esame 15 Luglio 2024, Q15:</strong> Associare HMAC, cifratura e firma digitale ai rispettivi obiettivi di sicurezza.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="wep-case-study" class="content-section">
+            <h2 class="section-title">5. Caso Studio: Attacchi a WEP (Wired Equivalent Privacy)</h2>
+            <div class="section-content">
+                <p>WEP, il primo protocollo di sicurezza per WiFi, è un esempio da manuale di come *non* si progetta un sistema sicuro. Combina una serie di debolezze che lo rendono completamente insicuro.</p>
+                <ol>
+                    <li><strong>Usa RC4 (Stream Cipher):</strong> Di per sé non è un problema, se usato correttamente.</li>
+                    <li><strong>Riutilizzo della Keystream:</strong> Il problema principale. La keystream è generata dalla concatenazione di una chiave segreta a lungo termine (condivisa tra tutti i dispositivi) e un IV a 24 bit.
+                        <ul>
+                            <li>L'IV è troppo corto (\(2^{24}\) valori, circa 16 milioni). Su una rete trafficata, gli IV si ripetono in poche ore.</li>
+                            <li>L'IV viene inviato in chiaro.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Integrità Debole:</strong> Usa un semplice CRC-32 (non crittografico) per l'integrità, che è vulnerabile a manipolazioni.</li>
+                </ol>
+                <p>La combinazione di IV corto e riutilizzo della chiave porta a collisioni di keystream, permettendo a un attaccante di recuperare lo XOR dei plaintext e, con un po' di analisi, i plaintext stessi.</p>
+            </div>
+        </article>
+
+        <article id="esercizi-consigliati" class="content-section">
+            <h2 class="section-title">6. Esercizi Consigliati per la Lezione 11</h2>
+            <div class="section-content">
+                <p>Questa lezione è più concettuale, quindi gli esercizi testano la tua comprensione delle definizioni e delle vulnerabilità.</p>
+                <div class="clarification-box">
+                    <strong>Set di Esercizi Chiave:</strong>
+                    <ol>
+                        <li>
+                            <strong>Classificazione degli Attacchi (Teoria):</strong>
+                            <ul>
+                                <li><strong>Esame 16 Settembre 2024, Q15.</strong> Ti chiede di classificare tre scenari in base alla triade CIA e alla natura (attivo/passivo). È perfetto per consolidare il vocabolario di base della sicurezza.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Modalità Operative (Teoria e Conseguenze):</strong>
+                            <ul>
+                                <li><strong>Esame 19 Febbraio 2024, Q16.</strong> Chiede cosa succede in modalità CBC se si scambiano due blocchi cifrati. Questo testa la tua comprensione della propagazione degli errori e del "chaining" in CBC.</li>
+                            </ul>
+                        </li>
+                         <li>
+                            <strong>Scopo dei Meccanismi Crittografici (Teoria):</strong>
+                            <ul>
+                                <li><strong>Esame 15 Luglio 2024, Q15.</strong> Domanda diretta che ti chiede di associare HMAC, firma digitale e cifratura simmetrica al loro scopo primario. È un test rapido per verificare che tu conosca le basi.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p>Padroneggiare questi concetti è il prerequisito fondamentale per affrontare la prossima lezione, dove vedremo come la crittografia asimmetrica risolve alcuni dei problemi della crittografia simmetrica, come la distribuzione delle chiavi.</p>
+                </div>
+            </div>
+        </article>
+        
+    </main>
+
+    <footer>
+        <p>© 2024 Appunti di Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+</body>
+</html>
