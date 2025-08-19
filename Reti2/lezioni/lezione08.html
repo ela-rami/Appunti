@@ -195,50 +195,5 @@ graph TD
     </footer>
 
     <script src="../assets/common.js"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        if (typeof mermaid !== 'undefined') {
-            mermaid.initialize({
-                startOnLoad: false,
-                theme: 'dark',
-                 themeVariables: {
-                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
-                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
-                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
-                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
-                    mainBkg: 'transparent',
-                }
-            });
-            
-            const renderMermaidInSection = (section) => {
-                section.querySelectorAll('.mermaid').forEach(async (diag) => {
-                    if (diag.dataset.rendered) return;
-                    const id = diag.id || `mermaid-diag-${Math.random().toString(36).substr(2, 9)}`;
-                    diag.id = id;
-                    const code = diag.textContent.trim();
-                    diag.innerHTML = 'Loading diagram...';
-                    
-                    try {
-                        const { svg } = await mermaid.render(id, code);
-                        diag.innerHTML = svg;
-                        diag.dataset.rendered = 'true';
-                    } catch(e) {
-                        console.error("Mermaid rendering error:", e);
-                        diag.innerHTML = `<p style="color:red;">Error rendering diagram</p>`;
-                    }
-                });
-            };
-
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.addEventListener('sectionshown', () => renderMermaidInSection(section));
-            });
-            
-            const initiallyActiveSection = document.querySelector('.content-section.active-section');
-            if (initiallyActiveSection) {
-                renderMermaidInSection(initiallyActiveSection);
-            }
-        }
-    });
-    </script>
 </body>
 </html>
