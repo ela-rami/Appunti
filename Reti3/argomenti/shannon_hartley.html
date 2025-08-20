@@ -37,15 +37,14 @@
         <div class="sidebar-actions">
             <a href="../reti3_home.html" class="sidebar-action-button" id="lezioni-home-btn">Home Corso</a>
             <a href="reti3_argomenti_home.html" class="sidebar-action-button" id="argomenti-home-btn">Indice Argomenti</a>
-            <a href="#" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Appunti Prof (PDF)</a>
+            <a href="shannon_hartley(es).html" class="sidebar-action-button" id="appunti-prof-btn" target="_blank" rel="noopener noreferrer">Esercizi</a>
         </div>
         <h2>Indice Argomento</h2>
         <ul>
             <li><a href="#concetti-fondamentali" class="sidebar-link">1. Concetti Fondamentali</a></li>
             <li><a href="#formule-indispensabili" class="sidebar-link">2. Le Formule Indispensabili</a></li>
             <li><a href="#procedimenti-tipici" class="sidebar-link">3. Procedimenti Tipici</a></li>
-            <li><a href="#esercizi-chiave" class="sidebar-link">4. Esercizi Chiave e Focus</a></li>
-            <li><a href="#preparazione-esame" class="sidebar-link">5. Preparazione all'Esame</a></li>
+            <li><a href="#preparazione-esame" class="sidebar-link">4. Preparazione all'Esame</a></li>
         </ul>
     </nav>
 
@@ -201,54 +200,8 @@
             </div>
         </article>
 
-        <article id="esercizi-chiave" class="content-section">
-            <h2 class="section-title">4. Esercizi Chiave su cui Esercitarsi (Analisi Esami 2022-2024)</h2>
-            <div class="section-content">
-                <p>Questi esercizi sono stati selezionati tra i 15 appelli passati per coprire tutte le varianti e le sottigliezze che il professore ha chiesto su questo argomento. <strong>Concentrati prima su quelli evidenziati in grassetto.</strong> Una volta risolti tutti con sicurezza, puoi ritenere l'argomento "blindato".</p>
-
-                <ol class="exercise-list">
-                    <li><strong>Febbraio 2024, Appello I, Q2:</strong>
-                        <p>“Si vuole utilizzare un mezzo fisico la cui banda è 20MHz, per realizzare un canale di comunicazione di capacità minima 100Mbps. Qual è il minimo SNR accettabile?”</p>
-                        <div class="clarification-box">
-                            <strong>Perché è fondamentale:</strong> Richiede l'applicazione inversa della formula di Shannon per trovare \(S/N\) e la conversione in dB. È la variante più comune.
-                        </div>
-                    </li>
-                    <li><strong>Febbraio 2023, Appello II, Q2:</strong>
-                        <p>“Un certo canale ha SNR = -8 dB, con una larghezza di banda pari a 20MHz. (a) Qual è la massima capacità ottenibile (in Mbps)? (b) Se il baudrate è di 3 Mbaud, quanti bit devono essere codificati in ogni simbolo per avere tale capacità di canale?”</p>
-                        <div class="clarification-box">
-                            <strong>Perché è fondamentale:</strong> Copre sia il calcolo di \(C\) da \(S/N\) e \(B\) (parte a), sia il concetto di bitrate/baudrate/bit per simbolo (parte b). Ti costringe a distinguere bene i concetti.
-                        </div>
-                    </li>
-                    <li><strong>Luglio 2022, Appello II, Q2:</strong>
-                        <p>“Su un certo canale viene trasmesso un segnale con una potenza di 14 mW, mentre si osserva un rumore di 0.2 mW. Quanto deve essere la larghezza di banda per permettere una capacità di canale di 16 Mbps?”</p>
-                        <div class="clarification-box">
-                            <strong>Perché è fondamentale:</strong> Un'altra variante della formula inversa, dove \(S/N\) è dato come rapporto di potenze assolute (\(S\) e \(N\) in mW).
-                        </div>
-                    </li>
-                    <li><strong>Giugno 2022, Appello III, Q2:</strong>
-                        <p>“Un certo canale ha SNR = 15 dB. Se si adotta una codifica 4B/5B, qual è la massima capacità netta ottenibile?”</p>
-                        <div class="clarification-box">
-                            <strong>Perché è fondamentale:</strong> Introduce il concetto di <strong>efficienza di codifica</strong> (4B/5B = 4/5). Devi prima calcolare la capacità <em>grezza</em> con Shannon e poi applicare l'efficienza per la capacità <em>netta</em>.
-                        </div>
-                    </li>
-                    <li><strong>Luglio 2024, Appello IV, Q2:</strong>
-                        <p>“Un segnale portante sinusoidale a 10MHz viene modulato in fase, con quattro possibili sfasamenti (+45°, +135º, -45°, -135º). (a) Quanti bit si possono codificare in ogni simbolo? (b) Se si invia un simbolo ogni due cicli della sinusoide, qual è il bitrate massimo ottenibile?”</p>
-                        <div class="clarification-box">
-                            <strong>Perché è fondamentale:</strong> Perfetto per testare la formula \(C = \text{Baud Rate} \cdot \log_2(M)\) e non confonderla con Shannon. Ti fa capire come il numero di sfasamenti (M) e la frequenza (baud rate implicito) si trasformano in bitrate.
-                        </div>
-                    </li>
-                    <li><strong>Febbraio 2024, Appello II, Q2 (Parte 2):</strong>
-                        <p>“Un certo dispositivo trasmette ad intervalli regolari un messaggio di 100 byte di dati; il frame comprende anche un'intestazione di 5 byte, un CRC-16, e un preambolo pari a 50 bit. (...) Viene usato un canale wireless con capacità grezza pari a 150 kbps e una FEC 4/5 (ossia, ogni 4 bit di dati reali viene aggiunto 1 bit di ridondanza). Quanto tempo è necessario per trasmettere tale frame?”</p>
-                        <div class="clarification-box">
-                            <strong>Perché è fondamentale:</strong> Questo è un esercizio più complesso che unisce il calcolo della capacità/tempo di trasmissione (tipico di un altro argomento, ma qui interseca) con il concetto di <strong>FEC (Forward Error Correction)</strong>, che è un'efficienza di codifica. Devi calcolare i bit totali "reali" e poi i bit "grezzi" necessari per la trasmissione data la FEC.
-                        </div>
-                    </li>
-                </ol>
-            </div>
-        </article>
-
         <article id="preparazione-esame" class="content-section">
-            <h2 class="section-title">5. Preparazione all'Esame: Cosa Aspettarsi e Come Evitare Errori</h2>
+            <h2 class="section-title">4. Preparazione all'Esame: Cosa Aspettarsi e Come Evitare Errori</h2>
             <div class="section-content">
                 <p>Il Teorema di Shannon-Hartley è un argomento <strong>fisso</strong> negli esami del Prof. Miculan. L'abilità sta nel saper manipolare le formule e non farsi ingannare dalle unità di misura o dalle informazioni aggiuntive.</p>
                 <ul>

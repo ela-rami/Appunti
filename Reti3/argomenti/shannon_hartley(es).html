@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esercizi: Capacità del Canale e Shannon-Hartley</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per la pagina degli esercizi */
+        .exercise-item {
+            background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft);
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+        .exercise-item .question-title {
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .exercise-item .solution-section {
+            margin-top: 1.5rem;
+            border-top: 1px dashed var(--border-soft);
+            padding-top: 1.5rem;
+        }
+        .exercise-item .solution-section h4 {
+            color: var(--accent-secondary);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        .exercise-item .solution-steps li {
+            margin-bottom: 0.7rem;
+        }
+        .exercise-item .solution-steps strong {
+            color: var(--text-primary);
+        }
+        .exercise-item .math-equation {
+            display: block;
+            text-align: center;
+            margin: 1rem 0;
+            font-family: var(--font-code);
+            font-size: 1.05em;
+            color: var(--code-text);
+            background-color: var(--code-bg);
+            padding: 0.75em;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+        }
+        .exercise-item .highlight {
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Esercizi: Capacità del Canale e Shannon-Hartley</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="shannon_hartley.html" class="sidebar-action-button">Torna agli Appunti</a>
+        </div>
+        <h2>Elenco Esercizi</h2>
+        <ul>
+            <li><a href="#esercizio-1" class="sidebar-link">1. Calcolo SNR da C e B</a></li>
+            <li><a href="#esercizio-2" class="sidebar-link">2. Calcolo C da SNR e B</a></li>
+            <li><a href="#esercizio-3" class="sidebar-link">3. Capacità da Simboli e Baud Rate</a></li>
+            <li><a href="#esercizio-4" class="sidebar-link">4. Gestione Efficienza Codifica</a></li>
+            <li><a href="#esercizio-5" class="sidebar-link">5. Problema Multi-step Combinato</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="esercizio-1" class="exercise-item active-section">
+            <h3 class="question-title">Esercizio 1: Calcolo SNR da Capacità e Banda (La Variante Più Frequente)</h3>
+            <p><strong>Domanda:</strong> Si vuole utilizzare un mezzo fisico la cui banda è 20 MHz per realizzare un canale di comunicazione di capacità minima 100 Mbps. Qual è il minimo rapporto Segnale/Rumore (SNR) accettabile, espresso in decibel (dB)?</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Identificazione e Conversione Dati:</strong></p>
+                        <ul>
+                            <li>Capacità minima richiesta (\(C\)): 100 Mbps = \(100 \times 10^6\) bps</li>
+                            <li>Banda del canale (\(B\)): 20 MHz = \(20 \times 10^6\) Hz</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Applicazione della Formula di Shannon-Hartley (inversa):</strong><br>
+                        La formula di Shannon è: \(C = B \cdot \log_2(1 + S/N)\).<br>
+                        Dobbiamo isolare il rapporto \(S/N\).<br>
+                        Dividiamo entrambi i lati per \(B\):</p>
+                        <div class="math-equation">
+                            $$ \frac{C}{B} = \log_2(1 + S/N) $$
+                        </div>
+                        <p>Per eliminare il logaritmo in base 2, usiamo la potenza di 2:</p>
+                        <div class="math-equation">
+                            $$ 2^{\frac{C}{B}} = 1 + S/N $$
+                        </div>
+                        <p>Infine, isoliamo $S/N$:</p>
+                        <div class="math-equation">
+                            $$ S/N = 2^{\frac{C}{B}} - 1 $$
+                        </div>
+                    </li>
+                    <li>
+                        <p><strong>Sostituzione dei Valori Numerici:</strong><br>
+                        Calcoliamo il rapporto \(C/B\):</p>
+                        <div class="math-equation">
+                            $$ \frac{C}{B} = \frac{100 \times 10^6 \text{ bps}}{20 \times 10^6 \text{ Hz}} = 5 $$
+                        </div>
+                        <p>Ora sostituiamo 5 nella formula per \(S/N\):</p>
+                        <div class="math-equation">
+                            $$ S/N = 2^5 - 1 = 32 - 1 = 31 $$
+                        </div>
+                    </li>
+                    <li>
+                        <p><strong>Conversione del Rapporto SNR in Decibel (dB):</strong><br>
+                        La formula per convertire un rapporto puro in decibel è: \(SNR_{dB} = 10 \cdot \log_{10}(S/N)\).<br>
+                        Sostituendo il valore di \(S/N\):</p>
+                        <div class="math-equation">
+                            $$ SNR_{dB} = 10 \cdot \log_{10}(31) $$
+                        </div>
+                        <p>Utilizzando una calcolatrice, \(\log_{10}(31) \approx 1.491\).<br>
+                        Quindi:</p>
+                        <div class="math-equation">
+                            $$ SNR_{dB} \approx 10 \cdot 1.491 = \highlight{14.91 \text{ dB}} $$
+                        </div>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio è un test diretto della tua capacità di invertire la formula di Shannon-Hartley e di gestire le conversioni in decibel. È il tipo di problema numerico che compare molto frequentemente.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-2" class="exercise-item">
+            <h3 class="question-title">Esercizio 2: Calcolo Capacità da SNR e Banda (Applicazione Diretta)</h3>
+            <p><strong>Domanda:</strong> Un canale di comunicazione ha una larghezza di banda di 4 MHz e un rapporto segnale/rumore (SNR) di 20 dB. Qual è la sua capacità massima teorica in Mbps?</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Identificazione e Conversione Dati:</strong></p>
+                        <ul>
+                            <li>Banda del canale (\(B\)): 4 MHz = \(4 \times 10^6\) Hz</li>
+                            <li>Rapporto segnale/rumore in decibel (\(SNR_{dB}\)): 20 dB</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Conversione dell'SNR da Decibel a Rapporto Puro:</strong><br>
+                        Usiamo la formula: \(S/N = 10^{(SNR_{dB}/10)}\).<br>
+                        Sostituendo \(SNR_{dB} = 20\):</p>
+                        <div class="math-equation">
+                            $$ S/N = 10^{(20/10)} = 10^2 = 100 $$
+                        </div>
+                    </li>
+                    <li>
+                        <p><strong>Applicazione della Formula di Shannon-Hartley:</strong><br>
+                        La formula è: \(C = B \cdot \log_2(1 + S/N)\).<br>
+                        Sostituiamo i valori di \(B\) e \(S/N\):</p>
+                        <div class="math-equation">
+                            $$ C = (4 \times 10^6 \text{ Hz}) \cdot \log_2(1 + 100) $$
+                            $$ C = (4 \times 10^6 \text{ Hz}) \cdot \log_2(101) $$
+                        </div>
+                        <p>Calcoliamo \(\log_2(101)\). Poiché \(2^6 = 64\) e \(2^7 = 128\), il valore sarà tra 6 e 7.</p>
+                        <div class="math-equation">
+                            $$ \log_2(101) \approx 6.658 $$
+                        </div>
+                        <p>Quindi:</p>
+                        <div class="math-equation">
+                            $$ C \approx (4 \times 10^6) \cdot 6.658 = 26,632,000 \text{ bps} $$
+                        </div>
+                    </li>
+                    <li>
+                        <p><strong>Conversione del Risultato in Mbps:</strong><br>
+                        Dividiamo per \(10^6\):</p>
+                        <div class="math-equation">
+                            $$ C \approx \highlight{26.63 \text{ Mbps}} $$
+                        </div>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo è un esercizio di applicazione diretta della formula di Shannon. L'errore più comune è non convertire l'SNR da dB a rapporto puro prima di inserirlo nella formula.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-3" class="exercise-item">
+            <h3 class="question-title">Esercizio 3: Capacità da Simboli e Baud Rate (L'Alternativa a Shannon)</h3>
+            <p><strong>Domanda:</strong> Un segnale viene modulato utilizzando 8 livelli di tensione diversi. Il canale permette di trasmettere 5 milioni di simboli al secondo (5 Mbaud). Qual è il bitrate massimo del canale? Spiegare perché non si usa la formula di Shannon-Hartley.</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Identificazione e Conversione Dati:</strong></p>
+                        <ul>
+                            <li>Numero di stati/livelli di tensione (\(M\)): 8</li>
+                            <li>Baud Rate (\(\text{Baud Rate}\)): 5 Mbaud = \(5 \times 10^6\) simboli/secondo</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Calcolo dei Bit per Simbolo:</strong><br>
+                        Ogni simbolo può trasportare $\log_2(M)$ bit di informazione. In questo caso:</p>
+                        <div class="math-equation">
+                            $$ \text{Bit per simbolo} = \log_2(8) = 3 \text{ bit} $$
+                        </div>
+                    </li>
+                    <li>
+                        <p><strong>Calcolo del Bitrate Massimo (Capacità):</strong><br>
+                        Il bitrate massimo si ottiene moltiplicando il Baud Rate per il numero di bit che ogni simbolo trasporta:</p>
+                        <div class="math-equation">
+                            $$ C = \text{Baud Rate} \cdot \text{Bit per simbolo} $$
+                            $$ C = (5 \times 10^6 \text{ simboli/s}) \cdot (3 \text{ bit/simbolo}) = 15 \times 10^6 \text{ bps} $$
+                        </div>
+                    </li>
+                    <li>
+                        <p><strong>Conversione in Mbps:</strong></p>
+                        <div class="math-equation">
+                            $$ C = \highlight{15 \text{ Mbps}} $$
+                        </div>
+                    </li>
+                    <li>
+                        <p><strong>Motivazione sull'uso della formula:</strong><br>
+                        La formula di Shannon-Hartley non viene utilizzata in questo caso perché il problema non fornisce informazioni sul rumore (SNR o S/N) o sulla banda in Hertz. Questo esercizio si riferisce a un modello di canale ideale (senza rumore) in cui la capacità è limitata solo dal numero di stati discreti del segnale e dalla velocità con cui tali stati possono essere trasmessi. Il teorema di Nyquist stabilisce che il massimo baud rate in un canale ideale è $2B$, ma qui la banda $B$ non è esplicitamente data in Hz.
+                        </p>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio è fondamentale per distinguere i due modelli di calcolo della capacità. Se non c'è rumore e sono dati simboli/baud rate, non usare Shannon!
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-4" class="exercise-item">
+            <h3 class="question-title">Esercizio 4: Gestione dell'Efficienza di Codifica (Esempio 4B/5B)</h3>
+            <p><strong>Domanda:</strong> Una tecnologia di comunicazione offre una capacità *grezza* di 125 Mbps. Se per la trasmissione viene utilizzata una codifica 4B/5B, qual è la capacità *netta* (cioè quella disponibile per i dati utili)?</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Identificazione Dati:</strong></p>
+                        <ul>
+                            <li>Capacità grezza (\(C_{grezza}\)): 125 Mbps</li>
+                            <li>Codifica utilizzata: 4B/5B</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Calcolo dell'Efficienza della Codifica:</strong><br>
+                        La codifica 4B/5B significa che per ogni 4 bit di dati utili, vengono trasmessi 5 bit sul canale. L'efficienza è il rapporto tra bit utili e bit totali:</p>
+                        <div class="math-equation">
+                            $$ \text{Efficienza} = \frac{4 \text{ bit utili}}{5 \text{ bit trasmessi}} = 0.8 $$
+                        </div>
+                    </li>
+                    <li>
+                        <p><strong>Calcolo della Capacità Netta:</strong><br>
+                        La capacità netta è la capacità grezza moltiplicata per l'efficienza della codifica:</p>
+                        <div class="math-equation">
+                            $$ C_{netta} = C_{grezza} \cdot \text{Efficienza} $$
+                            $$ C_{netta} = 125 \text{ Mbps} \cdot 0.8 = \highlight{100 \text{ Mbps}} $$
+                        </div>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Molti esercizi combinano la formula di Shannon con un fattore di efficienza dovuto alla codifica. Devi sempre ricordare che la capacità calcolata con Shannon è quella *grezza* sul canale, e per i dati *utili* (netta) è necessario applicare l'efficienza.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-5" class="exercise-item">
+            <h3 class="question-title">Esercizio 5: Problema Multi-step Combinato (Massima Complessità)</h3>
+            <p><strong>Domanda:</strong> Un sistema di comunicazione deve garantire una capacità *netta* di 80 Mbps. Utilizza una codifica FEC 4/5 (per ogni 4 bit di dati, ne viene trasmesso 1 di ridondanza, per un totale di 5 bit). Il canale ha una larghezza di banda di 20 MHz. Qual è il minimo SNR richiesto, in decibel (dB)?</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Identificazione e Conversione Dati:</strong></p>
+                        <ul>
+                            <li>Capacità netta richiesta (\(C_{netta}\)): 80 Mbps</li>
+                            <li>Banda del canale (\(B\)): 20 MHz = \(20 \times 10^6\) Hz</li>
+                            <li>Codifica FEC: 4/5 (4 bit utili su 5 trasmessi)</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Calcolo della Capacità Grezza (C_grezza) Necessaria:</strong><br>
+                        La codifica FEC 4/5 ha un'efficienza del 0.8. Per garantire una capacità netta di 80 Mbps, la capacità grezza del canale deve essere maggiore:</p>
+                        <div class="math-equation">
+                            $$ C_{netta} = C_{grezza} \cdot \text{Efficienza} \implies C_{grezza} = \frac{C_{netta}}{\text{Efficienza}} $$
+                            $$ C_{grezza} = \frac{80 \text{ Mbps}}{0.8} = 100 \text{ Mbps} = 100 \times 10^6 \text{ bps} $$
+                        </div>
+                    </li>
+                    <li>
+                        <p><strong>Applicazione della Formula di Shannon-Hartley (inversa) per $S/N$:</strong><br>
+                        Ora abbiamo la capacità grezza necessaria e la banda. Usiamo la formula $S/N = 2^{(C_{grezza}/B)} - 1$:</p>
+                        <div class="math-equation">
+                            $$ \frac{C_{grezza}}{B} = \frac{100 \times 10^6 \text{ bps}}{20 \times 10^6 \text{ Hz}} = 5 $$
+                            $$ S/N = 2^5 - 1 = 32 - 1 = 31 $$
+                        </div>
+                    </li>
+                    <li>
+                        <p><strong>Conversione del Rapporto SNR in Decibel (dB):</strong><br>
+                        Infine, convertiamo il rapporto $S/N$ in decibel:</p>
+                        <div class="math-equation">
+                            $$ SNR_{dB} = 10 \cdot \log_{10}(31) \approx 10 \cdot 1.491 = \highlight{14.91 \text{ dB}} $$
+                        </div>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio è il più completo, combinando l'efficienza di codifica con il calcolo inverso di Shannon. Padroneggiarlo significa che sei pronto ad affrontare qualsiasi combinazione di concetti su questo argomento.
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    // Inizializza MathJax e Mermaid (se necessario)
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+        }
+    });
+    </script>
+</body>
+</html>
