@@ -55,17 +55,17 @@
         <article id="introduzione-congestione" class="content-section active-section">
             <h2 class="section-title">1. Introduzione e Contesto: Evitare il Congestion Collapse</h2>
             <div class="section-content">
-                <p>Il controllo di congestione TCP è stato introdotto nell'Internet alla fine degli anni '80 (da Van Jacobson) per affrontare un problema critico: il **Congestion Collapse (Collasso da Congestione)**. Prima di questi meccanismi, le sorgenti inviavano dati il più velocemente possibile, basandosi solo sulla `AdvertisedWindow` del ricevitore.</p>
+                <p>Il controllo di congestione TCP è stato introdotto nell'Internet alla fine degli anni '80 (da Van Jacobson) per affrontare un problema critico: il <strong>Congestion Collapse (Collasso da Congestione)</strong>. Prima di questi meccanismi, le sorgenti inviavano dati il più velocemente possibile, basandosi solo sulla `AdvertisedWindow` del ricevitore.</p>
                 <p>Questo portava a:</p>
                 <ul>
-                    <li>**Sovraccarico dei router:** Troppi pacchetti venivano iniettati nella rete, riempiendo i buffer dei router.</li>
-                    <li>**Perdita di pacchetti:** I buffer pieni causavano lo scarto dei pacchetti.</li>
-                    <li>**Ritrasmissioni inefficaci:** Le sorgenti, non ricevendo ACK, andavano in timeout e ritrasmettevano i pacchetti persi. Questo aumentava ulteriormente il carico sulla rete già congestionata, creando un circolo vizioso che riduceva drasticamente il throughput effettivo.</li>
+                    <li><strong>Sovraccarico dei router:</strong> Troppi pacchetti venivano iniettati nella rete, riempiendo i buffer dei router.</li>
+                    <li><strong>Perdita di pacchetti:</strong> I buffer pieni causavano lo scarto dei pacchetti.</li>
+                    <li><strong>Ritrasmissioni inefficaci:</strong> Le sorgenti, non ricevendo ACK, andavano in timeout e ritrasmettevano i pacchetti persi. Questo aumentava ulteriormente il carico sulla rete già congestionata, creando un circolo vizioso che riduceva drasticamente il throughput effettivo.</li>
                 </ul>
                 <p>L'obiettivo del controllo di congestione è permettere a ogni sorgente di stimare quanta capacità è disponibile nella rete, inviando dati a un ritmo sostenibile per evitare il sovraccarico e le perdite, garantendo così un uso efficiente delle risorse.</p>
                 <div class="note-box">
                     <strong>Differenza con Controllo di Flusso:</strong>
-                    <p>È importante distinguere il controllo di congestione dal controllo di flusso. Il **controllo di flusso** impedisce che un mittente sovraccarichi un *singolo ricevitore*. Il **controllo di congestione** impedisce che un mittente sovraccarichi l'intera *rete*.</p>
+                    <p>È importante distinguere il controllo di congestione dal controllo di flusso. Il <strong>controllo di flusso</strong> impedisce che un mittente sovraccarichi un <em>singolo ricevitore</em>. Il <strong>controllo di congestione</strong> impedisce che un mittente sovraccarichi l'intera <em>rete</em>.</p>
                 </div>
             </div>
         </article>
@@ -75,24 +75,24 @@
             <div class="section-content">
                 <p>Per implementare il controllo di congestione, TCP introduce e gestisce diverse variabili di stato e concetti:</p>
                 <ul>
-                    <li>**Congestion Window (cwnd):**
+                    <li><strong>Congestion Window (cwnd):</strong>
                         <ul>
-                            <li>Una variabile di stato mantenuta dalla **sorgente** per limitare la quantità di dati che può avere "in transito" (non ancora ACKed) nella rete in un dato momento.</li>
-                            <li>È il **controllore primario** del tasso di trasmissione del mittente.</li>
+                            <li>Una variabile di stato mantenuta dalla <strong>sorgente</strong> per limitare la quantità di dati che può avere "in transito" (non ancora ACKed) nella rete in un dato momento.</li>
+                            <li>È il <strong>controllore primario</strong> del tasso di trasmissione del mittente.</li>
                             <li>Definisce la massima quantità di byte che la sorgente può inviare prima di dover aspettare un ACK.</li>
                         </ul>
                     </li>
-                    <li>**Advertised Window (awnd):**
+                    <li><strong>Advertised Window (awnd):</strong>
                         <ul>
-                            <li>La variabile di stato mantenuta dal **ricevitore** che indica quanto spazio disponibile ha nel suo buffer di ricezione.</li>
+                            <li>La variabile di stato mantenuta dal <strong>ricevitore</strong> che indica quanto spazio disponibile ha nel suo buffer di ricezione.</li>
                             <li>Viene comunicata al mittente tramite il campo "Window Size" nell'header TCP.</li>
                             <li>È il limite imposto dal controllo di flusso.</li>
                         </ul>
                     </li>
-                    <li>**Effective Window (eff_wnd):**
+                    <li><strong>Effective Window (eff_wnd):</strong>
                         <ul>
                             <li>Il limite effettivo sulla quantità di dati che il mittente può inviare.</li>
-                            <li>È il **minimo** tra la Congestion Window e la Advertised Window.
+                            <li>È il <strong>minimo</strong> tra la Congestion Window e la Advertised Window.
                                 <div class="math-block">
                                     $$ \text{Effective Window} = \min(\text{cwnd}, \text{awnd}) $$
                                 </div>
@@ -100,20 +100,20 @@
                             <li>Questo assicura che il mittente non sovraccarichi né il ricevitore né la rete.</li>
                         </ul>
                     </li>
-                    <li>**Maximum Segment Size (MSS):**
+                    <li><strong>Maximum Segment Size (MSS):</strong>
                         <ul>
                             <li>La dimensione massima del payload che TCP può inviare in un singolo segmento senza frammentazione a livello IP.</li>
                             <li>Tipicamente è derivata dalla MTU (Maximum Transmission Unit) del livello di rete sottostante (es. MTU Ethernet 1500 byte - 20 byte IP Header - 20 byte TCP Header = 1460 byte MSS).</li>
                             <li>Serve come "unità" per l'incremento di `cwnd`.</li>
                         </ul>
                     </li>
-                    <li>**ssthreshold (Slow Start Threshold):**
+                    <li><strong>ssthreshold (Slow Start Threshold):</strong>
                         <ul>
-                            <li>Una variabile di stato utilizzata per regolare il comportamento dell'algoritmo **Slow Start**.</li>
+                            <li>Una variabile di stato utilizzata per regolare il comportamento dell'algoritmo <strong>Slow Start</strong>.</li>
                             <li>Serve a determinare quando passare dalla crescita esponenziale di `cwnd` a una crescita più cauta (lineare).</li>
                         </ul>
                     </li>
-                    <li>**Self-Clocking:**
+                    <li><strong>Self-Clocking:</strong>
                         <ul>
                             <li>TCP è un protocollo "self-clocking" (o auto-sincronizzato). Questo significa che il mittente usa l'arrivo degli ACK come "segnale" per sapere quando iniettare nuovi dati nella rete, mantenendo così un ritmo che si adatta alle condizioni della rete stessa.</li>
                         </ul>
@@ -129,13 +129,13 @@
 
                 <h3 class="subsection-title">Logica di Base</h3>
                 <ul>
-                    <li>**Additive Increase (Incremento Additivo):** Quando la rete non è congestionata (o la congestione non viene rilevata), `cwnd` aumenta gradualmente, per "sondare" la capacità disponibile. L'aumento è tipicamente di 1 MSS per ogni RTT (Round Trip Time) completo.
+                    <li><strong>Additive Increase (Incremento Additivo):</strong> Quando la rete non è congestionata (o la congestione non viene rilevata), `cwnd` aumenta gradualmente, per "sondare" la capacità disponibile. L'aumento è tipicamente di 1 MSS per ogni RTT (Round Trip Time) completo.
                         <div class="math-block">
                             $$ \text{cwnd}(t+1) = \text{cwnd}(t) + \text{MSS} \quad \text{(dopo 1 RTT di successo)} $$
                             <p>In pratica, TCP incrementa `cwnd` di una frazione di MSS ogni volta che riceve un ACK (proporzionale ai byte ACKed).</p>
                         </div>
                     </li>
-                    <li>**Multiplicative Decrease (Decremento Moltiplicativo):** Quando la rete è congestionata (rilevamento di perdita di pacchetti), `cwnd` viene ridotto drasticamente per alleviare la pressione sulla rete. La riduzione è tipicamente della metà.
+                    <li><strong>Multiplicative Decrease (Decremento Moltiplicativo):</strong> Quando la rete è congestionata (rilevamento di perdita di pacchetti), `cwnd` viene ridotto drasticamente per alleviare la pressione sulla rete. La riduzione è tipicamente della metà.
                         <div class="math-block">
                             $$ \text{cwnd}(t+1) = \text{cwnd}(t) \cdot b \quad \text{dove } b=0.5 $$
                             $$ \text{cwnd}(t+1) = \text{cwnd}(t) / 2 \quad \text{(dopo rilevamento congestione)} $$
@@ -144,7 +144,7 @@
                 </ul>
 
                 <h3 class="subsection-title">Rilevamento della Congestione: Il Timeout</h3>
-                <p>In AIMD, la principale indicazione di congestione per TCP è la **perdita di un pacchetto**, che viene rilevata dal **timeout** (scadenza di un timer per un ACK non ricevuto).</p>
+                <p>In AIMD, la principale indicazione di congestione per TCP è la <strong>perdita di un pacchetto</strong>, che viene rilevata dal <strong>timeout</strong> (scadenza di un timer per un ACK non ricevuto).</p>
                 <ul>
                     <li>Quando si verifica un timeout, TCP interpreta ciò come un forte segnale di congestione e riduce immediatamente la `CongestionWindow` alla metà del suo valore precedente.</li>
                     <li>Inoltre, la variabile `ssthreshold` viene impostata al nuovo valore di `cwnd` (cioè `cwnd / 2`). Questo è un punto chiave per capire il comportamento di Slow Start.</li>
@@ -166,24 +166,24 @@
         <article id="slow-start" class="content-section">
             <h2 class="section-title">4. Slow Start: L'Accelerazione Esponenziale</h2>
             <div class="section-content">
-                <p>L'algoritmo AIMD, da solo, sarebbe troppo lento per "avviare" una nuova connessione o per ripartire dopo un timeout. Per questo, TCP introduce **Slow Start**, un meccanismo per aumentare rapidamente la `CongestionWindow`.</p>
+                <p>L'algoritmo AIMD, da solo, sarebbe troppo lento per "avviare" una nuova connessione o per ripartire dopo un timeout. Per questo, TCP introduce <strong>Slow Start</strong>, un meccanismo per aumentare rapidamente la `CongestionWindow`.</p>
 
                 <h3 class="subsection-title">Logica di Slow Start</h3>
                 <ul>
-                    <li>**Crescita Esponenziale:** Durante Slow Start, `cwnd` viene aumentata **esponenzialmente**, non linearmente. Per ogni ACK ricevuto, `cwnd` aumenta di 1 MSS (o della frazione corrispondente ai byte ACKed, che però per semplicità si assume spesso sia 1 MSS per ogni ACK).
+                    <li><strong>Crescita Esponenziale:</strong> Durante Slow Start, `cwnd` viene aumentata <strong>esponenzialmente</strong>, non linearmente. Per ogni ACK ricevuto, `cwnd` aumenta di 1 MSS (o della frazione corrispondente ai byte ACKed, che però per semplicità si assume spesso sia 1 MSS per ogni ACK).
                         <div class="math-block">
                             $$ \text{cwnd}(t+1) = \text{cwnd}(t) + \text{MSS} \quad \text{(per ogni ACK ricevuto)} $$
                         </div>
                         Questo fa sì che, per ogni Round Trip Time (RTT), `cwnd` raddoppi (poiché ogni segmento inviato viene ACKed, e per ogni ACK si aggiunge 1 MSS).
                     </li>
-                    <li>**Inizio:** `cwnd` viene inizializzata a 1 MSS (o a un valore predefinito di pochi MSS).</li>
-                    <li>**Terminazione:** Slow Start termina e il controllo passa a AIMD (fase di incremento additivo) quando `cwnd` raggiunge o supera `ssthreshold`.</li>
+                    <li><strong>Inizio:</strong> `cwnd` viene inizializzata a 1 MSS (o a un valore predefinito di pochi MSS).</li>
+                    <li><strong>Terminazione:</strong> Slow Start termina e il controllo passa a AIMD (fase di incremento additivo) quando `cwnd` raggiunge o supera `ssthreshold`.</li>
                 </ul>
 
                 <h3 class="subsection-title">Quando si Usa Slow Start</h3>
                 <ul>
-                    <li>**Inizio di una Nuova Connessione:** È il modo per "sondare" rapidamente la capacità della rete quando non si hanno informazioni pregresse.</li>
-                    <li>**Dopo un Timeout (Fase Tahoe):** Quando si verifica un timeout, `cwnd` viene resettata a 1 MSS e si riparte con Slow Start. L'obiettivo è ricominciare con cautela per non sovraccaricare ulteriormente una rete che è già congestionata (evitare un nuovo collasso).</li>
+                    <li><strong>Inizio di una Nuova Connessione:</strong> È il modo per "sondare" rapidamente la capacità della rete quando non si hanno informazioni pregresse.</li>
+                    <li><strong>Dopo un Timeout (Fase Tahoe):</strong> Quando si verifica un timeout, `cwnd` viene resettata a 1 MSS e si riparte con Slow Start. L'obiettivo è ricominciare con cautela per non sovraccaricare ulteriormente una rete che è già congestionata (evitare un nuovo collasso).</li>
                 </ul>
                 <div class="note-box">
                     <strong>`ssthreshold` e Slow Start:</strong> La variabile `ssthreshold` determina il punto in cui Slow Start "decelera". Se un timeout si verifica, `ssthreshold` viene impostata a `cwnd / 2` (il valore a cui si trovava `cwnd` al momento della perdita). La prossima volta che si usa Slow Start (es. dopo un timeout), la crescita esponenziale si ferma quando `cwnd` raggiunge questo nuovo `ssthreshold`.
@@ -194,17 +194,17 @@
         <article id="fast-retransmit" class="content-section">
             <h2 class="section-title">5. Fast Retransmit: Evitare Timeout Lunghi</h2>
             <div class="section-content">
-                <p>Il meccanismo del timeout per rilevare le perdite è efficace, ma ha un grave svantaggio: può causare lunghi periodi di inattività della linea mentre il timer attende la scadenza. Per migliorare l'efficienza, TCP introduce **Fast Retransmit**.</p>
+                <p>Il meccanismo del timeout per rilevare le perdite è efficace, ma ha un grave svantaggio: può causare lunghi periodi di inattività della linea mentre il timer attende la scadenza. Per migliorare l'efficienza, TCP introduce <strong>Fast Retransmit</strong>.</p>
 
                 <h3 class="subsection-title">Logica di Fast Retransmit</h3>
                 <ul>
-                    <li>**ACK Duplicati:** Quando un pacchetto viene perso, i pacchetti successivi (fuori ordine) arrivano al ricevitore. Il ricevitore, non potendo passare i dati all'applicazione in ordine, invia ripetutamente un ACK per l'ultimo byte *in ordine* che ha ricevuto. Questi sono gli **ACK duplicati**.</li>
-                    <li>**Rilevamento:** Il mittente, ricevendo **tre ACK duplicati** (cioè, un totale di quattro ACK per lo stesso segmento), interpreta ciò come un'indicazione *non ambigua* di perdita di pacchetto. A differenza del timeout (che potrebbe indicare anche un ritardo), gli ACK duplicati suggeriscono che i pacchetti successivi sono arrivati, ma quello in mezzo è andato perso.</li>
-                    <li>**Azione:** Appena il mittente riceve il terzo ACK duplicato, esegue un **Fast Retransmit**:
+                    <li><strong>ACK Duplicati:</strong> Quando un pacchetto viene perso, i pacchetti successivi (fuori ordine) arrivano al ricevitore. Il ricevitore, non potendo passare i dati all'applicazione in ordine, invia ripetutamente un ACK per l'ultimo byte <em>in ordine</em> che ha ricevuto. Questi sono gli <strong>ACK duplicati</strong>.</li>
+                    <li><strong>Rilevamento:</strong> Il mittente, ricevendo <strong>tre ACK duplicati</strong> (cioè, un totale di quattro ACK per lo stesso segmento), interpreta ciò come un'indicazione <em>non ambigua</em> di perdita di pacchetto. A differenza del timeout (che potrebbe indicare anche un ritardo), gli ACK duplicati suggeriscono che i pacchetti successivi sono arrivati, ma quello in mezzo è andato perso.</li>
+                    <li><strong>Azione:</strong> Appena il mittente riceve il terzo ACK duplicato, esegue un <strong>Fast Retransmit</strong>:
                         <ul>
                             <li>Ritrasmette immediatamente il segmento che si ritiene perso, senza aspettare la scadenza del timeout.</li>
                             <li>Imposta `ssthreshold` a `cwnd / 2` (il valore corrente di `cwnd` diviso per 2).</li>
-                            <li>Nella versione **Tahoe**, `cwnd` viene poi resettata a 1 MSS e si riparte con **Slow Start**.</li>
+                            <li>Nella versione <strong>Tahoe</strong>, `cwnd` viene poi resettata a 1 MSS e si riparte con <strong>Slow Start</strong>.</li>
                         </ul>
                     </li>
                 </ul>
@@ -217,26 +217,26 @@
         <article id="fast-recovery" class="content-section">
             <h2 class="section-title">6. Fast Recovery: Transizione più Morbida</h2>
             <div class="section-content">
-                <p>La fase di **Fast Recovery** è un miglioramento introdotto per evitare il drastico ritorno a Slow Start dopo un Fast Retransmit (come avveniva in TCP Tahoe).</p>
+                <p>La fase di <strong>Fast Recovery</strong> è un miglioramento introdotto per evitare il drastico ritorno a Slow Start dopo un Fast Retransmit (come avveniva in TCP Tahoe).</p>
 
                 <h3 class="subsection-title">Logica di Fast Recovery (Fase Reno)</h3>
                 <ul>
-                    <li>**Evitare Slow Start:** Se la perdita è rilevata tramite 3 ACK duplicati (che implicano che la rete non è completamente "morta", ma solo leggermente congestionata), non si riparte da `cwnd=1` e Slow Start.</li>
-                    <li>**Impostazione di `cwnd`:** `cwnd` viene impostata a `ssthreshold + 3 MSS`. I "+3 MSS" sono un "credito" che il mittente si auto-assegna, presumendo che i tre ACK duplicati ricevuti liberino spazio nella finestra di congestione.</li>
+                    <li><strong>Evitare Slow Start:</strong> Se la perdita è rilevata tramite 3 ACK duplicati (che implicano che la rete non è completamente "morta", ma solo leggermente congestionata), non si riparte da `cwnd=1` e Slow Start.</li>
+                    <li><strong>Impostazione di `cwnd`:</strong> `cwnd` viene impostata a `ssthreshold + 3 MSS`. I "+3 MSS" sono un "credito" che il mittente si auto-assegna, presumendo che i tre ACK duplicati ricevuti liberino spazio nella finestra di congestione.</li>
                         <div class="math-block">
                             $$ \text{cwnd} = \text{ssthreshold} + 3 \cdot \text{MSS} $$
                         </div>
-                    <li>**Incremento Lineare Continuo:** Dopo il Fast Retransmit e l'impostazione di `cwnd`, TCP non entra in Slow Start, ma riprende direttamente con l'incremento additivo (come in AIMD). Questo significa che, per ogni ACK valido ricevuto (non duplicato, che conferma nuovi dati), `cwnd` aumenta di `1 MSS / cwnd`.</li>
-                    <li>**Ritorno a Slow Start per Timeout:** Se, nonostante Fast Recovery, si verifica comunque un timeout (segno di congestione grave o fallimento di Fast Recovery), allora si torna alla fase Slow Start (con `cwnd=1` e `ssthreshold=cwnd/2`).</li>
+                    <li><strong>Incremento Lineare Continuo:</strong> Dopo il Fast Retransmit e l'impostazione di `cwnd`, TCP non entra in Slow Start, ma riprende direttamente con l'incremento additivo (come in AIMD). Questo significa che, per ogni ACK valido ricevuto (non duplicato, che conferma nuovi dati), `cwnd` aumenta di `1 MSS / cwnd`.</li>
+                    <li><strong>Ritorno a Slow Start per Timeout:</strong> Se, nonostante Fast Recovery, si verifica comunque un timeout (segno di congestione grave o fallimento di Fast Recovery), allora si torna alla fase Slow Start (con `cwnd=1` e `ssthreshold=cwnd/2`).</li>
                 </ul>
                 <div class="clarification-box">
                     <strong>Fast Retransmit + Fast Recovery (TCP Reno):</strong>
                     <p>In sintesi, quando TCP Reno rileva 3 ACK duplicati:</p>
                     <ol>
-                        <li>Esegue **Fast Retransmit** (ritrasmette il pacchetto presunto perso).</li>
+                        <li>Esegue <strong>Fast Retransmit</strong> (ritrasmette il pacchetto presunto perso).</li>
                         <li>Imposta `ssthreshold = cwnd / 2`.</li>
                         <li>Imposta `cwnd = ssthreshold + 3 * MSS`.</li>
-                        <li>Entra in **Fast Recovery**, riprendendo l'incremento additivo.</li>
+                        <li>Entra in <strong>Fast Recovery</strong>, riprendendo l'incremento additivo.</li>
                     </ol>
                     <p>Questo permette una ripresa più rapida e fluida della trasmissione rispetto al drastico ritorno a Slow Start di TCP Tahoe.</p>
                 </div>
@@ -248,12 +248,12 @@
             <div class="section-content">
                 <p>Comprendere il controllo di congestione TCP significa capire l'interazione dinamica di questi meccanismi:</p>
                 <ul>
-                    <li>**Slow Start:** Crescita esponenziale iniziale (o dopo timeout) fino a `ssthreshold`.</li>
-                    <li>**Congestion Avoidance (AIMD - Additive Increase):** Crescita lineare dopo `ssthreshold` (o dopo Fast Recovery), incrementando `cwnd` di 1 MSS per RTT.</li>
-                    <li>**Congestion Detection (Multiplicative Decrease):**
+                    <li><strong>Slow Start:</strong> Crescita esponenziale iniziale (o dopo timeout) fino a `ssthreshold`.</li>
+                    <li><strong>Congestion Avoidance (AIMD - Additive Increase):</strong> Crescita lineare dopo `ssthreshold` (o dopo Fast Recovery), incrementando `cwnd` di 1 MSS per RTT.</li>
+                    <li><strong>Congestion Detection (Multiplicative Decrease):</strong>
                         <ul>
-                            <li>**Timeout:** Congestione grave, `cwnd = 1 MSS`, `ssthreshold = cwnd / 2`, si riparte con Slow Start.</li>
-                            <li>**3 ACK Duplicati:** Congestione meno grave, **Fast Retransmit** (ritrasmette il pacchetto), `ssthreshold = cwnd / 2`, **Fast Recovery** (`cwnd = ssthreshold + 3 MSS`), si riprende con incremento additivo.</li>
+                            <li><strong>Timeout:</strong> Congestione grave, `cwnd = 1 MSS`, `ssthreshold = cwnd / 2`, si riparte con Slow Start.</li>
+                            <li><strong>3 ACK Duplicati:</strong> Congestione meno grave, <strong>Fast Retransmit</strong> (ritrasmette il pacchetto), `ssthreshold = cwnd / 2`, <strong>Fast Recovery</strong> (`cwnd = ssthreshold + 3 MSS`), si riprende con incremento additivo.</li>
                         </ul>
                     </li>
                 </ul>
