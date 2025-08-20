@@ -110,7 +110,7 @@
                         <div class="math-equation">
                             $$ 2^{\frac{C}{B}} = 1 + S/N $$
                         </div>
-                        <p>Infine, isoliamo $S/N$:</p>
+                        <p>Infine, isoliamo \(S/N\):</p>
                         <div class="math-equation">
                             $$ S/N = 2^{\frac{C}{B}} - 1 $$
                         </div>
@@ -136,7 +136,7 @@
                         <p>Utilizzando una calcolatrice, \(\log_{10}(31) \approx 1.491\).<br>
                         Quindi:</p>
                         <div class="math-equation">
-                            $$ SNR_{dB} \approx 10 \cdot 1.491 = \highlight{14.91 \text{ dB}} $$
+                            $$ SNR_{dB} \approx 10 \cdot 1.491 = \mathbf{14.91 \text{ dB}} $$
                         </div>
                     </li>
                 </ol>
@@ -189,7 +189,7 @@
                         <p><strong>Conversione del Risultato in Mbps:</strong><br>
                         Dividiamo per \(10^6\):</p>
                         <div class="math-equation">
-                            $$ C \approx \highlight{26.63 \text{ Mbps}} $$
+                            $$ C \approx \mathbf{26.63 \text{ Mbps}} $$
                         </div>
                     </li>
                 </ol>
@@ -215,7 +215,7 @@
                     </li>
                     <li>
                         <p><strong>Calcolo dei Bit per Simbolo:</strong><br>
-                        Ogni simbolo può trasportare $\log_2(M)$ bit di informazione. In questo caso:</p>
+                        Ogni simbolo può trasportare \(\log_2(M)\) bit di informazione. In questo caso:</p>
                         <div class="math-equation">
                             $$ \text{Bit per simbolo} = \log_2(8) = 3 \text{ bit} $$
                         </div>
@@ -231,12 +231,12 @@
                     <li>
                         <p><strong>Conversione in Mbps:</strong></p>
                         <div class="math-equation">
-                            $$ C = \highlight{15 \text{ Mbps}} $$
+                            $$ C = \mathbf{15 \text{ Mbps}} $$
                         </div>
                     </li>
                     <li>
                         <p><strong>Motivazione sull'uso della formula:</strong><br>
-                        La formula di Shannon-Hartley non viene utilizzata in questo caso perché il problema non fornisce informazioni sul rumore (SNR o S/N) o sulla banda in Hertz. Questo esercizio si riferisce a un modello di canale ideale (senza rumore) in cui la capacità è limitata solo dal numero di stati discreti del segnale e dalla velocità con cui tali stati possono essere trasmessi. Il teorema di Nyquist stabilisce che il massimo baud rate in un canale ideale è $2B$, ma qui la banda $B$ non è esplicitamente data in Hz.
+                        La formula di Shannon-Hartley non viene utilizzata in questo caso perché il problema non fornisce informazioni sul rumore (SNR o S/N) o sulla banda in Hertz. Questo esercizio si riferisce a un modello di canale ideale (senza rumore) in cui la capacità è limitata solo dal numero di stati discreti del segnale e dalla velocità con cui tali stati possono essere trasmessi. Il teorema di Nyquist stabilisce che il massimo baud rate in un canale ideale è \(2B\), ma qui la banda \(B\) non è esplicitamente data in Hz.
                         </p>
                     </li>
                 </ol>
@@ -248,7 +248,7 @@
 
         <article id="esercizio-4" class="exercise-item">
             <h3 class="question-title">Esercizio 4: Gestione dell'Efficienza di Codifica (Esempio 4B/5B)</h3>
-            <p><strong>Domanda:</strong> Una tecnologia di comunicazione offre una capacità *grezza* di 125 Mbps. Se per la trasmissione viene utilizzata una codifica 4B/5B, qual è la capacità *netta* (cioè quella disponibile per i dati utili)?</p>
+            <p><strong>Domanda:</strong> Una tecnologia di comunicazione offre una capacità <em>grezza</em> di 125 Mbps. Se per la trasmissione viene utilizzata una codifica 4B/5B, qual è la capacità <em>netta</em> (cioè quella disponibile per i dati utili)?</p>
             
             <div class="solution-section">
                 <h4>Svolgimento Dettagliato:</h4>
@@ -272,19 +272,19 @@
                         La capacità netta è la capacità grezza moltiplicata per l'efficienza della codifica:</p>
                         <div class="math-equation">
                             $$ C_{netta} = C_{grezza} \cdot \text{Efficienza} $$
-                            $$ C_{netta} = 125 \text{ Mbps} \cdot 0.8 = \highlight{100 \text{ Mbps}} $$
+                            $$ C_{netta} = 125 \text{ Mbps} \cdot 0.8 = \mathbf{100 \text{ Mbps}} $$
                         </div>
                     </li>
                 </ol>
                 <div class="clarification-box">
-                    <strong>Spiegazione Chiave:</strong> Molti esercizi combinano la formula di Shannon con un fattore di efficienza dovuto alla codifica. Devi sempre ricordare che la capacità calcolata con Shannon è quella *grezza* sul canale, e per i dati *utili* (netta) è necessario applicare l'efficienza.
+                    <strong>Spiegazione Chiave:</strong> Molti esercizi combinano la formula di Shannon con un fattore di efficienza dovuto alla codifica. Devi sempre ricordare che la capacità calcolata con Shannon è quella <em>grezza</em> sul canale, e per i dati <em>utili</em> (netta) è necessario applicare l'efficienza.
                 </div>
             </div>
         </article>
 
         <article id="esercizio-5" class="exercise-item">
             <h3 class="question-title">Esercizio 5: Problema Multi-step Combinato (Massima Complessità)</h3>
-            <p><strong>Domanda:</strong> Un sistema di comunicazione deve garantire una capacità *netta* di 80 Mbps. Utilizza una codifica FEC 4/5 (per ogni 4 bit di dati, ne viene trasmesso 1 di ridondanza, per un totale di 5 bit). Il canale ha una larghezza di banda di 20 MHz. Qual è il minimo SNR richiesto, in decibel (dB)?</p>
+            <p><strong>Domanda:</strong> Un sistema di comunicazione deve garantire una capacità <em>netta</em> di 80 Mbps. Utilizza una codifica FEC 4/5 (per ogni 4 bit di dati, ne viene trasmesso 1 di ridondanza, per un totale di 5 bit). Il canale ha una larghezza di banda di 20 MHz. Qual è il minimo SNR richiesto, in decibel (dB)?</p>
             
             <div class="solution-section">
                 <h4>Svolgimento Dettagliato:</h4>
@@ -306,8 +306,8 @@
                         </div>
                     </li>
                     <li>
-                        <p><strong>Applicazione della Formula di Shannon-Hartley (inversa) per $S/N$:</strong><br>
-                        Ora abbiamo la capacità grezza necessaria e la banda. Usiamo la formula $S/N = 2^{(C_{grezza}/B)} - 1$:</p>
+                        <p><strong>Applicazione della Formula di Shannon-Hartley (inversa) per \(S/N\):</strong><br>
+                        Ora abbiamo la capacità grezza necessaria e la banda. Usiamo la formula \(S/N = 2^{(C_{grezza}/B)} - 1\):</p>
                         <div class="math-equation">
                             $$ \frac{C_{grezza}}{B} = \frac{100 \times 10^6 \text{ bps}}{20 \times 10^6 \text{ Hz}} = 5 $$
                             $$ S/N = 2^5 - 1 = 32 - 1 = 31 $$
@@ -315,9 +315,9 @@
                     </li>
                     <li>
                         <p><strong>Conversione del Rapporto SNR in Decibel (dB):</strong><br>
-                        Infine, convertiamo il rapporto $S/N$ in decibel:</p>
+                        Infine, convertiamo il rapporto \(S/N\) in decibel:</p>
                         <div class="math-equation">
-                            $$ SNR_{dB} = 10 \cdot \log_{10}(31) \approx 10 \cdot 1.491 = \highlight{14.91 \text{ dB}} $$
+                            $$ SNR_{dB} = 10 \cdot \log_{10}(31) \approx 10 \cdot 1.491 = \mathbf{14.91 \text{ dB}} $$
                         </div>
                     </li>
                 </ol>
