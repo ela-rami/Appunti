@@ -56,20 +56,20 @@
                 <p>Per comprendere appieno la capacità di un canale di comunicazione, è essenziale padroneggiare i seguenti termini, spesso confusi, che sono alla base degli esercizi d'esame.</p>
 
                 <h3 class="subsection-title">Capacità (C) o Throughput Teorico</h3>
-                <p>È il **bitrate massimo teorico** (la velocità più alta) a cui i dati possono essere trasmessi in modo affidabile su un canale, in presenza di rumore. È il limite invalicabile imposto dalle leggi della fisica e dalla qualità del canale.</p>
+                <p>È il <strong>bitrate massimo teorico</strong> (la velocità più alta) a cui i dati possono essere trasmessi in modo affidabile su un canale, in presenza di rumore. È il limite invalicabile imposto dalle leggi della fisica e dalla qualità del canale.</p>
                 <ul>
-                    <li>**Unità di Misura:** **bit per secondo (bps)** o suoi multipli (kbps, Mbps, Gbps).
+                    <li><strong>Unità di Misura:</strong> <strong>bit per secondo (bps)</strong> o suoi multipli (kbps, Mbps, Gbps).
                         <div class="clarification-box">
                             <strong>Ricorda le conversioni:</strong> 1 Mbps = \(10^6\) bps, 1 Gbps = \(10^9\) bps. Negli esercizi, i prefissi possono essere in base 2 (kilo = 1024), ma per la capacità e banda di solito si usano i prefissi decimali (kilo = 1000). Se non specificato, usa \(10^x\).
                         </div>
                     </li>
-                    <li>**Importanza:** Rappresenta il potenziale massimo di trasmissione di un canale. Il throughput effettivo di una rete sarà sempre inferiore a questa capacità a causa di protocolli, overhead, congestione e altri fattori pratici.</li>
+                    <li><strong>Importanza:</strong> Rappresenta il potenziale massimo di trasmissione di un canale. Il throughput effettivo di una rete sarà sempre inferiore a questa capacità a causa di protocolli, overhead, congestione e altri fattori pratici.</li>
                 </ul>
 
                 <h3 class="subsection-title">Banda (Bandwidth - B)</h3>
-                <p>Indica l'**ampiezza dello spettro di frequenze** che un canale può utilizzare per trasmettere i segnali. Immagina la banda come il "numero di corsie" su un'autostrada: più corsie ci sono, più segnali (simboli) possono viaggiare parallelamente.</p>
+                <p>Indica l'<strong>ampiezza dello spettro di frequenze</strong> che un canale può utilizzare per trasmettere i segnali. Immagina la banda come il "numero di corsie" su un'autostrada: più corsie ci sono, più segnali (simboli) possono viaggiare parallelamente.</p>
                 <ul>
-                    <li>**Unità di Misura:** Si misura in **Hertz (Hz)** o suoi multipli (kHz, MHz, GHz).
+                    <li><strong>Unità di Misura:</strong> Si misura in <strong>Hertz (Hz)</strong> o suoi multipli (kHz, MHz, GHz).
                         <div class="clarification-box">
                             <strong>Attenzione:</strong> Non confondere la "banda" (in Hz) con la "larghezza di banda" intesa come velocità (in bps). Il professore sottolinea spesso questa distinzione.
                         </div>
@@ -77,28 +77,28 @@
                 </ul>
 
                 <h3 class="subsection-title">Rapporto Segnale/Rumore (SNR o S/N)</h3>
-                <p>È una misura della **qualità di un segnale** in un canale. Si calcola come il rapporto tra la potenza del segnale utile ($S$) e la potenza del rumore ($N$) che lo disturba. Il rumore è un disturbo casuale che si sovrappone al segnale, spesso assunto come "rumore bianco" (distribuito uniformemente).</p>
+                <p>È una misura della <strong>qualità di un segnale</strong> in un canale. Si calcola come il rapporto tra la potenza del segnale utile \(S\) e la potenza del rumore \(N\) che lo disturba. Il rumore è un disturbo casuale che si sovrappone al segnale, spesso assunto come "rumore bianco" (distribuito uniformemente).</p>
                 <ul>
-                    <li>**Unità di Misura:** È un **numero adimensionale (puro)** quando $S$ e $N$ sono espresse nella stessa unità (es. Watt, mW).
+                    <li><strong>Unità di Misura:</strong> È un <strong>numero adimensionale (puro)</strong> quando \(S\) e \(N\) sono espresse nella stessa unità (es. Watt, mW).
                     </li>
-                    <li>**Importanza:** Un SNR elevato significa che il segnale è molto più forte del rumore, facilitando la corretta interpretazione dei simboli e riducendo gli errori di trasmissione.</li>
+                    <li><strong>Importanza:</strong> Un SNR elevato significa che il segnale è molto più forte del rumore, facilitando la corretta interpretazione dei simboli e riducendo gli errori di trasmissione.</li>
                 </ul>
 
-                <h3 class="subsection-title">Decibel (dB) e SNR in dB ($SNR_{dB}$)</h3>
+                <h3 class="subsection-title">Decibel (dB) e SNR in dB (\(SNR_{dB}\))</h3>
                 <p>I decibel sono un'unità logaritmica utilizzata per esprimere rapporti di potenza, utile per gestire intervalli molto ampi di valori. È la forma più comune in cui viene fornito o richiesto l'SNR negli esercizi.</p>
                 <ul>
-                    <li>**Formula di Conversione:**
+                    <li><strong>Formula di Conversione:</strong>
                         <div class="math-block">
                             $$ SNR_{dB} = 10 \cdot \log_{10}(S/N) \quad \iff \quad S/N = 10^{(SNR_{dB}/10)} $$
                         </div>
                     </li>
-                    <li>**Esempi Utili da Memorizzare:**
+                    <li><strong>Esempi Utili da Memorizzare:</strong>
                         <ul>
-                            <li>$0 \text{ dB} \implies S/N = 1$ (segnale = rumore)</li>
-                            <li>$10 \text{ dB} \implies S/N = 10$ (segnale 10x rumore)</li>
-                            <li>$20 \text{ dB} \implies S/N = 100$ (segnale 100x rumore)</li>
-                            <li>Un aumento di **3 dB** raddoppia il rapporto $S/N$.</li>
-                            <li>Un aumento di **10 dB** moltiplica il rapporto $S/N$ per 10.</li>
+                            <li>\(0 \text{ dB} \implies S/N = 1\) (segnale = rumore)</li>
+                            <li>\(10 \text{ dB} \implies S/N = 10\) (segnale 10x rumore)</li>
+                            <li>\(20 \text{ dB} \implies S/N = 100\) (segnale 100x rumore)</li>
+                            <li>Un aumento di <strong>3 dB</strong> raddoppia il rapporto \(S/N\).</li>
+                            <li>Un aumento di <strong>10 dB</strong> moltiplica il rapporto \(S/N\) per 10.</li>
                         </ul>
                     </li>
                 </ul>
@@ -106,17 +106,17 @@
                 <h3 class="subsection-title">Simboli, Baud Rate e Codifiche</h3>
                 <p>Questi concetti sono correlati alla quantità di informazione trasportata da ogni "segnale fisico" e all'efficienza con cui i dati vengono mappati sul canale.</p>
                 <ul>
-                    <li>**Simbolo (M):** Uno stato discreto del segnale che il trasmettitore può impostare e che il ricevitore può osservare (es. un livello di tensione, una fase, un colore). Ogni simbolo trasporta $\log_2(M)$ bit di informazione.</li>
-                    <li>**Baud Rate (R):** Il numero di simboli trasmessi al secondo. Si misura in **baud (simboli/s)**.</li>
-                    <li>**Capacità/Bitrate da Simboli (formula alternativa a Shannon):**
+                    <li><strong>Simbolo (M):</strong> Uno stato discreto del segnale che il trasmettitore può impostare e che il ricevitore può osservare (es. un livello di tensione, una fase, un colore). Ogni simbolo trasporta \(\log_2(M)\) bit di informazione.</li>
+                    <li><strong>Baud Rate (R):</strong> Il numero di simboli trasmessi al secondo. Si misura in <strong>baud (simboli/s)</strong>.</li>
+                    <li><strong>Capacità/Bitrate da Simboli (formula alternativa a Shannon):</strong>
                         <div class="math-block">
                             $$ C = \text{Baud Rate} \cdot \log_2(M) $$
                         </div>
                         <div class="note-box">
-                            <strong>Quando NON usare Shannon:</strong> Questa formula si usa quando non è menzionato il rumore (S/N) ma sono dati il numero di stati/simboli e il baud rate. Il teorema di Nyquist stabilisce il limite massimo per il baud rate in un canale ideale senza rumore: $R_{max} = 2B$.
+                            <strong>Quando NON usare Shannon:</strong> Questa formula si usa quando non è menzionato il rumore (S/N) ma sono dati il numero di stati/simboli e il baud rate. Il teorema di Nyquist stabilisce il limite massimo per il baud rate in un canale ideale senza rumore: \(R_{max} = 2B\).
                         </div>
                     </li>
-                    <li>**Efficienza di Codifica:** Molte codifiche (es. 4B/5B, FEC) aggiungono bit ridondanti per migliorare la robustezza o la sincronizzazione. Se per ogni $k$ bit di dati utili se ne trasmettono $n$ totali, l'efficienza è $k/n$. La capacità calcolata con Shannon è quella *grezza* sul canale; per ottenere la capacità *netta* (dei dati utili), devi moltiplicare per l'efficienza: $C_{netta} = C_{grezza} \cdot \text{Efficienza}$.</li>
+                    <li><strong>Efficienza di Codifica:</strong> Molte codifiche (es. 4B/5B, FEC) aggiungono bit ridondanti per migliorare la robustezza o la sincronizzazione. Se per ogni \(k\) bit di dati utili se ne trasmettono \(n\) totali, l'efficienza è \(k/n\). La capacità calcolata con Shannon è quella <em>grezza</em> sul canale; per ottenere la capacità <em>netta</em> (dei dati utili), devi moltiplicare per l'efficienza: \(C_{netta} = C_{grezza} \cdot \text{Efficienza}\).</li>
                 </ul>
             </div>
         </article>
@@ -126,23 +126,23 @@
             <div class="section-content">
                 <p>Ricapitolando, queste sono le formule che devi saper applicare e manipolare:</p>
                 <ul>
-                    <li>**Teorema di Shannon-Hartley:**
+                    <li><strong>Teorema di Shannon-Hartley:</strong>
                         <div class="math-block">
                             $$ C = B \cdot \log_2(1 + S/N) $$
                         </div>
                     </li>
-                    <li>**Conversione SNR in Decibel:**
+                    <li><strong>Conversione SNR in Decibel:</strong>
                         <div class="math-block">
                             $$ SNR_{dB} = 10 \cdot \log_{10}(S/N) $$
                             $$ S/N = 10^{(SNR_{dB}/10)} $$
                         </div>
                     </li>
-                    <li>**Capacità da Baud Rate e Simboli:**
+                    <li><strong>Capacità da Baud Rate e Simboli:</strong>
                         <div class="math-block">
                             $$ C = \text{Baud Rate} \cdot \log_2(M) $$
                         </div>
                     </li>
-                    <li>**Capacità Netta con Efficienza di Codifica (se presente):**
+                    <li><strong>Capacità Netta con Efficienza di Codifica (se presente):</strong>
                         <div class="math-block">
                             $$ C_{netta} = C_{grezza} \cdot \text{Efficienza} $$
                         </div>
@@ -156,29 +156,29 @@
                 <p>Il professore varia le domande chiedendo di trovare una delle variabili incognite o di combinare le formule. Sii pronto a riorganizzare le equazioni.</p>
 
                 <h3 class="subsection-title">Scenario A: Calcolare la Capacità (C)</h3>
-                <p>**Input:** Banda ($B$) in Hz, SNR ($SNR_{dB}$) in dB.</p>
+                <p><strong>Input:</strong> Banda \(B\) in Hz, SNR \(SNR_{dB}\) in dB.</p>
                 <ol>
-                    <li>Converti $SNR_{dB}$ in rapporto puro $S/N$ usando $S/N = 10^{(SNR_{dB}/10)}$.</li>
-                    <li>Applica la formula di Shannon-Hartley: $C = B \cdot \log_2(1 + S/N)$.</li>
-                    <li>Assicurati che le unità di $C$ e $B$ siano coerenti (es. $B$ in Hz, $C$ in bps, o $B$ in MHz, $C$ in Mbps).</li>
+                    <li>Converti \(SNR_{dB}\) in rapporto puro \(S/N\) usando \(S/N = 10^{(SNR_{dB}/10)}\).</li>
+                    <li>Applica la formula di Shannon-Hartley: \(C = B \cdot \log_2(1 + S/N)\).</li>
+                    <li>Assicurati che le unità di \(C\) e \(B\) siano coerenti (es. \(B\) in Hz, \(C\) in bps, o \(B\) in MHz, \(C\) in Mbps).</li>
                 </ol>
 
-                <h3 class="subsection-title">Scenario B: Calcolare il Rapporto Segnale/Rumore (S/N o $SNR_{dB}$)</h3>
-                <p>**Input:** Capacità ($C$) in bps, Banda ($B$) in Hz.</p>
+                <h3 class="subsection-title">Scenario B: Calcolare il Rapporto Segnale/Rumore (S/N o \(SNR_{dB}\))</h3>
+                <p><strong>Input:</strong> Capacità \(C\) in bps, Banda \(B\) in Hz.</p>
                 <ol>
-                    <li>Riorganizza la formula di Shannon-Hartley per $S/N$:
+                    <li>Riorganizza la formula di Shannon-Hartley per \(S/N\):
                         <div class="math-block">
                             $$ S/N = 2^{(C/B)} - 1 $$
                         </div>
                     </li>
-                    <li>Se richiesto, converti il rapporto puro $S/N$ in $SNR_{dB}$ usando $SNR_{dB} = 10 \cdot \log_{10}(S/N)$.</li>
+                    <li>Se richiesto, converti il rapporto puro \(S/N\) in \(SNR_{dB}\) usando \(SNR_{dB} = 10 \cdot \log_{10}(S/N)\).</li>
                 </ol>
 
                 <h3 class="subsection-title">Scenario C: Calcolare la Banda (B)</h3>
-                <p>**Input:** Capacità ($C$) in bps, SNR ($SNR_{dB}$) in dB (o rapporto di potenze $S$ e $N$).</p>
+                <p><strong>Input:</strong> Capacità \(C\) in bps, SNR \(SNR_{dB}\) in dB (o rapporto di potenze \(S\) e \(N\)).</p>
                 <ol>
-                    <li>Se $S/N$ è in dB, convertilo in rapporto puro $S/N$. Se hai $S$ e $N$ in mW/Watt, calcola $S/N = S/N$.</li>
-                    <li>Riorganizza la formula di Shannon-Hartley per $B$:
+                    <li>Se \(S/N\) è in dB, convertilo in rapporto puro \(S/N\). Se hai \(S\) e \(N\) in mW/Watt, calcola \(S/N = S/N\).</li>
+                    <li>Riorganizza la formula di Shannon-Hartley per \(B\):
                         <div class="math-block">
                             $$ B = C / \log_2(1 + S/N) $$
                         </div>
@@ -186,17 +186,17 @@
                 </ol>
 
                 <h3 class="subsection-title">Scenario D: Capacità da Baud Rate e Simboli (senza Rumore)</h3>
-                <p>**Input:** Baud Rate (simboli/s), Numero di simboli (M).</p>
+                <p><strong>Input:</strong> Baud Rate (simboli/s), Numero di simboli (M).</p>
                 <ol>
-                    <li>Applica la formula: $C = \text{Baud Rate} \cdot \log_2(M)$.</li>
+                    <li>Applica la formula: \(C = \text{Baud Rate} \cdot \log_2(M)\).</li>
                     <li>Questo ti dà il bitrate grezzo del canale.</li>
                 </ol>
 
-                <h3 class="subsection-title">Scenario E: Gestire l'Efficienza di Codifica (Efficienza $k/n$)</h3>
-                <p>**Input:** Capacità grezza del canale ($C_{grezza}$), efficienza della codifica (es. 4B/5B implica efficienza 4/5 = 0.8).</p>
+                <h3 class="subsection-title">Scenario E: Gestire l'Efficienza di Codifica (Efficienza \(k/n\))</h3>
+                <p><strong>Input:</strong> Capacità grezza del canale \(C_{grezza}\), efficienza della codifica (es. 4B/5B implica efficienza 4/5 = 0.8).</p>
                 <ol>
-                    <li>Calcola la capacità netta: $C_{netta} = C_{grezza} \cdot \text{Efficienza}$.</li>
-                    <li>Oppure, se ti è data $C_{netta}$ e devi trovare $C_{grezza}$ (per usarla con Shannon): $C_{grezza} = C_{netta} / \text{Efficienza}$.</li>
+                    <li>Calcola la capacità netta: \(C_{netta} = C_{grezza} \cdot \text{Efficienza}\).</li>
+                    <li>Oppure, se ti è data \(C_{netta}\) e devi trovare \(C_{grezza}\) (per usarla con Shannon): \(C_{grezza} = C_{netta} / \text{Efficienza}\).</li>
                 </ol>
             </div>
         </article>
@@ -204,43 +204,43 @@
         <article id="esercizi-chiave" class="content-section">
             <h2 class="section-title">4. Esercizi Chiave su cui Esercitarsi (Analisi Esami 2022-2024)</h2>
             <div class="section-content">
-                <p>Questi esercizi sono stati selezionati tra i 15 appelli passati per coprire tutte le varianti e le sottigliezze che il professore ha chiesto su questo argomento. **Concentrati prima su quelli evidenziati in grassetto.** Una volta risolti tutti con sicurezza, puoi ritenere l'argomento "blindato".</p>
+                <p>Questi esercizi sono stati selezionati tra i 15 appelli passati per coprire tutte le varianti e le sottigliezze che il professore ha chiesto su questo argomento. <strong>Concentrati prima su quelli evidenziati in grassetto.</strong> Una volta risolti tutti con sicurezza, puoi ritenere l'argomento "blindato".</p>
 
                 <ol class="exercise-list">
                     <li><strong>Febbraio 2024, Appello I, Q2:</strong>
                         <p>“Si vuole utilizzare un mezzo fisico la cui banda è 20MHz, per realizzare un canale di comunicazione di capacità minima 100Mbps. Qual è il minimo SNR accettabile?”</p>
                         <div class="clarification-box">
-                            <strong>Perché è fondamentale:</strong> Richiede l'applicazione inversa della formula di Shannon per trovare $S/N$ e la conversione in dB. È la variante più comune.
+                            <strong>Perché è fondamentale:</strong> Richiede l'applicazione inversa della formula di Shannon per trovare \(S/N\) e la conversione in dB. È la variante più comune.
                         </div>
                     </li>
                     <li><strong>Febbraio 2023, Appello II, Q2:</strong>
                         <p>“Un certo canale ha SNR = -8 dB, con una larghezza di banda pari a 20MHz. (a) Qual è la massima capacità ottenibile (in Mbps)? (b) Se il baudrate è di 3 Mbaud, quanti bit devono essere codificati in ogni simbolo per avere tale capacità di canale?”</p>
                         <div class="clarification-box">
-                            <strong>Perché è fondamentale:</strong> Copre sia il calcolo di $C$ da $S/N$ e $B$ (parte a), sia il concetto di bitrate/baudrate/bit per simbolo (parte b). Ti costringe a distinguere bene i concetti.
+                            <strong>Perché è fondamentale:</strong> Copre sia il calcolo di \(C\) da \(S/N\) e \(B\) (parte a), sia il concetto di bitrate/baudrate/bit per simbolo (parte b). Ti costringe a distinguere bene i concetti.
                         </div>
                     </li>
                     <li><strong>Luglio 2022, Appello II, Q2:</strong>
                         <p>“Su un certo canale viene trasmesso un segnale con una potenza di 14 mW, mentre si osserva un rumore di 0.2 mW. Quanto deve essere la larghezza di banda per permettere una capacità di canale di 16 Mbps?”</p>
                         <div class="clarification-box">
-                            <strong>Perché è fondamentale:</strong> Un'altra variante della formula inversa, dove $S/N$ è dato come rapporto di potenze assolute ($S$ e $N$ in mW).
+                            <strong>Perché è fondamentale:</strong> Un'altra variante della formula inversa, dove \(S/N\) è dato come rapporto di potenze assolute (\(S\) e \(N\) in mW).
                         </div>
                     </li>
                     <li><strong>Giugno 2022, Appello III, Q2:</strong>
                         <p>“Un certo canale ha SNR = 15 dB. Se si adotta una codifica 4B/5B, qual è la massima capacità netta ottenibile?”</p>
                         <div class="clarification-box">
-                            <strong>Perché è fondamentale:</strong> Introduce il concetto di **efficienza di codifica** (4B/5B = 4/5). Devi prima calcolare la capacità *grezza* con Shannon e poi applicare l'efficienza per la capacità *netta*.
+                            <strong>Perché è fondamentale:</strong> Introduce il concetto di <strong>efficienza di codifica</strong> (4B/5B = 4/5). Devi prima calcolare la capacità <em>grezza</em> con Shannon e poi applicare l'efficienza per la capacità <em>netta</em>.
                         </div>
                     </li>
-                    <li>**Luglio 2024, Appello IV, Q2:**
+                    <li><strong>Luglio 2024, Appello IV, Q2:</strong>
                         <p>“Un segnale portante sinusoidale a 10MHz viene modulato in fase, con quattro possibili sfasamenti (+45°, +135º, -45°, -135º). (a) Quanti bit si possono codificare in ogni simbolo? (b) Se si invia un simbolo ogni due cicli della sinusoide, qual è il bitrate massimo ottenibile?”</p>
                         <div class="clarification-box">
-                            <strong>Perché è fondamentale:</strong> Perfetto per testare la formula $C = \text{Baud Rate} \cdot \log_2(M)$ e non confonderla con Shannon. Ti fa capire come il numero di sfasamenti (M) e la frequenza (baud rate implicito) si trasformano in bitrate.
+                            <strong>Perché è fondamentale:</strong> Perfetto per testare la formula \(C = \text{Baud Rate} \cdot \log_2(M)\) e non confonderla con Shannon. Ti fa capire come il numero di sfasamenti (M) e la frequenza (baud rate implicito) si trasformano in bitrate.
                         </div>
                     </li>
-                    <li>**Febbraio 2024, Appello II, Q2 (Parte 2):**
+                    <li><strong>Febbraio 2024, Appello II, Q2 (Parte 2):</strong>
                         <p>“Un certo dispositivo trasmette ad intervalli regolari un messaggio di 100 byte di dati; il frame comprende anche un'intestazione di 5 byte, un CRC-16, e un preambolo pari a 50 bit. (...) Viene usato un canale wireless con capacità grezza pari a 150 kbps e una FEC 4/5 (ossia, ogni 4 bit di dati reali viene aggiunto 1 bit di ridondanza). Quanto tempo è necessario per trasmettere tale frame?”</p>
                         <div class="clarification-box">
-                            <strong>Perché è fondamentale:</strong> Questo è un esercizio più complesso che unisce il calcolo della capacità/tempo di trasmissione (tipico di un altro argomento, ma qui interseca) con il concetto di **FEC (Forward Error Correction)**, che è un'efficienza di codifica. Devi calcolare i bit totali "reali" e poi i bit "grezzi" necessari per la trasmissione data la FEC.
+                            <strong>Perché è fondamentale:</strong> Questo è un esercizio più complesso che unisce il calcolo della capacità/tempo di trasmissione (tipico di un altro argomento, ma qui interseca) con il concetto di <strong>FEC (Forward Error Correction)</strong>, che è un'efficienza di codifica. Devi calcolare i bit totali "reali" e poi i bit "grezzi" necessari per la trasmissione data la FEC.
                         </div>
                     </li>
                 </ol>
@@ -250,13 +250,13 @@
         <article id="preparazione-esame" class="content-section">
             <h2 class="section-title">5. Preparazione all'Esame: Cosa Aspettarsi e Come Evitare Errori</h2>
             <div class="section-content">
-                <p>Il Teorema di Shannon-Hartley è un argomento **fisso** negli esami del Prof. Miculan. L'abilità sta nel saper manipolare le formule e non farsi ingannare dalle unità di misura o dalle informazioni aggiuntive.</p>
+                <p>Il Teorema di Shannon-Hartley è un argomento <strong>fisso</strong> negli esami del Prof. Miculan. L'abilità sta nel saper manipolare le formule e non farsi ingannare dalle unità di misura o dalle informazioni aggiuntive.</p>
                 <ul>
-                    <li>**Maestria Algebrica:** Esercitati a isolare $C$, $B$, $S/N$ da tutte le forme della formula.</li>
-                    <li>**Conversioni:** Fai pratica costante con le conversioni da Hertz a MHz/GHz e da bps a kbps/Mbps/Gbps. Soprattutto, padroneggia le conversioni da rapporto $S/N$ a $SNR_{dB}$ e viceversa.</li>
-                    <li>**Distinzione Cruciale:** Sii sempre in grado di distinguere chiaramente **Banda (Hz)** da **Capacità (bps)**. Il professore spesso gioca su questa confusione.</li>
-                    <li>**Leggere Bene il Testo:** Presta attenzione se l'esercizio fornisce il numero di simboli, il baud rate, o se menziona codifiche con efficienza (es. 4B/5B, FEC). Questo ti indicherà quale formula di capacità usare e se applicare un fattore di efficienza.</li>
-                    <li>**Esercitazione Ripetuta:** Fai gli esercizi evidenziati più volte. Non basta capirli una volta, devi essere in grado di risolverli rapidamente e senza errori sotto pressione.</li>
+                    <li><strong>Maestria Algebrica:</strong> Esercitati a isolare \(C\), \(B\), \(S/N\) da tutte le forme della formula.</li>
+                    <li><strong>Conversioni:</strong> Fai pratica costante con le conversioni da Hertz a MHz/GHz e da bps a kbps/Mbps/Gbps. Soprattutto, padroneggia le conversioni da rapporto \(S/N\) a \(SNR_{dB}\) e viceversa.</li>
+                    <li><strong>Distinzione Cruciale:</strong> Sii sempre in grado di distinguere chiaramente <strong>Banda (Hz)</strong> da <strong>Capacità (bps)</strong>. Il professore spesso gioca su questa confusione.</li>
+                    <li><strong>Leggere Bene il Testo:</strong> Presta attenzione se l'esercizio fornisce il numero di simboli, il baud rate, o se menziona codifiche con efficienza (es. 4B/5B, FEC). Questo ti indicherà quale formula di capacità usare e se applicare un fattore di efficienza.</li>
+                    <li><strong>Esercitazione Ripetuta:</strong> Fai gli esercizi evidenziati più volte. Non basta capirli una volta, devi essere in grado di risolverli rapidamente e senza errori sotto pressione.</li>
                 </ul>
                 <div class="note-box">
                     <strong>Suggerimento Finale:</strong> Avere un foglio di riassunto (il tuo "Formulario") con tutte le formule e le conversioni chiave ti darà un enorme vantaggio durante l'esame.
