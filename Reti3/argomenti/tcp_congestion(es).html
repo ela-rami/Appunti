@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esercizi: Controllo di Congestione TCP - Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per la pagina degli esercizi */
+        .exercise-item {
+            background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft);
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+        .exercise-item .question-title {
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .exercise-item .solution-section {
+            margin-top: 1.5rem;
+            border-top: 1px dashed var(--border-soft);
+            padding-top: 1.5rem;
+        }
+        .exercise-item .solution-section h4 {
+            color: var(--accent-secondary);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        .exercise-item .solution-steps li {
+            margin-bottom: 0.7rem;
+            color: var(--text-secondary); /* Ensure list text is secondary */
+        }
+        .exercise-item .solution-steps strong {
+            color: var(--text-primary);
+        }
+        .exercise-item .math-equation {
+            display: block;
+            text-align: center;
+            margin: 1rem 0;
+            font-family: var(--font-code);
+            font-size: 1.05em;
+            color: var(--code-text);
+            background-color: var(--code-bg);
+            padding: 0.75em;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+        }
+        .exercise-item .highlight {
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+        .solution-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-family: var(--font-code);
+            font-size: 0.9em;
+        }
+        .solution-table th, .solution-table td {
+            border: 1px solid var(--border-soft);
+            padding: 0.8em;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .solution-table th {
+            background-color: var(--bg-header);
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+        .solution-table td {
+            background-color: var(--code-bg);
+        }
+        .solution-table .highlight-row td {
+            background-color: rgba(96, 165, 250, 0.1);
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+        .solution-table .event-marker {
+            color: #FACC15; /* Yellow for events like Timeout/ACK Duplicati */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Esercizi: Controllo di Congestione TCP</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="tcp_congestion.html" class="sidebar-action-button">Torna agli Appunti</a>
+        </div>
+        <h2>Elenco Esercizi</h2>
+        <ul>
+            <li><a href="#esercizio-1" class="sidebar-link">1. Slow Start Base</a></li>
+            <li><a href="#esercizio-2" class="sidebar-link">2. Transizione Slow Start -> AIMD</a></li>
+            <li><a href="#esercizio-3" class="sidebar-link">3. Scenario Timeout (Tahoe)</a></li>
+            <li><a href="#esercizio-4" class="sidebar-link">4. Fast Retransmit (Tahoe)</a></li>
+            <li><a href="#esercizio-5" class="sidebar-link">5. Fast Retransmit + Fast Recovery (Reno)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="esercizio-1" class="exercise-item active-section">
+            <h3 class="question-title">Esercizio 1: Slow Start Base (Evoluzione cwnd)</h3>
+            <p><strong>Domanda:</strong> Un host TCP inizia una nuova connessione. Il `Maximum Segment Size (MSS)` è 1500 byte. Traccia l'evoluzione della `Congestion Window (cwnd)` per i primi 4 Round Trip Time (RTT), assumendo che non ci siano perdite di pacchetti e che `ssthreshold` sia inizialmente infinito.</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <p>Durante la fase di Slow Start, la `cwnd` raddoppia per ogni RTT. Viene inizializzata a 1 MSS.</p>
+                <table class="solution-table">
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th>Evento</th>
+                            <th>`cwnd` (MSS)</th>
+                            <th>`cwnd` (Byte)</th>
+                            <th>`ssthreshold` (MSS)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Iniziale</td>
+                            <td>Nuova Connessione</td>
+                            <td>1</td>
+                            <td>1500</td>
+                            <td>\( \infty \)</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>ACK del 1° RTT</td>
+                            <td>2</td>
+                            <td>3000</td>
+                            <td>\( \infty \)</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>ACK del 2° RTT</td>
+                            <td>4</td>
+                            <td>6000</td>
+                            <td>\( \infty \)</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>ACK del 3° RTT</td>
+                            <td>8</td>
+                            <td>12000</td>
+                            <td>\( \infty \)</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>ACK del 4° RTT</td>
+                            <td>16</td>
+                            <td>24000</td>
+                            <td>\( \infty \)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio testa la comprensione del meccanismo di base di Slow Start: la crescita esponenziale della `cwnd` (raddoppia per RTT) finché non ci sono eventi di congestione o `ssthreshold` non viene raggiunto.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-2" class="exercise-item">
+            <h3 class="question-title">Esercizio 2: Transizione Slow Start -> AIMD (Congestion Avoidance)</h3>
+            <p><strong>Domanda:</strong> Un host TCP inizia una nuova connessione con `MSS` = 1000 byte e `ssthreshold` = 8 MSS. Traccia l'evoluzione della `Congestion Window (cwnd)` fino al 10° RTT, assumendo che non ci siano perdite di pacchetti.</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <p>L'host inizia in Slow Start. Quando `cwnd` raggiunge `ssthreshold`, passa alla fase di Congestion Avoidance (Incremento Additivo), dove `cwnd` aumenta di 1 MSS per RTT.</p>
+                <table class="solution-table">
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th>Fase</th>
+                            <th>`cwnd` (MSS)</th>
+                            <th>`cwnd` (Byte)</th>
+                            <th>`ssthreshold` (MSS)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Iniziale</td>
+                            <td>-</td>
+                            <td>1</td>
+                            <td>1000</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td class="highlight">Slow Start</td>
+                            <td>2</td>
+                            <td>2000</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td class="highlight">Slow Start</td>
+                            <td>4</td>
+                            <td>4000</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td class="highlight">Slow Start</td>
+                            <td>8</td>
+                            <td>8000</td>
+                            <td>8</td>
+                        </tr>
+                        <tr class="highlight-row">
+                            <td>4</td>
+                            <td class="highlight">Congestion Avoidance</td>
+                            <td>9</td>
+                            <td>9000</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Congestion Avoidance</td>
+                            <td>10</td>
+                            <td>10000</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>Congestion Avoidance</td>
+                            <td>11</td>
+                            <td>11000</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>Congestion Avoidance</td>
+                            <td>12</td>
+                            <td>12000</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>Congestion Avoidance</td>
+                            <td>13</td>
+                            <td>13000</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>Congestion Avoidance</td>
+                            <td>14</td>
+                            <td>14000</td>
+                            <td>8</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>Congestion Avoidance</td>
+                            <td>15</td>
+                            <td>15000</td>
+                            <td>8</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio verifica la tua comprensione della transizione chiave da Slow Start a Congestion Avoidance (`cwnd` che raggiunge `ssthreshold`). È importante seguire attentamente la crescita di `cwnd` e identificare il momento esatto del cambio di fase.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-3" class="exercise-item">
+            <h3 class="question-title">Esercizio 3: Scenario Timeout (TCP Tahoe)</h3>
+            <p><strong>Domanda:</strong> Un host TCP sta trasmettendo dati. All'inizio del 5° RTT, la `Congestion Window (cwnd)` è 16 MSS e `ssthreshold` è 32 MSS. Durante questo RTT, il mittente va in timeout perché non riceve gli ACK attesi. Quali saranno i valori di `cwnd` e `ssthreshold` all'inizio del 6° RTT?</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <p>Quando si verifica un timeout, TCP Tahoe lo interpreta come una grave congestione e ripristina la `cwnd` e `ssthreshold` come segue:</p>
+                <table class="solution-table">
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th>Evento</th>
+                            <th>`cwnd` (MSS)</th>
+                            <th>`ssthreshold` (MSS)</th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Inizio 5°</td>
+                            <td>Stato corrente</td>
+                            <td>16</td>
+                            <td>32</td>
+                            <td>-</td>
+                        </tr>
+                        <tr class="highlight-row">
+                            <td>Durante 5°</td>
+                            <td class="event-marker">Timeout</td>
+                            <td>1</td>
+                            <td>8</td>
+                            <td>`ssthreshold` = `cwnd` (pre-timeout) / 2 = 16 / 2 = 8<br>`cwnd` = 1 MSS (ripartenza da Slow Start)</td>
+                        </tr>
+                        <tr>
+                            <td>Inizio 6°</td>
+                            <td>Nuovo stato</td>
+                            <td>1</td>
+                            <td>8</td>
+                            <td>Si riparte con Slow Start.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio testa la tua conoscenza di come TCP (in particolare Tahoe) reagisce a un timeout. È fondamentale ricordare che un timeout porta `cwnd` a 1 MSS e aggiorna `ssthreshold`.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-4" class="exercise-item">
+            <h3 class="question-title">Esercizio 4: Fast Retransmit (TCP Tahoe)</h3>
+            <p><strong>Domanda:</strong> Un host TCP sta operando in Congestion Avoidance. All'inizio di un RTT, `cwnd` è 10 MSS e `ssthreshold` è 8 MSS. Durante questo RTT, il mittente riceve 3 ACK duplicati per un segmento. Quali saranno i valori di `cwnd` e `ssthreshold` dopo questo evento, assumendo che sia TCP Tahoe?</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <p>Quando TCP Tahoe rileva 3 ACK duplicati, esegue Fast Retransmit e poi rientra in Slow Start.</p>
+                <table class="solution-table">
+                    <thead>
+                        <tr>
+                            <th>Evento</th>
+                            <th>`cwnd` (MSS)</th>
+                            <th>`ssthreshold` (MSS)</th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Stato iniziale</td>
+                            <td>10</td>
+                            <td>8</td>
+                            <td>Operando in Congestion Avoidance.</td>
+                        </tr>
+                        <tr class="highlight-row">
+                            <td class="event-marker">3 ACK Duplicati</td>
+                            <td>1</td>
+                            <td>5</td>
+                            <td>`ssthreshold` = `cwnd` (corrente) / 2 = 10 / 2 = 5<br>`cwnd` = 1 MSS (ripartenza da Slow Start dopo Fast Retransmit).</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio verifica la reazione di TCP Tahoe ai 3 ACK duplicati. La differenza fondamentale rispetto al timeout è che non si aspetta la scadenza del timer. Ricorda che Tahoe, anche con Fast Retransmit, torna a Slow Start.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-5" class="exercise-item">
+            <h3 class="question-title">Esercizio 5: Fast Retransmit + Fast Recovery (TCP Reno)</h3>
+            <p><strong>Domanda:</strong> Un host TCP (implementando TCP Reno) è in fase di Congestion Avoidance. All'inizio di un RTT, `cwnd` è 12 MSS e `ssthreshold` è 10 MSS. Durante questo RTT, il mittente riceve 3 ACK duplicati. Quali saranno i valori di `cwnd` e `ssthreshold` dopo questo evento?</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <p>TCP Reno, alla ricezione di 3 ACK duplicati, esegue Fast Retransmit e poi entra in Fast Recovery, evitando di tornare a `cwnd=1`.</p>
+                <table class="solution-table">
+                    <thead>
+                        <tr>
+                            <th>Evento</th>
+                            <th>`cwnd` (MSS)</th>
+                            <th>`ssthreshold` (MSS)</th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Stato iniziale</td>
+                            <td>12</td>
+                            <td>10</td>
+                            <td>Operando in Congestion Avoidance.</td>
+                        </tr>
+                        <tr class="highlight-row">
+                            <td class="event-marker">3 ACK Duplicati</td>
+                            <td>9</td>
+                            <td>6</td>
+                            <td>`ssthreshold` = `cwnd` (corrente) / 2 = 12 / 2 = 6<br>`cwnd` = `ssthreshold` + 3 MSS = 6 + 3 = 9 MSS (si entra in Fast Recovery).</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio è fondamentale per comprendere la differenza tra TCP Tahoe e TCP Reno nella gestione dei 3 ACK duplicati. TCP Reno evita il ritorno a Slow Start (`cwnd=1`) grazie a Fast Recovery (`cwnd = ssthreshold + 3 MSS`), permettendo una ripresa più fluida.
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    // Script di inizializzazione MathJax e Mermaid, se necessario per diagrammi futuri.
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\nstyle NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
