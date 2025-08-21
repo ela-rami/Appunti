@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algoritmi di Routing e Spanning Tree - Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per questa pagina */
+        .math-block {
+            font-size: 1.15em;
+        }
+        .figure-caption {
+            text-align: center;
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+        }
+        .mermaid-container.small-graph {
+            max-width: 500px; /* Limit width for smaller graphs */
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Algoritmi di Routing e Spanning Tree</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="routing_algorithms(es).html" class="sidebar-action-button" id="esercizi-btn">Esercizi</a>
+        </div>
+        <h2>Indice Argomento</h2>
+        <ul>
+            <li><a href="#introduzione-routing" class="sidebar-link">1. Introduzione al Routing</a></li>
+            <li><a href="#spanning-tree-protocol" class="sidebar-link">2. Spanning Tree Protocol (STP)</a></li>
+            <li><a href="#algoritmi-routing" class="sidebar-link">3. Algoritmi di Routing Classici</a></li>
+            <li><a href="#distance-vector" class="sidebar-link">4. Algoritmi Distance Vector (RIP)</a></li>
+            <li><a href="#link-state" class="sidebar-link">5. Algoritmi Link State (OSPF)</a></li>
+            <li><a href="#interdomain-routing" class="sidebar-link">6. Routing Inter-Dominio (BGP)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="introduzione-routing" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione al Routing</h2>
+            <div class="section-content">
+                <p>Il routing è il processo fondamentale che permette ai pacchetti di dati di attraversare reti complesse, da una sorgente a una destinazione. Si distingue nettamente dal concetto di switching/forwarding, pur essendo ad esso complementare.</p>
+
+                <h3 class="subsection-title">Forwarding vs. Routing (Data Plane vs. Control Plane)</h3>
+                <ul>
+                    <li><strong>Forwarding (Data Plane):</strong> È l'atto di trasferire un pacchetto da una porta d'ingresso a una porta d'uscita su un singolo dispositivo (router o switch). Questa decisione è rapida, idealmente implementata in hardware, e si basa sulle informazioni presenti nella <strong>tabella di forwarding</strong>. Pensa a un postino che legge l'indirizzo sulla busta e sa subito in quale sacco mettere la lettera per la prossima tappa.</li>
+                    <li><strong>Routing (Control Plane):</strong> È il processo più complesso di costruire e mantenere la <strong>tabella di routing</strong> (o tabella di instradamento). Questo processo è più lento, spesso eseguito in background nel software del router, e determina il percorso migliore attraverso la rete per raggiungere le diverse destinazioni. Pensa all'ufficio postale centrale che decide le rotte ottimali per i sacchi di lettere tra le varie città.</li>
+                </ul>
+
+                <h3 class="subsection-title">Rappresentazione della Rete: il Grafo</h3>
+                <p>Per studiare gli algoritmi di routing, la rete è spesso modellata come un <strong>grafo:</strong></p>
+                <ul>
+                    <li><strong>Nodi:</strong> Rappresentano i router o gli host.</li>
+                    <li><strong>Archi:</strong> Rappresentano i collegamenti (link) tra i nodi.</li>
+                    <li><strong>Pesi:</strong> Gli archi hanno un peso (costo) associato, che può rappresentare latenza, banda, costo economico, affidabilità, ecc.</li>
+                </ul>
+                <p>L'obiettivo degli algoritmi di routing è trovare il <strong>percorso a costo minimo</strong> (shortest path) tra i nodi del grafo.</p>
+                <div class="mermaid-container small-graph">
+                    <pre class="mermaid">
+                        graph LR
+                            A --- 6 --- B
+                            A --- 1 --- C
+                            B --- 1 --- E
+                            C --- 3 --- D
+                            C --- 2 --- E
+                            D --- 1 --- F
+                            E --- 1 --- F
+                    </pre>
+                    <p class="figure-caption">Esempio di rete come grafo pesato. I numeri sugli archi indicano il costo.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="spanning-tree-protocol" class="content-section">
+            <h2 class="section-title">2. Spanning Tree Protocol (STP): Evitare i Loop nelle LAN</h2>
+            <div class="section-content">
+                <p>Lo <strong>Spanning Tree Protocol (STP)</strong>, definito nello standard IEEE 802.1D, è un protocollo utilizzato per gestire le <strong>LAN estese</strong> (reti locali interconnesse da più switch/bridge) e prevenire la formazione di <strong>loop</strong>.</p>
+
+                <h3 class="subsection-title">Il Problema dei Loop nelle LAN Estese</h3>
+                <p>Nelle LAN estese con più switch, possono crearsi dei loop (percorsi circolari). Questi loop sono estremamente dannosi perché causano:</p>
+                <ul>
+                    <li><strong>Broadcast Storms:</strong> I frame broadcast circolano all'infinito, consumando tutta la banda.</li>
+                    <li><strong>Instabilità delle MAC Table:</strong> Gli switch vedono gli stessi MAC address arrivare da porte diverse, rendendo le tabelle di forwarding instabili e inaffidabili.</li>
+                    <li><strong>Multipli Frame:</strong> Lo stesso frame può arrivare più volte a destinazione.</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Perché i loop si formano?</strong> Spesso per ridondanza (percorso alternativo in caso di guasto) o per errori di configurazione. STP permette di avere ridondanza senza i problemi dei loop.
+                </div>
+
+                <h3 class="subsection-title">Come Funziona STP (Idea)</h3>
+                <p>STP trasforma la LAN estesa in uno <strong>Spanning Tree</strong> (albero di copertura): un sottografo che connette tutti i dispositivi, ma è <strong>aciclico</strong> (senza loop). Lo fa disabilitando selettivamente alcune porte sugli switch.</p>
+                <ol>
+                    <li><strong>Elezione del Root Bridge:</strong>
+                        <ul>
+                            <li>Ogni switch ha un <strong>Bridge ID</strong> (generalmente MAC address + priorità).</li>
+                            <li>Lo switch con il <strong>Bridge ID più basso</strong> viene eletto come <strong>Root Bridge</strong> (ponte radice). Questo è il "centro" logico dell'albero.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Determinazione dei Percorsi e Porte:</strong>
+                        <ul>
+                            <li>Ogni switch non-root calcola il <strong>percorso a costo minimo</strong> (basato sul peso degli archi) per raggiungere il Root Bridge.</li>
+                            <li>La porta su questo percorso a costo minimo viene designata come <strong>Root Port</strong> per quello switch.</li>
+                            <li>Per ogni segmento di LAN condiviso, viene eletto un <strong>Designated Bridge</strong> (il bridge collegato a quel segmento che ha il percorso a costo minimo più breve verso il Root Bridge; a parità di costo, vince il bridge con Bridge ID più basso). La porta di questo bridge che si affaccia sul segmento è la <strong>Designated Port</strong>.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Blocco delle Porte (Non-Designated / Alternate Ports):</strong>
+                        <ul>
+                            <li>Tutte le porte che non sono né Root Port né Designated Port vengono messe in stato di <strong>blocco (blocking state)</strong>. Queste porte non inoltrano traffico, prevenendo i loop.</li>
+                            <li>Le porte bloccate fungono da <strong>percorsi alternativi</strong> in caso di guasto di una porta attiva.</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3 class="subsection-title">Comunicazione BPDU</h3>
+                <p>Gli switch comunicano tra loro scambiandosi messaggi <strong>BPDU (Bridge Protocol Data Units)</strong> per determinare il Root Bridge e lo Spanning Tree. Ogni BPDU contiene informazioni sul Root Bridge candidato, la distanza al Root e l'ID dello switch mittente (`(RootID, DistanzaAlRoot, SenderID)`).</p>
+                <div class="note-box">
+                    <strong>Dinamicità:</strong> STP è dinamico. Se un link o uno switch fallisce, il protocollo si riconfigura per ristabilire la connettività (se possibile) e un nuovo Spanning Tree.
+                </div>
+
+                <h3 class="subsection-title">Limitazioni di STP</h3>
+                <ul>
+                    <li><strong>Non risolve la congestione:</strong> STP crea un unico percorso logico. Se questo percorso diventa congestionato, STP non devierà il traffico su link alternativi (bloccati).</li>
+                    <li><strong>Rallentamento della Convergenza:</strong> Il processo di riconfigurazione dopo un guasto può richiedere del tempo (decine di secondi), durante il quale la rete è interrotta.</li>
+                    <li><strong>Sfruttamento Parziale della Rete:</strong> Bloccare le porte significa che alcuni link (altrimenti utili per bilanciare il carico) rimangono inattivi.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="algoritmi-routing" class="content-section">
+            <h2 class="section-title">3. Algoritmi di Routing Classici: Criteri di Classificazione</h2>
+            <div class="section-content">
+                <p>Gli algoritmi di routing sono essenziali per le reti su larga scala. Vengono classificati in base a diverse dimensioni:</p>
+                <ul>
+                    <li><strong>Statico vs. Dinamico:</strong>
+                        <ul>
+                            <li><strong>Statico:</strong> Le tabelle di routing sono configurate manualmente e rimangono fisse. Semplice per piccole reti, ma non si adatta a guasti o cambiamenti di carico.</li>
+                            <li><strong>Dinamico:</strong> Le tabelle di routing sono aggiornate automaticamente in base alle condizioni della rete (es. guasti, congestione). Essenziale per grandi reti, ma più complesso.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Centralizzato vs. Distribuito:</strong>
+                        <ul>
+                            <li><strong>Centralizzato:</strong> Un'entità centrale calcola tutte le tabelle di routing e le distribuisce ai router. Semplice da gestire ma vulnerabile a fallimenti del centro.</li>
+                            <li><strong>Distribuito:</strong> Ogni router calcola autonomamente parte della tabella di routing, scambiando informazioni con i vicini. Più robusto, ma più complesso da progettare.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Intra-Dominio (IGP) vs. Inter-Dominio (EGP):</strong>
+                        <ul>
+                            <li><strong>Intra-Dominio (Interior Gateway Protocols - IGP):</strong> Operano all'interno di un singolo <strong>Autonomous System (AS)</strong>. L'obiettivo è trovare i percorsi <em>ottimali</em> e sono progettati per scalare all'interno di un dominio amministrativo. Esempi: <strong>RIP (Distance Vector)</strong>, <strong>OSPF (Link State)</strong>.</li>
+                            <li><strong>Inter-Dominio (Exterior Gateway Protocols - EGP):</strong> Operano tra AS diversi. L'obiettivo primario è la <em>raggiungibilità</em> (trovare un percorso, anche se non ottimale, purché senza loop), data la necessità di rispettare politiche amministrative e di trust tra AS diversi. Esempio: <strong>BGP (Path Vector)</strong>.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="distance-vector" class="content-section">
+            <h2 class="section-title">4. Algoritmi Distance Vector (Es. RIP)</h2>
+            <div class="section-content">
+                <p>Gli algoritmi <strong>Distance Vector</strong> (DV) sono una classe di algoritmi di routing dinamici e distribuiti, basati sul principio di <strong>Bellman-Ford</strong>. Sono stati tra i primi ad essere sviluppati, con <strong>RIP (Routing Information Protocol)</strong> come esempio più noto.</p>
+
+                <h3 class="subsection-title">Idea di Base</h3>
+                <ul>
+                    <li>Ogni router mantiene un "<strong>vettore di distanze</strong>" (un array) che contiene la sua stima del costo minimo per raggiungere <strong>tutti</strong> gli altri nodi della rete.</li>
+                    <li>Periodicamente, ogni router invia una copia del suo vettore di distanze a <strong>tutti i suoi vicini diretti</strong>.</li>
+                    <li>Quando un router riceve un vettore di distanze da un vicino, aggiorna il proprio vettore. Per ogni destinazione \(D\), calcola se il percorso attraverso il vicino \(N\) è migliore del suo percorso attuale:
+                        <div class="math-block">
+                            $$ \text{costo}(S, D) = \min_{\text{vicino } N} (\text{costo}(S, N) + \text{costo}(N, D)) $$
+                        </div>
+                        dove `costo(S,N)` è il costo del link diretto tra il router \(S\) e il vicino \(N\), e `costo(N,D)` è il costo per raggiungere \(D\) che il vicino \(N\) ha pubblicizzato.
+                    </li>
+                    <li>Il costo di un link è spesso misurato in "salti" (hop count), con costo 1 per ogni link.</li>
+                </ul>
+
+                <h3 class="subsection-title">Il Problema del "Count-to-Infinity"</h3>
+                <p>La principale limitazione degli algoritmi Distance Vector è la lenta convergenza in caso di "bad news" (guasti di link o nodi), che può portare al fenomeno del <strong>"count-to-infinity"</strong>.</p>
+                <ul>
+                    <li><strong>Come si manifesta:</strong> Se un link fallisce, i router possono propagare informazioni errate per un lungo periodo. Un router che non può più raggiungere una destinazione attraverso il percorso migliore, potrebbe erroneamente credere di poterla raggiungere attraverso un altro vicino che, a sua volta, stava usando il percorso originale (ora fallito). Questo crea un ciclo di informazioni errate, dove il costo per raggiungere la destinazione "irraggiungibile" aumenta lentamente verso l'infinito.</li>
+                </ul>
+
+                <h3 class="subsection-title">Tecniche di Mitigazione</h3>
+                Per contrastare il count-to-infinity, sono state introdotte delle euristiche:
+                <ul>
+                    <li><strong>Finite Infinity:</strong> Si fissa un valore massimo per il costo (es. 16 hop in RIP). Qualsiasi costo superiore a questo è considerato infinito. Questo limita il problema ma non lo risolve per reti più grandi.</li>
+                    <li><strong>Split Horizon:</strong> Quando un router invia il suo vettore di distanze a un vicino, <strong>non include le rotte che ha imparato da quel vicino</strong>. L'idea è: se ho imparato a raggiungere \(D\) da \(N\), non ha senso dire a \(N\) che posso raggiungere \(D\) (perché \(N\) già lo sa).
+                        <div class="clarification-box">
+                            <strong>Limiti di Split Horizon:</strong> Non risolve tutti i cicli, in particolare quelli che coinvolgono più di due nodi.
+                        </div>
+                    </li>
+                    <li><strong>Poison Reverse:</strong> Una versione più aggressiva di Split Horizon. Quando un router \(R_1\) impara una rotta per \(D\) da un vicino \(N\), se \(R_1\) dovesse pubblicizzare quella rotta a \(N\), la pubblicizza con un costo <strong>infinito</strong>. Questo "avvelena" la rotta, scoraggiando \(N\) dall'usare \(R_1\) per raggiungere \(D\) (anche in caso di cicli più complessi).
+                        <div class="note-box">
+                            <strong>Frequenza negli esami:</strong> Il concetto di count-to-infinity e le soluzioni (Split Horizon, Poison Reverse) sono molto richiesti, spesso tramite la simulazione di guasti su una topologia.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="link-state" class="content-section">
+            <h2 class="section-title">5. Algoritmi Link State (Es. OSPF)</h2>
+            <div class="section-content">
+                <p>Gli algoritmi <strong>Link State</strong> (LS) sono un'altra classe di algoritmi di routing dinamici e distribuiti, considerati più moderni ed efficienti dei Distance Vector, soprattutto per reti di grandi dimensioni. <strong>OSPF (Open Shortest Path First)</strong> è l'esempio più diffuso.</p>
+
+                <h3 class="subsection-title">Idea di Base</h3>
+                <p>Invece di scambiarsi vettori di distanze, ogni router in un algoritmo Link State fa due cose:</p>
+                <ol>
+                    <li><strong>Scopre i suoi vicini diretti e il costo dei link verso di essi.</strong></li>
+                    <li><strong>Costruisce un "Link State Packet (LSP)"</strong> che contiene solo questa informazione locale. Un LSP include l'ID del router che lo ha generato, la lista dei suoi vicini e i costi dei link verso di essi, un numero di sequenza (SEQNO) e un tempo di vita (TTL).</li>
+                    <li><strong>Invia l'LSP a <em>tutti</em> gli altri router del dominio</strong> usando un meccanismo di <strong>Flooding affidabile</strong>.</li>
+                    <li>Ogni router, ricevendo gli LSP da tutti gli altri, può <strong>ricostruire una mappa completa e identica</strong> della topologia dell'intera rete.</li>
+                    <li>Con questa mappa, ogni router esegue autonomamente l'<strong>algoritmo di Dijkstra</strong> (o un algoritmo equivalente per i cammini minimi da sorgente singola) per calcolare il percorso a costo minimo per ogni altra destinazione nella rete.</li>
+                </ol>
+
+                <h3 class="subsection-title">Flooding Affidabile</h3>
+                <p>Il flooding affidabile garantisce che ogni LSP venga ricevuto da tutti i router del dominio e che i router mantengano solo la versione più recente di ogni LSP. Questo meccanismo usa:</p>
+                <ul>
+                    <li><strong>Numero di Sequenza (SEQNO):</strong> Identifica la versione di un LSP. Un LSP con un SEQNO più alto è più recente.</li>
+                    <li><strong>Time-to-Live (TTL):</strong> Evita che LSP vecchi o corrotti circolino indefinitamente.</li>
+                    <li><strong>ACKs e Ritrasmissioni:</strong> Per garantire la consegna.</li>
+                </ul>
+
+                <h3 class="subsection-title">Vantaggi degli Algoritmi Link State</h3>
+                <ul>
+                    <li><strong>Convergenza più Rapida:</strong> Le "bad news" (guasti) vengono propagate rapidamente attraverso il flooding, permettendo ai router di ricalcolare i percorsi più velocemente.</li>
+                    <li><strong>Mappe Complete:</strong> Ogni router ha una visione completa della rete, il che permette calcoli di percorsi più accurati.</li>
+                    <li><strong>Meno Vulnerabile al Count-to-Infinity:</strong> Poiché ogni router ha la topologia completa, non si verificano loop di informazione.</li>
+                    <li><strong>Supporto Multi-Costo:</strong> Permettono di definire costi diversi per lo stesso link in base al tipo di servizio (es. bassa latenza vs. alta banda).</li>
+                </ul>
+
+                <h3 class="subsection-title">Svantaggi e Complessità</h3>
+                <ul>
+                    <li><strong>Complessità di Calcolo:</strong> Eseguire Dijkstra su ogni router è computazionalmente più oneroso rispetto all'aggiornamento di un vettore di distanze.</li>
+                    <li><strong>Memoria:</strong> Richiede più memoria per memorizzare l'intera topologia della rete.</li>
+                    <li><strong>Traffico di Rete:</strong> Il flooding di LSP può generare un traffico significativo, anche se periodico.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="interdomain-routing" class="content-section">
+            <h2 class="section-title">6. Routing Inter-Dominio (Es. BGP)</h2>
+            <div class="section-content">
+                <p>Il routing globale su Internet è organizzato in modo gerarchico, dividendo la rete in <strong>Autonomous Systems (AS)</strong>, ciascuno sotto un'unica amministrazione. Il routing <strong>inter-dominio</strong> gestisce il traffico tra questi AS.</p>
+
+                <h3 class="subsection-title">Autonomous Systems (AS)</h3>
+                <ul>
+                    <li>Un AS è un dominio amministrativo gestito da una singola entità (es. un ISP, un'università, una grande azienda).</li>
+                    <li>Ogni AS ha un <strong>Autonomous System Number (ASN)</strong> univoco.</li>
+                </ul>
+
+                <h3 class="subsection-title">Tipi di AS (Importante per BGP)</h3>
+                <ul>
+                    <li><strong>Stub AS:</strong> Ha una sola connessione ad un altro AS (es. un piccolo utente finale) e trasporta solo traffico <em>locale</em> (che ha origine o destinazione all'interno dell'AS).</li>
+                    <li><strong>Multihomed AS:</strong> Ha più connessioni ad AS diversi (per ridondanza o bilanciamento del carico), ma rifiuta di trasportare traffico di <em>transito</em> (traffico che non ha origine o destinazione all'interno dell'AS).</li>
+                    <li><strong>Transit AS:</strong> Ha più connessioni ad AS diversi ed è disposto a trasportare traffico di <em>transito</em>. Tipicamente sono i grandi ISP di backbone.</li>
+                </ul>
+                <div class="note-box">
+                    <strong>Frequenza negli esami:</strong> Spesso viene chiesto di classificare un AS (Stub, Multihomed, Transit) dato uno scenario o un diagramma di rete.
+                </div>
+
+                <h3 class="subsection-title">Border Gateway Protocol (BGP): Il Path Vector</h3>
+                <p><strong>BGP</strong> è il protocollo di routing inter-dominio standard di Internet. Non è né un Distance Vector né un Link State puro, ma un <strong>Path Vector</strong>.</p>
+                <ul>
+                    <li><strong>Idea:</strong> Invece di pubblicizzare solo costi o stati dei link, BGP pubblicizza <strong>percorsi completi</strong> per raggiungere le destinazioni. Un percorso è una sequenza enumerata di AS che un pacchetto deve attraversare per arrivare a destinazione (es. `<AS1, AS2, AS3>`).</li>
+                    <li><strong>Obiettivo:</strong> Il goal principale di BGP è la <strong>raggiungibilità</strong> e la garanzia di <strong>percorsi senza loop</strong>, non necessariamente l'ottimalità (che è soggettiva e dipende dalle politiche degli AS).</li>
+                    <li><strong>Prevenzione dei Loop:</strong> Un router BGP ignora un percorso se il proprio ASN appare già nella lista degli AS del percorso. Questo previene i loop.</li>
+                    <li><strong>Policy Routing:</strong> Gli AS possono implementare politiche complesse per decidere quali rotte accettare o pubblicizzare (es. un Multihomed AS non accetterà rotte di transito).</li>
+                    <li><strong>eBGP vs. iBGP:</strong>
+                        <ul>
+                            <li><strong>eBGP (External BGP):</strong> Usato per scambiare informazioni di routing tra router di AS <strong>diversi</strong>.</li>
+                            <li><strong>iBGP (Internal BGP):</strong> Usato per distribuire le informazioni di routing BGP ai router <strong>interni</strong> allo stesso AS. Tutti i router all'interno di un AS che partecipano al routing inter-dominio devono eseguire iBGP.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            // Specific style for NIL nodes in Mermaid (example, not used directly here)
+            const nilStyle = "style NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563";
+            
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                // Add NIL styling if not already present
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\n${nilStyle}`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esercizi: Algoritmi di Routing e Spanning Tree</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per la pagina degli esercizi */
+        .exercise-item {
+            background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft);
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+        .exercise-item .question-title {
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .exercise-item .solution-section {
+            margin-top: 1.5rem;
+            border-top: 1px dashed var(--border-soft);
+            padding-top: 1.5rem;
+        }
+        .exercise-item .solution-section h4 {
+            color: var(--accent-secondary);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        .exercise-item .solution-steps li {
+            margin-bottom: 0.7rem;
+            color: var(--text-secondary);
+        }
+        .exercise-item .solution-steps strong {
+            color: var(--text-primary);
+        }
+        .exercise-item .math-equation {
+            display: block; text-align: center; margin: 1rem 0; font-family: var(--font-code);
+            font-size: 1.05em; color: var(--code-text); background-color: var(--code-bg);
+            padding: 0.75em; border-radius: var(--border-radius-small); border: 1px solid var(--border-soft);
+        }
+        .exercise-item .highlight {
+            color: var(--accent-primary); font-weight: bold;
+        }
+        .solution-table {
+            width: auto;
+            min-width: 300px;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-family: var(--font-code);
+            font-size: 0.9em;
+        }
+        .solution-table th, .solution-table td {
+            border: 1px solid var(--border-soft);
+            padding: 0.8em;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .solution-table th {
+            background-color: var(--bg-header);
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+        .solution-table td { background-color: var(--code-bg); }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Esercizi: Routing e Spanning Tree</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="routing_algorithms.html" class="sidebar-action-button">Torna agli Appunti</a>
+        </div>
+        <h2>Elenco Esercizi</h2>
+        <ul>
+            <li><a href="#esercizio-1" class="sidebar-link">1. Spanning Tree Protocol (STP)</a></li>
+            <li><a href="#esercizio-2" class="sidebar-link">2. Distance Vector con Guasto</a></li>
+            <li><a href="#esercizio-3" class="sidebar-link">3. Link State con Aggiornamento</a></li>
+            <li><a href="#esercizio-4" class="sidebar-link">4. Routing Inter-Dominio (BGP)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="esercizio-1" class="exercise-item active-section">
+            <h3 class="question-title">Esercizio 1: Spanning Tree Protocol (STP)</h3>
+            <p><strong>Domanda:</strong> La rete a lato è composta da switch ad autoapprendimento che implementano l'algoritmo di spanning tree. I Bridge ID sono B1 < B2 < B3 < B4. (a) Ci sono switch che si disattivano (o porte che vengono bloccate)? (b) Un frame originato nella rete N2, quanti switch deve attraversare per arrivare a N3?</p>
+            <div class="mermaid-container" style="max-width: 400px; margin: 1rem auto;">
+                <pre class="mermaid">
+                    graph TD
+                        N1 --- B1 --- N4
+                        N1 --- B2 --- N2
+                        N4 --- B3 --- N2
+                        N4 --- B4 --- N3
+                        B1 --- B4
+                </pre>
+            </div>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Identificazione del Root Bridge:</strong><br>
+                        Il Root Bridge è lo switch con il Bridge ID più basso. In questo caso, è <strong>B1</strong>.</p>
+                    </li>
+                    <li>
+                        <p><strong>Calcolo dei Percorsi e delle Porte:</strong><br>
+                        Ogni altro switch (B2, B3, B4) calcola il suo percorso a costo minimo verso B1.</p>
+                        <ul>
+                            <li><strong>Per B2:</strong> Il percorso più breve verso B1 è attraverso N1. La porta di B2 verso N1 diventa la sua <strong>Root Port</strong>.</li>
+                            <li><strong>Per B4:</strong> Il percorso più breve è il link diretto B4-B1. La porta di B4 verso B1 diventa la sua <strong>Root Port</strong>.</li>
+                            <li><strong>Per B3:</strong> Il percorso più breve verso B1 è B3 -> N4 -> B4 -> B1. La porta di B3 verso N4 diventa la sua <strong>Root Port</strong>.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Identificazione delle Designated Ports e delle Porte Bloccate:</strong><br>
+                        Analizziamo ogni segmento di rete (link):</p>
+                        <ul>
+                            <li><strong>Link B1-N1:</strong> B1 è il Root Bridge, quindi la sua porta verso N1 è <strong>Designated Port</strong>.</li>
+                            <li><strong>Link B1-N4:</strong> B1 è il Root Bridge, quindi la sua porta verso N4 è <strong>Designated Port</strong>.</li>
+                            <li><strong>Link B1-B4:</strong> B1 è il Root Bridge, quindi la sua porta verso B4 è <strong>Designated Port</strong>.</li>
+                            <li><strong>Link B2-N1:</strong> Sul segmento N1, B1 è più vicino alla radice (costo 0) di B2. Quindi la porta di B1 è Designated, e la porta di B2 è la sua Root Port. Nessuna porta bloccata qui.</li>
+                            <li><strong>Link B2-N2 e B3-N2 (Segmento N2):</strong> B2 ha un costo di 1 per raggiungere B1. B3 ha un costo di 2. Quindi, <strong>B2 è il Designated Bridge</strong> per il segmento N2. La sua porta verso N2 è <strong>Designated Port</strong>. La porta di B3 verso N2 è una porta <strong>bloccata</strong>, perché non è né Root Port né Designated Port.</li>
+                            <li><strong>Link B4-N3:</strong> La porta di B4 verso N3 è una <strong>Designated Port</strong> (perché B4 è l'unico bridge su quel segmento).</li>
+                            <li><strong>Link B4-N4:</strong> Sul segmento N4, B1 è più vicino (costo 0). B4 ha costo 1. B3 ha costo 1. Tra B4 e B3, B3 ha ID maggiore, quindi B4 è il Designated Bridge. La porta di B4 verso N4 è <strong>Designated Port</strong>. La porta di B3 verso N4 è la sua Root Port.</li>
+                        </ul>
+                        <p>L'unico loop potenziale era B1-N4-B3-N2-B2-N1-B1 e B1-B4-N4... Viene rotto bloccando la porta di B3 verso N2.</p>
+                    </li>
+                    <li>
+                        <p><strong>Risposte:</strong><br>
+                        (a) Sì, la porta dello switch <strong>B3</strong> che si collega alla rete <strong>N2</strong> viene disattivata (messa in stato di blocco) per prevenire il loop.<br>
+                        (b) Per andare da N2 a N3, un frame deve seguire il percorso attivo: N2 → <strong>B2</strong> → N1 → <strong>B1</strong> → <strong>B4</strong> → N3. Quindi attraversa <strong>3 switch: B2, B1, e B4</strong>.
+                        </p>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Perché è fondamentale:</strong> Questo esercizio testa la comprensione completa e meccanica dell'algoritmo STP. Richiede di seguire la logica di elezione del root, delle root port e delle designated port per identificare quale link viene bloccato.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-2" class="exercise-item">
+            <h3 class="question-title">Esercizio 2: Algoritmo Distance Vector con Guasto</h3>
+            <p><strong>Domanda:</strong> I router della rete a lato utilizzano un algoritmo di routing basato sul vettore delle distanze. (a) Si dia la tabella di instradamento finale di D. (b) Ad un certo punto il costo del link A-C cambia e diventa 1. Quanti messaggi LSP arrivano a D e come cambia la sua tabella di routing?</p>
+            <div class="mermaid-container small-graph">
+                <pre class="mermaid">
+                    graph TD
+                        A --- 1 --- B
+                        A --- 3 --- D
+                        B --- 1 --- E
+                        D --- 1 --- C
+                        E --- 4 --- C
+                        style E stroke-width:0px, color:transparent
+                </pre>
+            </div>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>(a) Tabella di Routing Finale di D:</strong><br>
+                        Assumendo che l'algoritmo sia converso, D calcola i percorsi a costo minimo:</p>
+                        <ul>
+                            <li><strong>Verso A:</strong> Percorso diretto D-A, costo 3. Next hop: A.</li>
+                            <li><strong>Verso B:</strong> Via A (D→A→B), costo 3+1=4. Via C (D→C→E→B), costo 1+4+1=6. Il percorso migliore è via A. Next hop: A.</li>
+                            <li><strong>Verso C:</strong> Percorso diretto D-C, costo 1. Next hop: C.</li>
+                            <li><strong>Verso D:</strong> Costo 0.</li>
+                            <li><strong>Verso E:</strong> Via A (D→A→B→E), costo 3+1+1=5. Via C (D→C→E), costo 1+4=5. I percorsi sono equivalenti. Per convenzione, si può scegliere uno (es. via A). Next hop: A.</li>
+                        </ul>
+                        <p>La tabella di routing finale di D è:</p>
+                        <table class="solution-table">
+                            <thead><tr><th>Destinazione</th><th>Costo</th><th>Next Hop</th></tr></thead>
+                            <tbody>
+                                <tr><td>A</td><td>3</td><td>A</td></tr>
+                                <tr><td>B</td><td>4</td><td>A</td></tr>
+                                <tr><td>C</td><td>1</td><td>C</td></tr>
+                                <tr><td>D</td><td>0</td><td>-</td></tr>
+                                <tr><td>E</td><td>5</td><td>A</td></tr>
+                            </tbody>
+                        </table>
+                    </li>
+                    <li>
+                        <p><strong>(b) Cambio del Costo A-C e Aggiornamenti:</strong><br>
+                        Il costo A-C diventa 1. Questa domanda contiene un trabocchetto: chiede quanti <strong>LSP</strong> arrivano a D, ma gli LSP sono usati dagli algoritmi <strong>Link State</strong>, non Distance Vector. Distance Vector usa vettori di distanze.</p>
+                        <p>Assumendo che la domanda intendesse chiedere "quanti aggiornamenti (vettori di distanze) causano un cambiamento", la risposta è:</p>
+                        <ul>
+                            <li>A aggiornerà il suo vettore perché ora può raggiungere C con costo 1. Invierà questo aggiornamento a D e B.</li>
+                            <li>C aggiornerà il suo vettore perché ora può raggiungere A con costo 1. Invierà questo aggiornamento a D e E.</li>
+                            <li>Quando D riceve l'aggiornamento da A, non cambia nulla perché i suoi percorsi via A non dipendono dal costo A-C.</li>
+                            <li>Quando D riceve l'aggiornamento da C, ricalcola i percorsi. Il nuovo percorso verso A via C (D→C→A) ha costo 1+1=2, che è migliore del percorso diretto (costo 3). Di conseguenza, D aggiornerà la sua tabella.</li>
+                        </ul>
+                        <p>La nuova tabella di D sarà:</p>
+                        <table class="solution-table">
+                            <thead><tr><th>Destinazione</th><th>Costo</th><th>Next Hop</th></tr></thead>
+                            <tbody>
+                                <tr><td>A</td><td class="highlight">2</td><td class="highlight">C</td></tr>
+                                <tr><td>B</td><td class="highlight">3</td><td class="highlight">C</td></tr>
+                                <tr><td>C</td><td>1</td><td>C</td></tr>
+                                <tr><td>D</td><td>0</td><td>-</td></tr>
+                                <tr><td>E</td><td class="highlight">4</td><td class="highlight">C</td></tr>
+                            </tbody>
+                        </table>
+                        <p>Quindi, a D arrivano aggiornamenti da A e C. L'aggiornamento significativo che causa la modifica della tabella è quello proveniente da C. (Il numero di messaggi LSP è 2, ma la tabella cambia solo dopo aver ricevuto quello di C).</p>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Perché è fondamentale:</strong> Questo esercizio verifica la tua capacità di calcolare una tabella di routing con un algoritmo DV e di analizzare l'impatto di un cambiamento nella topologia. Il trabocchetto sugli LSP testa la tua attenzione e la conoscenza della differenza tra DV e LS.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-3" class="exercise-item">
+            <h3 class="question-title">Esercizio 3: Algoritmo Link State con Aggiornamento</h3>
+            <p><strong>Domanda:</strong> I router della rete a lato usano un algoritmo Link State. Il router B conosce già i costi mostrati. Riceve da C un pacchetto LSP (ID=D, SeqNum=1231, A=4, C=3). Si dia la nuova tabella di instradamento di B.</p>
+            <div class="mermaid-container small-graph">
+                <pre class="mermaid">
+                    graph TD
+                        A --- 1 --- B
+                        B --- 2 --- D
+                        B --- 3 --- E
+                        C --- 4 --- D
+                        C --- 1 --- E
+                </pre>
+            </div>
+
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Interpretazione dell'LSP:</strong><br>
+                        L'LSP ricevuto da B (originato da D) informa B che i link di D sono: D-A con costo 4 e D-C con costo 3. Questo aggiorna la conoscenza di B sulla topologia della rete.</p>
+                    </li>
+                    <li>
+                        <p><strong>Costruzione della Nuova Mappa della Rete:</strong><br>
+                        B ora ha una mappa completa del grafo. Esegue l'algoritmo di Dijkstra partendo da se stesso per calcolare i percorsi a costo minimo:</p>
+                        <ul>
+                            <li><strong>Verso A:</strong> Percorso diretto B-A, costo 1. Next hop: A.</li>
+                            <li><strong>Verso B:</strong> Costo 0.</li>
+                            <li><strong>Verso C:</strong> Via D (B→D→C), costo 2+3=5. Via E (B→E→C), costo 3+1=4. Il percorso migliore è via E. Next hop: E.</li>
+                            <li><strong>Verso D:</strong> Percorso diretto B-D, costo 2. Next hop: D.</li>
+                            <li><strong>Verso E:</strong> Percorso diretto B-E, costo 3. Next hop: E.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Nuova Tabella di Instradamento di B:</strong></p>
+                        <table class="solution-table">
+                            <thead><tr><th>Destinazione</th><th>Costo</th><th>Next Hop</th></tr></thead>
+                            <tbody>
+                                <tr><td>A</td><td>1</td><td>A</td></tr>
+                                <tr><td>B</td><td>0</td><td>-</td></tr>
+                                <tr><td>C</td><td class="highlight">4</td><td class="highlight">E</td></tr>
+                                <tr><td>D</td><td>2</td><td>D</td></tr>
+                                <tr><td>E</td><td>3</td><td>E</td></tr>
+                            </tbody>
+                        </table>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Perché è fondamentale:</strong> Questo esercizio testa la tua comprensione del principio di Link State: un router riceve un aggiornamento (LSP), aggiorna la sua mappa globale della rete, e ricalcola i percorsi a costo minimo da sé verso tutte le altre destinazioni.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-4" class="exercise-item">
+            <h3 class="question-title">Esercizio 4: Routing Inter-Dominio (BGP)</h3>
+            <p><strong>Domanda:</strong> Si considerino gli autonomous system a lato. (a) Ci sono AS stub? (b) Cosa succede alla connettività di AS1 se AS2 è multi-homed?</p>
+            <div class="mermaid-container small-graph">
+                <pre class="mermaid">
+                    graph TD
+                        AS1 --> AS2
+                        AS2 --> AS3
+                        AS4 --> AS2
+                        AS4 --> AS5
+                </pre>
+            </div>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>(a) Identificazione degli AS Stub:</strong><br>
+                        Un AS <strong>stub</strong> è un AS che ha una sola connessione verso l'esterno e non trasporta traffico di transito. Analizziamo il grafo:</p>
+                        <ul>
+                            <li><strong>AS1:</strong> Ha una sola connessione, verso AS2. È un AS stub.</li>
+                            <li><strong>AS3:</strong> Ha una sola connessione, da AS2. È un AS stub.</li>
+                            <li><strong>AS5:</strong> Ha una sola connessione, da AS4. È un AS stub.</li>
+                            <li>AS2 e AS4 sono AS di transito o multihomed, avendo più di una connessione.</li>
+                        </ul>
+                        <p>Risposta (a): Sì, gli AS stub sono <strong>AS1, AS3, e AS5</strong>.</p>
+                    </li>
+                    <li>
+                        <p><strong>(b) Impatto del Multi-homing su un AS vicino:</strong><br>
+                        Un AS <strong>multi-homed</strong> è connesso a più AS, ma rifiuta di far transitare traffico. Se AS2 fosse multi-homed invece che di transito, significa che accetterebbe traffico solo se originato o destinato a nodi interni ad AS2.</p>
+                        <p>L'AS1 è connesso solo tramite AS2. Se AS2 fosse multi-homed, non farebbe passare traffico proveniente da AS1 e diretto ad altri AS (come AS3 o AS4). Di conseguenza, <strong>AS1 potrebbe raggiungere solo AS2 e non il resto della rete</strong>. L'accesso di AS1 al resto di Internet dipenderebbe completamente dal fatto che AS2 sia un provider di transito.</p>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Perché è fondamentale:</strong> Questo esercizio testa la tua comprensione della terminologia di BGP (stub, multi-homed, transit) e delle implicazioni delle policy di routing. È una domanda concettuale che richiede di applicare le definizioni a una topologia.
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
