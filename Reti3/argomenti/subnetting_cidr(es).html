@@ -130,7 +130,7 @@
                     </li>
                     <li>
                         <p><strong>Calcolo dell'Indirizzo di Rete (Network Address):</strong><br>
-                        L'indirizzo di rete si ottiene applicando l'operazione logica **AND** (bit a bit) tra l'indirizzo IP e la Subnet Mask. Alternativamente, si mettono a zero tutti i bit della parte host (gli ultimi 4 bit in questo caso).
+                        L'indirizzo di rete si ottiene applicando l'operazione logica <strong>AND</strong> (bit a bit) tra l'indirizzo IP e la Subnet Mask. Alternativamente, si mettono a zero tutti i bit della parte host (gli ultimi 4 bit in questo caso).
                         <br><span class="binary-label">IP:</span>    <span class="binary-representation">11000000.10101000.00001010.0000<span class="highlight">1111</span></span>
                         <br><span class="binary-label">Mask:</span> <span class="binary-representation">11111111.11111111.11111111.1111<span class="highlight">0000</span></span>
                         <br><span class="binary-label">Rete:</span>  <span class="binary-representation">11000000.10101000.00001010.0000<span class="highlight">0000</span></span></p>
@@ -370,22 +370,22 @@
                     <li>
                         <p><strong><code>127.0.0.1</code> (Loopback Address):</strong></p>
                         <ul>
-                            <li>**Uso Speciale:** Indirizzo di loopback. Fa parte del blocco `127.0.0.0/8`.</li>
-                            <li>**Funzione:** Permette a un dispositivo di inviare traffico a se stesso. Questo è utile per testare applicazioni di rete o servizi senza la necessità di un'interfaccia di rete fisica o di una connessione esterna. Il traffico inviato a questo indirizzo non esce mai dal dispositivo.</li>
+                            <li><strong>Uso Speciale:</strong> Indirizzo di loopback. Fa parte del blocco `127.0.0.0/8`.</li>
+                            <li><strong>Funzione:</strong> Permette a un dispositivo di inviare traffico a se stesso. Questo è utile per testare applicazioni di rete o servizi senza la necessità di un'interfaccia di rete fisica o di una connessione esterna. Il traffico inviato a questo indirizzo non esce mai dal dispositivo.</li>
                         </ul>
                     </li>
                     <li>
                         <p><strong><code>10.0.0.5/8</code> (Private IP Address):</strong></p>
                         <ul>
-                            <li>**Uso Speciale:** Indirizzo IP privato. Fa parte del blocco `10.0.0.0/8` (RFC 1918).</li>
-                            <li>**Funzione:** È utilizzato per l'indirizzamento interno di host all'interno di reti locali private. Gli indirizzi privati non sono instradabili su Internet, il che significa che non possono essere raggiunti direttamente dall'esterno e non causano conflitti con gli indirizzi IP pubblici globali. Le reti private che usano questi indirizzi necessitano di un meccanismo come NAT (Network Address Translation) per comunicare con Internet.</li>
+                            <li><strong>Uso Speciale:</strong> Indirizzo IP privato. Fa parte del blocco `10.0.0.0/8` (RFC 1918).</li>
+                            <li><strong>Funzione:</strong> È utilizzato per l'indirizzamento interno di host all'interno di reti locali private. Gli indirizzi privati non sono instradabili su Internet, il che significa che non possono essere raggiunti direttamente dall'esterno e non causano conflitti con gli indirizzi IP pubblici globali. Le reti private che usano questi indirizzi necessitano di un meccanismo come NAT (Network Address Translation) per comunicare con Internet.</li>
                         </ul>
                     </li>
                     <li>
                         <p><strong><code>255.255.255.255</code> (Limited Broadcast Address):</strong></p>
                         <ul>
-                            <li>**Uso Speciale:** Indirizzo di broadcast limitato.</li>
-                            <li>**Funzione:** Viene utilizzato per inviare pacchetti a *tutti* i dispositivi sulla rete locale corrente (sottorete) senza che questi pacchetti vengano inoltrati dai router. È un broadcast "locale". È spesso usato da protocolli che necessitano di scoprire servizi o dispositivi sulla rete locale (es. DHCP Discover).</li>
+                            <li><strong>Uso Speciale:</strong> Indirizzo di broadcast limitato.</li>
+                            <li><strong>Funzione:</strong> Viene utilizzato per inviare pacchetti a <em>tutti</em> i dispositivi sulla rete locale corrente (sottorete) senza che questi pacchetti vengano inoltrati dai router. È un broadcast "locale". È spesso usato da protocolli che necessitano di scoprire servizi o dispositivi sulla rete locale (es. DHCP Discover).</li>
                         </ul>
                     </li>
                 </ol>
