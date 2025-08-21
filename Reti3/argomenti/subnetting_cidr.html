@@ -86,7 +86,7 @@
             <h2 class="section-title">1. Indirizzamento IPv4: La Struttura Classful (Storica)</h2>
             <div class="section-content">
                 <p>L'indirizzamento IP è il cuore della comunicazione a livello di rete su Internet. Ogni dispositivo connesso a Internet necessita di un indirizzo IP univoco. Gli indirizzi IPv4 sono a 32 bit, solitamente rappresentati in notazione decimale puntata (es. <code>192.168.1.1</code>).</p>
-                <p>Storicamente, gli indirizzi IPv4 erano divisi in classi, un approccio noto come **indirizzamento classful**. Ogni indirizzo era composto da due parti: una parte che identificava la **rete** e una parte che identificava l'**host** all'interno di quella rete.</p>
+                <p>Storicamente, gli indirizzi IPv4 erano divisi in classi, un approccio noto come <strong>indirizzamento classful</strong>. Ogni indirizzo era composto da due parti: una parte che identificava la <strong>rete</strong> e una parte che identificava l'<strong>host</strong> all'interno di quella rete.</p>
 
                 <h3 class="subsection-title">Classi di Indirizzi IPv4</h3>
                 <p>Le classi erano determinate dai primi bit dell'indirizzo e definivano la lunghezza delle parti di rete e di host, influenzando il numero di reti e host possibili per ciascuna classe:</p>
@@ -104,7 +104,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>**Classe A**</td>
+                            <td><strong>Classe A</strong></td>
                             <td>`0`</td>
                             <td>8</td>
                             <td>24</td>
@@ -113,7 +113,7 @@
                             <td><code class="class-example">10.0.0.0/8</code></td>
                         </tr>
                         <tr>
-                            <td>**Classe B**</td>
+                            <td><strong>Classe B</strong></td>
                             <td>`10`</td>
                             <td>16</td>
                             <td>16</td>
@@ -122,7 +122,7 @@
                             <td><code class="class-example">172.16.0.0/16</code></td>
                         </tr>
                         <tr>
-                            <td>**Classe C**</td>
+                            <td><strong>Classe C</strong></td>
                             <td>`110`</td>
                             <td>24</td>
                             <td>8</td>
@@ -131,7 +131,7 @@
                             <td><code class="class-example">192.168.1.0/24</code></td>
                         </tr>
                         <tr>
-                            <td>**Classe D**</td>
+                            <td><strong>Classe D</strong></td>
                             <td>`1110`</td>
                             <td>Multicast</td>
                             <td>Multicast</td>
@@ -140,7 +140,7 @@
                             <td><code class="class-example">224.0.0.0/4</code></td>
                         </tr>
                         <tr>
-                            <td>**Classe E**</td>
+                            <td><strong>Classe E</strong></td>
                             <td>`1111`</td>
                             <td>Sperimentale</td>
                             <td>Sperimentale</td>
@@ -158,12 +158,12 @@
             <div class="section-content">
                 <p>All'interno di ogni rete, due indirizzi sono riservati e non possono essere assegnati a singoli host. Questi indirizzi sono vitali per il funzionamento di base della rete:</p>
                 <ul>
-                    <li>**Indirizzo di Rete:** L'indirizzo di rete ha tutti i bit della parte Host ID impostati a **0**. Rappresenta la rete stessa, non un singolo dispositivo.
+                    <li><strong>Indirizzo di Rete:</strong> L'indirizzo di rete ha tutti i bit della parte Host ID impostati a <strong>0</strong>. Rappresenta la rete stessa, non un singolo dispositivo.
                         <ul>
                             <li>Esempio: Per la rete <code>192.168.1.0/24</code>, l'indirizzo di rete è <code class="class-example">192.168.1.0</code>.</li>
                         </ul>
                     </li>
-                    <li>**Indirizzo di Broadcast:** L'indirizzo di broadcast ha tutti i bit della parte Host ID impostati a **1**. Viene utilizzato per inviare un messaggio a *tutti* i dispositivi all'interno di quella specifica rete.
+                    <li><strong>Indirizzo di Broadcast:</strong> L'indirizzo di broadcast ha tutti i bit della parte Host ID impostati a <strong>1</strong>. Viene utilizzato per inviare un messaggio a <em>tutti</em> i dispositivi all'interno di quella specifica rete.
                         <ul>
                             <li>Esempio: Per la rete <code>192.168.1.0/24</code>, l'indirizzo di broadcast è <code class="class-example">192.168.1.255</code>.</li>
                         </ul>
@@ -171,16 +171,16 @@
                 </ul>
                 <p>Esistono anche altri indirizzi IP con usi speciali (RFC 5735), che compaiono spesso negli esami:</p>
                 <ul>
-                    <li>**<code>0.0.0.0/8</code>:** Indirizzo non instradabile e invalido. Rappresenta "qualsiasi indirizzo IP". Usato per indicare la sorgente di un host non configurato o per routing di default.</li>
-                    <li>**Indirizzi Privati (RFC 1918):** Blocchi di indirizzi riservati per l'uso in reti private, non instradabili su Internet. Questi permettono a molte reti di usare gli stessi indirizzi interni senza conflitti globali, conservando lo spazio IPv4 pubblico.
+                    <li><strong><code>0.0.0.0/8</code>:</strong> Indirizzo non instradabile e invalido. Rappresenta "qualsiasi indirizzo IP". Usato per indicare la sorgente di un host non configurato o per routing di default.</li>
+                    <li><strong>Indirizzi Privati (RFC 1918):</strong> Blocchi di indirizzi riservati per l'uso in reti private, non instradabili su Internet. Questi permettono a molte reti di usare gli stessi indirizzi interni senza conflitti globali, conservando lo spazio IPv4 pubblico.
                         <ul>
                             <li>Classe A: <code class="class-example">10.0.0.0/8</code> (range: 10.0.0.1 - 10.255.255.254)</li>
                             <li>Classe B: <code class="class-example">172.16.0.0/12</code> (range: 172.16.0.1 - 172.31.255.254)</li>
                             <li>Classe C: <code class="class-example">192.168.0.0/16</code> (range: 192.168.0.1 - 192.168.255.254)</li>
                         </ul>
                     </li>
-                    <li>**Loopback (<code>127.0.0.0/8</code>):** Indirizzo usato per riferirsi al computer locale ("localhost" o "myself"). Utile per testare applicazioni di rete senza coinvolgere la rete fisica. L'indirizzo più comune è <code class="class-example">127.0.0.1</code>.</li>
-                    <li>**Link-Local (<code>169.254.0.0/16</code>):** Usato per l'auto-configurazione di indirizzi IP su reti locali quando non è disponibile un server DHCP.</li>
+                    <li><strong>Loopback (<code>127.0.0.0/8</code>):</strong> Indirizzo usato per riferirsi al computer locale ("localhost" o "myself"). Utile per testare applicazioni di rete senza coinvolgere la rete fisica. L'indirizzo più comune è <code class="class-example">127.0.0.1</code>.</li>
+                    <li><strong>Link-Local (<code>169.254.0.0/16</code>):</strong> Usato per l'auto-configurazione di indirizzi IP su reti locali quando non è disponibile un server DHCP.</li>
                 </ul>
                 <div class="note-box">
                     <strong>Frequenza negli esami:</strong> La conoscenza degli indirizzi privati e dell'indirizzo di broadcast/rete è spesso testata in esercizi di subnetting o su scenari NAT. La domanda su "protocolli ancillari" spesso chiede quale indirizzo è usato dal DHCP discover (broadcast).
@@ -193,14 +193,14 @@
             <div class="section-content">
                 <p>Nonostante la sua semplicità, il modello di indirizzamento classful ha presentato gravi problemi, che hanno portato alla sua obsolescenza e all'introduzione di CIDR:</p>
                 <ul>
-                    <li>**Sprechi di Indirizzi (Inefficienza):**
+                    <li><strong>Sprechi di Indirizzi (Inefficienza):</strong>
                         <ul>
                             <li>Assegnava blocchi di indirizzi troppo grandi o troppo piccoli. Ad esempio, una piccola azienda con 25 host avrebbe avuto bisogno di una Classe C (254 host), sprecando quasi 230 indirizzi.</li>
                             <li>Un'azienda con 300 host non poteva usare una Classe C e doveva prendere una Classe B (65534 host), sprecando un'enorme quantità di indirizzi.</li>
                         </ul>
                     </li>
-                    <li>**Esaurimento degli Indirizzi IPv4:** L'allocazione fissa delle classi ha accelerato l'esaurimento degli indirizzi IPv4 disponibili, soprattutto per le classi A e B che contenevano molti host.</li>
-                    <li>**Tabella di Routing Esplosiva (Scalabilità):**
+                    <li><strong>Esaurimento degli Indirizzi IPv4:</strong> L'allocazione fissa delle classi ha accelerato l'esaurimento degli indirizzi IPv4 disponibili, soprattutto per le classi A e B che contenevano molti host.</li>
+                    <li><strong>Tabella di Routing Esplosiva (Scalabilità):</strong>
                         <ul>
                             <li>Ogni rete (Net ID) richiedeva una voce separata nelle tabelle di routing dei router backbone di Internet.</li>
                             <li>Poiché il numero di reti (specialmente di Classe C) cresceva esponenzialmente, le tabelle di routing dei router diventavano troppo grandi, rendendo le ricerche lente e consumando troppa memoria. Questo era il problema più critico per la scalabilità di Internet.</li>
@@ -213,21 +213,21 @@
         <article id="subnetting" class="content-section">
             <h2 class="section-title">4. Subnetting: La Soluzione Iniziale</h2>
             <div class="section-content">
-                <p>Il **subnetting** è stato introdotto per risolvere il problema dell'inefficienza nell'allocazione degli indirizzi all'interno di una singola rete (Autonomous System - AS), senza influenzare il routing globale.</p>
+                <p>Il <strong>subnetting</strong> è stato introdotto per risolvere il problema dell'inefficienza nell'allocazione degli indirizzi all'interno di una singola rete (Autonomous System - AS), senza influenzare il routing globale.</p>
 
                 <h3 class="subsection-title">Idea del Subnetting</h3>
                 <ul>
-                    <li>Consiste nel suddividere la parte **Host ID** di un indirizzo IP in due sotto-parti: un **Subnet ID** e un nuovo **Host ID**.</li>
+                    <li>Consiste nel suddividere la parte <strong>Host ID</strong> di un indirizzo IP in due sotto-parti: un <strong>Subnet ID</strong> e un nuovo <strong>Host ID</strong>.</li>
                     <li>Questo permette a una singola rete di Classe A o B di essere suddivisa in più reti più piccole (sottoreti), ottimizzando l'uso degli indirizzi disponibili per i vari dipartimenti o sedi.</li>
-                    <li>Le sottoreti sono visibili **solo all'interno dell'AS**; all'esterno, la rete appare ancora come un singolo blocco IP della sua classe originale.</li>
+                    <li>Le sottoreti sono visibili <strong>solo all'interno dell'AS</strong>; all'esterno, la rete appare ancora come un singolo blocco IP della sua classe originale.</li>
                 </ul>
 
                 <h3 class="subsection-title">Subnet Mask</h3>
-                <p>La **subnet mask** è una sequenza di 32 bit che definisce la divisione tra la parte di rete/sottorete e la parte host di un indirizzo IP. È composta da una sequenza di **1** seguita da una sequenza di **0**.</p>
+                <p>La <strong>subnet mask</strong> è una sequenza di 32 bit che definisce la divisione tra la parte di rete/sottorete e la parte host di un indirizzo IP. È composta da una sequenza di <strong>1</strong> seguita da una sequenza di <strong>0</strong>.</p>
                 <ul>
-                    <li>I bit a **1** nella subnet mask corrispondono alla parte di **rete e sottorete**.</li>
-                    <li>I bit a **0** nella subnet mask corrispondono alla parte di **host**.</li>
-                    <li>L'operazione logica **AND** (bit a bit) tra un indirizzo IP e la sua subnet mask restituisce l'**indirizzo della sottorete**.</li>
+                    <li>I bit a <strong>1</strong> nella subnet mask corrispondono alla parte di <strong>rete e sottorete</strong>.</li>
+                    <li>I bit a <strong>0</strong> nella subnet mask corrispondono alla parte di <strong>host</strong>.</li>
+                    <li>L'operazione logica <strong>AND</strong> (bit a bit) tra un indirizzo IP e la sua subnet mask restituisce l'<strong>indirizzo della sottorete</strong>.</li>
                 </ul>
                 <div class="clarification-box">
                     <strong>Importante:</strong> Sebbene tradizionalmente la subnet mask sia composta da 1 consecutivi seguiti da 0, con CIDR si possono avere anche "weird subnets" (maschere non contigue di 1). Negli esami del Prof. Miculan, si assume implicitamente che le maschere siano contigue, a meno di esplicita indicazione.
@@ -238,17 +238,17 @@
         <article id="cidr" class="content-section">
             <h2 class="section-title">5. CIDR (Classless Inter-Domain Routing): La Soluzione Attuale</h2>
             <div class="section-content">
-                <p>**CIDR (Classless Inter-Domain Routing)** è la soluzione definitiva ai problemi di esaurimento degli indirizzi IPv4 e di scalabilità delle tabelle di routing. Ha sostituito l'indirizzamento classful.</p>
+                <p><strong>CIDR (Classless Inter-Domain Routing)</strong> è la soluzione definitiva ai problemi di esaurimento degli indirizzi IPv4 e di scalabilità delle tabelle di routing. Ha sostituito l'indirizzamento classful.</p>
 
                 <h3 class="subsection-title">Idea di CIDR</h3>
                 <ul>
-                    <li>**Eliminazione delle Classi:** CIDR elimina il concetto rigido di classi A, B, C. Gli indirizzi non hanno più una divisione fissa tra network e host, ma usano una **lunghezza di prefisso variabile**.</li>
-                    <li>**Notazione CIDR:** Un indirizzo IP è seguito da uno slash (`/`) e un numero intero che indica la **lunghezza del prefisso** in bit. Questo numero indica quanti bit dall'inizio dell'indirizzo identificano la rete/sottorete.
+                    <li><strong>Eliminazione delle Classi:</strong> CIDR elimina il concetto rigido di classi A, B, C. Gli indirizzi non hanno più una divisione fissa tra network e host, ma usano una <strong>lunghezza di prefisso variabile</strong>.</li>
+                    <li><strong>Notazione CIDR:</strong> Un indirizzo IP è seguito da uno slash (`/`) e un numero intero che indica la <strong>lunghezza del prefisso</strong> in bit. Questo numero indica quanti bit dall'inizio dell'indirizzo identificano la rete/sottorete.
                         <ul>
                             <li>Esempio: <code class="class-example">192.168.1.0/24</code> significa che i primi 24 bit identificano la rete, e gli ultimi 8 bit identificano l'host. Equivale a una subnet mask di `255.255.255.0`.</li>
                         </ul>
                     </li>
-                    <li>**Aggregazione di Rotte (Summarization):** Questo è il vantaggio principale di CIDR per la scalabilità. AS contigui possono essere assegnati blocchi di indirizzi che condividono un prefisso più corto. Invece di avere molte voci separate nelle tabelle di routing, un router esterno può avere una singola voce che copre un intero blocco di AS.
+                    <li><strong>Aggregazione di Rotte (Summarization):</strong> Questo è il vantaggio principale di CIDR per la scalabilità. AS contigui possono essere assegnati blocchi di indirizzi che condividono un prefisso più corto. Invece di avere molte voci separate nelle tabelle di routing, un router esterno può avere una singola voce che copre un intero blocco di AS.
                         <ul>
                             <li>Esempio: Se un AS ha le reti <code class="class-example">192.168.1.0/24</code> e <code class="class-example">192.168.2.0/24</code>, se condividono un prefisso più lungo (es. <code class="class-example">192.168.0.0/22</code>), i router esterni possono vedere solo <code class="class-example">192.168.0.0/22</code>, riducendo le dimensioni delle tabelle.</li>
                         </ul>
@@ -256,9 +256,9 @@
                 </ul>
 
                 <h3 class="subsection-title">Longest Prefix Match (Regola del Prefisso Più Lungo)</h3>
-                <p>Con CIDR, un indirizzo di destinazione può corrispondere a più voci nella tabella di routing (perché i prefissi possono sovrapporsi). Per risolvere questa ambiguità, i router utilizzano la regola del **"longest prefix match"**:</p>
+                <p>Con CIDR, un indirizzo di destinazione può corrispondere a più voci nella tabella di routing (perché i prefissi possono sovrapporsi). Per risolvere questa ambiguità, i router utilizzano la regola del <strong>"longest prefix match"</strong>:</p>
                 <ul>
-                    <li>Un router seleziona la rotta che ha il **prefisso più lungo** (il maggior numero di bit in comune con l'indirizzo di destinazione). Questa è la rotta più specifica.</li>
+                    <li>Un router seleziona la rotta che ha il <strong>prefisso più lungo</strong> (il maggior numero di bit in comune con l'indirizzo di destinazione). Questa è la rotta più specifica.</li>
                     <li>Esempio: Se un router ha rotte per <code class="class-example">10.0.0.0/8</code> e <code class="class-example">10.1.2.0/24</code>, un pacchetto destinato a <code class="class-example">10.1.2.5</code> seguirà la rotta <code class="class-example">10.1.2.0/24</code> perché è più specifica.</li>
                 </ul>
                 <div class="note-box">
@@ -272,17 +272,17 @@
             <div class="section-content">
                 <p>IPv6 è stato sviluppato per affrontare definitivamente l'esaurimento degli indirizzi IPv4 e per migliorare le funzionalità complessive della rete.</p>
                 <ul>
-                    <li>**Indirizzi a 128 bit:** Lo spazio di indirizzamento di IPv6 è enormemente più grande di IPv4 (circa \(3.4 \times 10^{38}\) indirizzi), rendendo l'esaurimento un problema non più attuale.</li>
-                    <li>**Formato Semplificato:** L'header IPv6 è più semplice e snello di IPv4 (40 byte fissi), anche se può essere esteso con "extension headers" per funzionalità aggiuntive (frammentazione, sicurezza).</li>
-                    <li>**Nessuna Classe:** IPv6 usa unicamente l'indirizzamento **classless** (simile a CIDR), con prefissi di lunghezza variabile.</li>
-                    <li>**Funzionalità Integrate:** IPv6 integra nativamente funzionalità come l'autoconfigurazione, la sicurezza (IPsec) e il supporto per il multicast e la mobilità.</li>
+                    <li><strong>Indirizzi a 128 bit:</strong> Lo spazio di indirizzamento di IPv6 è enormemente più grande di IPv4 (circa \(3.4 \times 10^{38}\) indirizzi), rendendo l'esaurimento un problema non più attuale.</li>
+                    <li><strong>Formato Semplificato:</strong> L'header IPv6 è più semplice e snello di IPv4 (40 byte fissi), anche se può essere esteso con "extension headers" per funzionalità aggiuntive (frammentazione, sicurezza).</li>
+                    <li><strong>Nessuna Classe:</strong> IPv6 usa unicamente l'indirizzamento <strong>classless</strong> (simile a CIDR), con prefissi di lunghezza variabile.</li>
+                    <li><strong>Funzionalità Integrate:</strong> IPv6 integra nativamente funzionalità come l'autoconfigurazione, la sicurezza (IPsec) e il supporto per il multicast e la mobilità.</li>
                 </ul>
                 <div class="note-box">
                     <strong>Transizione da IPv4 a IPv6:</strong> La transizione è complessa a causa dell'enorme numero di dispositivi. Le strategie principali sono:
                     <ul>
-                        <li>**Dual Stack:** I dispositivi supportano entrambi i protocolli.</li>
-                        <li>**Tunneling:** I pacchetti IPv6 vengono incapsulati in pacchetti IPv4 per attraversare reti IPv4 non compatibili.</li>
-                        <li>**Header Translation:** Router intermedi traducono gli header tra IPv4 e IPv6.</li>
+                        <li><strong>Dual Stack:</strong> I dispositivi supportano entrambi i protocolli.</li>
+                        <li><strong>Tunneling:</strong> I pacchetti IPv6 vengono incapsulati in pacchetti IPv4 per attraversare reti IPv4 non compatibili.</li>
+                        <li><strong>Header Translation:</strong> Router intermedi traducono gli header tra IPv4 e IPv6.</li>
                     </ul>
                 </div>
             </div>

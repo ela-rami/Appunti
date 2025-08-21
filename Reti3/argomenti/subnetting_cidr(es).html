@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esercizi: Subnetting e Indirizzamento IP (CIDR)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per la pagina degli esercizi */
+        .exercise-item {
+            background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft);
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+        .exercise-item .question-title {
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .exercise-item .solution-section {
+            margin-top: 1.5rem;
+            border-top: 1px dashed var(--border-soft);
+            padding-top: 1.5rem;
+        }
+        .exercise-item .solution-section h4 {
+            color: var(--accent-secondary);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        .exercise-item .solution-steps li {
+            margin-bottom: 0.7rem;
+            color: var(--text-secondary);
+        }
+        .exercise-item .solution-steps strong {
+            color: var(--text-primary);
+        }
+        .exercise-item .math-equation {
+            display: block;
+            text-align: center;
+            margin: 1rem 0;
+            font-family: var(--font-code);
+            font-size: 1.05em;
+            color: var(--code-text);
+            background-color: var(--code-bg);
+            padding: 0.75em;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+        }
+        .exercise-item .highlight {
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+        .binary-representation {
+            font-family: var(--font-code);
+            background-color: var(--code-bg);
+            padding: 0.5em 0.8em;
+            border-radius: var(--border-radius-small);
+            display: inline-block;
+            margin: 0.5em 0;
+            color: var(--code-text);
+        }
+        .binary-label {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            margin-bottom: 0.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Esercizi: Subnetting e Indirizzamento IP (CIDR)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="subnetting_cidr.html" class="sidebar-action-button">Torna agli Appunti</a>
+        </div>
+        <h2>Elenco Esercizi</h2>
+        <ul>
+            <li><a href="#esercizio-1" class="sidebar-link">1. Dati IP/CIDR: Rete, Broadcast, Host Range</a></li>
+            <li><a href="#esercizio-2" class="sidebar-link">2. Dati 2 IP: Sottorete Comune Minima</a></li>
+            <li><a href="#esercizio-3" class="sidebar-link">3. Progettazione Subnetting per N Host</a></li>
+            <li><a href="#esercizio-4" class="sidebar-link">4. Controllo Appartenenza Sottorete</a></li>
+            <li><a href="#esercizio-5" class="sidebar-link">5. Domanda Concettuale: Indirizzi Speciali</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="esercizio-1" class="exercise-item active-section">
+            <h3 class="question-title">Esercizio 1: Dati IP/CIDR, Trovare Indirizzo di Rete, Broadcast e Range Host</h3>
+            <p><strong>Domanda:</strong> Per l'indirizzo IP <code class="binary-representation">192.168.10.15/28</code>, determinare:</p>
+            <ol>
+                <li>L'indirizzo di rete.</li>
+                <li>L'indirizzo di broadcast.</li>
+                <li>Il range degli indirizzi assegnabili agli host.</li>
+            </ol>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Analisi del Prefisso CIDR:</strong><br>
+                        Il prefisso `/28` indica che i primi 28 bit dell'indirizzo sono dedicati alla parte di rete/sottorete, e i rimanenti 32 - 28 = 4 bit sono dedicati alla parte host.
+                        </p>
+                    </li>
+                    <li>
+                        <p><strong>Determinazione della Subnet Mask:</strong><br>
+                        Una maschera `/28` corrisponde a 28 bit a 1 seguiti da 4 bit a 0.
+                        <br><span class="binary-label">Subnet Mask (binario):</span> <span class="binary-representation">11111111.11111111.11111111.11110000</span>
+                        <br><span class="binary-label">Subnet Mask (decimale):</span> <span class="binary-representation">255.255.255.240</span></p>
+                        <p>Il valore 240 nell'ultimo ottetto deriva da \(11110000_2 = 128+64+32+16 = 240\).</p>
+                    </li>
+                    <li>
+                        <p><strong>Conversione dell'Indirizzo IP in Binario:</strong><br>
+                        <span class="binary-label">Indirizzo IP (decimale):</span> <span class="binary-representation">192.168.10.15</span>
+                        <br><span class="binary-label">Indirizzo IP (binario):</span> <span class="binary-representation">11000000.10101000.00001010.00001111</span></p>
+                    </li>
+                    <li>
+                        <p><strong>Calcolo dell'Indirizzo di Rete (Network Address):</strong><br>
+                        L'indirizzo di rete si ottiene applicando l'operazione logica **AND** (bit a bit) tra l'indirizzo IP e la Subnet Mask. Alternativamente, si mettono a zero tutti i bit della parte host (gli ultimi 4 bit in questo caso).
+                        <br><span class="binary-label">IP:</span>    <span class="binary-representation">11000000.10101000.00001010.0000<span class="highlight">1111</span></span>
+                        <br><span class="binary-label">Mask:</span> <span class="binary-representation">11111111.11111111.11111111.1111<span class="highlight">0000</span></span>
+                        <br><span class="binary-label">Rete:</span>  <span class="binary-representation">11000000.10101000.00001010.0000<span class="highlight">0000</span></span></p>
+                        <p>In decimale, questo corrisponde a <highlight>192.168.10.0</highlight>.</p>
+                    </li>
+                    <li>
+                        <p><strong>Calcolo dell'Indirizzo di Broadcast:</strong><br>
+                        L'indirizzo di broadcast si ottiene mettendo a uno tutti i bit della parte host (gli ultimi 4 bit).
+                        <br><span class="binary-label">Rete:</span>      <span class="binary-representation">11000000.10101000.00001010.0000<span class="highlight">0000</span></span>
+                        <br><span class="binary-label">Broadcast:</span> <span class="binary-representation">11000000.10101000.00001010.0000<span class="highlight">1111</span></span></p>
+                        <p>In decimale, questo corrisponde a <highlight>192.168.10.15</highlight>.</p>
+                    </li>
+                    <li>
+                        <p><strong>Calcolo del Range di Indirizzi Assegnabili agli Host:</strong><br>
+                        Il primo indirizzo assegnabile è l'indirizzo di rete + 1 (nel bit meno significativo della parte host).<br>
+                        L'ultimo indirizzo assegnabile è l'indirizzo di broadcast - 1 (nel bit meno significativo della parte host).
+                        <br>Quindi, il range è da <highlight>192.168.10.1</highlight> a <highlight>192.168.10.14</highlight>.</p>
+                        <p>Il numero di host assegnabili è \(2^{\text{bit host}} - 2 = 2^4 - 2 = 16 - 2 = 14\) host.</p>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Perché è fondamentale:</strong> Questo è l'esercizio di base per il subnetting. Se non riesci a fare questo, significa che devi ripassare le basi di conversione binaria e le operazioni AND/OR sugli indirizzi IP. È il punto di partenza per ogni altro esercizio di subnetting.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-2" class="exercise-item">
+            <h3 class="question-title">Esercizio 2: Dati Due Indirizzi IP, Trovare la Sottorete Comune Minima (Prefisso CIDR)</h3>
+            <p><strong>Domanda:</strong> Si considerino i seguenti due indirizzi IP: <code class="binary-representation">192.168.5.9</code> e <code class="binary-representation">192.168.6.14</code>. Determinare la sottorete più piccola (ossia con il minor numero di indirizzi) che contiene entrambi questi indirizzi (dare l'indirizzo e il prefisso CIDR).</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Conversione degli Indirizzi IP in Binario:</strong></p>
+                        <ul>
+                            <li><span class="binary-label">IP1: 192.168.5.9</span> <span class="binary-representation">11000000.10101000.00000101.00001001</span></li>
+                            <li><span class="binary-label">IP2: 192.168.6.14</span> <span class="binary-representation">11000000.10101000.00000110.00001110</span></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Ricerca del Prefisso Comune Più Lungo (LCP - Longest Common Prefix):</strong><br>
+                        Confrontiamo bit per bit i due indirizzi da sinistra a destra per trovare il punto in cui iniziano a differire.</p>
+                        <ul>
+                            <li><span class="binary-representation">11000000.10101000.0000010<span class="highlight">1</span>.0001001</span> (IP1)</li>
+                            <li><span class="binary-representation">11000000.10101000.0000011<span class="highlight">0</span>.0001110</span> (IP2)</li>
+                        </ul>
+                        <p>I primi 25 bit sono identici. Il 26° bit è dove differiscono (1 contro 0).<br>
+                        Quindi, il prefisso comune più lungo è di 25 bit.</p>
+                    </li>
+                    <li>
+                        <p><strong>Costruzione dell'Indirizzo di Rete della Sottorete Comune:</strong><br>
+                        L'indirizzo di rete della sottorete comune è dato dal prefisso comune più lungo, con tutti i bit rimanenti (32-25=7 bit) impostati a zero.</p>
+                        <br><span class="binary-label">Prefisso comune (25 bit):</span> <span class="binary-representation">11000000.10101000.00000100</span>
+                        <br><span class="binary-label">Bit rimanenti (7 a 0):</span> <span class="binary-representation">0000000</span>
+                        <br><span class="binary-label">Indirizzo di rete (binario):</span> <span class="binary-representation">11000000.10101000.00000100.00000000</span></p>
+                        <p>Convertendo in decimale: <highlight>192.168.4.0</highlight>.</p>
+                    </li>
+                    <li>
+                        <p><strong>Formulazione della Sottorete CIDR:</strong><br>
+                        L'indirizzo di rete con il prefisso CIDR è <highlight>192.168.4.0/25</highlight>.</p>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio è estremamente comune e testa la tua capacità di lavorare con gli indirizzi IP a livello di bit. Richiede una solida comprensione della notazione CIDR e del concetto di prefisso comune più lungo. È un "must-know".
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-3" class="exercise-item">
+            <h3 class="question-title">Esercizio 3: Progettazione di un Piano di Subnetting per N Host</h3>
+            <p><strong>Domanda:</strong> Un'azienda ha tre reparti A, B, C, che richiedono rispettivamente 80, 150 e 100 indirizzi IP per host. Si definiscano le tre sottoreti corrispondenti, a partire dall'indirizzo <code class="binary-representation">10.0.0.0/8</code>, in modo che siano contigue e si sprechi il minor numero possibile di indirizzi. Per ogni sottorete, si dia l'indirizzo in notazione CIDR e il range di indirizzi utili per gli host.</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <p>Per minimizzare lo spreco, è buona pratica assegnare le sottoreti più grandi per prime, in modo da lasciare spazi contigui per le più piccole.</p>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Calcolo dei bit host necessari per ogni reparto:</strong><br>
+                        Il numero di host assegnabili è \(2^{\text{bit host}} - 2\). Dobbiamo trovare il più piccolo $2^X$ tale che $2^X - 2 \ge \text{host richiesti}$.</p>
+                        <ul>
+                            <li>Reparto B (150 host): \(2^7 - 2 = 126\) (troppo piccolo); \(2^8 - 2 = 254\). Necessita 8 bit host.</li>
+                            <li>Reparto C (100 host): \(2^7 - 2 = 126\) (troppo piccolo); \(2^8 - 2 = 254\). Necessita 8 bit host.</li>
+                            <li>Reparto A (80 host): \(2^7 - 2 = 126\). Necessita 7 bit host.</li>
+                        </ul>
+                        <p>Quindi, le sottoreti avranno:</p>
+                        <ul>
+                            <li>Reparto B e C: 8 bit host \(\implies\) prefisso di 32 - 8 = `/24`</li>
+                            <li>Reparto A: 7 bit host \(\implies\) prefisso di 32 - 7 = `/25`</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Assegnazione contigua delle sottoreti (dalla più grande alla più piccola per minimizzare spreco):</strong><br>
+                        Iniziamo dalla rete <code class="binary-representation">10.0.0.0/8</code>.</p>
+                        <ul>
+                            <li><strong>Reparto B (150 host, /24):</strong> La prima sottorete disponibile.
+                                <ul>
+                                    <li>Indirizzo CIDR: <highlight>10.0.0.0/24</highlight></li>
+                                    <li>Range host: da <highlight>10.0.0.1</highlight> a <highlight>10.0.0.254</highlight></li>
+                                </ul>
+                                La prossima sottorete disponibile inizia da <code class="binary-representation">10.0.1.0</code>.
+                            </li>
+                            <li><strong>Reparto C (100 host, /24):</strong> Assegniamo la successiva sottorete `/24`.
+                                <ul>
+                                    <li>Indirizzo CIDR: <highlight>10.0.1.0/24</highlight></li>
+                                    <li>Range host: da <highlight>10.0.1.1</highlight> a <highlight>10.0.1.254</highlight></li>
+                                </ul>
+                                La prossima sottorete disponibile inizia da <code class="binary-representation">10.0.2.0</code>.
+                            </li>
+                            <li><strong>Reparto A (80 host, /25):</strong> Assegniamo la successiva sottorete `/25`.
+                                <ul>
+                                    <li>Indirizzo CIDR: <highlight>10.0.2.0/25</highlight></li>
+                                    <li>Range host: da <highlight>10.0.2.1</highlight> a <highlight>10.0.2.126</highlight></li>
+                                </ul>
+                                (Notare che `10.0.2.0/25` usa la prima metà del blocco `10.0.2.0/24`. La seconda metà (`10.0.2.128/25`) rimarrebbe libera per future espansioni o altre sottoreti).
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio è un test di progettazione. Richiede di capire come dimensionare le sottoreti e come allocarle contiguamente per minimizzare gli sprechi. Spesso si commette l'errore di non calcolare il numero di host *assegnabili* ($2^X-2$) o di non ordinare le sottoreti per dimensione.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-4" class="exercise-item">
+            <h3 class="question-title">Esercizio 4: Controllo Appartenenza alla Stessa Sottorete (e Indirizzi Speciali)</h3>
+            <p><strong>Domanda:</strong> Si considerino due host con i seguenti indirizzi IP e netmask: Host A: <code class="binary-representation">192.168.5.9</code> con netmask <code class="binary-representation">255.255.255.0</code>. Host B: <code class="binary-representation">192.168.6.14</code> con netmask <code class="binary-representation">255.255.254.0</code>. (a) L'host A vede B come appartenente alla sua stessa sottorete? (b) L'host B vede A come appartenente alla sua stessa sottorete? Spiegare le risposte.</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <p>Per determinare se un host "vede" un altro host nella sua stessa sottorete, è necessario applicare la **subnet mask del host che "vede"** all'indirizzo dell'altro host e al proprio, e confrontare gli indirizzi di rete risultanti. Se sono uguali, sono nella stessa sottorete per quel host.</p>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>(a) Host A vede B?:</strong><br>
+                        Host A ha IP <code class="binary-representation">192.168.5.9</code> e netmask <code class="binary-representation">255.255.255.0</code> (equivalente a /24).<br>
+                        Host B ha IP <code class="binary-representation">192.168.6.14</code>.
+                        </p>
+                        <ul>
+                            <li><strong>Indirizzo di rete di A (secondo A):</strong> <br><span class="binary-label">IP A:</span>   <span class="binary-representation">192.168.5.<span class="highlight">9</span></span>
+                                <br><span class="binary-label">Mask A:</span> <span class="binary-representation">255.255.255.<span class="highlight">0</span></span>
+                                <br><span class="binary-label">Rete A:</span>  <span class="binary-representation">192.168.5.<span class="highlight">0</span></span></li>
+                            <li><strong>Indirizzo di rete di B (calcolato da A):</strong> <br><span class="binary-label">IP B:</span>   <span class="binary-representation">192.168.6.<span class="highlight">14</span></span>
+                                <br><span class="binary-label">Mask A:</span> <span class="binary-representation">255.255.255.<span class="highlight">0</span></span>
+                                <br><span class="binary-label">Rete B:</span>  <span class="binary-representation">192.168.6.<span class="highlight">0</span></span></li>
+                        </ul>
+                        <p>Poiché `192.168.5.0` \(\neq\) `192.168.6.0`, l'Host A <highlight>NON</highlight> vede B come appartenente alla sua stessa sottorete. Per A, B si trova in una rete diversa (o dietro un router).</p>
+                    </li>
+                    <li>
+                        <p><strong>(b) Host B vede A?:</strong><br>
+                        Host B ha IP <code class="binary-representation">192.168.6.14</code> e netmask <code class="binary-representation">255.255.254.0</code> (equivalente a /23).<br>
+                        Host A ha IP <code class="binary-representation">192.168.5.9</code>.
+                        </p>
+                        <p>Convertiamo l'ultimo ottetto di A e B e la mask di B in binario per l'analisi:
+                        <br><span class="binary-label">IP A (ultimo ottetto):</span> <span class="binary-representation">00000101.00001001</span> (che è 5.9)
+                        <br><span class="binary-label">IP B (ultimo ottetto):</span> <span class="binary-representation">00000110.00001110</span> (che è 6.14)
+                        <br><span class="binary-label">Mask B (/23):</span> <span class="binary-representation">11111110.00000000</span> (che è 254.0)</p>
+
+                        <ul>
+                            <li><strong>Indirizzo di rete di B (secondo B):</strong> <br>
+                                Applichiamo la mask /23 all'IP di B:
+                                <br><span class="binary-label">IP B (/23):</span>   <span class="binary-representation">192.168.6.14</span>
+                                <br><span class="binary-label">In binario:</span>   <span class="binary-representation">11000000.10101000.0000011<span class="highlight">0.0001110</span></span>
+                                <br><span class="binary-label">Mask B (/23):</span> <span class="binary-representation">11111111.11111111.1111111<span class="highlight">0.0000000</span></span>
+                                <br><span class="binary-label">Rete B:</span>    <span class="binary-representation">11000000.10101000.0000011<span class="highlight">0.0000000</span></span>
+                                <br>In decimale: <span class="binary-representation">192.168.6.0</span>.
+                            </li>
+                            <li><strong>Indirizzo di rete di A (calcolato da B):</strong> <br>
+                                Applichiamo la mask /23 all'IP di A:
+                                <br><span class="binary-label">IP A (/23):</span>   <span class="binary-representation">192.168.5.9</span>
+                                <br><span class="binary-label">In binario:</span>   <span class="binary-representation">11000000.10101000.0000010<span class="highlight">1.00001001</span></span>
+                                <br><span class="binary-label">Mask B (/23):</span> <span class="binary-representation">11111111.11111111.1111111<span class="highlight">0.0000000</span></span>
+                                <br><span class="binary-label">Rete A:</span>    <span class="binary-representation">11000000.10101000.0000010<span class="highlight">0.0000000</span></span>
+                                <br>In decimale: <span class="binary-representation">192.168.4.0</span>.
+                            </li>
+                        </ul>
+                        <p>Errore comune: ho convertito male il terzo ottetto per la /23 (255.255.254.0).
+                        <br>L'indirizzo 192.168.5.9 in binario è `11000000.10101000.00000101.00001001`
+                        <br>L'indirizzo 192.168.6.14 in binario è `11000000.10101000.00000110.00001110`
+                        <br>La subnet mask 255.255.254.0 in binario è `11111111.11111111.11111110.00000000` (/23)
+                        </p>
+                        <p>Applicando l'AND a Host A (`192.168.5.9`) con la mask di B (`/23`):
+                        <br><span class="binary-label">IP A:</span>    <span class="binary-representation">11000000.10101000.<span class="highlight">0000010</span>1.0001001</span>
+                        <br><span class="binary-label">Mask B:</span> <span class="binary-representation">11111111.11111111.<span class="highlight">1111111</span>0.00000000</span>
+                        <br><span class="binary-label">Rete A (secondo B):</span> <span class="binary-representation">11000000.10101000.<span class="highlight">0000010</span>0.00000000</span> (192.168.4.0)</p>
+                        
+                        <p>Applicando l'AND a Host B (`192.168.6.14`) con la mask di B (`/23`):
+                        <br><span class="binary-label">IP B:</span>    <span class="binary-representation">11000000.10101000.<span class="highlight">0000011</span>0.0001110</span>
+                        <br><span class="binary-label">Mask B:</span> <span class="binary-representation">11111111.11111111.<span class="highlight">1111111</span>0.00000000</span>
+                        <br><span class="binary-label">Rete B (secondo B):</span> <span class="binary-representation">11000000.10101000.<span class="highlight">0000011</span>0.00000000</span> (192.168.6.0)</p>
+
+                        <p>Rivedo i calcoli per il /23. La mask 255.255.254.0 significa che il terzo ottetto è `11111110`. Quindi i primi 23 bit sono la rete, e gli ultimi 9 sono l'host.</p>
+                        <p>L'indirizzo di rete per 192.168.5.9/23 è 192.168.4.0 (192.168.00000100.00000000)</p>
+                        <p>L'indirizzo di rete per 192.168.6.14/23 è 192.168.6.0 (192.168.00000110.00000000)</p>
+
+                        <p>Okay, torniamo alla base dell'esercizio e lo rifaccio in modo preciso, dato che è una tipologia classica.</p>
+                        <p><strong>Ricalcolo per (b) Host B vede A?:</strong></p>
+                        <p>Host B ha IP <code class="binary-representation">192.168.6.14</code> e netmask <code class="binary-representation">255.255.254.0</code> (equivalente a /23).</p>
+                        <p>Indirizzo IP di A: <code class="binary-representation">192.168.5.9</code></p>
+                        <p><strong>1. Convertiamo in binario i terzi e quarti ottetti rilevanti e la subnet mask di B:</strong></p>
+                        <ul>
+                            <li>IP A: `...00000101.00001001` (5.9)</li>
+                            <li>IP B: `...00000110.00001110` (6.14)</li>
+                            <li>Mask B (/23): `...11111110.00000000` (254.0)</li>
+                        </ul>
+                        <p><strong>2. Calcoliamo l'indirizzo di rete per Host A usando la mask di Host B:</strong></p>
+                        <p><span class="binary-label">IP A:</span>   <span class="binary-representation">192.168.<span class="highlight">0000010</span>1.0001001</span><br>
+                        <span class="binary-label">Mask B:</span> <span class="binary-representation">255.255.<span class="highlight">1111111</span>0.00000000</span><br>
+                        <span class="binary-label">Rete A (per B):</span> <span class="binary-representation">192.168.<span class="highlight">0000010</span>0.00000000</span> = <highlight>192.168.4.0</highlight></p>
+                        <p><strong>Spiegazione:</strong> il 23° bit è il penultimo bit del terzo ottetto. Il terzo ottetto di 5 è `00000101`, il terzo ottetto di 6 è `00000110`. Con una mask `/23`, i bit della parte di rete sono i primi 23. Quindi, per `00000101` (`5`), la parte di rete è `0000010` (quindi `4`). Per `00000110` (`6`), la parte di rete è `0000011` (quindi `6`).</p>
+                        <p><strong>3. Calcoliamo l'indirizzo di rete per Host B usando la sua stessa mask:</strong></p>
+                        <p><span class="binary-label">IP B:</span>   <span class="binary-representation">192.168.<span class="highlight">0000011</span>0.0001110</span><br>
+                        <span class="binary-label">Mask B:</span> <span class="binary-representation">255.255.<span class="highlight">1111111</span>0.00000000</span><br>
+                        <span class="binary-label">Rete B (per B):</span> <span class="binary-representation">192.168.<span class="highlight">0000011</span>0.00000000</span> = <highlight>192.168.6.0</highlight></p>
+                        <p>Poiché l'indirizzo di rete di A (calcolato da B, che è `192.168.4.0`) è <highlight>DIVERSO</highlight> dall'indirizzo di rete di B (`192.168.6.0`), l'Host B <highlight>NON</highlight> vede A come appartenente alla sua stessa sottorete.</p>
+                        <p><strong>Risposta Finale:</strong> (a) L'Host A NON vede B come appartenente alla sua stessa sottorete (192.168.5.0 vs 192.168.6.0). (b) L'Host B NON vede A come appartenente alla sua stessa sottorete (192.168.6.0 vs 192.168.4.0).</p>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio è un classico per testare la comprensione della subnet mask e delle operazioni bit a bit. Un errore comune è non capire che ogni host applica *la propria* subnet mask agli indirizzi che vuole raggiungere. La conversione in binario è fondamentale per non sbagliare i calcoli sui bit di rete/host.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-5" class="exercise-item">
+            <h3 class="question-title">Esercizio 5: Domanda Concettuale su Indirizzi Speciali</h3>
+            <p><strong>Domanda:</strong> Per ciascuno dei seguenti indirizzi IP, indicare il suo uso speciale e spiegare brevemente la sua funzione:</p>
+            <ol>
+                <li><code>127.0.0.1</code></li>
+                <li><code>10.0.0.5/8</code></li>
+                <li><code>255.255.255.255</code> (come indirizzo di destinazione in un frame)</li>
+            </ol>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong><code>127.0.0.1</code> (Loopback Address):</strong></p>
+                        <ul>
+                            <li>**Uso Speciale:** Indirizzo di loopback. Fa parte del blocco `127.0.0.0/8`.</li>
+                            <li>**Funzione:** Permette a un dispositivo di inviare traffico a se stesso. Questo è utile per testare applicazioni di rete o servizi senza la necessità di un'interfaccia di rete fisica o di una connessione esterna. Il traffico inviato a questo indirizzo non esce mai dal dispositivo.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong><code>10.0.0.5/8</code> (Private IP Address):</strong></p>
+                        <ul>
+                            <li>**Uso Speciale:** Indirizzo IP privato. Fa parte del blocco `10.0.0.0/8` (RFC 1918).</li>
+                            <li>**Funzione:** È utilizzato per l'indirizzamento interno di host all'interno di reti locali private. Gli indirizzi privati non sono instradabili su Internet, il che significa che non possono essere raggiunti direttamente dall'esterno e non causano conflitti con gli indirizzi IP pubblici globali. Le reti private che usano questi indirizzi necessitano di un meccanismo come NAT (Network Address Translation) per comunicare con Internet.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong><code>255.255.255.255</code> (Limited Broadcast Address):</strong></p>
+                        <ul>
+                            <li>**Uso Speciale:** Indirizzo di broadcast limitato.</li>
+                            <li>**Funzione:** Viene utilizzato per inviare pacchetti a *tutti* i dispositivi sulla rete locale corrente (sottorete) senza che questi pacchetti vengano inoltrati dai router. È un broadcast "locale". È spesso usato da protocolli che necessitano di scoprire servizi o dispositivi sulla rete locale (es. DHCP Discover).</li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Le domande sugli indirizzi speciali testano la tua conoscenza delle funzionalità intrinseche di IPv4 oltre al semplice routing. Sono spesso richieste all'orale o come brevi domande teoriche negli scritti.
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\nstyle NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.exercise-item').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.exercise-item.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
