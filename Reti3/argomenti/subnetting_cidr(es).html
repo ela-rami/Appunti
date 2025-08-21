@@ -227,52 +227,80 @@
             
             <div class="solution-section">
                 <h4>Svolgimento Dettagliato:</h4>
-                <p>Per minimizzare lo spreco, è buona pratica assegnare le sottoreti più grandi per prime, in modo da lasciare spazi contigui per le più piccole.</p>
+                <p>Per minimizzare lo spreco di indirizzi, è buona pratica assegnare le sottoreti partendo da quelle che richiedono il numero maggiore di host (e quindi il minor numero di bit nel prefisso, o il maggior numero di bit host). Questo aiuta a "incastrare" meglio i blocchi di indirizzi.</p>
                 <ol class="solution-steps">
                     <li>
-                        <p><strong>Calcolo dei bit host necessari per ogni reparto:</strong><br>
-                        Il numero di host assegnabili è \(2^{\text{bit host}} - 2\). Dobbiamo trovare il più piccolo $2^X$ tale che $2^X - 2 \ge \text{host richiesti}$.</p>
+                        <p><strong>Calcolo dei bit host necessari e dei prefissi per ogni reparto:</strong><br>
+                        Il numero di host assegnabili in una sottorete è dato da \(2^{\text{numero di bit host}} - 2\) (sottraendo l'indirizzo di rete e di broadcast). Dobbiamo trovare il più piccolo numero di bit host (\(X\)) tale che \(2^X - 2 \ge \text{host richiesti}\). Il prefisso CIDR sarà \(32 - X\).</p>
                         <ul>
-                            <li>Reparto B (150 host): \(2^7 - 2 = 126\) (troppo piccolo); \(2^8 - 2 = 254\). Necessita 8 bit host.</li>
-                            <li>Reparto C (100 host): \(2^7 - 2 = 126\) (troppo piccolo); \(2^8 - 2 = 254\). Necessita 8 bit host.</li>
-                            <li>Reparto A (80 host): \(2^7 - 2 = 126\). Necessita 7 bit host.</li>
-                        </ul>
-                        <p>Quindi, le sottoreti avranno:</p>
-                        <ul>
-                            <li>Reparto B e C: 8 bit host \(\implies\) prefisso di 32 - 8 = `/24`</li>
-                            <li>Reparto A: 7 bit host \(\implies\) prefisso di 32 - 7 = `/25`</li>
+                            <li><strong>Reparto B (150 host):</strong>
+                                <ul>
+                                    <li>\(2^7 - 2 = 126\) (non sufficiente per 150 host)</li>
+                                    <li>\(2^8 - 2 = 254\) (sufficiente per 150 host). Necessita 8 bit host.</li>
+                                    <li>Prefisso: 32 - 8 = `/24`</li>
+                                </ul>
+                            </li>
+                            <li><strong>Reparto C (100 host):</strong>
+                                <ul>
+                                    <li>\(2^7 - 2 = 126\) (sufficiente per 100 host). Necessita 7 bit host.</li>
+                                    <li>Prefisso: 32 - 7 = `/25`</li>
+                                </ul>
+                            </li>
+                            <li><strong>Reparto A (80 host):</strong>
+                                <ul>
+                                    <li>\(2^7 - 2 = 126\) (sufficiente per 80 host). Necessita 7 bit host.</li>
+                                    <li>Prefisso: 32 - 7 = `/25`</li>
+                                </ul>
+                            </li>
                         </ul>
                     </li>
                     <li>
-                        <p><strong>Assegnazione contigua delle sottoreti (dalla più grande alla più piccola per minimizzare spreco):</strong><br>
-                        Iniziamo dalla rete <code class="binary-representation">10.0.0.0/8</code>.</p>
+                        <p><strong>Ordinamento delle Sottoreti per Dimensione (decrescente):</strong><br>
+                        Questo ci aiuta a minimizzare gli sprechi, assegnando prima i blocchi più grandi.</p>
                         <ul>
-                            <li><strong>Reparto B (150 host, /24):</strong> La prima sottorete disponibile.
+                            <li>Reparto B: /24 (blocchi da 256 indirizzi)</li>
+                            <li>Reparto C: /25 (blocchi da 128 indirizzi)</li>
+                            <li>Reparto A: /25 (blocchi da 128 indirizzi)</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Assegnazione contigua delle sottoreti, partendo da <code class="binary-representation">10.0.0.0/8</code>:</strong></p>
+                        <ul>
+                            <li><strong>1. Reparto B (150 host, /24):</strong><br>
+                                Iniziamo dall'indirizzo base `10.0.0.0`.
                                 <ul>
                                     <li>Indirizzo CIDR: <highlight>10.0.0.0/24</highlight></li>
+                                    <li>Indirizzo di Rete: `10.0.0.0`</li>
+                                    <li>Indirizzo di Broadcast: `10.0.0.255`</li>
                                     <li>Range host: da <highlight>10.0.0.1</highlight> a <highlight>10.0.0.254</highlight></li>
                                 </ul>
-                                La prossima sottorete disponibile inizia da <code class="binary-representation">10.0.1.0</code>.
+                                La prossima sottorete disponibile inizia subito dopo, da <code class="binary-representation">10.0.1.0</code>.
                             </li>
-                            <li><strong>Reparto C (100 host, /24):</strong> Assegniamo la successiva sottorete `/24`.
+                            <li><strong>2. Reparto C (100 host, /25):</strong><br>
+                                Assegniamo la sottorete `/25` successiva. Un blocco `/25` occupa 128 indirizzi (da X.X.X.0 a X.X.X.127 o da X.X.X.128 a X.X.X.255).
                                 <ul>
-                                    <li>Indirizzo CIDR: <highlight>10.0.1.0/24</highlight></li>
-                                    <li>Range host: da <highlight>10.0.1.1</highlight> a <highlight>10.0.1.254</highlight></li>
+                                    <li>Indirizzo CIDR: <highlight>10.0.1.0/25</highlight></li>
+                                    <li>Indirizzo di Rete: `10.0.1.0`</li>
+                                    <li>Indirizzo di Broadcast: `10.0.1.127`</li>
+                                    <li>Range host: da <highlight>10.0.1.1</highlight> a <highlight>10.0.1.126</highlight></li>
+                                </ul>
+                                La prossima sottorete disponibile inizia da <code class="binary-representation">10.0.1.128</code> (se fosse un altro /25) o da <code class="binary-representation">10.0.2.0</code> (se passiamo al prossimo ottetto).
+                            </li>
+                            <li><strong>3. Reparto A (80 host, /25):</strong><br>
+                                Assegniamo la successiva sottorete `/25`.
+                                <ul>
+                                    <li>Indirizzo CIDR: <highlight>10.0.1.128/25</highlight></li>
+                                    <li>Indirizzo di Rete: `10.0.1.128`</li>
+                                    <li>Indirizzo di Broadcast: `10.0.1.255`</li>
+                                    <li>Range host: da <highlight>10.0.1.129</highlight> a <highlight>10.0.1.254</highlight></li>
                                 </ul>
                                 La prossima sottorete disponibile inizia da <code class="binary-representation">10.0.2.0</code>.
-                            </li>
-                            <li><strong>Reparto A (80 host, /25):</strong> Assegniamo la successiva sottorete `/25`.
-                                <ul>
-                                    <li>Indirizzo CIDR: <highlight>10.0.2.0/25</highlight></li>
-                                    <li>Range host: da <highlight>10.0.2.1</highlight> a <highlight>10.0.2.126</highlight></li>
-                                </ul>
-                                (Notare che `10.0.2.0/25` usa la prima metà del blocco `10.0.2.0/24`. La seconda metà (`10.0.2.128/25`) rimarrebbe libera per future espansioni o altre sottoreti).
                             </li>
                         </ul>
                     </li>
                 </ol>
                 <div class="clarification-box">
-                    <strong>Spiegazione Chiave:</strong> Questo esercizio è un test di progettazione. Richiede di capire come dimensionare le sottoreti e come allocarle contiguamente per minimizzare gli sprechi. Spesso si commette l'errore di non calcolare il numero di host *assegnabili* ($2^X-2$) o di non ordinare le sottoreti per dimensione.
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio è un test di progettazione di subnetting. È cruciale calcolare correttamente il numero di bit host necessari (\(2^X-2\)) e assegnare le sottoreti in ordine di dimensione decrescente (per minimizzare gli sprechi) e contigue, partendo dall'indirizzo base fornito.
                 </div>
             </div>
         </article>
