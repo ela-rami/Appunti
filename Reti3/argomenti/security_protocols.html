@@ -89,7 +89,7 @@
         <article id="introduzione-protocolli" class="content-section active-section">
             <h2 class="section-title">1. Obiettivi e Notazione dei Protocolli di Sicurezza</h2>
             <div class="section-content">
-                <p>Negli esami, l'analisi dei protocolli di sicurezza è una delle parti più concettuali. L'obiettivo non è implementare gli algoritmi crittografici (RSA, AES, etc.), ma **analizzare la logica di uno scambio di messaggi** per capire se raggiunge i suoi obiettivi di sicurezza e se è vulnerabile ad attacchi noti.</p>
+                <p>Negli esami, l'analisi dei protocolli di sicurezza è una delle parti più concettuali. L'obiettivo non è implementare gli algoritmi crittografici (RSA, AES, etc.), ma <strong>analizzare la logica di uno scambio di messaggi</strong> per capire se raggiunge i suoi obiettivi di sicurezza e se è vulnerabile ad attacchi noti.</p>
 
                 <h3 class="subsection-title">Notazione Standard (Alice & Bob)</h3>
                 <p>Viene utilizzata una notazione standard per descrivere i protocolli. È fondamentale capirla per leggere correttamente gli esercizi:</p>
@@ -97,14 +97,14 @@
                     <p><strong>A &rarr; B: M</strong>: Alice (A) invia un messaggio (M) a Bob (B).</p>
                     <p><strong>E<sub>K</sub>(M)</strong>: Messaggio M cifrato con la chiave K.
                         <ul>
-                            <li>Se K è una chiave **simmetrica** (es. K<sub>AB</sub>), solo chi possiede K può decifrare.</li>
-                            <li>Se K è una chiave **pubblica** (es. PU<sub>B</sub>), solo il possessore della chiave privata corrispondente (Bob) può decifrare.</li>
+                            <li>Se K è una chiave <strong>simmetrica</strong> (es. K<sub>AB</sub>), solo chi possiede K può decifrare.</li>
+                            <li>Se K è una chiave <strong>pubblica</strong> (es. PU<sub>B</sub>), solo il possessore della chiave privata corrispondente (Bob) può decifrare.</li>
                         </ul>
                     </p>
                     <p><strong>D<sub>K</sub>(C)</strong>: Messaggio cifrato C decifrato con la chiave K.</p>
                     <p><strong>H(M)</strong>: Hash del messaggio M. È un digest di lunghezza fissa, facile da calcolare ma difficile da invertire.</p>
-                    <p><strong>{M}<sub>K</sub></strong> o <strong>E<sub>PR<sub>A</sub></sub>(H(M))</strong>: Firma digitale. L'**hash** del messaggio M viene cifrato con la chiave **privata** del mittente (A). Chiunque con la chiave pubblica di A può verificarla.</p>
-                    <p><strong>N<sub>A</sub>, N<sub>B</sub></strong>: Nonce (Number used once). Un numero casuale generato da A o B per garantire la **freschezza** di un messaggio e prevenire attacchi di replay.</p>
+                    <p><strong>{M}<sub>K</sub></strong> o <strong>E<sub>PR<sub>A</sub></sub>(H(M))</strong>: Firma digitale. L'<strong>hash</strong> del messaggio M viene cifrato con la chiave <strong>privata</strong> del mittente (A). Chiunque con la chiave pubblica di A può verificarla.</p>
+                    <p><strong>N<sub>A</sub>, N<sub>B</sub></strong>: Nonce (Number used once). Un numero casuale generato da A o B per garantire la <strong>freschezza</strong> di un messaggio e prevenire attacchi di replay.</p>
                     <p><strong>T</strong>: Timestamp. Data e ora usate per garantire la freschezza, ma richiedono orologi sincronizzati.</p>
                 </div>
             </div>
@@ -113,20 +113,20 @@
         <article id="cia-e-attacchi" class="content-section">
             <h2 class="section-title">2. La Triade CIA e i Tipi di Attacchi</h2>
             <div class="section-content">
-                <p>Tutta la sicurezza informatica ruota attorno a tre obiettivi principali, noti come **triade CIA**:</p>
+                <p>Tutta la sicurezza informatica ruota attorno a tre obiettivi principali, noti come <strong>triade CIA</strong>:</p>
                 <ul>
-                    <li><strong>Confidenzialità (Confidentiality):</strong> Garantire che le informazioni siano accessibili solo a chi è autorizzato. L'obiettivo è prevenire la **lettura** non autorizzata. Si ottiene principalmente tramite **cifratura**.</li>
-                    <li><strong>Integrità (Integrity):</strong> Garantire che i dati non vengano alterati o distrutti in modo non autorizzato durante la trasmissione o l'archiviazione. L'obiettivo è prevenire la **modifica** non autorizzata. Si ottiene tramite **hash (HMAC)** e **firme digitali**.</li>
-                    <li><strong>Disponibilità (Availability):</strong> Garantire che i servizi e le risorse siano disponibili agli utenti autorizzati quando ne hanno bisogno. L'obiettivo è prevenire l'**interruzione** del servizio.</li>
+                    <li><strong>Confidenzialità (Confidentiality):</strong> Garantire che le informazioni siano accessibili solo a chi è autorizzato. L'obiettivo è prevenire la <strong>lettura</strong> non autorizzata. Si ottiene principalmente tramite <strong>cifratura</strong>.</li>
+                    <li><strong>Integrità (Integrity):</strong> Garantire che i dati non vengano alterati o distrutti in modo non autorizzato durante la trasmissione o l'archiviazione. L'obiettivo è prevenire la <strong>modifica</strong> non autorizzata. Si ottiene tramite <strong>hash (HMAC)</strong> e <strong>firme digitali</strong>.</li>
+                    <li><strong>Disponibilità (Availability):</strong> Garantire che i servizi e le risorse siano disponibili agli utenti autorizzati quando ne hanno bisogno. L'obiettivo è prevenire l'<strong>interruzione</strong> del servizio.</li>
                 </ul>
 
                 <h3 class="subsection-title">Attacchi Attivi vs. Passivi</h3>
                 <p>Gli attacchi si dividono in due categorie principali:</p>
                 <ul>
-                    <li>**Attacchi Passivi:** L'attaccante si limita ad **ascoltare** il traffico (eavesdropping, sniffing) o a monitorarlo (traffic analysis). Minacciano la **confidenzialità**. Sono difficili da rilevare ma più facili da prevenire (con la cifratura).</li>
-                    <li>**Attacchi Attivi:** L'attaccante **modifica, cancella o inserisce** messaggi. Minacciano l'**integrità** e la **disponibilità**. Sono più facili da rilevare (se si usano meccanismi di controllo) ma più difficili da prevenire.
+                    <li><strong>Attacchi Passivi:</strong> L'attaccante si limita ad <strong>ascoltare</strong> il traffico (eavesdropping, sniffing) o a monitorarlo (traffic analysis). Minacciano la <strong>confidenzialità</strong>. Sono difficili da rilevare ma più facili da prevenire (con la cifratura).</li>
+                    <li><strong>Attacchi Attivi:</strong> L'attaccante <strong>modifica, cancella o inserisce</strong> messaggi. Minacciano l'<strong>integrità</strong> e la <strong>disponibilità</strong>. Sono più facili da rilevare (se si usano meccanismi di controllo) ma più difficili da prevenire.
                         <ul>
-                            <li>**Masquerade (Spoofing):** L'attaccante si finge un'altra entità.</li>
+                            <li><strong>Masquerade (Spoofing):</strong> L'attaccante si finge un'altra entità.</li>
                             <li><strong>Replay Attack:</strong> L'attaccante cattura un messaggio valido e lo reinvia in un secondo momento.</li>
                             <li><strong>Modification of Messages:</strong> L'attaccante altera il contenuto di un messaggio.</li>
                             <li><strong>Denial of Service (DoS):</strong> L'attaccante impedisce l'uso legittimo del servizio.</li>
@@ -138,8 +138,8 @@
                 <div class="note-box">
                     <strong>Frequenza negli esami:</strong> Molti esercizi chiedono di classificare un'azione (es. "leggere la mail di Bob", "modificare il server di uscita") come attacco attivo/passivo, quale obiettivo della triade CIA viola, e se colpisce i dati o i metadati.
                     <ul>
-                        <li>**Dati:** Il contenuto del messaggio (il payload, il corpo dell'email, il file trasferito).</li>
-                        <li>**Metadati:** Informazioni *sul* messaggio (mittente, destinatario, orario, indirizzi IP, intestazioni).</li>
+                        <li><strong>Dati:</strong> Il contenuto del messaggio (il payload, il corpo dell'email, il file trasferito).</li>
+                        <li><strong>Metadati:</strong> Informazioni <em>sul</em> messaggio (mittente, destinatario, orario, indirizzi IP, intestazioni).</li>
                     </ul>
                 </div>
             </div>
@@ -152,32 +152,32 @@
 
                 <h3 class="subsection-title">Cifratura Simmetrica (a Chiave Segreta)</h3>
                 <ul>
-                    <li>**Come funziona:** Mittente e destinatario condividono la **stessa chiave segreta** (es. K<sub>AB</sub>) per cifrare e decifrare.</li>
-                    <li>**Obiettivo principale:** **Confidenzialità**.</li>
-                    <li>**Vantaggi:** Molto veloce ed efficiente.</li>
-                    <li>**Svantaggi:** Richiede un modo sicuro per scambiare la chiave segreta (problema della distribuzione delle chiavi). Non fornisce **non ripudio** (entrambe le parti conoscono la chiave, quindi chiunque dei due potrebbe aver creato un messaggio).</li>
+                    <li><strong>Come funziona:</strong> Mittente e destinatario condividono la <strong>stessa chiave segreta</strong> (es. K<sub>AB</sub>) per cifrare e decifrare.</li>
+                    <li><strong>Obiettivo principale:</strong> <strong>Confidenzialità</strong>.</li>
+                    <li><strong>Vantaggi:</strong> Molto veloce ed efficiente.</li>
+                    <li><strong>Svantaggi:</strong> Richiede un modo sicuro per scambiare la chiave segreta (problema della distribuzione delle chiavi). Non fornisce <strong>non ripudio</strong> (entrambe le parti conoscono la chiave, quindi chiunque dei due potrebbe aver creato un messaggio).</li>
                 </ul>
 
                 <h3 class="subsection-title">Cifratura Asimmetrica (a Chiave Pubblica)</h3>
                 <ul>
-                    <li>**Come funziona:** Ogni utente ha una coppia di chiavi: una **pubblica** (condivisa con tutti) e una **privata** (segreta).</li>
-                    <li>**Uso per Confidenzialità:** Per inviare un messaggio confidenziale a Bob, Alice lo cifra con la **chiave pubblica di Bob**. Solo Bob può decifrarlo con la sua **chiave privata**.</li>
-                    <li>**Uso per Autenticazione/Firma Digitale:** Per "firmare" un messaggio, Alice cifra l'**hash** del suo messaggio con la sua **chiave privata**. Chiunque può verificare la firma decifrando con la **chiave pubblica di Alice**.</li>
-                    <li>**Vantaggi:** Risolve il problema della distribuzione delle chiavi (basta distribuire le chiavi pubbliche). Fornisce **non ripudio**.</li>
-                    <li>**Svantaggi:** Molto più lenta e computazionalmente costosa della cifratura simmetrica.</li>
+                    <li><strong>Come funziona:</strong> Ogni utente ha una coppia di chiavi: una <strong>pubblica</strong> (condivisa con tutti) e una <strong>privata</strong> (segreta).</li>
+                    <li><strong>Uso per Confidenzialità:</strong> Per inviare un messaggio confidenziale a Bob, Alice lo cifra con la <strong>chiave pubblica di Bob</strong>. Solo Bob può decifrarlo con la sua <strong>chiave privata</strong>.</li>
+                    <li><strong>Uso per Autenticazione/Firma Digitale:</strong> Per "firmare" un messaggio, Alice cifra l'<strong>hash</strong> del suo messaggio con la sua <strong>chiave privata</strong>. Chiunque può verificare la firma decifrando con la <strong>chiave pubblica di Alice</strong>.</li>
+                    <li><strong>Vantaggi:</strong> Risolve il problema della distribuzione delle chiavi (basta distribuire le chiavi pubbliche). Fornisce <strong>non ripudio</strong>.</li>
+                    <li><strong>Svantaggi:</strong> Molto più lenta e computazionalmente costosa della cifratura simmetrica.</li>
                 </ul>
 
                 <h3 class="subsection-title">Funzioni di Hash e HMAC</h3>
                 <ul>
-                    <li>**Funzione di Hash:** Produce un'impronta digitale (digest) a lunghezza fissa di un messaggio. Una buona funzione di hash è resistente alle collisioni. Garantisce l'**integrità**.</li>
-                    <li>**HMAC (Keyed-Hash Message Authentication Code):** È un hash che include una chiave segreta nel calcolo. Fornisce sia **integrità** che **autenticazione dell'origine del messaggio** (solo chi conosce la chiave può aver generato quel MAC).
+                    <li><strong>Funzione di Hash:</strong> Produce un'impronta digitale (digest) a lunghezza fissa di un messaggio. Una buona funzione di hash è resistente alle collisioni. Garantisce l'<strong>integrità</strong>.</li>
+                    <li><strong>HMAC (Keyed-Hash Message Authentication Code):</strong> È un hash che include una chiave segreta nel calcolo. Fornisce sia <strong>integrità</strong> che <strong>autenticazione dell'origine del messaggio</strong> (solo chi conosce la chiave può aver generato quel MAC).
                         <div class="clarification-box">
                             <strong>HMAC vs Firma Digitale:</strong>
                             <p>Entrambi forniscono autenticazione e integrità. Le differenze chiave sono:</p>
                             <ul>
-                                <li>**Chiave:** HMAC usa una chiave *simmetrica*; Firma Digitale usa una chiave *asimmetrica*.</li>
-                                <li>**Velocità:** HMAC è più veloce; Firma Digitale è più lenta.</li>
-                                <li>**Non Ripudio:** HMAC *non* fornisce non ripudio; Firma Digitale *sì*.</li>
+                                <li><strong>Chiave:</strong> HMAC usa una chiave <em>simmetrica</em>; Firma Digitale usa una chiave <em>asimmetrica</em>.</li>
+                                <li><strong>Velocità:</strong> HMAC è più veloce; Firma Digitale è più lenta.</li>
+                                <li><strong>Non Ripudio:</strong> HMAC <em>non</em> fornisce non ripudio; Firma Digitale <em>sì</em>.</li>
                             </ul>
                         </div>
                     </li>
@@ -188,32 +188,32 @@
         <article id="autenticazione" class="content-section">
             <h2 class="section-title">4. Autenticazione e Freschezza: Nonce e Timestamp</h2>
             <div class="section-content">
-                <p>Un obiettivo chiave di molti protocolli è l'**autenticazione dell'entità**: verificare che si sta parlando con chi si dice di essere. Un altro è la **freschezza** (o puntualità): garantire che i messaggi non siano vecchi messaggi reinviati da un attaccante (Replay Attack).</p>
+                <p>Un obiettivo chiave di molti protocolli è l'<strong>autenticazione dell'entità</strong>: verificare che si sta parlando con chi si dice di essere. Un altro è la <strong>freschezza</strong> (o puntualità): garantire che i messaggi non siano vecchi messaggi reinviati da un attaccante (Replay Attack).</p>
 
                 <h3 class="subsection-title">Meccanismo Challenge-Response</h3>
                 <p>È il paradigma di base per l'autenticazione. La logica è: "Se sei davvero chi dici di essere, dimostramelo risolvendo questa sfida che solo tu puoi risolvere."</p>
                 <ol>
-                    <li>Il verificatore (B) invia una **sfida (challenge)** al claimant (A). La sfida è tipicamente un **nonce (N<sub>B</sub>)**.</li>
+                    <li>Il verificatore (B) invia una <strong>sfida (challenge)</strong> al claimant (A). La sfida è tipicamente un <strong>nonce (N<sub>B</sub>)</strong>.</li>
                     <li>Il claimant (A) esegue un'operazione sul nonce che solo lui può fare (es. cifrarlo con una chiave segreta condivisa, K<sub>AB</sub>).</li>
-                    <li>A invia la **risposta (response)** a B.</li>
+                    <li>A invia la <strong>risposta (response)</strong> a B.</li>
                     <li>B verifica la risposta. Se è corretta, A è autenticato.</li>
                 </ol>
 
                 <h3 class="subsection-title">Nonce vs. Timestamp</h3>
                 <p>Per garantire la freschezza, si usano principalmente due tecniche:</p>
                 <ul>
-                    <li>**Nonce:** Un numero casuale usato una sola volta. Il mittente lo genera e lo include nel messaggio. Il destinatario, rispondendo, deve includere o trasformare quel nonce per dimostrare che la sua risposta è "fresca" e non un replay.
+                    <li><strong>Nonce:</strong> Un numero casuale usato una sola volta. Il mittente lo genera e lo include nel messaggio. Il destinatario, rispondendo, deve includere o trasformare quel nonce per dimostrare che la sua risposta è "fresca" e non un replay.
                         <ul>
-                            <li>**Vantaggi:** Non richiede orologi sincronizzati.</li>
-                            <li>**Svantaggi:** Richiede più passaggi nel protocollo (uno per inviare la challenge, uno per la risposta).</li>
+                            <li><strong>Vantaggi:</strong> Non richiede orologi sincronizzati.</li>
+                            <li><strong>Svantaggi:</strong> Richiede più passaggi nel protocollo (uno per inviare la challenge, uno per la risposta).</li>
                         </ul>
                     </li>
-                    <li>**Timestamp:** Il mittente include la data e l'ora correnti nel messaggio (firmato o cifrato). Il ricevitore controlla che il timestamp sia recente (entro una certa finestra di tolleranza, es. |t<sub>ricezione</sub> - t<sub>invio</sub>| < Δ).
+                    <li><strong>Timestamp:</strong> Il mittente include la data e l'ora correnti nel messaggio (firmato o cifrato). Il ricevitore controlla che il timestamp sia recente (entro una certa finestra di tolleranza, es. |t<sub>ricezione</sub> - t<sub>invio</sub>| < Δ).
                         <ul>
-                            <li>**Vantaggi:** Può richiedere meno passaggi (non serve una challenge).</li>
-                            <li><strong>Svantaggi:** Richiede che gli orologi delle due parti siano **sincronizzati**, il che è difficile da garantire in una rete distribuita.
+                            <li><strong>Vantaggi:</strong> Può richiedere meno passaggi (non serve una challenge).</li>
+                            <li><strong>Svantaggi:</strong> Richiede che gli orologi delle due parti siano <strong>sincronizzati</strong>, il che è difficile da garantire in una rete distribuita.
                             <br>Negli esami, è spesso evidenziato come un punto debole.
-                            </strong></li>
+                            </li>
                         </ul>
                     </li>
                 </ul>
@@ -243,7 +243,7 @@
         <article id="diffie-hellman" class="content-section">
             <h2 class="section-title">5. Scambio Chiavi Diffie-Hellman (DH)</h2>
             <div class="section-content">
-                <p>L'algoritmo di Diffie-Hellman è un metodo per permettere a due parti di stabilire una **chiave di sessione segreta condivisa** attraverso un canale di comunicazione insicuro, senza averla mai trasmessa in chiaro.</p>
+                <p>L'algoritmo di Diffie-Hellman è un metodo per permettere a due parti di stabilire una <strong>chiave di sessione segreta condivisa</strong> attraverso un canale di comunicazione insicuro, senza averla mai trasmessa in chiaro.</p>
 
                 <h3 class="subsection-title">Funzionamento Base (NON Autenticato)</h3>
                 <ol>
@@ -256,7 +256,7 @@
                 </ol>
 
                 <h3 class="subsection-title">Vulnerabilità al Man-in-the-Middle (MITM)</h3>
-                <p>Il protocollo DH base è vulnerabile all'attacco **Man-in-the-Middle** perché le mezze chiavi pubbliche scambiate **non sono autenticate**. Un attaccante (Eve) può interporsi tra Alice e Bob:</p>
+                <p>Il protocollo DH base è vulnerabile all'attacco <strong>Man-in-the-Middle</strong> perché le mezze chiavi pubbliche scambiate <strong>non sono autenticate</strong>. Un attaccante (Eve) può interporsi tra Alice e Bob:</p>
                 <ul>
                     <li>Eve intercetta la mezza chiave di Alice ($A = g^a \mod p$) e invia a Bob la sua mezza chiave pubblica ($E_1 = g^e \mod p$).</li>
                     <li>Eve intercetta la mezza chiave di Bob ($B = g^b \mod p$) e invia ad Alice la sua mezza chiave pubblica ($E_2 = g^e \mod p$).</li>
@@ -266,19 +266,19 @@
                 </ul>
 
                 <h3 class="subsection-title">Rendere DH Sicuro (DH Autenticato e Perfect Forward Secrecy - PFS)</h3>
-                <p>Per prevenire l'attacco MITM, le mezze chiavi scambiate devono essere **autenticate**. Questo si ottiene solitamente tramite **firme digitali**:</p>
+                <p>Per prevenire l'attacco MITM, le mezze chiavi scambiate devono essere <strong>autenticate</strong>. Questo si ottiene solitamente tramite <strong>firme digitali</strong>:</p>
                 <ul>
-                    <li>Alice invia a Bob la sua mezza chiave A, **firmata con la sua chiave privata**.</li>
+                    <li>Alice invia a Bob la sua mezza chiave A, <strong>firmata con la sua chiave privata</strong>.</li>
                     <li>Bob verifica la firma con la chiave pubblica di Alice (ottenuta da un certificato X.509) e fa lo stesso.</li>
                     <li>In questo modo, entrambi sono sicuri dell'identità della controparte e la chiave di sessione è autenticata.</li>
                 </ul>
                 <div class="clarification-box">
                     <strong>Perfect Forward Secrecy (PFS):</strong>
-                    <p>Un protocollo fornisce PFS se la compromissione della chiave a lungo termine di una delle parti **non compromette la segretezza delle chiavi di sessione generate in passato**.</p>
+                    <p>Un protocollo fornisce PFS se la compromissione della chiave a lungo termine di una delle parti <strong>non compromette la segretezza delle chiavi di sessione generate in passato</strong>.</p>
                     <ul>
-                        <li>**DH Ephemeral (EDH/ECDHE):** Le varianti di Diffie-Hellman che utilizzano chiavi private temporanee ("effimere") per ogni sessione, e firmano lo scambio con una chiave a lungo termine (RSA o DSA), **forniscono PFS**. Se la chiave a lungo termine viene compromessa, un attaccante non può decifrare le sessioni passate perché le chiavi effimere sono state generate e distrutte per ogni sessione.</li>
-                        <li>**DH Fixed (DH fisso):** Le varianti che utilizzano chiavi pubbliche statiche (pre-certificate) **non forniscono PFS**.</li>
-                        <li>**RSA per scambio chiave:** Se una chiave di sessione viene semplicemente cifrata con la chiave pubblica RSA a lungo termine del destinatario, **non fornisce PFS**. Se la chiave privata RSA a lungo termine viene compromessa, tutte le sessioni passate possono essere decifrate.</li>
+                        <li><strong>DH Ephemeral (EDH/ECDHE):</strong> Le varianti di Diffie-Hellman che utilizzano chiavi private temporanee ("effimere") per ogni sessione, e firmano lo scambio con una chiave a lungo termine (RSA o DSA), <strong>forniscono PFS</strong>. Se la chiave a lungo termine viene compromessa, un attaccante non può decifrare le sessioni passate perché le chiavi effimere sono state generate e distrutte per ogni sessione.</li>
+                        <li><strong>DH Fixed (DH fisso):</strong> Le varianti che utilizzano chiavi pubbliche statiche (pre-certificate) <strong>non forniscono PFS</strong>.</li>
+                        <li><strong>RSA per scambio chiave:</strong> Se una chiave di sessione viene semplicemente cifrata con la chiave pubblica RSA a lungo termine del destinatario, <strong>non fornisce PFS</strong>. Se la chiave privata RSA a lungo termine viene compromessa, tutte le sessioni passate possono essere decifrate.</li>
                     </ul>
                 </div>
             </div>
@@ -287,30 +287,30 @@
         <article id="tls-e-certificati" class="content-section">
             <h2 class="section-title">6. TLS, HTTPS e Certificati X.509</h2>
             <div class="section-content">
-                <p>Negli esami, compaiono spesso domande su scenari reali come una connessione HTTPS, che si basa sul protocollo **TLS (Transport Layer Security)**.</p>
+                <p>Negli esami, compaiono spesso domande su scenari reali come una connessione HTTPS, che si basa sul protocollo <strong>TLS (Transport Layer Security)</strong>.</p>
                 <ul>
-                    <li><strong>Scopo di TLS:** Fornire confidenzialità, integrità e autenticazione per le comunicazioni a livello di trasporto (tipicamente sopra TCP).</li>
-                    <li>**Autenticazione:** In una tipica connessione HTTPS, solo il **server è autenticato** per il client (browser). Il server presenta un **certificato X.509** che lega il suo nome a dominio alla sua chiave pubblica, firmato da una **Certificate Authority (CA)** fidata. Il client può, in alcuni casi, autenticarsi a sua volta (client-side certificate), ma non è la norma.</li>
-                    <li>**Integrità a livello Record:**
+                    <li><strong>Scopo di TLS:</strong> Fornire confidenzialità, integrità e autenticazione per le comunicazioni a livello di trasporto (tipicamente sopra TCP).</li>
+                    <li><strong>Autenticazione:</strong> In una tipica connessione HTTPS, solo il <strong>server è autenticato</strong> per il client (browser). Il server presenta un <strong>certificato X.509</strong> che lega il suo nome a dominio alla sua chiave pubblica, firmato da una <strong>Certificate Authority (CA)</strong> fidata. Il client può, in alcuni casi, autenticarsi a sua volta (client-side certificate), ma non è la norma.</li>
+                    <li><strong>Integrità a livello Record:</strong>
                         <ul>
-                            <li>TLS include un **sequence number** nel calcolo del MAC (o usa AEAD in TLS 1.3).</li>
-                            <li>Questo **impedisce attacchi di riordino, eliminazione o duplicazione** di record da parte di un attaccante passivo/attivo che modificherebbe i segmenti TCP.
+                            <li>TLS include un <strong>sequence number</strong> nel calcolo del MAC (o usa AEAD in TLS 1.3).</li>
+                            <li>Questo <strong>impedisce attacchi di riordino, eliminazione o duplicazione</strong> di record da parte di un attaccante passivo/attivo che modificherebbe i segmenti TCP.
                             <br>È la risposta a domande come: "Come TLS contrasta lo scambio/riordino dei segmenti?"
                             </li>
                         </ul>
                     </li>
-                    <li>**Segretezza e Visibilità in HTTPS:**
+                    <li><strong>Segretezza e Visibilità in HTTPS:</strong>
                         <ul>
-                            <li>L'indirizzo IP del client **non è segreto**; è necessario per l'instradamento a livello di rete e i router lo vedono.</li>
-                            <li>Il **nome host** del server (es. `www.google.com`) è visibile durante l'handshake (tramite Server Name Indication - **SNI**), a meno che non si utilizzino estensioni come Encrypted Client Hello (ECH).</li>
-                            <li>Il path della pagina web richiesta (es. `/pagina_segreta.html`), il contenuto della richiesta HTTP e le risposte **sono coperti dalla cifratura TLS**.</li>
+                            <li>L'indirizzo IP del client <strong>non è segreto</strong>; è necessario per l'instradamento a livello di rete e i router lo vedono.</li>
+                            <li>Il <strong>nome host</strong> del server (es. `www.google.com`) è visibile durante l'handshake (tramite Server Name Indication - <strong>SNI</strong>), a meno che non si utilizzino estensioni come Encrypted Client Hello (ECH).</li>
+                            <li>Il path della pagina web richiesta (es. `/pagina_segreta.html`), il contenuto della richiesta HTTP e le risposte <strong>sono coperti dalla cifratura TLS</strong>.</li>
                         </ul>
                     </li>
-                    <li>**Chiavi in TLS:**
+                    <li><strong>Chiavi in TLS:</strong>
                         <ul>
-                            <li>**Premaster Secret:** Un segreto iniziale generato casualmente e scambiato durante l'handshake.</li>
-                            <li>**Master Secret:** Derivato dal premaster secret e da altri valori random (ClientHello.random, ServerHello.random), è specifico della **sessione TLS**.</li>
-                            <li>**Chiavi di Cifratura (per-connessione):** Derivate dal master secret, queste chiavi sono usate per cifrare e decifrare i dati della **connessione TLS specifica**. Sono molto lunghe, generate casualmente per ogni connessione, e in TLS 1.3 possono essere aggiornate tramite meccanismi di **KeyUpdate** per aumentare ulteriormente la sicurezza nel lungo termine.</li>
+                            <li><strong>Premaster Secret:</strong> Un segreto iniziale generato casualmente e scambiato durante l'handshake.</li>
+                            <li><strong>Master Secret:</strong> Derivato dal premaster secret e da altri valori random (ClientHello.random, ServerHello.random), è specifico della <strong>sessione TLS</strong>.</li>
+                            <li><strong>Chiavi di Cifratura (per-connessione):</strong> Derivate dal master secret, queste chiavi sono usate per cifrare e decifrare i dati della <strong>connessione TLS specifica</strong>. Sono molto lunghe, generate casualmente per ogni connessione, e in TLS 1.3 possono essere aggiornate tramite meccanismi di <strong>KeyUpdate</strong> per aumentare ulteriormente la sicurezza nel lungo termine.</li>
                         </ul>
                     </li>
                 </ul>
@@ -327,19 +327,19 @@
                     <tbody>
                         <tr>
                             <td>Chi genera la chiave privata (es. per un server web)?</td>
-                            <td>**Il Subject** (l'entità cui il certificato si riferisce, es. il server stesso).</td>
+                            <td><strong>Il Subject</strong> (l'entità cui il certificato si riferisce, es. il server stesso).</td>
                         </tr>
                         <tr>
                             <td>Chi decide la durata di validità del certificato?</td>
-                            <td>**L'Issuer** (la Certificate Authority che rilascia il certificato).</td>
+                            <td><strong>L'Issuer</strong> (la Certificate Authority che rilascia il certificato).</td>
                         </tr>
                         <tr>
                             <td>L'Issuer conserva una copia della chiave privata del Subject come backup di sicurezza?</td>
-                            <td>**Assolutamente no.** La chiave privata deve rimanere segreta e nota solo al Subject. Conservarla sarebbe una violazione della confidenzialità.</td>
+                            <td><strong>Assolutamente no.</strong> La chiave privata deve rimanere segreta e nota solo al Subject. Conservarla sarebbe una violazione della confidenzialità.</td>
                         </tr>
                         <tr>
                             <td>Quali informazioni contiene un certificato X.509?</td>
-                            <td>**Chiave pubblica del Subject**, Identità del Subject, Identità dell'Issuer, Numero Seriale, Periodo di validità, Algoritmo di firma, **Firma digitale dell'Issuer**.</td>
+                            <td><strong>Chiave pubblica del Subject</strong>, Identità del Subject, Identità dell'Issuer, Numero Seriale, Periodo di validità, Algoritmo di firma, <strong>Firma digitale dell'Issuer</strong>.</td>
                         </tr>
                     </tbody>
                 </table>
