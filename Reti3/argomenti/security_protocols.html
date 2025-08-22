@@ -219,8 +219,8 @@
                 </ul>
 
                 <h3 class="subsection-title">Challenge-Response con Terza Parte Fidata (KDC)</h3>
-                <p>Spesso i protocolli di autenticazione e scambio chiavi coinvolgono una **Terza Parte Fidata (TTP) o Key Distribution Center (KDC)**. Questo è comune in contesti come Kerberos o nelle domande ispirate al modello Dolev-Yao.</p>
-                <p>Un esempio tipico di scambio chiave con autenticazione via TTP/KDC, usando nonce e chiavi simmetriche pre-condivise ($K_{AC}$, $K_{BC}$):</p>
+                <p>Spesso i protocolli di autenticazione e scambio chiavi coinvolgono una <strong>Terza Parte Fidata (TTP) o Key Distribution Center (KDC)</strong>. Questo è comune in contesti come Kerberos o nelle domande ispirate al modello Dolev-Yao.</p>
+                <p>Un esempio tipico di scambio chiave con autenticazione via TTP/KDC, usando nonce e chiavi simmetriche pre-condivise (K<sub>AC</sub>, K<sub>BC</sub>):</p>
                 <div class="protocol-notation">
                     <p>1. A &rarr; KDC: A, B, N<sub>A</sub></p>
                     <p>2. KDC &rarr; A: E<sub>KAC</sub>(B, K<sub>AB</sub>, N<sub>A</sub>, E<sub>KBC</sub>(A, K<sub>AB</sub>))</p>
@@ -258,8 +258,8 @@
                 <h3 class="subsection-title">Vulnerabilità al Man-in-the-Middle (MITM)</h3>
                 <p>Il protocollo DH base è vulnerabile all'attacco <strong>Man-in-the-Middle</strong> perché le mezze chiavi pubbliche scambiate <strong>non sono autenticate</strong>. Un attaccante (Eve) può interporsi tra Alice e Bob:</p>
                 <ul>
-                    <li>Eve intercetta la mezza chiave di Alice ($A = g^a \mod p$) e invia a Bob la sua mezza chiave pubblica ($E_1 = g^e \mod p$).</li>
-                    <li>Eve intercetta la mezza chiave di Bob ($B = g^b \mod p$) e invia ad Alice la sua mezza chiave pubblica ($E_2 = g^e \mod p$).</li>
+                    <li>Eve intercetta la mezza chiave di Alice (A = g<sup>a</sup> mod p) e invia a Bob la sua mezza chiave pubblica (E<sub>1</sub> = g<sup>e</sup> mod p).</li>
+                    <li>Eve intercetta la mezza chiave di Bob (B = g<sup>b</sup> mod p) e invia ad Alice la sua mezza chiave pubblica (E<sub>2</sub> = g<sup>e</sup> mod p).</li>
                     <li>Alice calcola la chiave di sessione con Eve: \(K_{AE} = E_2^a \mod p\).</li>
                     <li>Bob calcola la chiave di sessione con Eve: \(K_{BE} = E_1^b \mod p\).</li>
                     <li>Eve stabilisce due chiavi segrete distinte (con Alice e con Bob), potendo così decifrare, leggere e modificare tutto il traffico che scorre tra loro.</li>
