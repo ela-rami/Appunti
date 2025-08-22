@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisi di Protocolli di Sicurezza - Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per questa pagina */
+        .math-block {
+            font-size: 1.15em;
+        }
+        .figure-caption {
+            text-align: center;
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+        }
+        .protocol-notation {
+            font-family: var(--font-code);
+            font-size: 1.1em;
+            color: var(--code-text);
+            background-color: var(--code-bg);
+            padding: 0.75em;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            margin: 1rem 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body data-pdf-path="../prof_appunti/lezione_XX_security.pdf"> <!-- Placeholder per il PDF specifico -->
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Analisi di Protocolli di Sicurezza</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="security_protocols(es).html" class="sidebar-action-button" id="esercizi-btn">Esercizi</a>
+        </div>
+        <h2>Indice Argomento</h2>
+        <ul>
+            <li><a href="#introduzione-protocolli" class="sidebar-link">1. Obiettivi e Notazione</a></li>
+            <li><a href="#cia-e-attacchi" class="sidebar-link">2. Triade CIA e Tipi di Attacchi</a></li>
+            <li><a href="#strumenti-crittografici" class="sidebar-link">3. Strumenti Crittografici Fondamentali</a></li>
+            <li><a href="#autenticazione" class="sidebar-link">4. Autenticazione e Freschezza</a></li>
+            <li><a href="#diffie-hellman" class="sidebar-link">5. Scambio Chiavi Diffie-Hellman</a></li>
+            <li><a href="#tls-e-certificati" class="sidebar-link">6. TLS, HTTPS e Certificati X.509</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="introduzione-protocolli" class="content-section active-section">
+            <h2 class="section-title">1. Obiettivi e Notazione dei Protocolli di Sicurezza</h2>
+            <div class="section-content">
+                <p>Negli esami, l'analisi dei protocolli di sicurezza è una delle parti più concettuali. L'obiettivo non è implementare gli algoritmi crittografici (RSA, AES, etc.), ma <strong>analizzare la logica di uno scambio di messaggi</strong> per capire se raggiunge i suoi obiettivi di sicurezza e se è vulnerabile ad attacchi noti.</p>
+
+                <h3 class="subsection-title">Notazione Standard (Alice & Bob)</h3>
+                <p>Viene utilizzata una notazione standard per descrivere i protocolli. È fondamentale capirla per leggere correttamente gli esercizi:</p>
+                <div class="protocol-notation">
+                    <p><strong>A &rarr; B: M</strong>: Alice (A) invia un messaggio (M) a Bob (B).</p>
+                    <p><strong>E<sub>K</sub>(M)</strong>: Messaggio M cifrato con la chiave K.
+                        <ul>
+                            <li>Se K è una chiave <strong>simmetrica</strong> (es. K<sub>AB</sub>), solo chi possiede K può decifrare.</li>
+                            <li>Se K è una chiave <strong>pubblica</strong> (es. PU<sub>B</sub>), solo il possessore della chiave privata corrispondente (Bob) può decifrare.</li>
+                        </ul>
+                    </p>
+                    <p><strong>D<sub>K</sub>(C)</strong>: Messaggio cifrato C decifrato con la chiave K.</p>
+                    <p><strong>H(M)</strong>: Hash del messaggio M. È un digest di lunghezza fissa, facile da calcolare ma difficile da invertire.</p>
+                    <p><strong>{M}<sub>K</sub></strong> o <strong>E<sub>PR<sub>A</sub></sub>(H(M))</strong>: Firma digitale. L'hash del messaggio M viene cifrato con la chiave <strong>privata</strong> del mittente (A). Chiunque con la chiave pubblica di A può verificarla.</p>
+                    <p><strong>N<sub>A</sub>, N<sub>B</sub></strong>: Nonce (Number used once). Un numero casuale generato da A o B per garantire la <strong>freschezza</strong> di un messaggio e prevenire attacchi di replay.</p>
+                    <p><strong>T</strong>: Timestamp. Data e ora usate per garantire la freschezza, ma richiedono orologi sincronizzati.</p>
+                </div>
+            </div>
+        </article>
+
+        <article id="cia-e-attacchi" class="content-section">
+            <h2 class="section-title">2. La Triade CIA e i Tipi di Attacchi</h2>
+            <div class="section-content">
+                <p>Tutta la sicurezza informatica ruota attorno a tre obiettivi principali, noti come <strong>triade CIA</strong>:</p>
+                <ul>
+                    <li><strong>Confidenzialità (Confidentiality):</strong> Garantire che le informazioni siano accessibili solo a chi è autorizzato. L'obiettivo è prevenire la <strong>lettura</strong> non autorizzata. Si ottiene principalmente tramite <strong>cifratura</strong>.</li>
+                    <li><strong>Integrità (Integrity):</strong> Garantire che i dati non vengano alterati o distrutti in modo non autorizzato durante la trasmissione o l'archiviazione. L'obiettivo è prevenire la <strong>modifica</strong> non autorizzata. Si ottiene tramite <strong>hash (HMAC)</strong> e <strong>firme digitali</strong>.</li>
+                    <li><strong>Disponibilità (Availability):</strong> Garantire che i servizi e le risorse siano disponibili agli utenti autorizzati quando ne hanno bisogno. L'obiettivo è prevenire l'<strong>interruzione</strong> del servizio.</li>
+                </ul>
+
+                <h3 class="subsection-title">Attacchi Attivi vs. Passivi</h3>
+                <p>Gli attacchi si dividono in due categorie principali:</p>
+                <ul>
+                    <li><strong>Attacchi Passivi:</strong> L'attaccante si limita ad <strong>ascoltare</strong> il traffico (eavesdropping, sniffing) o a monitorarlo (traffic analysis). Minacciano la <strong>confidenzialità</strong>. Sono difficili da rilevare ma più facili da prevenire (con la cifratura).</li>
+                    <li><strong>Attacchi Attivi:</strong> L'attaccante <strong>modifica, cancella o inserisce</strong> messaggi. Minacciano l'<strong>integrità</strong> e la <strong>disponibilità</strong>. Sono più facili da rilevare (se si usano meccanismi di controllo) ma più difficili da prevenire.
+                        <ul>
+                            <li><strong>Masquerade (Spoofing):</strong> L'attaccante si finge un'altra entità.</li>
+                            <li><strong>Replay Attack:</strong> L'attaccante cattura un messaggio valido e lo reinvia in un secondo momento.</li>
+                            <li><strong>Modification of Messages:</strong> L'attaccante altera il contenuto di un messaggio.</li>
+                            <li><strong>Denial of Service (DoS):</strong> L'attaccante impedisce l'uso legittimo del servizio.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3 class="subsection-title">Dati vs. Metadati</h3>
+                <div class="note-box">
+                    <strong>Frequenza negli esami:</strong> Molti esercizi chiedono di classificare un'azione (es. "leggere la mail di Bob", "modificare il server di uscita") come attacco attivo/passivo, quale obiettivo della triade CIA viola, e se colpisce i dati o i metadati.
+                    <ul>
+                        <li><strong>Dati:</strong> Il contenuto del messaggio (il payload, il corpo dell'email, il file trasferito).</li>
+                        <li><strong>Metadati:</strong> Informazioni *sul* messaggio (mittente, destinatario, orario, indirizzi IP, intestazioni).</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+        
+        <article id="strumenti-crittografici" class="content-section">
+            <h2 class="section-title">3. Strumenti Crittografici Fondamentali</h2>
+            <div class="section-content">
+                <p>Per raggiungere gli obiettivi di sicurezza, i protocolli si basano su alcuni "mattoni" crittografici fondamentali.</p>
+
+                <h3 class="subsection-title">Cifratura Simmetrica (a Chiave Segreta)</h3>
+                <ul>
+                    <li><strong>Come funziona:</strong> Mittente e destinatario condividono la <strong>stessa chiave segreta</strong> (es. K<sub>AB</sub>) per cifrare e decifrare.</li>
+                    <li><strong>Obiettivo principale:</strong> <strong>Confidenzialità</strong>.</li>
+                    <li><strong>Vantaggi:</strong> Molto veloce ed efficiente.</li>
+                    <li><strong>Svantaggi:</strong> Richiede un modo sicuro per scambiare la chiave segreta (problema della distribuzione delle chiavi). Non fornisce <strong>non ripudio</strong> (entrambe le parti conoscono la chiave, quindi chiunque dei due potrebbe aver creato un messaggio).</li>
+                </ul>
+
+                <h3 class="subsection-title">Cifratura Asimmetrica (a Chiave Pubblica)</h3>
+                <ul>
+                    <li><strong>Come funziona:</strong> Ogni utente ha una coppia di chiavi: una <strong>pubblica</strong> (condivisa con tutti) e una <strong>privata</strong> (segreta).</li>
+                    <li><strong>Uso per Confidenzialità:</strong> Per inviare un messaggio confidenziale a Bob, Alice lo cifra con la <strong>chiave pubblica di Bob</strong>. Solo Bob può decifrarlo con la sua <strong>chiave privata</strong>.</li>
+                    <li><strong>Uso per Autenticazione/Firma Digitale:</strong> Per "firmare" un messaggio, Alice cifra il suo hash con la sua <strong>chiave privata</strong>. Chiunque può verificare la firma decifrando con la <strong>chiave pubblica di Alice</strong>.</li>
+                    <li><strong>Vantaggi:</strong> Risolve il problema della distribuzione delle chiavi (basta distribuire le chiavi pubbliche). Fornisce <strong>non ripudio</strong>.</li>
+                    <li><strong>Svantaggi:</strong> Molto più lenta e computazionalmente costosa della cifratura simmetrica.</li>
+                </ul>
+
+                <h3 class="subsection-title">Funzioni di Hash e HMAC</h3>
+                <ul>
+                    <li><strong>Funzione di Hash:</strong> Produce un'impronta digitale (digest) a lunghezza fissa di un messaggio. Una buona funzione di hash è resistente alle collisioni. Garantisce l'<strong>integrità</strong>.</li>
+                    <li><strong>HMAC (Keyed-Hash Message Authentication Code):</strong> È un hash che include una chiave segreta nel calcolo. Fornisce sia <strong>integrità</strong> che <strong>autenticazione dell'origine del messaggio</strong> (solo chi conosce la chiave può aver generato quel MAC).
+                        <div class="clarification-box">
+                            <strong>HMAC vs Firma Digitale:</strong> Entrambi forniscono autenticazione e integrità. L'HMAC usa una chiave <em>simmetrica</em> (più veloce, non fornisce non ripudio). La firma digitale usa una chiave <em>asimmetrica</em> (più lenta, fornisce non ripudio).
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="autenticazione" class="content-section">
+            <h2 class="section-title">4. Autenticazione e Freschezza: Nonce e Timestamp</h2>
+            <div class="section-content">
+                <p>Un obiettivo chiave di molti protocolli è l'<strong>autenticazione dell'entità</strong>: verificare che si sta parlando con chi si dice di essere. Un altro è la <strong>freschezza</strong> (o puntualità): garantire che i messaggi non siano vecchi messaggi reinviati da un attaccante (Replay Attack).</p>
+
+                <h3 class="subsection-title">Meccanismo Challenge-Response</h3>
+                <p>È il paradigma di base per l'autenticazione. La logica è: "Se sei davvero chi dici di essere, dimostramelo risolvendo questa sfida che solo tu puoi risolvere."</p>
+                <ol>
+                    <li>Il verificatore (B) invia una <strong>sfida (challenge)</strong> al claimant (A). La sfida è tipicamente un <strong>nonce (N<sub>B</sub>)</strong>.</li>
+                    <li>Il claimant (A) esegue un'operazione sul nonce che solo lui può fare (es. cifrarlo con una chiave segreta condivisa, K<sub>AB</sub>).</li>
+                    <li>A invia la <strong>risposta (response)</strong> a B.</li>
+                    <li>B verifica la risposta. Se è corretta, A è autenticato.</li>
+                </ol>
+
+                <h3 class="subsection-title">Nonce vs. Timestamp</h3>
+                <p>Per garantire la freschezza, si usano principalmente due tecniche:</p>
+                <ul>
+                    <li><strong>Nonce:</strong> Un numero casuale usato una sola volta. Il mittente lo genera e lo include nel messaggio. Il destinatario, rispondendo, deve includere o trasformare quel nonce per dimostrare che la sua risposta è "fresca" e non un replay.
+                        <ul>
+                            <li><strong>Vantaggi:</strong> Non richiede orologi sincronizzati.</li>
+                            <li><strong>Svantaggi:</strong> Richiede più passaggi nel protocollo (uno per inviare la challenge, uno per la risposta).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Timestamp:</strong> Il mittente include la data e l'ora correnti nel messaggio (firmato o cifrato). Il ricevitore controlla che il timestamp sia recente (entro una certa finestra di tolleranza, es. |t<sub>ricezione</sub> - t<sub>invio</sub>| < Δ).
+                        <ul>
+                            <li><strong>Vantaggi:</strong> Può richiedere meno passaggi (non serve una challenge).</li>
+                            <li><strong>Svantaggi:</strong> Richiede che gli orologi delle due parti siano <strong>sincronizzati</strong>, il che è difficile da garantire in una rete distribuita.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="diffie-hellman" class="content-section">
+            <h2 class="section-title">5. Scambio Chiavi Diffie-Hellman (DH)</h2>
+            <div class="section-content">
+                <p>L'algoritmo di Diffie-Hellman è un metodo per permettere a due parti di stabilire una <strong>chiave di sessione segreta condivisa</strong> attraverso un canale di comunicazione insicuro, senza averla mai trasmessa in chiaro.</p>
+
+                <h3 class="subsection-title">Funzionamento Base (Non Autenticato)</h3>
+                <ol>
+                    <li>Alice e Bob si accordano pubblicamente su due numeri: un numero primo grande `p` e un generatore `g`.</li>
+                    <li>Alice sceglie un numero segreto `a` e calcola la sua "mezza chiave" pubblica: \(A = g^a \mod p\).</li>
+                    <li>Bob sceglie un numero segreto `b` e calcola la sua "mezza chiave" pubblica: \(B = g^b \mod p\).</li>
+                    <li>Alice e Bob si scambiano le loro mezze chiavi pubbliche (A e B).</li>
+                    <li>Alice calcola la chiave di sessione segreta: \(K = B^a \mod p = (g^b)^a \mod p\).</li>
+                    <li>Bob calcola la stessa chiave di sessione segreta: \(K = A^b \mod p = (g^a)^b \mod p\).</li>
+                </ol>
+
+                <h3 class="subsection-title">Vulnerabilità al Man-in-the-Middle (MITM)</h3>
+                <p>Il protocollo DH base è vulnerabile all'attacco <strong>Man-in-the-Middle</strong> perché le mezze chiavi pubbliche non sono autenticate. Un attaccante (Eve) può interporsi tra Alice e Bob:</p>
+                <ul>
+                    <li>Eve intercetta la mezza chiave di Alice (A) e invia a Bob la sua (E).</li>
+                    <li>Eve intercetta la mezza chiave di Bob (B) e invia ad Alice la sua (E).</li>
+                    <li>Eve stabilisce una chiave segreta con Alice e un'altra con Bob, potendo così decifrare, leggere e modificare tutto il traffico.</li>
+                </ul>
+
+                <h3 class="subsection-title">Rendere DH Sicuro (DH Autenticato)</h3>
+                <p>Per prevenire l'attacco MITM, le mezze chiavi scambiate devono essere <strong>autenticate</strong>. Questo si ottiene solitamente tramite <strong>firme digitali</strong>:</p>
+                <ul>
+                    <li>Alice invia a Bob la sua mezza chiave A, <strong>firmata con la sua chiave privata</strong>.</li>
+                    <li>Bob verifica la firma con la chiave pubblica di Alice (ottenuta da un certificato) e fa lo stesso.</li>
+                    <li>In questo modo, entrambi sono sicuri dell'identità della controparte.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="tls-e-certificati" class="content-section">
+            <h2 class="section-title">6. TLS, HTTPS e Certificati X.509</h2>
+            <div class="section-content">
+                <p>Negli esami, compaiono spesso domande su scenari reali come una connessione HTTPS, che si basa sul protocollo <strong>TLS (Transport Layer Security)</strong>.</p>
+                <ul>
+                    <li><strong>Scopo di TLS:</strong> Fornire confidenzialità, integrità e autenticazione per le comunicazioni a livello di trasporto (tipicamente sopra TCP).</li>
+                    <li><strong>Autenticazione:</strong> In una tipica connessione HTTPS, solo il <strong>server è autenticato</strong> per il client (browser). Il server presenta un <strong>certificato X.509</strong> che lega il suo nome a dominio alla sua chiave pubblica, firmato da una <strong>Certificate Authority (CA)</strong> fidata. Il client può, in alcuni casi, autenticarsi a sua volta, ma non è la norma.</li>
+                    <li><strong>Segretezza:</strong>
+                        <ul>
+                            <li>L'indirizzo IP del client <strong>non è segreto</strong>, è necessario per l'instradamento a livello di rete.</li>
+                            <li>Il path della pagina web richiesta (es. `/pagina_segreta.html`) <strong>è coperto dalla cifratura TLS</strong>. Un attaccante passivo può vedere a quale server ti colleghi, ma non quale pagina specifica stai visitando.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Chiavi in TLS:</strong>
+                        <ul>
+                            <li><strong>Premaster Secret:</strong> Un segreto iniziale scambiato durante l'handshake.</li>
+                            <li><strong>Master Secret:</strong> Derivato dal premaster secret e da altri valori random, è specifico della <strong>sessione</strong>.</li>
+                            <li><strong>Chiavi di Cifratura:</strong> Derivate dal master secret, sono specifiche della <strong>connessione</strong>. Sono molto lunghe e cambiate spesso per resistere ad attacchi brute-force.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    // Inizializza Mermaid e MathJax
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+        }
+    });
+    </script>
+</body>
+</html>
