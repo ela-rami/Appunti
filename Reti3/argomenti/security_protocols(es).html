@@ -238,12 +238,12 @@
                     </li>
                     <li>
                         <p><strong>Come si previene il MITM:</strong><br>
-                        L'attacco MITM è prevenuto perché le mezze chiavi DH (`A` e `B`) sono **firmate digitalmente**. Eve non può falsificare queste firme senza la chiave privata di Alice o Bob, quindi non può spacciarsi per loro durante lo scambio.
+                        L'attacco MITM è prevenuto perché le mezze chiavi DH (`A` e `B`) sono <strong>firmate digitalmente</strong>. Eve non può falsificare queste firme senza la chiave privata di Alice o Bob, quindi non può spacciarsi per loro durante lo scambio.
                         </p>
                     </li>
                     <li>
                         <p><strong>Come si garantisce Perfect Forward Secrecy (PFS):</strong><br>
-                        Per garantire PFS, le chiavi private `x_A` e `x_B` di Diffie-Hellman devono essere **effimere (temporanee)**, cioè generate casualmente per *ogni singola sessione* e distrutte al termine della sessione. La **chiave RSA** usata per firmare è una chiave a **lungo termine**. Se questa chiave RSA a lungo termine (es. `PR<sub>A</sub>`) viene compromessa in futuro, non rivelerà le chiavi di sessione DH passate perché le `x_A`, `x_B` di quelle sessioni sono già state distrutte. Solo le chiavi a lungo termine usate per firmare il processo di scambio verrebbero compromesse, ma non la segretezza retroattiva delle sessioni.
+                        Per garantire PFS, le chiavi private `x_A` e `x_B` di Diffie-Hellman devono essere <strong>effimere (temporanee)</strong>, cioè generate casualmente per <em>ogni singola sessione</em> e distrutte al termine della sessione. La <strong>chiave RSA</strong> usata per firmare è una chiave a <strong>lungo termine</strong>. Se questa chiave RSA a lungo termine (es. `PR<sub>A</sub>`) viene compromessa in futuro, non rivelerà le chiavi di sessione DH passate perché le `x_A`, `x_B` di quelle sessioni sono già state distrutte. Solo le chiavi a lungo termine usate per firmare il processo di scambio verrebbero compromesse, ma non la segretezza retroattiva delle sessioni.
                         </p>
                     </li>
                 </ol>
@@ -281,14 +281,14 @@
                     <li>
                         <p><strong>Quali sono i campi principali che un certificato X.509 contiene?</strong></p>
                         <ul>
-                            <li>**Versione:** La versione del formato X.509.</li>
-                            <li>**Numero Seriale:** Identificativo univoco del certificato all'interno della CA.</li>
-                            <li>**Algoritmo di Firma:** L'algoritmo usato dalla CA per firmare il certificato.</li>
-                            <li>**Issuer (Emittente):** Il nome della CA che ha rilasciato il certificato.</li>
-                            <li>**Validity (Validità):** Il periodo di tempo in cui il certificato è considerato valido (Not Before, Not After).</li>
-                            <li>**Subject (Soggetto):** Il nome (e altre informazioni) dell'entità a cui il certificato si riferisce (es. il server web).</li>
-                            <li>**Subject Public Key Info:** La <highlight>chiave pubblica</highlight> dell'entità a cui il certificato si riferisce, e l'algoritmo usato.</li>
-                            <li>**Signature (Firma):** La firma digitale della CA sul certificato, generata usando la sua chiave privata.</li>
+                            <li><strong>Versione:</strong> La versione del formato X.509.</li>
+                            <li><strong>Numero Seriale:</strong> Identificativo univoco del certificato all'interno della CA.</li>
+                            <li><strong>Algoritmo di Firma:</strong> L'algoritmo usato dalla CA per firmare il certificato.</li>
+                            <li><strong>Issuer (Emittente):</strong> Il nome della CA che ha rilasciato il certificato.</li>
+                            <li><strong>Validity (Validità):</strong> Il periodo di tempo in cui il certificato è considerato valido (Not Before, Not After).</li>
+                            <li><strong>Subject (Soggetto):</strong> Il nome (e altre informazioni) dell'entità a cui il certificato si riferisce (es. il server web).</li>
+                            <li><strong>Subject Public Key Info:</strong> La <span class="highlight">chiave pubblica</span> dell'entità a cui il certificato si riferisce, e l'algoritmo usato.</li>
+                            <li><strong>Signature (Firma):</strong> La firma digitale della CA sul certificato, generata usando la sua chiave privata.</li>
                         </ul>
                     </li>
                 </ol>
