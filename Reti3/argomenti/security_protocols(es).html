@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esercizi: Analisi Protocolli di Sicurezza - Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi (non strettamente necessario qui, ma mantenuto per coerenza) -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per la pagina degli esercizi */
+        .exercise-item {
+            background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft);
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+        .exercise-item .question-title {
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .exercise-item .solution-section {
+            margin-top: 1.5rem;
+            border-top: 1px dashed var(--border-soft);
+            padding-top: 1.5rem;
+        }
+        .exercise-item .solution-section h4 {
+            color: var(--accent-secondary);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        .exercise-item .solution-steps li {
+            margin-bottom: 0.7rem;
+            color: var(--text-secondary);
+        }
+        .exercise-item .solution-steps strong {
+            color: var(--text-primary);
+        }
+        .exercise-item .math-equation {
+            display: block; text-align: center; margin: 1rem 0; font-family: var(--font-code);
+            font-size: 1.05em; color: var(--code-text); background-color: var(--code-bg);
+            padding: 0.75em; border-radius: var(--border-radius-small); border: 1px solid var(--border-soft);
+        }
+        .exercise-item .highlight {
+            color: var(--accent-primary); font-weight: bold;
+        }
+        .protocol-notation-block {
+            font-family: var(--font-code);
+            background-color: var(--code-bg);
+            padding: 1em;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            margin: 1rem 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: var(--code-text);
+        }
+        .protocol-notation-block strong {
+            color: var(--accent-primary);
+        }
+        .qa-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-family: var(--font-code);
+            font-size: 0.95em;
+        }
+        .qa-table th, .qa-table td {
+            border: 1px solid var(--border-soft);
+            padding: 0.8em;
+            text-align: left;
+            color: var(--text-secondary);
+        }
+        .qa-table th {
+            background-color: var(--bg-header);
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+        .qa-table td:first-child {
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Esercizi: Analisi Protocolli di Sicurezza</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="security_protocols.html" class="sidebar-action-button">Torna agli Appunti</a>
+        </div>
+        <h2>Elenco Esercizi</h2>
+        <ul>
+            <li><a href="#esercizio-1" class="sidebar-link">1. Attacchi e Triade CIA</a></li>
+            <li><a href="#esercizio-2" class="sidebar-link">2. Protocollo Autenticazione con Nonce</a></li>
+            <li><a href="#esercizio-3" class="sidebar-link">3. Protocollo Diffie-Hellman Autenticato (con Firma)</a></li>
+            <li><a href="#esercizio-4" class="sidebar-link">4. Certificati X.509 (Q&A)</a></li>
+            <li><a href="#esercizio-5" class="sidebar-link">5. HTTPS/TLS e Visibilità</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="esercizio-1" class="exercise-item active-section">
+            <h3 class="question-title">Esercizio 1: Attacchi e Triade CIA (Focus: Classificazione)</h3>
+            <p><strong>Domanda:</strong> Per ognuna delle seguenti azioni, si dica se è un attacco attivo o passivo, a quale obiettivo della triade CIA mira (Confidenzialità, Integrità, Disponibilità) e se colpisce i dati o i metadati:</p>
+            <ol>
+                <li>Leggere il contenuto di un file di esami sul server.</li>
+                <li>Modificare il server di email di uscita affinché le mail passino per un server controllato dall'attaccante.</li>
+                <li>Interrompere la connessione a un sito web tramite un attacco DoS.</li>
+            </ol>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Azione 1: Leggere il contenuto di un file di esami sul server.</strong></p>
+                        <ul>
+                            <li><strong>Tipo di Attacco:</strong> <highlight>Passivo</highlight> (l'attaccante osserva senza modificare).</li>
+                            <li><strong>Obiettivo CIA Violato:</strong> <highlight>Confidenzialità</highlight> (l'informazione riservata viene letta).</li>
+                            <li><strong>Cosa Colpisce:</strong> <highlight>Dati</highlight> (il contenuto del file).</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Azione 2: Modificare il server di email di uscita affinché le mail passino per un server controllato dall'attaccante.</strong></p>
+                        <ul>
+                            <li><strong>Tipo di Attacco:</strong> <highlight>Attivo</highlight> (l'attaccante altera la configurazione del servizio).</li>
+                            <li><strong>Obiettivo CIA Violato:</strong> <highlight>Integrità</highlight> (la rotta è alterata, potenzialmente per intercettazione/modifica) e potenzialmente <highlight>Confidenzialità/Integrità dei Dati</highlight> (se poi l'attaccante legge/modifica le mail).</li>
+                            <li><strong>Cosa Colpisce:</strong> <highlight>Metadati</highlight> (la rotta dei messaggi) e potenzialmente Dati.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Azione 3: Interrompere la connessione a un sito web tramite un attacco DoS.</strong></p>
+                        <ul>
+                            <li><strong>Tipo di Attacco:</strong> <highlight>Attivo</highlight> (l'attaccante impedisce l'uso del servizio).</li>
+                            <li><strong>Obiettivo CIA Violato:</strong> <highlight>Disponibilità</highlight> (il servizio non è accessibile).</li>
+                            <li><strong>Cosa Colpisce:</strong> <highlight>Servizio</highlight> (impedisce il normale funzionamento).</li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Le domande su CIA e attacchi sono un classico. È fondamentale identificare se l'azione implica una *modifica* (attivo) o solo un *ascolto* (passivo), e quale tra Confidenzialità, Integrità e Disponibilità viene compromesso. Ricorda la distinzione tra dati e metadati.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-2" class="exercise-item">
+            <h3 class="question-title">Esercizio 2: Protocollo di Autenticazione con Nonce (Focus: Freschezza e Autenticazione)</h3>
+            <p><strong>Domanda:</strong> Si consideri il seguente protocollo di autenticazione e scambio chiavi tra Alice (A) e Bob (B), dove K<sub>AB</sub> è una chiave simmetrica precondivisa, N<sub>A</sub> e N<sub>B</sub> sono nonce generati rispettivamente da A e B, e K è una chiave di sessione generata da B. Si analizzi il protocollo:</p>
+            <div class="protocol-notation-block">
+                1. A &rarr; B: N<sub>A</sub><br>
+                2. B &rarr; A: N<sub>A</sub>, N<sub>B</sub>, E<sub>KAB</sub>(K)<br>
+                3. A &rarr; B: E<sub>KAB</sub>(N<sub>B</sub>)
+            </div>
+            <p>(a) A è autenticato per B? Motivare. (b) B è autenticato per A? Motivare. (c) Il protocollo garantisce la freschezza della chiave K? Motivare.</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>(a) A è autenticato per B?</strong><br>
+                        Sì, A è autenticato per B. Nel passo 1, A invia a B una challenge (N<sub>A</sub>). Nel passo 2, B include N<sub>A</sub> nella sua risposta. Nel passo 3, A cifra N<sub>B</sub> con K<sub>AB</sub> (la chiave di sessione che B ha inviato) e la invia a B. Poiché solo A e B conoscono K<sub>AB</sub>, e A dimostra di conoscerla cifrando N<sub>B</sub>, B può essere sicuro che è A a rispondere e non un attaccante.</p>
+                    </li>
+                    <li>
+                        <p><strong>(b) B è autenticato per A?</strong><br>
+                        Sì, B è autenticato per A. Nel passo 2, B invia a A una challenge (N<sub>B</sub>). Nel passo 3, A risponde cifrando N<sub>B</sub> con K<sub>AB</sub>. Poiché solo B poteva generare K (la chiave di sessione) e solo A e B conoscono K<sub>AB</sub>, A può fidarsi che B ha partecipato allo scambio.
+                        <br>
+                        In realtà, l'autenticazione più forte di B per A avviene perché A, nel passo 3, usa la chiave di sessione K<sub>AB</sub> (derivata da K, che è stata cifrata da B con K<sub>AB</sub>) per cifrare N<sub>B</sub>. Se A riesce a cifrare correttamente N<sub>B</sub>, significa che K<sub>AB</sub> è stata correttamente stabilita e che B (che ha generato K e K<sub>AB</sub>) è autentico.
+                        </p>
+                    </li>
+                    <li>
+                        <p><strong>(c) Il protocollo garantisce la freschezza della chiave K?</strong><br>
+                        Sì, il protocollo garantisce la freschezza della chiave K.
+                        <ul>
+                            <li>K è generata da B nel passo 2 e cifrata con K<sub>AB</sub>.</li>
+                            <li>N<sub>A</sub>, generato da A nel passo 1, viene incluso nel messaggio 2 di B, garantendo che il messaggio di B (e quindi K) non sia un replay di un messaggio vecchio.</li>
+                            <li>N<sub>B</sub>, generato da B nel passo 2, viene cifrato da A nel passo 3, garantendo che la risposta di A e la sessione K<sub>AB</sub> siano fresche.</li>
+                        </ul>
+                        Entrambi i nonce (N<sub>A</sub> e N<sub>B</sub>) cooperano per garantire la freschezza dello scambio.
+                        </p>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio è un classico di analisi dei protocolli basati su nonce e chiavi simmetriche. È cruciale capire come ogni parte dimostra la sua identità (challenge-response) e come i nonce vengono usati per prevenire i replay attack (garantendo la freschezza).
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-3" class="exercise-item">
+            <h3 class="question-title">Esercizio 3: Protocollo Diffie-Hellman Autenticato (con Firma)</h3>
+            <p><strong>Domanda:</strong> Si consideri il seguente protocollo per lo scambio di chiavi Diffie-Hellman tra Alice (A) e Bob (B), usando firme digitali per l'autenticazione. Sia `g`, `p` i parametri pubblici di DH, `x_A`, `x_B` i segreti di Alice e Bob, e `A = g^{x_A} mod p`, `B = g^{x_B} mod p` le mezze chiavi pubbliche. Alice e Bob hanno chiavi pubbliche (PU<sub>A</sub>, PU<sub>B</sub>) e private (PR<sub>A</sub>, PR<sub>B</sub>) di RSA. Si spieghi come prevenire un attacco Man-in-the-Middle (MITM) e garantire Perfect Forward Secrecy (PFS).</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <p>Il protocollo DH base è vulnerabile al MITM perché le mezze chiavi pubbliche (A e B) non sono autenticate. Per prevenire questo, si usano firme digitali.</p>
+                <p><strong>Protocollo DH Autenticato con Firme (Schema EDH/ECDHE):</strong></p>
+                <div class="protocol-notation-block">
+                    1. A &rarr; B: A, {A}<sub>PR<sub>A</sub></sub>, N<sub>A</sub><br>
+                    2. B &rarr; A: B, {B}<sub>PR<sub>B</sub></sub>, N<sub>A</sub>, N<sub>B</sub><br>
+                    3. A &rarr; B: {N<sub>B</sub>}<sub>PR<sub>A</sub></sub>  (Optional, per autenticazione incrociata più forte)
+                </div>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Passo 1: Alice invia la sua mezza chiave autenticata</strong><br>
+                        Alice genera la sua mezza chiave pubblica `A` e la firma con la sua chiave privata RSA (`PR<sub>A</sub>`). Invia `A` e la firma, assieme a un `nonce` `N<sub>A</sub>` (per la freschezza), a Bob.
+                        </p>
+                    </li>
+                    <li>
+                        <p><strong>Passo 2: Bob verifica e risponde autenticato</strong><br>
+                        Bob riceve il messaggio di Alice.<br>
+                        <ul>
+                            <li>Verifica la firma di Alice usando la sua chiave pubblica (`PU<sub>A</sub>`) (ottenuta da un certificato X.509). Se la firma è valida, Bob è sicuro che `A` proviene da Alice.</li>
+                            <li>Bob genera la sua mezza chiave pubblica `B` e la firma con la sua chiave privata (`PR<sub>B</sub>`).</li>
+                            <li>Invia `B`, la sua firma, il `nonce` di Alice (`N<sub>A</sub>`) per dimostrare di averlo ricevuto, e un `nonce` suo (`N<sub>B</sub>`) per la freschezza del suo messaggio, ad Alice.</li>
+                        </ul>
+                        </p>
+                    </li>
+                    <li>
+                        <p><strong>Passo 3 (Opzionale): Alice verifica e risponde</strong><br>
+                        Alice riceve il messaggio di Bob e verifica la sua firma con `PU<sub>B</sub>`. Se valida, è sicura che `B` proviene da Bob.<br>
+                        Entrambi possono ora calcolare la chiave di sessione `K = A^{x_B} mod p = B^{x_A} mod p`.<br>
+                        Un passo opzionale (come `3. A &rarr; B: {N<sub>B</sub>}<sub>PR<sub>A</sub></sub>`) può essere aggiunto per fornire un'autenticazione incrociata più forte, in cui Alice dimostra di aver ricevuto `N<sub>B</sub>` e di aver stabilito la chiave di sessione.
+                        </p>
+                    </li>
+                    <li>
+                        <p><strong>Come si previene il MITM:</strong><br>
+                        L'attacco MITM è prevenuto perché le mezze chiavi DH (`A` e `B`) sono **firmate digitalmente**. Eve non può falsificare queste firme senza la chiave privata di Alice o Bob, quindi non può spacciarsi per loro durante lo scambio.
+                        </p>
+                    </li>
+                    <li>
+                        <p><strong>Come si garantisce Perfect Forward Secrecy (PFS):</strong><br>
+                        Per garantire PFS, le chiavi private `x_A` e `x_B` di Diffie-Hellman devono essere **effimere (temporanee)**, cioè generate casualmente per *ogni singola sessione* e distrutte al termine della sessione. La **chiave RSA** usata per firmare è una chiave a **lungo termine**. Se questa chiave RSA a lungo termine (es. `PR<sub>A</sub>`) viene compromessa in futuro, non rivelerà le chiavi di sessione DH passate perché le `x_A`, `x_B` di quelle sessioni sono già state distrutte. Solo le chiavi a lungo termine usate per firmare il processo di scambio verrebbero compromesse, ma non la segretezza retroattiva delle sessioni.
+                        </p>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo è un esercizio complesso che tocca molteplici concetti: DH base, MITM, firme digitali, PFS. Devi saper spiegare perché DH base non è sicuro, come le firme risolvono il problema, e la differenza tra chiavi a lungo termine e chiavi effimere per la PFS.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-4" class="exercise-item">
+            <h3 class="question-title">Esercizio 4: Certificati X.509 (Focus: Campi e Ruoli)</h3>
+            <p><strong>Domanda:</strong> Per un certificato X.509 rilasciato per un server web:</p>
+            <ol>
+                <li>Chi genera la chiave privata del server?</li>
+                <li>Chi decide la durata di validità del certificato?</li>
+                <li>La Certificate Authority (CA) conserva una copia della chiave privata del server come backup di sicurezza?</li>
+                <li>Quali sono i campi principali che un certificato X.509 contiene?</li>
+            </ol>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Chi genera la chiave privata del server?</strong><br>
+                        È il <highlight>server stesso (o l'entità che richiede il certificato)</highlight>. La chiave privata viene generata localmente sul server e non deve mai essere condivisa con la CA o altre parti.</p>
+                    </li>
+                    <li>
+                        <p><strong>Chi decide la durata di validità del certificato?</strong><br>
+                        È la <highlight>Certificate Authority (CA)</highlight> che decide la durata di validità, in base alle sue policy e agli standard. Questo è un campo presente nel certificato (`Validity: Not Before / Not After`).</p>
+                    </li>
+                    <li>
+                        <p><strong>La Certificate Authority (CA) conserva una copia della chiave privata del server come backup di sicurezza?</strong><br>
+                        <highlight>Assolutamente no</highlight>. La chiave privata deve rimanere segreta e nota solo al suo proprietario (il server in questo caso). Se la CA conservasse le chiavi private, la confidenzialità e la sicurezza sarebbero compromesse (la CA diventerebbe un punto di attacco critico). La CA gestisce solo la chiave pubblica e la sua associazione al soggetto.</p>
+                    </li>
+                    <li>
+                        <p><strong>Quali sono i campi principali che un certificato X.509 contiene?</strong></p>
+                        <ul>
+                            <li>**Versione:** La versione del formato X.509.</li>
+                            <li>**Numero Seriale:** Identificativo univoco del certificato all'interno della CA.</li>
+                            <li>**Algoritmo di Firma:** L'algoritmo usato dalla CA per firmare il certificato.</li>
+                            <li>**Issuer (Emittente):** Il nome della CA che ha rilasciato il certificato.</li>
+                            <li>**Validity (Validità):** Il periodo di tempo in cui il certificato è considerato valido (Not Before, Not After).</li>
+                            <li>**Subject (Soggetto):** Il nome (e altre informazioni) dell'entità a cui il certificato si riferisce (es. il server web).</li>
+                            <li>**Subject Public Key Info:** La <highlight>chiave pubblica</highlight> dell'entità a cui il certificato si riferisce, e l'algoritmo usato.</li>
+                            <li>**Signature (Firma):** La firma digitale della CA sul certificato, generata usando la sua chiave privata.</li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questa è una domanda teorica ricorrente che testa la conoscenza dei certificati X.509. È fondamentale capire i ruoli della CA e del Subject, e il principio che la chiave privata non viene mai condivisa.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-5" class="exercise-item">
+            <h3 class="question-title">Esercizio 5: HTTPS/TLS e Visibilità (Focus: Segretezza di Dati e Metadati)</h3>
+            <p><strong>Domanda:</strong> Un browser si collega a un server web tramite HTTPS. Si dica quali delle seguenti informazioni sono ottenibili da un attaccante passivo che osserva la connessione, e quali sono coperte dalla cifratura TLS:</p>
+            <ol>
+                <li>L'indirizzo IP del client.</li>
+                <li>Il nome host del server (es. `www.google.com`).</li>
+                <li>Il path della pagina web richiesta (es. `/secret/document.pdf`).</li>
+                <li>La quantità di dati trasferita tra client e server.</li>
+                <li>La chiave di sessione (`Master Secret`).</li>
+            </ol>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>L'indirizzo IP del client:</strong></p>
+                        <ul>
+                            <li><highlight>Ottenibile dall'attaccante</highlight>. L'indirizzo IP del client è un metadato fondamentale per l'instradamento a livello di rete e non è cifrato da TLS.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Il nome host del server (es. `www.google.com`):</strong></p>
+                        <ul>
+                            <li><highlight>Ottenibile dall'attaccante (di norma)</highlight>. Il nome host del server è spesso inviato in chiaro durante l'handshake TLS tramite l'estensione Server Name Indication (SNI), che permette al server di sapere quale certificato presentare. Eccezioni: se si usano tecnologie come Encrypted Client Hello (ECH), il nome host può essere nascosto.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Il path della pagina web richiesta (es. `/secret/document.pdf`):</strong></p>
+                        <ul>
+                            <li><highlight>Coperto dalla cifratura TLS</highlight>. Il path fa parte del contenuto della richiesta HTTP, che viene cifrato a livello di trasporto da TLS.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>La quantità di dati trasferita tra client e server:</strong></p>
+                        <ul>
+                            <li><highlight>Ottenibile dall'attaccante</highlight>. La quantità di dati transferred è un metadato (lunghezza dei pacchetti/record TLS) che non è cifrato. L'attaccante può osservare la dimensione dei record TLS e dedurre la quantità di traffico.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>La chiave di sessione (`Master Secret`):</strong></p>
+                        <ul>
+                            <li><highlight>Coperta dalla cifratura TLS</highlight>. La chiave di sessione (e le chiavi di cifratura derivate) sono il segreto principale della connessione TLS e non sono mai trasmesse in chiaro. Sono scambiate o generate in modo sicuro durante l'handshake TLS.</li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio è ricorrente e testa la tua comprensione del "limite" della cifratura TLS. Non tutto il traffico è segreto: i metadati come IP, nomi host (senza ECH) e lunghezze dei dati possono essere osservati. Il contenuto (path, payload HTTP) e le chiavi di sessione sono invece protetti.
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\nstyle NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            document.querySelectorAll('.exercise-item').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            const initiallyActiveSection = document.querySelector('.exercise-item.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
