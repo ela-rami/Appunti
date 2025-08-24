@@ -35,7 +35,7 @@
         }
     </style>
 </head>
-<body>
+<body data-pdf-path="../prof_appunti/lezione_XX_congestion.pdf"> <!-- Placeholder per il PDF specifico -->
     <div class="overlay"></div>
     <header class="topic-header">
         <button class="hamburger-menu" id="hamburger-btn">☰</button>
@@ -174,19 +174,13 @@
                     <p class="figure-caption">Three-way handshake di TCP.</p>
                 </div>
 
-                <h3 class="subsection-title">Casi Particolari nell'Handshake</h3>
+                <h3 class="subsection-title">Casi Particolari e Messaggi RST</h3>
                 <ul>
-                    <li><strong>Server non disponibile:</strong> Se il client invia SYN e il server non è in ascolto (LISTEN), il server risponde con un segmento <strong>RST (Reset)</strong>.</li>
-                    <li><strong>Apertura Simultanea:</strong> Raro, ma possibile. Se client e server tentano di stabilire una connessione contemporaneamente (entrambi inviano SYN):
-                        <ul>
-                            <li>Si scambiano SYN.</li>
-                            <li>Entrambi ricevono il SYN dell'altro e rispondono con SYN+ACK.</li>
-                            <li>Entrambi ricevono il SYN+ACK dell'altro e passano a ESTABLISHED.
-                            <br>Il risultato è una singola connessione ESTABLISHED.
-                            </li>
-                        </ul>
-                    </li>
-                    <li><strong>SYN_RECEIVED e SYN Duplicato (Esame ricorrente):</strong> Se una socket in stato <strong>SYN_RECEIVED</strong> riceve un secondo segmento con `SYN=1` ma con un <strong>diverso numero di sequenza</strong>, questo viene interpretato come un <em>nuovo tentativo di connessione separato</em>. La socket <em>rimane</em> in SYN_RECEIVED e invia un nuovo SYN+ACK appropriato per la nuova richiesta. Non passa allo stato CLOSED o ESTABLISHED.</li>
+                    <li><strong>Server non in LISTEN:</strong> Se un client invia un `SYN` a una porta su cui il server non è in `LISTEN` (o non c'è nessuna applicazione), il server risponde con un segmento <strong>RST (Reset)</strong>. Questo segnala un rifiuto immediato della connessione.</li>
+                    <li><strong>SYN duplicati / Retrasmissione SYN:</strong> Se un client invia un `SYN` e non riceve risposta, lo ritrasmette (con lo stesso `Seq=X`). Se la socket del server è in `SYN_RECEIVED` e riceve un `SYN` con lo <strong>stesso numero di sequenza</strong> (`X`) e la stessa 4-tuple, lo interpreta come una <strong>retrasmissione</strong> e risponde con un `SYN+ACK` identico al precedente.</li>
+                    <li><strong>SYN con SeqNum Diverso in SYN_RECEIVED (Situazione ambigua):</strong> Se una socket in stato <strong>SYN_RECEIVED</strong> riceve un `SYN` con `SYN=1` ma con un <strong>diverso numero di sequenza</strong> (e la stessa 4-tuple), TCP lo interpreta come un <em>nuovo tentativo di connessione separato</em> da parte dello stesso client. La socket <em>rimane</em> in `SYN_RECEIVED` e invia un nuovo `SYN+ACK` appropriato per questa nuova richiesta. Questo avvia un'ulteriore procedura di handshake.</li>
+                    <li><strong>Apertura Simultanea:</strong> Raro, ma possibile. Se client e server tentano di stabilire una connessione contemporaneamente (entrambi inviano `SYN`), il risultato è una singola connessione `ESTABLISHED`.</li>
+                    <li><strong>RST per Segmento Inatteso (Generale):</strong> Un host invia un <strong>RST</strong> se riceve un segmento TCP che non corrisponde a nessuna `TCB` attiva (es. un `ACK` verso una porta chiusa) o che ha un numero di sequenza completamente fuori range e non gestibile.</li>
                 </ul>
             </div>
         </article>
@@ -194,21 +188,25 @@
         <article id="data-transfer" class="content-section">
             <h2 class="section-title">4. Fase 2: Trasferimento Dati</h2>
             <div class="section-content">
-                <p>Una volta stabilita la connessione, entrambi gli endpoint sono in stato <strong>ESTABLISHED</strong> e possono scambiare dati.</p>
+                <p>Una volta stabilita la connessione, entrambi gli endpoint sono in stato <strong>ESTABLISHED</strong> e possono scambiare dati. Questa fase è governata da numeri di sequenza, ACK, controllo di flusso e congestione.</p>
 
                 <h3 class="subsection-title">Segmenti e ACK (Piggybacking)</h3>
                 <ul>
                     <li>I dati vengono trasmessi in <strong>segmenti</strong>. Ogni segmento porta un numero di sequenza (Seq) che indica il primo byte di dati in esso contenuto.</li>
                     <li>L'affidabilità è garantita da <strong>ACK (Acknowledgement)</strong>. Il ricevitore invia ACK per i byte ricevuti.</li>
-                    <li><strong>Piggybacking:</strong> Spesso, l'ACK per i dati ricevuti viene incluso in un segmento che trasporta dati nella direzione opposta. Questo riduce l'overhead.</li>
+                    <li><strong>Piggybacking:</strong> Spesso, l'ACK per i dati ricevuti viene incluso in un segmento che trasporta dati nella direzione opposta. Questo riduce l'overhead e migliora l'efficienza.</li>
                     <li><strong>Buffer:</strong> TCP mantiene buffer di invio e ricezione. I dati vengono scritti nel buffer di invio dall'applicazione mittente e letti dal buffer di ricezione dall'applicazione destinataria. TCP gestisce la segmentazione e il riassemblaggio.</li>
                 </ul>
 
                 <h3 class="subsection-title">Flag PSH (PUSH) e URG (URGENT)</h3>
-                Questi flag, se impostati nell'header TCP, influenzano la gestione dei dati.
+                Questi flag, se impostati nell'header TCP, influenzano la gestione dei dati dal ricevitore.
                 <ul>
-                    <li><strong>Flag PSH (PUSH):</strong> Indica al ricevitore di <strong>passare immediatamente i dati</strong> all'applicazione, bypassando i normali meccanismi di buffering di TCP. Utile per applicazioni interattive (es. Telnet) per ridurre la latenza.</li>
-                    <li><strong>Flag URG (URGENT):</strong> Indica che il segmento contiene dati urgenti. Il campo `UrgPtr` nell'header TCP specifica l'ultimo byte di dati urgenti. Questi dati vengono passati all'applicazione <strong>fuori sequenza</strong> o con priorità maggiore.</li>
+                    <li><strong>Flag PSH (PUSH):</strong> Il mittente, quando imposta questo flag, <strong>suggerisce</strong> al ricevitore di passare immediatamente i dati all'applicazione, bypassando i normali meccanismi di buffering di TCP. Non è un comando obbligatorio, ma un "hint". È utile per applicazioni interattive (es. Telnet) per ridurre la latenza.</li>
+                    <li><strong>Flag URG (URGENT):</strong> Indica che il segmento contiene dati urgenti. Il campo `UrgPtr` nell'header TCP specifica l'ultimo byte di dati urgenti. Questi dati dovrebbero essere passati all'applicazione <strong>fuori sequenza</strong> o con priorità maggiore.
+                        <div class="note-box">
+                            <strong>Caveat URG:</strong> Molti stack TCP moderni e applicazioni tendono a ignorare il flag URG, gestendo i dati urgenti a livello applicativo o semplicemente processandoli in sequenza come gli altri dati.
+                        </div>
+                    </li>
                 </ul>
             </div>
         </article>
@@ -230,6 +228,7 @@
                         <ul>
                             <li>Il <strong>responder</strong> riceve il FIN e risponde con un ACK.</li>
                             <li>Passa allo stato <strong>CLOSE_WAIT</strong>. In questo stato, il responder può ancora inviare dati all'initiator (chiamata "half-closure").</li>
+                            <li>L'initiator, ricevendo questo ACK, passa a <strong>FIN_WAIT_2</strong>.</li>
                         </ul>
                     </li>
                     <li><strong>Responder &rarr; Initiator: FIN (Seq=W)</strong>
@@ -246,7 +245,7 @@
                     </li>
                     <li><strong>Initiator (TIME_WAIT): Timeout</strong>
                         <ul>
-                            <li>L'initiator rimane in stato <strong>TIME_WAIT</strong> per un periodo di <strong>2 * MSL (Maximum Segment Lifetime)</strong>.</li>
+                            <li>L'initiator (active closer) rimane in stato <strong>TIME_WAIT</strong> per un periodo di <strong>2 * MSL (Maximum Segment Lifetime)</strong>.</li>
                             <li>Dopo questo timeout, passa a <strong>CLOSED</strong>.</li>
                         </ul>
                     </li>
@@ -264,7 +263,7 @@
                             CLOSE_WAIT --> LAST_ACK: Responder.close()
                             LAST_ACK --> CLOSED: ACK from Initiator
                     </pre>
-                    <p class="figure-caption">Fasi di chiusura di una connessione TCP.</p>
+                    <p class="figure-caption">Fasi di chiusura di una connessione TCP. L'initiator è l'endpoint che ha iniziato la chiusura.</p>
                 </div>
 
                 <h3 class="subsection-title">Motivazioni per lo Stato TIME_WAIT (Esame ricorrente)</h3>
@@ -275,7 +274,7 @@
                 </ul>
 
                 <h3 class="subsection-title">Chiusura Simultanea</h3>
-                <p>Se entrambi gli endpoint chiamano `close()` contemporaneamente, entrambi inviano FIN e poi passano a `CLOSING` dopo aver ricevuto il FIN dell'altro e aver risposto con ACK. Entrambi poi passano a `TIME_WAIT` dopo aver ricevuto l'ultimo ACK.</p>
+                <p>Se entrambi gli endpoint chiamano `close()` contemporaneamente, entrambi inviano FIN. Ricevendo il FIN dell'altro, rispondono con ACK e passano a `CLOSING`. Dopo aver ricevuto l'ultimo ACK dall'altro, entrambi passano a `TIME_WAIT`.</p>
             </div>
         </article>
     </main>
@@ -290,7 +289,7 @@
         // Inizializza Mermaid
         if (typeof mermaid !== 'undefined') {
             mermaid.initialize({
-                startOnLoad: false, /* Gestito manualmente dalle active-section */
+                startOnLoad: false, 
                 theme: 'dark',
                 darkMode: true,
                 fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
