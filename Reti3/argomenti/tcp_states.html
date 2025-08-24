@@ -63,16 +63,16 @@
         <article id="introduzione-tcp" class="content-section active-section">
             <h2 class="section-title">1. Introduzione a TCP (Transmission Control Protocol)</h2>
             <div class="section-content">
-                <p>TCP è uno dei protocolli di trasporto fondamentali di Internet. A differenza di UDP (User Datagram Protocol), TCP offre un servizio di comunicazione **affidabile**, **orientato alla connessione** e basato su **stream di byte**. La sua complessità deriva dal dover gestire queste garanzie in una rete non affidabile come Internet.</p>
+                <p>TCP è uno dei protocolli di trasporto fondamentali di Internet. A differenza di UDP (User Datagram Protocol), TCP offre un servizio di comunicazione <strong>affidabile</strong>, <strong>orientato alla connessione</strong> e basato su <strong>stream di byte</strong>. La sua complessità deriva dal dover gestire queste garanzie in una rete non affidabile come Internet.</p>
 
                 <h3 class="subsection-title">Caratteristiche Chiave di TCP</h3>
                 <ul>
-                    <li>**Affidabile:** Garantisce che i dati arrivino a destinazione senza errori, senza perdite e senza duplicazioni. Se un pacchetto si perde, TCP lo ritrasmette.</li>
-                    <li>**Orientato alla Connessione:** Prima di iniziare a trasferire dati, client e server devono stabilire una connessione ("handshake"). Questa connessione è uno "stato" logico mantenuto da entrambi gli endpoint.</li>
-                    <li>**Stream di Byte:** TCP vede i dati come un flusso continuo di byte, non come messaggi discreti. L'applicazione mittente scrive byte in un buffer, e l'applicazione ricevente legge byte da un altro buffer. TCP si occupa di segmentare/riassemblare questo flusso.</li>
-                    <li>**Controllo di Flusso:** Impedisce che un mittente veloce sovraccarichi un ricevitore lento, adattando la velocità di trasmissione alla capacità del buffer del ricevitore (`AdvertisedWindow`).</li>
-                    <li>**Controllo di Congestione:** Adatta la velocità di trasmissione alla capacità della rete stessa per evitare il collasso.</li>
-                    <li>**Full-Duplex:** La comunicazione è bidirezionale, i dati possono fluire in entrambe le direzioni contemporaneamente.</li>
+                    <li><strong>Affidabile:</strong> Garantisce che i dati arrivino a destinazione senza errori, senza perdite e senza duplicazioni. Se un pacchetto si perde, TCP lo ritrasmette.</li>
+                    <li><strong>Orientato alla Connessione:</strong> Prima di iniziare a trasferire dati, client e server devono stabilire una connessione ("handshake"). Questa connessione è uno "stato" logico mantenuto da entrambi gli endpoint.</li>
+                    <li><strong>Stream di Byte:</strong> TCP vede i dati come un flusso continuo di byte, non come messaggi discreti. L'applicazione mittente scrive byte in un buffer, e l'applicazione ricevente legge byte da un altro buffer. TCP si occupa di segmentare/riassemblare questo flusso.</li>
+                    <li><strong>Controllo di Flusso:</strong> Impedisce che un mittente veloce sovraccarichi un ricevitore lento, adattando la velocità di trasmissione alla capacità del buffer del ricevitore (`AdvertisedWindow`).</li>
+                    <li><strong>Controllo di Congestione:</strong> Adatta la velocità di trasmissione alla capacità della rete stessa per evitare il collasso.</li>
+                    <li><strong>Full-Duplex:</strong> La comunicazione è bidirezionale, i dati possono fluire in entrambe le direzioni contemporaneamente.</li>
                 </ul>
             </div>
         </article>
@@ -80,12 +80,12 @@
         <article id="diagramma-stati" class="content-section">
             <h2 class="section-title">2. Diagramma di Stato TCP: Il Cuore della Connessione</h2>
             <div class="section-content">
-                <p>La complessità di TCP è catturata dal suo **diagramma di stato**, che descrive il ciclo di vita di una connessione TCP. Ogni socket TCP si trova sempre in uno di questi stati e passa da uno all'altro in risposta a specifici **eventi** (chiamate di sistema da parte dell'applicazione o ricezione di segmenti TCP con determinati flag).</p>
+                <p>La complessità di TCP è catturata dal suo <strong>diagramma di stato</strong>, che descrive il ciclo di vita di una connessione TCP. Ogni socket TCP si trova sempre in uno di questi stati e passa da uno all'altro in risposta a specifici <strong>eventi</strong> (chiamate di sistema da parte dell'applicazione o ricezione di segmenti TCP con determinati flag).</p>
                 <p>Il diagramma di stato è composto da 11 stati principali e definisce le transizioni possibili, spesso con l'invio di un segmento in risposta. È fondamentale capire le tre fasi principali:</p>
                 <ul>
-                    <li>**Fase 1: Handshake** (creazione della connessione)</li>
-                    <li>**Fase 2: Data Transfer** (trasferimento dei dati)</li>
-                    <li>**Fase 3: Closing** (chiusura della connessione)</li>
+                    <li><strong>Fase 1: Handshake</strong> (creazione della connessione)</li>
+                    <li><strong>Fase 2: Data Transfer</strong> (trasferimento dei dati)</li>
+                    <li><strong>Fase 3: Closing</strong> (chiusura della connessione)</li>
                 </ul>
                 <div class="mermaid-container state-diagram">
                     <pre class="mermaid">
@@ -140,30 +140,30 @@
 
                 <h3 class="subsection-title">Three-Way Handshake Standard</h3>
                 <ol>
-                    <li>**Client &rarr; Server: SYN (Seq=X)**
+                    <li><strong>Client &rarr; Server: SYN (Seq=X)</strong>
                         <ul>
-                            <li>Il **client** (che esegue una "apertura attiva" con una chiamata `connect()`) invia un segmento SYN al server.</li>
+                            <li>Il <strong>client</strong> (che esegue una "apertura attiva" con una chiamata `connect()`) invia un segmento SYN al server.</li>
                             <li>Include un numero di sequenza iniziale (ISN) `X`. Non contiene payload dati.</li>
-                            <li>Client passa allo stato **SYN_SENT**.</li>
+                            <li>Client passa allo stato <strong>SYN_SENT</strong>.</li>
                         </ul>
                     </li>
-                    <li>**Server &rarr; Client: SYN+ACK (Seq=Y, Ack=X+1)**
+                    <li><strong>Server &rarr; Client: SYN+ACK (Seq=Y, Ack=X+1)</strong>
                         <ul>
-                            <li>Il **server** (che esegue una "apertura passiva" con `accept()`) riceve il SYN dal client.</li>
+                            <li>Il <strong>server</strong> (che esegue una "apertura passiva" con `accept()`) riceve il SYN dal client.</li>
                             <li>Risponde con un segmento SYN+ACK.</li>
                             <li>Include il suo ISN `Y` e conferma di aver ricevuto il SYN del client inviando `ACK = X+1`.</li>
-                            <li>Server passa allo stato **SYN_RECEIVED**.</li>
+                            <li>Server passa allo stato <strong>SYN_RECEIVED</strong>.</li>
                         </ul>
                     </li>
-                    <li>**Client &rarr; Server: ACK (Ack=Y+1)**
+                    <li><strong>Client &rarr; Server: ACK (Ack=Y+1)</strong>
                         <ul>
                             <li>Il client riceve il SYN+ACK dal server.</li>
                             <li>Conferma di aver ricevuto il SYN del server inviando `ACK = Y+1`.</li>
-                            <li>Client passa allo stato **ESTABLISHED**.</li>
+                            <li>Client passa allo stato <strong>ESTABLISHED</strong>.</li>
                         </ul>
                     </li>
                 </ol>
-                <p>Dopo il passo 3, anche il server riceve l'ultimo ACK e passa allo stato **ESTABLISHED**. A questo punto, la connessione è stabilita e il trasferimento dati può iniziare in entrambe le direzioni.</p>
+                <p>Dopo il passo 3, anche il server riceve l'ultimo ACK e passa allo stato <strong>ESTABLISHED</strong>. A questo punto, la connessione è stabilita e il trasferimento dati può iniziare in entrambe le direzioni.</p>
                 <div class="mermaid-container small-graph">
                     <pre class="mermaid">
                         graph LR
@@ -176,8 +176,8 @@
 
                 <h3 class="subsection-title">Casi Particolari nell'Handshake</h3>
                 <ul>
-                    <li>**Server non disponibile:** Se il client invia SYN e il server non è in ascolto (LISTEN), il server risponde con un segmento **RST (Reset)**.</li>
-                    <li>**Apertura Simultanea:** Raro, ma possibile. Se client e server tentano di stabilire una connessione contemporaneamente (entrambi inviano SYN):
+                    <li><strong>Server non disponibile:</strong> Se il client invia SYN e il server non è in ascolto (LISTEN), il server risponde con un segmento <strong>RST (Reset)</strong>.</li>
+                    <li><strong>Apertura Simultanea:</strong> Raro, ma possibile. Se client e server tentano di stabilire una connessione contemporaneamente (entrambi inviano SYN):
                         <ul>
                             <li>Si scambiano SYN.</li>
                             <li>Entrambi ricevono il SYN dell'altro e rispondono con SYN+ACK.</li>
@@ -186,7 +186,7 @@
                             </li>
                         </ul>
                     </li>
-                    <li>**SYN_RECEIVED e SYN Duplicato (Esame ricorrente):** Se una socket in stato **SYN_RECEIVED** riceve un secondo segmento con `SYN=1` ma con un **diverso numero di sequenza**, questo viene interpretato come un *nuovo tentativo di connessione separato*. La socket *rimane* in SYN_RECEIVED e invia un nuovo SYN+ACK appropriato per la nuova richiesta. Non passa allo stato CLOSED o ESTABLISHED.</li>
+                    <li><strong>SYN_RECEIVED e SYN Duplicato (Esame ricorrente):</strong> Se una socket in stato <strong>SYN_RECEIVED</strong> riceve un secondo segmento con `SYN=1` ma con un <strong>diverso numero di sequenza</strong>, questo viene interpretato come un <em>nuovo tentativo di connessione separato</em>. La socket <em>rimane</em> in SYN_RECEIVED e invia un nuovo SYN+ACK appropriato per la nuova richiesta. Non passa allo stato CLOSED o ESTABLISHED.</li>
                 </ul>
             </div>
         </article>
@@ -194,21 +194,21 @@
         <article id="data-transfer" class="content-section">
             <h2 class="section-title">4. Fase 2: Trasferimento Dati</h2>
             <div class="section-content">
-                <p>Una volta stabilita la connessione, entrambi gli endpoint sono in stato **ESTABLISHED** e possono scambiare dati.</p>
+                <p>Una volta stabilita la connessione, entrambi gli endpoint sono in stato <strong>ESTABLISHED</strong> e possono scambiare dati.</p>
 
                 <h3 class="subsection-title">Segmenti e ACK (Piggybacking)</h3>
                 <ul>
-                    <li>I dati vengono trasmessi in **segmenti**. Ogni segmento porta un numero di sequenza (Seq) che indica il primo byte di dati in esso contenuto.</li>
-                    <li>L'affidabilità è garantita da **ACK (Acknowledgement)**. Il ricevitore invia ACK per i byte ricevuti.</li>
-                    <li>**Piggybacking:** Spesso, l'ACK per i dati ricevuti viene incluso in un segmento che trasporta dati nella direzione opposta. Questo riduce l'overhead.</li>
-                    <li>**Buffer:** TCP mantiene buffer di invio e ricezione. I dati vengono scritti nel buffer di invio dall'applicazione mittente e letti dal buffer di ricezione dall'applicazione destinataria. TCP gestisce la segmentazione e il riassemblaggio.</li>
+                    <li>I dati vengono trasmessi in <strong>segmenti</strong>. Ogni segmento porta un numero di sequenza (Seq) che indica il primo byte di dati in esso contenuto.</li>
+                    <li>L'affidabilità è garantita da <strong>ACK (Acknowledgement)</strong>. Il ricevitore invia ACK per i byte ricevuti.</li>
+                    <li><strong>Piggybacking:</strong> Spesso, l'ACK per i dati ricevuti viene incluso in un segmento che trasporta dati nella direzione opposta. Questo riduce l'overhead.</li>
+                    <li><strong>Buffer:</strong> TCP mantiene buffer di invio e ricezione. I dati vengono scritti nel buffer di invio dall'applicazione mittente e letti dal buffer di ricezione dall'applicazione destinataria. TCP gestisce la segmentazione e il riassemblaggio.</li>
                 </ul>
 
                 <h3 class="subsection-title">Flag PSH (PUSH) e URG (URGENT)</h3>
                 Questi flag, se impostati nell'header TCP, influenzano la gestione dei dati.
                 <ul>
-                    <li>**Flag PSH (PUSH):** Indica al ricevitore di **passare immediatamente i dati** all'applicazione, bypassando i normali meccanismi di buffering di TCP. Utile per applicazioni interattive (es. Telnet) per ridurre la latenza.</li>
-                    <li>**Flag URG (URGENT):** Indica che il segmento contiene dati urgenti. Il campo `UrgPtr` nell'header TCP specifica l'ultimo byte di dati urgenti. Questi dati vengono passati all'applicazione **fuori sequenza** o con priorità maggiore.</li>
+                    <li><strong>Flag PSH (PUSH):</strong> Indica al ricevitore di <strong>passare immediatamente i dati</strong> all'applicazione, bypassando i normali meccanismi di buffering di TCP. Utile per applicazioni interattive (es. Telnet) per ridurre la latenza.</li>
+                    <li><strong>Flag URG (URGENT):</strong> Indica che il segmento contiene dati urgenti. Il campo `UrgPtr` nell'header TCP specifica l'ultimo byte di dati urgenti. Questi dati vengono passati all'applicazione <strong>fuori sequenza</strong> o con priorità maggiore.</li>
                 </ul>
             </div>
         </article>
@@ -216,38 +216,38 @@
         <article id="closing" class="content-section">
             <h2 class="section-title">5. Fase 3: Chiusura della Connessione (Four-Way Handshake)</h2>
             <div class="section-content">
-                <p>La chiusura di una connessione TCP è un processo che può essere avviato da uno qualsiasi dei due endpoint (l'**initiator**). È un "four-way handshake" logico, anche se può apparire come tre segmenti se un ACK e un FIN vengono combinati.</p>
+                <p>La chiusura di una connessione TCP è un processo che può essere avviato da uno qualsiasi dei due endpoint (l'<strong>initiator</strong>). È un "four-way handshake" logico, anche se può apparire come tre segmenti se un ACK e un FIN vengono combinati.</p>
 
                 <h3 class="subsection-title">Processo di Chiusura Standard</h3>
                 <ol>
-                    <li>**Initiator &rarr; Responder: FIN (Seq=U)**
+                    <li><strong>Initiator &rarr; Responder: FIN (Seq=U)</strong>
                         <ul>
-                            <li>L'**initiator** (esegue `close()`) invia un segmento FIN, indicando che non ha più dati da inviare.</li>
-                            <li>Passa allo stato **FIN_WAIT_1**.</li>
+                            <li>L'<strong>initiator</strong> (esegue `close()`) invia un segmento FIN, indicando che non ha più dati da inviare.</li>
+                            <li>Passa allo stato <strong>FIN_WAIT_1</strong>.</li>
                         </ul>
                     </li>
-                    <li>**Responder &rarr; Initiator: ACK (Ack=U+1)**
+                    <li><strong>Responder &rarr; Initiator: ACK (Ack=U+1)</strong>
                         <ul>
-                            <li>Il **responder** riceve il FIN e risponde con un ACK.</li>
-                            <li>Passa allo stato **CLOSE_WAIT**. In questo stato, il responder può ancora inviare dati all'initiator (chiamata "half-closure").</li>
+                            <li>Il <strong>responder</strong> riceve il FIN e risponde con un ACK.</li>
+                            <li>Passa allo stato <strong>CLOSE_WAIT</strong>. In questo stato, il responder può ancora inviare dati all'initiator (chiamata "half-closure").</li>
                         </ul>
                     </li>
-                    <li>**Responder &rarr; Initiator: FIN (Seq=W)**
+                    <li><strong>Responder &rarr; Initiator: FIN (Seq=W)</strong>
                         <ul>
                             <li>Quando l'applicazione sul responder decide di chiudere la sua parte della connessione (`close()`), il responder invia un segmento FIN.</li>
-                            <li>Passa allo stato **LAST_ACK**.</li>
+                            <li>Passa allo stato <strong>LAST_ACK</strong>.</li>
                         </ul>
                     </li>
-                    <li>**Initiator &rarr; Responder: ACK (Ack=W+1)**
+                    <li><strong>Initiator &rarr; Responder: ACK (Ack=W+1)</strong>
                         <ul>
                             <li>L'initiator riceve il FIN dal responder. Risponde con un ACK.</li>
-                            <li>Passa allo stato **TIME_WAIT**.</li>
+                            <li>Passa allo stato <strong>TIME_WAIT</strong>.</li>
                         </ul>
                     </li>
-                    <li>**Initiator (TIME_WAIT): Timeout**
+                    <li><strong>Initiator (TIME_WAIT): Timeout</strong>
                         <ul>
-                            <li>L'initiator rimane in stato **TIME_WAIT** per un periodo di **2 * MSL (Maximum Segment Lifetime)**.</li>
-                            <li>Dopo questo timeout, passa a **CLOSED**.</li>
+                            <li>L'initiator rimane in stato <strong>TIME_WAIT</strong> per un periodo di <strong>2 * MSL (Maximum Segment Lifetime)</strong>.</li>
+                            <li>Dopo questo timeout, passa a <strong>CLOSED</strong>.</li>
                         </ul>
                     </li>
                 </ol>
@@ -270,8 +270,8 @@
                 <h3 class="subsection-title">Motivazioni per lo Stato TIME_WAIT (Esame ricorrente)</h3>
                 <p>Lo stato `TIME_WAIT` è critico e spesso richiesto negli esami. Serve a due scopi principali:</p>
                 <ul>
-                    <li>**Affidabilità dell'Ultimo ACK:** Garantire che l'ultimo ACK inviato dall'initiator (passo 4) arrivi al responder. Se questo ACK si perde, il responder (in LAST_ACK) andrebbe in timeout e ritrasmetterebbe il FIN. Senza TIME_WAIT, l'initiator potrebbe aver già chiuso la connessione e ignorerebbe questo FIN.</li>
-                    <li>**Prevenzione di Segmenti "Reincarnati":** Impedire che segmenti vecchi di una *precedente incarnazione* della stessa connessione (stesse IP e porte) possano arrivare e interferire con una *nuova connessione* creata con gli stessi indirizzi e porte. Il timeout di 2*MSL assicura che tutti i segmenti della vecchia connessione siano "morti" prima che una nuova possa riutilizzare le stesse credenziali.</li>
+                    <li><strong>Affidabilità dell'Ultimo ACK:</strong> Garantire che l'ultimo ACK inviato dall'initiator (passo 4) arrivi al responder. Se questo ACK si perde, il responder (in LAST_ACK) andrebbe in timeout e ritrasmetterebbe il FIN. Senza TIME_WAIT, l'initiator potrebbe aver già chiuso la connessione e ignorerebbe questo FIN.</li>
+                    <li><strong>Prevenzione di Segmenti "Reincarnati":</strong> Impedire che segmenti vecchi di una <em>precedente incarnazione</em> della stessa connessione (stesse IP e porte) possano arrivare e interferire con una <em>nuova connessione</em> creata con gli stessi indirizzi e porte. Il timeout di 2*MSL assicura che tutti i segmenti della vecchia connessione siano "morti" prima che una nuova possa riutilizzare le stesse credenziali.</li>
                 </ul>
 
                 <h3 class="subsection-title">Chiusura Simultanea</h3>
