@@ -173,18 +173,20 @@
                     </li>
                     <li><strong>Tempo di Attesa (\(T_{wait}\)):</strong> Il tempo totale di attesa è la somma dell'<strong>IPG</strong> e del tempo di backoff:
                         <div class="math-block">
-                            $$ T_{wait} = \text{IPG} + (\text{valore\_casuale\_di\_k}) \cdot \text{Slot Time} $$
+                            $$ T_{wait} = \text{IPG} + (\text{valore casuale di k}) \cdot \text{Slot Time} $$
                         </div>
                     </li>
-                    <li><strong>Tempo di Attesa Medio:</strong> Negli esercizi, si chiede spesso il tempo di attesa *medio*. In questo caso, `valore_casuale_di_k` diventa la media dell'intervallo, ovvero \((0 + (2^n - 1)) / 2\).
+                    <li><strong>Tempo di Attesa Medio:</strong> Negli esercizi, si chiede spesso il tempo di attesa <em>medio</em>. In questo caso, `valore_casuale_di_k` diventa la media dell'intervallo, ovvero \((0 + (2^n - 1)) / 2\).
                         <div class="math-block">
-                            $$ T_{wait\_medio} = \text{IPG} + \left( \frac{2^n - 1}{2} \right) \cdot \text{Slot Time} $$
+                            $$ T_{wait\\_medio} = \text{IPG} + \left( \frac{2^n - 1}{2} \right) \cdot \text{Slot Time} $$
                         </div>
                     </li>
                     <li><strong>Esempio (seconda collisione, n=2):</strong>
-                        *   `k` è scelto da `[0, 2^2 - 1] = [0, 3]`.
-                        *   La media di `k` è `(0+1+2+3)/4 = 1.5`.
-                        *   `T_{wait_medio} = IPG + 1.5 \cdot \text{Slot Time}`.
+                        <ul>
+                            <li>`k` è scelto da `[0, 2^2 - 1] = [0, 3]`.</li>
+                            <li>La media di `k` è `(0+1+2+3)/4 = 1.5`.</li>
+                            <li>`T_{wait_medio} = IPG + 1.5 \cdot \text{Slot Time}`.</li>
+                        </ul>
                     </li>
                 </ul>
                 <div class="note-box">
@@ -282,10 +284,10 @@
                 <div class="note-box">
                     <strong>Overhead di Frame Wi-Fi Specifici:</strong>
                     <ul>
-                        <li>**RTS:** 20 byte</li>
-                        <li>**CTS:** 14 byte</li>
-                        <li>**ACK:** 14 byte</li>
-                        <li>**Data Frame Header:** Circa 30 byte (senza considerare indirizzi opzionali o payload).</li>
+                        <li><strong>RTS:</strong> 20 byte</li>
+                        <li><strong>CTS:</strong> 14 byte</li>
+                        <li><strong>ACK:</strong> 14 byte</li>
+                        <li><strong>Data Frame Header:</strong> Circa 30 byte (senza considerare indirizzi opzionali o payload).</li>
                     </ul>
                     Questi valori sono fondamentali per i calcoli di temporizzazione.
                 </div>
