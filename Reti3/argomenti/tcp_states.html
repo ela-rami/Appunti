@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stati e Funzionamento di TCP - Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per questa pagina */
+        .math-block {
+            font-size: 1.15em;
+        }
+        .figure-caption {
+            text-align: center;
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+        }
+        .mermaid-container.state-diagram {
+            max-width: 90%; /* Larger width for state diagrams */
+            margin-left: auto;
+            margin-right: auto;
+            overflow-x: auto;
+        }
+        .mermaid-container.state-diagram svg {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Stati e Funzionamento di TCP</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="tcp_states(es).html" class="sidebar-action-button" id="esercizi-btn">Esercizi</a>
+        </div>
+        <h2>Indice Argomento</h2>
+        <ul>
+            <li><a href="#introduzione-tcp" class="sidebar-link">1. Introduzione a TCP</a></li>
+            <li><a href="#diagramma-stati" class="sidebar-link">2. Diagramma di Stato TCP</a></li>
+            <li><a href="#handshake" class="sidebar-link">3. Fase 1: Handshake (Creazione Connessione)</a></li>
+            <li><a href="#data-transfer" class="sidebar-link">4. Fase 2: Trasferimento Dati</a></li>
+            <li><a href="#closing" class="sidebar-link">5. Fase 3: Chiusura Connessione</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="introduzione-tcp" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione a TCP (Transmission Control Protocol)</h2>
+            <div class="section-content">
+                <p>TCP è uno dei protocolli di trasporto fondamentali di Internet. A differenza di UDP (User Datagram Protocol), TCP offre un servizio di comunicazione **affidabile**, **orientato alla connessione** e basato su **stream di byte**. La sua complessità deriva dal dover gestire queste garanzie in una rete non affidabile come Internet.</p>
+
+                <h3 class="subsection-title">Caratteristiche Chiave di TCP</h3>
+                <ul>
+                    <li>**Affidabile:** Garantisce che i dati arrivino a destinazione senza errori, senza perdite e senza duplicazioni. Se un pacchetto si perde, TCP lo ritrasmette.</li>
+                    <li>**Orientato alla Connessione:** Prima di iniziare a trasferire dati, client e server devono stabilire una connessione ("handshake"). Questa connessione è uno "stato" logico mantenuto da entrambi gli endpoint.</li>
+                    <li>**Stream di Byte:** TCP vede i dati come un flusso continuo di byte, non come messaggi discreti. L'applicazione mittente scrive byte in un buffer, e l'applicazione ricevente legge byte da un altro buffer. TCP si occupa di segmentare/riassemblare questo flusso.</li>
+                    <li>**Controllo di Flusso:** Impedisce che un mittente veloce sovraccarichi un ricevitore lento, adattando la velocità di trasmissione alla capacità del buffer del ricevitore (`AdvertisedWindow`).</li>
+                    <li>**Controllo di Congestione:** Adatta la velocità di trasmissione alla capacità della rete stessa per evitare il collasso.</li>
+                    <li>**Full-Duplex:** La comunicazione è bidirezionale, i dati possono fluire in entrambe le direzioni contemporaneamente.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="diagramma-stati" class="content-section">
+            <h2 class="section-title">2. Diagramma di Stato TCP: Il Cuore della Connessione</h2>
+            <div class="section-content">
+                <p>La complessità di TCP è catturata dal suo **diagramma di stato**, che descrive il ciclo di vita di una connessione TCP. Ogni socket TCP si trova sempre in uno di questi stati e passa da uno all'altro in risposta a specifici **eventi** (chiamate di sistema da parte dell'applicazione o ricezione di segmenti TCP con determinati flag).</p>
+                <p>Il diagramma di stato è composto da 11 stati principali e definisce le transizioni possibili, spesso con l'invio di un segmento in risposta. È fondamentale capire le tre fasi principali:</p>
+                <ul>
+                    <li>**Fase 1: Handshake** (creazione della connessione)</li>
+                    <li>**Fase 2: Data Transfer** (trasferimento dei dati)</li>
+                    <li>**Fase 3: Closing** (chiusura della connessione)</li>
+                </ul>
+                <div class="mermaid-container state-diagram">
+                    <pre class="mermaid">
+                        stateDiagram-v2
+                            direction LR
+                            CLOSED --> LISTEN: passive open
+                            CLOSED --> SYN_SENT: active open
+
+                            LISTEN --> SYN_RECEIVED: SYN
+                            LISTEN --> CLOSED: close
+
+                            SYN_SENT --> SYN_RECEIVED: SYN+ACK
+                            SYN_SENT --> CLOSED: close / RST
+                            
+                            SYN_RECEIVED --> ESTABLISHED: ACK
+                            SYN_RECEIVED --> FIN_WAIT_1: close (simultaneous)
+                            SYN_RECEIVED --> CLOSED: RST
+
+                            ESTABLISHED --> FIN_WAIT_1: close
+                            ESTABLISHED --> CLOSE_WAIT: FIN
+                            ESTABLISHED --> CLOSED: RST
+
+                            FIN_WAIT_1 --> FIN_WAIT_2: ACK
+                            FIN_WAIT_1 --> CLOSING: FIN (simultaneous)
+                            FIN_WAIT_1 --> CLOSED: RST
+
+                            CLOSE_WAIT --> LAST_ACK: close
+                            CLOSE_WAIT --> CLOSED: RST
+
+                            FIN_WAIT_2 --> TIME_WAIT: FIN
+                            FIN_WAIT_2 --> CLOSED: RST
+
+                            CLOSING --> TIME_WAIT: ACK
+                            CLOSING --> CLOSED: RST
+
+                            LAST_ACK --> CLOSED: ACK
+                            
+                            TIME_WAIT --> CLOSED: timeout 2MSL
+                    </pre>
+                    <p class="figure-caption">Diagramma di stato semplificato di una connessione TCP. Le etichette indicano l'evento che scatena la transizione.</p>
+                </div>
+                <div class="note-box">
+                    <strong>TCP è Stateful:</strong> A differenza di UDP, TCP mantiene uno "stato" per ogni connessione. Questo stato include informazioni su numeri di sequenza, finestre, ACK attesi, ecc. È questo stato che permette le garanzie di affidabilità e ordine.
+                </div>
+            </div>
+        </article>
+
+        <article id="handshake" class="content-section">
+            <h2 class="section-title">3. Fase 1: Handshake (Creazione della Connessione)</h2>
+            <div class="section-content">
+                <p>La fase di handshake, nota anche come "three-way handshake", è il processo con cui due endpoint TCP stabiliscono una connessione prima di trasferire dati. Si basa sullo scambio di segmenti con i flag SYN (Synchronize) e ACK (Acknowledgement).</p>
+
+                <h3 class="subsection-title">Three-Way Handshake Standard</h3>
+                <ol>
+                    <li>**Client &rarr; Server: SYN (Seq=X)**
+                        <ul>
+                            <li>Il **client** (che esegue una "apertura attiva" con una chiamata `connect()`) invia un segmento SYN al server.</li>
+                            <li>Include un numero di sequenza iniziale (ISN) `X`. Non contiene payload dati.</li>
+                            <li>Client passa allo stato **SYN_SENT**.</li>
+                        </ul>
+                    </li>
+                    <li>**Server &rarr; Client: SYN+ACK (Seq=Y, Ack=X+1)**
+                        <ul>
+                            <li>Il **server** (che esegue una "apertura passiva" con `accept()`) riceve il SYN dal client.</li>
+                            <li>Risponde con un segmento SYN+ACK.</li>
+                            <li>Include il suo ISN `Y` e conferma di aver ricevuto il SYN del client inviando `ACK = X+1`.</li>
+                            <li>Server passa allo stato **SYN_RECEIVED**.</li>
+                        </ul>
+                    </li>
+                    <li>**Client &rarr; Server: ACK (Ack=Y+1)**
+                        <ul>
+                            <li>Il client riceve il SYN+ACK dal server.</li>
+                            <li>Conferma di aver ricevuto il SYN del server inviando `ACK = Y+1`.</li>
+                            <li>Client passa allo stato **ESTABLISHED**.</li>
+                        </ul>
+                    </li>
+                </ol>
+                <p>Dopo il passo 3, anche il server riceve l'ultimo ACK e passa allo stato **ESTABLISHED**. A questo punto, la connessione è stabilita e il trasferimento dati può iniziare in entrambe le direzioni.</p>
+                <div class="mermaid-container small-graph">
+                    <pre class="mermaid">
+                        graph LR
+                            Client -- SYN(Seq=X) --> Server
+                            Server -- SYN(Seq=Y), ACK(X+1) --> Client
+                            Client -- ACK(Y+1) --> Server
+                    </pre>
+                    <p class="figure-caption">Three-way handshake di TCP.</p>
+                </div>
+
+                <h3 class="subsection-title">Casi Particolari nell'Handshake</h3>
+                <ul>
+                    <li>**Server non disponibile:** Se il client invia SYN e il server non è in ascolto (LISTEN), il server risponde con un segmento **RST (Reset)**.</li>
+                    <li>**Apertura Simultanea:** Raro, ma possibile. Se client e server tentano di stabilire una connessione contemporaneamente (entrambi inviano SYN):
+                        <ul>
+                            <li>Si scambiano SYN.</li>
+                            <li>Entrambi ricevono il SYN dell'altro e rispondono con SYN+ACK.</li>
+                            <li>Entrambi ricevono il SYN+ACK dell'altro e passano a ESTABLISHED.
+                            <br>Il risultato è una singola connessione ESTABLISHED.
+                            </li>
+                        </ul>
+                    </li>
+                    <li>**SYN_RECEIVED e SYN Duplicato (Esame ricorrente):** Se una socket in stato **SYN_RECEIVED** riceve un secondo segmento con `SYN=1` ma con un **diverso numero di sequenza**, questo viene interpretato come un *nuovo tentativo di connessione separato*. La socket *rimane* in SYN_RECEIVED e invia un nuovo SYN+ACK appropriato per la nuova richiesta. Non passa allo stato CLOSED o ESTABLISHED.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="data-transfer" class="content-section">
+            <h2 class="section-title">4. Fase 2: Trasferimento Dati</h2>
+            <div class="section-content">
+                <p>Una volta stabilita la connessione, entrambi gli endpoint sono in stato **ESTABLISHED** e possono scambiare dati.</p>
+
+                <h3 class="subsection-title">Segmenti e ACK (Piggybacking)</h3>
+                <ul>
+                    <li>I dati vengono trasmessi in **segmenti**. Ogni segmento porta un numero di sequenza (Seq) che indica il primo byte di dati in esso contenuto.</li>
+                    <li>L'affidabilità è garantita da **ACK (Acknowledgement)**. Il ricevitore invia ACK per i byte ricevuti.</li>
+                    <li>**Piggybacking:** Spesso, l'ACK per i dati ricevuti viene incluso in un segmento che trasporta dati nella direzione opposta. Questo riduce l'overhead.</li>
+                    <li>**Buffer:** TCP mantiene buffer di invio e ricezione. I dati vengono scritti nel buffer di invio dall'applicazione mittente e letti dal buffer di ricezione dall'applicazione destinataria. TCP gestisce la segmentazione e il riassemblaggio.</li>
+                </ul>
+
+                <h3 class="subsection-title">Flag PSH (PUSH) e URG (URGENT)</h3>
+                Questi flag, se impostati nell'header TCP, influenzano la gestione dei dati.
+                <ul>
+                    <li>**Flag PSH (PUSH):** Indica al ricevitore di **passare immediatamente i dati** all'applicazione, bypassando i normali meccanismi di buffering di TCP. Utile per applicazioni interattive (es. Telnet) per ridurre la latenza.</li>
+                    <li>**Flag URG (URGENT):** Indica che il segmento contiene dati urgenti. Il campo `UrgPtr` nell'header TCP specifica l'ultimo byte di dati urgenti. Questi dati vengono passati all'applicazione **fuori sequenza** o con priorità maggiore.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="closing" class="content-section">
+            <h2 class="section-title">5. Fase 3: Chiusura della Connessione (Four-Way Handshake)</h2>
+            <div class="section-content">
+                <p>La chiusura di una connessione TCP è un processo che può essere avviato da uno qualsiasi dei due endpoint (l'**initiator**). È un "four-way handshake" logico, anche se può apparire come tre segmenti se un ACK e un FIN vengono combinati.</p>
+
+                <h3 class="subsection-title">Processo di Chiusura Standard</h3>
+                <ol>
+                    <li>**Initiator &rarr; Responder: FIN (Seq=U)**
+                        <ul>
+                            <li>L'**initiator** (esegue `close()`) invia un segmento FIN, indicando che non ha più dati da inviare.</li>
+                            <li>Passa allo stato **FIN_WAIT_1**.</li>
+                        </ul>
+                    </li>
+                    <li>**Responder &rarr; Initiator: ACK (Ack=U+1)**
+                        <ul>
+                            <li>Il **responder** riceve il FIN e risponde con un ACK.</li>
+                            <li>Passa allo stato **CLOSE_WAIT**. In questo stato, il responder può ancora inviare dati all'initiator (chiamata "half-closure").</li>
+                        </ul>
+                    </li>
+                    <li>**Responder &rarr; Initiator: FIN (Seq=W)**
+                        <ul>
+                            <li>Quando l'applicazione sul responder decide di chiudere la sua parte della connessione (`close()`), il responder invia un segmento FIN.</li>
+                            <li>Passa allo stato **LAST_ACK**.</li>
+                        </ul>
+                    </li>
+                    <li>**Initiator &rarr; Responder: ACK (Ack=W+1)**
+                        <ul>
+                            <li>L'initiator riceve il FIN dal responder. Risponde con un ACK.</li>
+                            <li>Passa allo stato **TIME_WAIT**.</li>
+                        </ul>
+                    </li>
+                    <li>**Initiator (TIME_WAIT): Timeout**
+                        <ul>
+                            <li>L'initiator rimane in stato **TIME_WAIT** per un periodo di **2 * MSL (Maximum Segment Lifetime)**.</li>
+                            <li>Dopo questo timeout, passa a **CLOSED**.</li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="mermaid-container state-diagram">
+                    <pre class="mermaid">
+                        stateDiagram-v2
+                            direction LR
+                            ESTABLISHED --> FIN_WAIT_1: Initiator.close()
+                            FIN_WAIT_1 --> FIN_WAIT_2: ACK from Responder
+                            FIN_WAIT_2 --> TIME_WAIT: FIN from Responder
+                            TIME_WAIT --> CLOSED: 2MSL Timeout
+
+                            ESTABLISHED --> CLOSE_WAIT: FIN from Initiator
+                            CLOSE_WAIT --> LAST_ACK: Responder.close()
+                            LAST_ACK --> CLOSED: ACK from Initiator
+                    </pre>
+                    <p class="figure-caption">Fasi di chiusura di una connessione TCP.</p>
+                </div>
+
+                <h3 class="subsection-title">Motivazioni per lo Stato TIME_WAIT (Esame ricorrente)</h3>
+                <p>Lo stato `TIME_WAIT` è critico e spesso richiesto negli esami. Serve a due scopi principali:</p>
+                <ul>
+                    <li>**Affidabilità dell'Ultimo ACK:** Garantire che l'ultimo ACK inviato dall'initiator (passo 4) arrivi al responder. Se questo ACK si perde, il responder (in LAST_ACK) andrebbe in timeout e ritrasmetterebbe il FIN. Senza TIME_WAIT, l'initiator potrebbe aver già chiuso la connessione e ignorerebbe questo FIN.</li>
+                    <li>**Prevenzione di Segmenti "Reincarnati":** Impedire che segmenti vecchi di una *precedente incarnazione* della stessa connessione (stesse IP e porte) possano arrivare e interferire con una *nuova connessione* creata con gli stessi indirizzi e porte. Il timeout di 2*MSL assicura che tutti i segmenti della vecchia connessione siano "morti" prima che una nuova possa riutilizzare le stesse credenziali.</li>
+                </ul>
+
+                <h3 class="subsection-title">Chiusura Simultanea</h3>
+                <p>Se entrambi gli endpoint chiamano `close()` contemporaneamente, entrambi inviano FIN e poi passano a `CLOSING` dopo aver ricevuto il FIN dell'altro e aver risposto con ACK. Entrambi poi passano a `TIME_WAIT` dopo aver ricevuto l'ultimo ACK.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Inizializza Mermaid
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, /* Gestito manualmente dalle active-section */
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\nstyle NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            // Renderizza i diagrammi solo quando la sezione è mostrata
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            // Trigger per la sezione inizialmente attiva
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
