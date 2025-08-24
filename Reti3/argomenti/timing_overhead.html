@@ -104,15 +104,15 @@
         <article id="introduzione-overhead" class="content-section active-section">
             <h2 class="section-title">1. Introduzione: L'Impatto dell'Overhead sulla Performance</h2>
             <div class="section-content">
-                <p>La trasmissione dei dati in una rete non è mai un semplice invio di "bit utili". Ogni protocollo, a ogni livello dello stack, aggiunge delle informazioni di controllo e richiede dei tempi di preparazione o attesa. Questo "costo aggiuntivo" è chiamato **overhead** e ha un impatto significativo sul throughput effettivo e sulla latenza della rete.</p>
+                <p>La trasmissione dei dati in una rete non è mai un semplice invio di "bit utili". Ogni protocollo, a ogni livello dello stack, aggiunge delle informazioni di controllo e richiede dei tempi di preparazione o attesa. Questo "costo aggiuntivo" è chiamato <strong>overhead</strong> e ha un impatto significativo sul throughput effettivo e sulla latenza della rete.</p>
 
                 <h3 class="subsection-title">Componenti della Latenza</h3>
                 <p>La latenza totale (\(L_{tot}\)) in una comunicazione è la somma di:</p>
                 <ul>
-                    <li>**Tempo di Propagazione (\(T_{prop}\)):** Tempo necessario al segnale per attraversare il mezzo fisico (dipende dalla distanza e dalla velocità di propagazione nel mezzo).</li>
-                    <li>**Tempo di Trasmissione (\(T_{trans}\)):** Tempo necessario per mettere tutti i bit di un messaggio sul mezzo fisico (dipende dalla dimensione del messaggio e dal bitrate del canale).</li>
-                    <li>**Tempo di Accodamento (\(T_{queue}\)):** Tempo che un pacchetto passa in coda nei buffer di router/switch, aspettando di essere processato.</li>
-                    <li>**Tempo di Elaborazione (\(T_{proc}\)):** Tempo che i dispositivi (schede di rete, router) impiegano per elaborare il pacchetto.</li>
+                    <li><strong>Tempo di Propagazione (\(T_{prop}\)):</strong> Tempo necessario al segnale per attraversare il mezzo fisico (dipende dalla distanza e dalla velocità di propagazione nel mezzo).</li>
+                    <li><strong>Tempo di Trasmissione (\(T_{trans}\)):</strong> Tempo necessario per mettere tutti i bit di un messaggio sul mezzo fisico (dipende dalla dimensione del messaggio e dal bitrate del canale).</li>
+                    <li><strong>Tempo di Accodamento (\(T_{queue}\)):</strong> Tempo che un pacchetto passa in coda nei buffer di router/switch, aspettando di essere processato.</li>
+                    <li><strong>Tempo di Elaborazione (\(T_{proc}\)):</strong> Tempo che i dispositivi (schede di rete, router) impiegano per elaborare il pacchetto.</li>
                 </ul>
                 <div class="math-block">
                     $$ L_{tot} = T_{prop} + T_{trans} + T_{queue} + T_{proc} $$
@@ -126,17 +126,17 @@
         <article id="ethernet-timing" class="content-section">
             <h2 class="section-title">2. Ethernet (IEEE 802.3): Dettagli di Temporizzazione</h2>
             <div class="section-content">
-                <p>Ethernet, in particolare nelle sue versioni classiche (10Base5, 10BaseT), utilizza il protocollo **CSMA/CD (Carrier Sense Multiple Access with Collision Detection)** per gestire l'accesso al mezzo condiviso. La temporizzazione è fondamentale per il rilevamento delle collisioni e la loro risoluzione.</p>
+                <p>Ethernet, in particolare nelle sue versioni classiche (10Base5, 10BaseT), utilizza il protocollo <strong>CSMA/CD (Carrier Sense Multiple Access with Collision Detection)</strong> per gestire l'accesso al mezzo condiviso. La temporizzazione è fondamentale per il rilevamento delle collisioni e la loro risoluzione.</p>
 
                 <h3 id="ethernet-frame-structure" class="subsection-title">2.1. Struttura del Frame Ethernet e Overhead</h3>
                 Un frame Ethernet ha una struttura ben definita che contribuisce all'overhead:
                 <ul>
-                    <li>**Preamble (7 byte):** Sequenza di bit (<code>10101010</code>) per la sincronizzazione del ricevitore.</li>
-                    <li>**Start of Frame Delimiter (SFD) (1 byte):** Sequenza di bit (<code>10101011</code>) che segnala l'inizio del frame effettivo.</li>
-                    <li>**Header Ethernet (14 byte):** Indirizzi MAC sorgente/destinazione (6+6 byte), Type/Length (2 byte).</li>
-                    <li>**Payload (min 46, max 1500 byte):** I dati utili.</li>
-                    <li>**Padding:** Se il payload è inferiore a 46 byte, viene aggiunto padding per raggiungere la dimensione minima del frame (64 byte totali). Questo è necessario per garantire che la trasmissione sia abbastanza lunga da permettere il rilevamento di collisioni.</li>
-                    <li>**Frame Check Sequence (FCS) / CRC (4 byte):** Controllo di ridondanza ciclica per rilevare errori.</li>
+                    <li><strong>Preamble (7 byte):</strong> Sequenza di bit (<code>10101010</code>) per la sincronizzazione del ricevitore.</li>
+                    <li><strong>Start of Frame Delimiter (SFD) (1 byte):</strong> Sequenza di bit (<code>10101011</code>) che segnala l'inizio del frame effettivo.</li>
+                    <li><strong>Header Ethernet (14 byte):</strong> Indirizzi MAC sorgente/destinazione (6+6 byte), Type/Length (2 byte).</li>
+                    <li><strong>Payload (min 46, max 1500 byte):</strong> I dati utili.</li>
+                    <li><strong>Padding:</strong> Se il payload è inferiore a 46 byte, viene aggiunto padding per raggiungere la dimensione minima del frame (64 byte totali). Questo è necessario per garantire che la trasmissione sia abbastanza lunga da permettere il rilevamento di collisioni.</li>
+                    <li><strong>Frame Check Sequence (FCS) / CRC (4 byte):</strong> Controllo di ridondanza ciclica per rilevare errori.</li>
                 </ul>
                 <div class="clarification-box">
                     <strong>Overhead del Frame:</strong> L'overhead di un frame Ethernet (senza Preamble e SFD, che non sono considerati parte del "frame" vero e proprio ma del preambolo di trasmissione) è: Header (14) + CRC (4) = 18 byte.
@@ -145,43 +145,43 @@
 
                 <h3 id="ethernet-collision-timing" class="subsection-title">2.2. Temporizzazione per il Rilevamento Collisioni (CSMA/CD)</h3>
                 <ul>
-                    <li>**Tempo di Propagazione (\(T_{prop}\)):** Il tempo che il segnale impiega per attraversare il cavo da un'estremità all'altra.</li>
-                    <li>**Slot Time:** Il tempo critico in CSMA/CD. È definito come il tempo necessario perché un segnale (e una sua eventuale collisione) possa propagarsi per tutta la rete e tornare indietro. È anche il tempo di cui si misura il Backoff.
+                    <li><strong>Tempo di Propagazione (\(T_{prop}\)):</strong> Il tempo che il segnale impiega per attraversare il cavo da un'estremità all'altra.</li>
+                    <li><strong>Slot Time:</strong> Il tempo critico in CSMA/CD. È definito come il tempo necessario perché un segnale (e una sua eventuale collisione) possa propagarsi per tutta la rete e tornare indietro. È anche il tempo di cui si misura il Backoff.
                         <div class="math-block">
                             $$ \text{Slot Time} = 2 \cdot T_{prop} $$
                         </div>
                         In Ethernet 10 Mbps, lo Slot Time è circa 51.2 µs (equivalente a 512 bit). Un frame Ethernet deve essere trasmesso per almeno uno Slot Time per garantire il rilevamento di collisioni.
                     </li>
-                    <li>**InterPacket Gap (IPG) (96 bit o 12 byte):** Un intervallo di tempo minimo (9.6 µs per Ethernet 10 Mbps) che una stazione deve attendere dopo la trasmissione (o una collisione) prima di poter tentare di trasmettere di nuovo. Serve per dare tempo alla rete di "pulirsi".</li>
-                    <li>**Jamming Sequence (32 bit o 4 byte):** Dopo aver rilevato una collisione, una stazione invia una sequenza di 32 bit per assicurarsi che tutte le altre stazioni rilevino la collisione.</li>
+                    <li><strong>InterPacket Gap (IPG) (96 bit o 12 byte):</strong> Un intervallo di tempo minimo (9.6 µs per Ethernet 10 Mbps) che una stazione deve attendere dopo la trasmissione (o una collisione) prima di poter tentare di trasmettere di nuovo. Serve per dare tempo alla rete di "pulirsi".</li>
+                    <li><strong>Jamming Sequence (32 bit o 4 byte):</strong> Dopo aver rilevato una collisione, una stazione invia una sequenza di 32 bit per assicurarsi che tutte le altre stazioni rilevino la collisione.</li>
                 </ul>
                 <div class="note-box">
                     <strong>Runt Frame:</strong> Un frame più corto della dimensione minima (64 byte) causato da una collisione ravvicinata. Contiene solo il preambolo (64 bit) e la jamming sequence (32 bit).
                 </div>
 
                 <h3 id="exponential-backoff" class="subsection-title">2.3. Calcolo del Tempo di Attesa con Exponential Backoff (Esame ricorrente)</h3>
-                <p>Quando una collisione viene rilevata in Ethernet, la stazione applica l'algoritmo di **Exponential Backoff** per determinare quanto tempo attendere prima di ritentare la trasmissione. Questo tempo è un multiplo casuale dello `Slot Time`.</p>
+                <p>Quando una collisione viene rilevata in Ethernet, la stazione applica l'algoritmo di <strong>Exponential Backoff</strong> per determinare quanto tempo attendere prima di ritentare la trasmissione. Questo tempo è un multiplo casuale dello `Slot Time`.</p>
                 <ul>
-                    <li>**Numero di Tentativi (n):** Indica quante collisioni consecutive si sono verificate per lo stesso frame.</li>
-                    <li>**Range di Scelta (k):** Il valore `k` è scelto casualmente da un intervallo \( [0, 2^n - 1] \).
+                    <li><strong>Numero di Tentativi (n):</strong> Indica quante collisioni consecutive si sono verificate per lo stesso frame.</li>
+                    <li><strong>Range di Scelta (k):</strong> Il valore `k` è scelto casualmente da un intervallo \( [0, 2^n - 1] \).
                         <ul>
-                            <li>Al primo tentativo fallito (n=1), $k \in [0, 1]$.</li>
-                            <li>Al secondo tentativo fallito (n=2), $k \in [0, 3]$.</li>
-                            <li>Al $n$-esimo tentativo fallito, $k \in [0, 2^n - 1]$.</li>
-                            <li>Il valore massimo per $n$ è spesso limitato a 10 (cioè $2^{10}-1=1023$) per evitare ritardi eccessivi, e dopo $n=15$ tentativi consecutivi, il frame viene scartato.</li>
+                            <li>Al primo tentativo fallito (n=1), \(k \in [0, 1]\).</li>
+                            <li>Al secondo tentativo fallito (n=2), \(k \in [0, 3]\).</li>
+                            <li>Al \(n\)-esimo tentativo fallito, \(k \in [0, 2^n - 1]\).</li>
+                            <li>Il valore massimo per \(n\) è spesso limitato a 10 (cioè \(2^{10}-1=1023\)) per evitare ritardi eccessivi, e dopo \(n=15\) tentativi consecutivi, il frame viene scartato.</li>
                         </ul>
                     </li>
-                    <li>**Tempo di Attesa (\(T_{wait}\)):** Il tempo totale di attesa è la somma dell'**IPG** e del tempo di backoff:
+                    <li><strong>Tempo di Attesa (\(T_{wait}\)):</strong> Il tempo totale di attesa è la somma dell'<strong>IPG</strong> e del tempo di backoff:
                         <div class="math-block">
                             $$ T_{wait} = \text{IPG} + (\text{valore\_casuale\_di\_k}) \cdot \text{Slot Time} $$
                         </div>
                     </li>
-                    <li>**Tempo di Attesa Medio:** Negli esercizi, si chiede spesso il tempo di attesa *medio*. In questo caso, `valore_casuale_di_k` diventa la media dell'intervallo, ovvero $(0 + (2^n - 1)) / 2$.
+                    <li><strong>Tempo di Attesa Medio:</strong> Negli esercizi, si chiede spesso il tempo di attesa *medio*. In questo caso, `valore_casuale_di_k` diventa la media dell'intervallo, ovvero \((0 + (2^n - 1)) / 2\).
                         <div class="math-block">
                             $$ T_{wait\_medio} = \text{IPG} + \left( \frac{2^n - 1}{2} \right) \cdot \text{Slot Time} $$
                         </div>
                     </li>
-                    <li>**Esempio (seconda collisione, n=2):**
+                    <li><strong>Esempio (seconda collisione, n=2):</strong>
                         *   `k` è scelto da `[0, 2^2 - 1] = [0, 3]`.
                         *   La media di `k` è `(0+1+2+3)/4 = 1.5`.
                         *   `T_{wait_medio} = IPG + 1.5 \cdot \text{Slot Time}`.
@@ -196,25 +196,25 @@
         <article id="wi-fi-timing" class="content-section">
             <h2 class="section-title">3. Wi-Fi (IEEE 802.11): Collision Avoidance e Intervalli</h2>
             <div class="section-content">
-                <p>Wi-Fi (IEEE 802.11) utilizza **CSMA/CA (Collision Sense Multiple Access with Collision Avoidance)**, che è un protocollo di prevenzione delle collisioni, a differenza di CSMA/CD che le rileva. Poiché le collisioni non possono essere rilevate durante la trasmissione in un mezzo wireless (half-duplex), è necessario prevenirle.</p>
+                <p>Wi-Fi (IEEE 802.11) utilizza <strong>CSMA/CA (Collision Sense Multiple Access with Collision Avoidance)</strong>, che è un protocollo di prevenzione delle collisioni, a differenza di CSMA/CD che le rileva. Poiché le collisioni non possono essere rilevate durante la trasmissione in un mezzo wireless (half-duplex), è necessario prevenirle.</p>
 
                 <h3 id="rts-cts-nav" class="subsection-title">3.1. Meccanismo RTS/CTS e NAV</h3>
-                <p>Per prevenire le collisioni (specialmente i problemi di *Hidden Node* e *Exposed Node*), Wi-Fi usa uno scambio di messaggi di controllo:</p>
+                <p>Per prevenire le collisioni (specialmente i problemi di <em>Hidden Node</em> e <em>Exposed Node</em>), Wi-Fi usa uno scambio di messaggi di controllo:</p>
                 <ul>
-                    <li>**RTS (Request To Send) (20 byte):** Il mittente invia un frame RTS al ricevitore, specificando la durata totale della trasmissione prevista.</li>
-                    <li>**CTS (Clear To Send) (14 byte):** Il ricevitore risponde con un frame CTS, confermando la durata.</li>
-                    <li>**NAV (Network Allocation Vector):** Tutti i nodi che "sentono" il RTS o il CTS impostano un timer (NAV) per la durata indicata. Durante questo periodo, **non trasmettono**, evitando collisioni.</li>
+                    <li><strong>RTS (Request To Send) (20 byte):</strong> Il mittente invia un frame RTS al ricevitore, specificando la durata totale della trasmissione prevista.</li>
+                    <li><strong>CTS (Clear To Send) (14 byte):</strong> Il ricevitore risponde con un frame CTS, confermando la durata.</li>
+                    <li><strong>NAV (Network Allocation Vector):</strong> Tutti i nodi che "sentono" il RTS o il CTS impostano un timer (NAV) per la durata indicata. Durante questo periodo, <strong>non trasmettono</strong>, evitando collisioni.</li>
                 </ul>
 
                 <h3 id="hidden-exposed-nodes" class="subsection-title">3.2. Problemi di Hidden Node e Exposed Node nel Wi-Fi (Esame ricorrente)</h3>
-                <p>I problemi di **Hidden Node** ed **Exposed Node** sono due scenari critici che rendono necessaria l'adozione di RTS/CTS in CSMA/CA.</p>
+                <p>I problemi di *<em>Hidden Node</em>* ed *<em>Exposed Node</em>* sono due scenari critici che rendono necessaria l'adozione di RTS/CTS in CSMA/CA.</p>
                 
                 <h4 class="subsubsection-title">Hidden Node Problem (Nodo Nascosto)</h4>
                 <p>Si verifica quando due stazioni (`A` e `C`) non si "sentono" direttamente (sono fuori dal reciproco raggio di trasmissione), ma entrambe possono "sentire" una terza stazione (`B`, spesso un Access Point). Se `A` e `C` tentano di trasmettere a `B` contemporaneamente, le loro trasmissioni collidono a `B`.</p>
                 <ul>
-                    <li>**Causa:** La mancanza di visibilità reciproca tra `A` e `C`.</li>
-                    <li>**Conseguenza:** Collisioni a `B` che `A` e `C` non rilevano immediatamente, riducendo il throughput.</li>
-                    <li>**Soluzione con RTS/CTS:**
+                    <li><strong>Causa:</strong> La mancanza di visibilità reciproca tra `A` e `C`.</li>
+                    <li><strong>Conseguenza:</strong> Collisioni a `B` che `A` e `C` non rilevano immediatamente, riducendo il throughput.</li>
+                    <li><strong>Soluzione con RTS/CTS:</strong>
                         <ul>
                             <li>`A` invia `RTS` a `B`. `B` risponde con `CTS` a `A`.</li>
                             <li>`C`, trovandosi nel raggio di `B`, sente il `CTS` e imposta il suo `NAV`. Si astiene dal trasmettere.</li>
@@ -226,12 +226,12 @@
                 <h4 class="subsubsection-title">Exposed Node Problem (Nodo Esposto)</h4>
                 <p>Si verifica quando una stazione (`B`) sta trasmettendo a `A`, e una terza stazione (`C`) si trova nel raggio di `B` (quindi sente `B`) ma è fuori dal raggio di `A` e di una potenziale destinazione `D`.</p>
                 <ul>
-                    <li>**Causa:** `C` sente `B` trasmettere e conclude erroneamente che il canale è occupato per tutti.</li>
-                    <li>**Conseguenza:** `C` non trasmette a `D`, anche se potrebbe farlo senza causare collisioni (poiché `A` non sente `C` e `D` non sente `B`). Questo porta a un **sottoutilizzo del canale**.</li>
-                    <li>**Soluzione con RTS/CTS:**
+                    <li><strong>Causa:</strong> `C` sente `B` trasmettere e conclude erroneamente che il canale è occupato per tutti.</li>
+                    <li><strong>Conseguenza:</strong> `C` non trasmette a `D`, anche se potrebbe farlo senza causare collisioni (poiché `A` non sente `C` e `D` non sente `B`). Questo porta a un <strong>sottoutilizzo del canale</strong>.</li>
+                    <li><strong>Soluzione con RTS/CTS:</strong>
                         <ul>
                             <li>`B` invia `RTS` ad `A`. `A` risponde con `CTS` a `B`.</li>
-                            <li>`C`, sentendo il `RTS` di `B`, imposta il suo `NAV`. Tuttavia, se `C` non sente il `CTS` di `A` (perché `A` è fuori portata), **C può dedurre di non interferire con la ricezione di A** e quindi può trasmettere a `D` (se `D` è fuori portata da `B`).</li>
+                            <li>`C`, sentendo il `RTS` di `B`, imposta il suo `NAV`. Tuttavia, se `C` non sente il `CTS` di `A` (perché `A` è fuori portata), <strong>C può dedurre di non interferire con la ricezione di A</strong> e quindi può trasmettere a `D` (se `D` è fuori portata da `B`).</li>
                             <li>Il `RTS` "dà voce" ad `A` per informare i nodi nel suo raggio di non trasmettere (se fossero Exposed Node).</li>
                         </ul>
                     </li>
@@ -243,9 +243,9 @@
                 <h3 id="ifs-sequence" class="subsection-title">3.3. Intervalli Interframe (IFS) e Sequenza Standard di Trasmissione Wi-Fi (Esame ricorrente)</h3>
                 <p>Wi-Fi definisce diversi intervalli di tempo tra i frame, per dare priorità a diversi tipi di traffico e risposte. Questi intervalli sono gerarchici e sono cruciali per la sequenza di trasmissione tipica (es. RTS/CTS/Data/ACK).</p>
                 <ul>
-                    <li>**SIFS (Short Interframe Space):** Il più breve (~10 µs). Usato per risposte immediate (ACK, CTS, ritrasmissioni).</li>
-                    <li>**PIFS (Point Coordination Function Interframe Space):** Medio (~20-30 µs). Usato dagli Access Point (AP) per trasmettere con priorità. $PIFS = SIFS + \text{Slot Time}$.</li>
-                    <li>**DIFS (Distributed Interframe Space):** Il più lungo (~30-40 µs). Usato dalle stazioni per iniziare una nuova trasmissione. $DIFS = SIFS + 2 \cdot \text{Slot Time}$.</li>
+                    <li><strong>SIFS (Short Interframe Space):</strong> Il più breve (~10 µs). Usato per risposte immediate (ACK, CTS, ritrasmissioni).</li>
+                    <li><strong>PIFS (Point Coordination Function Interframe Space):</strong> Medio (~20-30 µs). Usato dagli Access Point (AP) per trasmettere con priorità. \(PIFS = SIFS + \text{Slot Time}\).</li>
+                    <li><strong>DIFS (Distributed Interframe Space):</strong> Il più lungo (~30-40 µs). Usato dalle stazioni per iniziare una nuova trasmissione. \(DIFS = SIFS + 2 \cdot \text{Slot Time}\).</li>
                 </ul>
                 <div class="math-block">
                     $$ \text{SIFS} < \text{PIFS} < \text{DIFS} $$
@@ -256,14 +256,14 @@
                 <p>La sequenza completa per una trasmissione dati con RTS/CTS, che minimizza le collisioni e garantisce l'accesso prioritario, è la seguente:</p>
                 <div class="protocol-notation">
                     <p>Stazione A (Mittente) vuole inviare DATA a B (Ricevitore):</p>
-                    <p>1. A attende **DIFS** (Distributed Interframe Space).</p>
-                    <p>2. A invia **RTS** (Request To Send) a B.</p>
-                    <p>3. B attende **SIFS** (Short Interframe Space) (per rispondere subito al RTS).</p>
-                    <p>4. B invia **CTS** (Clear To Send) a A.</p>
-                    <p>5. A attende **SIFS** (per rispondere subito al CTS).</p>
-                    <p>6. A invia **DATA** (Payload) a B.</p>
-                    <p>7. B attende **SIFS** (per rispondere subito ai DATA).</p>
-                    <p>8. B invia **ACK** (Acknowledgement) a A.</p>
+                    <p>1. A attende <strong>DIFS</strong> (Distributed Interframe Space).</p>
+                    <p>2. A invia <strong>RTS</strong> (Request To Send) a B.</p>
+                    <p>3. B attende <strong>SIFS</strong> (Short Interframe Space) (per rispondere subito al RTS).</p>
+                    <p>4. B invia <strong>CTS</strong> (Clear To Send) a A.</p>
+                    <p>5. A attende <strong>SIFS</strong> (per rispondere subito al CTS).</p>
+                    <p>6. A invia <strong>DATA</strong> (Payload) a B.</p>
+                    <p>7. B attende <strong>SIFS</strong> (per rispondere subito ai DATA).</p>
+                    <p>8. B invia <strong>ACK</strong> (Acknowledgement) a A.</p>
                     <p>Dopo l'ACK, il canale è di nuovo libero e qualsiasi stazione dovrà attendere almeno un DIFS prima di iniziare una nuova sequenza.</p>
                 </div>
                 <div class="note-box">
@@ -272,12 +272,12 @@
 
                 <h3 id="wi-fi-frame-overhead" class="subsection-title">3.4. Frame Wi-Fi e Overhead</h3>
                 <ul>
-                    <li>**Frame Control (16 bit):** Identifica il tipo di frame (DATA, RTS, CTS, ACK, Beacon), sottotipo, ecc.</li>
-                    <li>**Duration/ID (16 bit):** Specifica la durata della trasmissione (NAV) o l'ID della rete.</li>
-                    <li>**Indirizzi MAC (fino a 4):** Sorgente, destinazione, indirizzi AP (per la distribuzione tra DS).</li>
-                    <li>**Sequence Control (16 bit):** Numeri di sequenza per frammentazione e riassemblaggio.</li>
-                    <li>**CRC (32 bit):** Per la rilevazione errori.</li>
-                    <li>**Preamble + PLCP Header (o SFD):** Precede il frame MAC per sincronizzazione e informazioni sul formato fisico.</li>
+                    <li><strong>Frame Control (16 bit):</strong> Identifica il tipo di frame (DATA, RTS, CTS, ACK, Beacon), sottotipo, ecc.</li>
+                    <li><strong>Duration/ID (16 bit):</strong> Specifica la durata della trasmissione (NAV) o l'ID della rete.</li>
+                    <li><strong>Indirizzi MAC (fino a 4):</strong> Sorgente, destinazione, indirizzi AP (per la distribuzione tra DS).</li>
+                    <li><strong>Sequence Control (16 bit):</strong> Numeri di sequenza per frammentazione e riassemblaggio.</li>
+                    <li><strong>CRC (32 bit):</strong> Per la rilevazione errori.</li>
+                    <li><strong>Preamble + PLCP Header (o SFD):</strong> Precede il frame MAC per sincronizzazione e informazioni sul formato fisico.</li>
                 </ul>
                 <div class="note-box">
                     <strong>Overhead di Frame Wi-Fi Specifici:</strong>
@@ -295,24 +295,24 @@
         <article id="bluetooth-timing" class="content-section">
             <h2 class="section-title">4. Bluetooth (IEEE 802.15): TDM e Slot</h2>
             <div class="section-content">
-                <p>Bluetooth (IEEE 802.15) utilizza una strategia completamente diversa per l'accesso al mezzo rispetto a Ethernet e Wi-Fi: **TDM (Time Division Multiplexing)**, basato su slot di tempo. È un protocollo robusto, progettato per comunicazioni a corto raggio con basso consumo energetico e latenza prevedibile.</p>
+                <p>Bluetooth (IEEE 802.15) utilizza una strategia completamente diversa per l'accesso al mezzo rispetto a Ethernet e Wi-Fi: <strong>TDM (Time Division Multiplexing)</strong>, basato su slot di tempo. È un protocollo robusto, progettato per comunicazioni a corto raggio con basso consumo energetico e latenza prevedibile.</p>
 
                 <h3 id="bluetooth-piconet" class="subsection-title">4.1. Piconet e Accesso TDM</h3>
                 <ul>
-                    <li>**Piconet:** Una piccola rete ad hoc formata da un **Master** e fino a 7 **Slave** attivi. Il Master controlla la comunicazione.</li>
-                    <li>**Slot di Tempo (625 µs):** Il tempo è diviso in slot fissi.</li>
-                    <li>**Comunicazione Master-Slave:** La comunicazione avviene in modo alternato: il Master trasmette negli slot pari, uno Slave risponde negli slot dispari (e solo se interrogato dal Master). I nodi slave non comunicano direttamente tra loro.</li>
-                    <li>**FHSS (Frequency Hopping Spread Spectrum):** Bluetooth cambia frequenza ad ogni slot per ridurre le interferenze (saltando tra 79 canali a 1 MHz nella banda 2.4 GHz).</li>
-                    <li>**Banda Minima Garantita:** Il TDM garantisce a ogni dispositivo attivo un accesso al canale prevedibile, eliminando le collisioni all'interno della piconet.</li>
-                    <li>**Modalità Multi-Slot:** La trasmissione può occupare anche **multi-slot** (es. 3 o 5 slot consecutivi), nel qual caso il frequency hopping viene sospeso per la durata del multi-slot.</li>
+                    <li><strong>Piconet:</strong> Una piccola rete ad hoc formata da un <strong>Master</strong> e fino a 7 <strong>Slave</strong> attivi. Il Master controlla la comunicazione.</li>
+                    <li><strong>Slot di Tempo (625 µs):</strong> Il tempo è diviso in slot fissi.</li>
+                    <li><strong>Comunicazione Master-Slave:</strong> La comunicazione avviene in modo alternato: il Master trasmette negli slot pari, uno Slave risponde negli slot dispari (e solo se interrogato dal Master). I nodi slave non comunicano direttamente tra loro.</li>
+                    <li><strong>FHSS (Frequency Hopping Spread Spectrum):</strong> Bluetooth cambia frequenza ad ogni slot per ridurre le interferenze (saltando tra 79 canali a 1 MHz nella banda 2.4 GHz).</li>
+                    <li><strong>Banda Minima Garantita:</strong> Il TDM garantisce a ogni dispositivo attivo un accesso al canale prevedibile, eliminando le collisioni all'interno della piconet.</li>
+                    <li><strong>Modalità Multi-Slot:</strong> La trasmissione può occupare anche <strong>multi-slot</strong> (es. 3 o 5 slot consecutivi), nel qual caso il frequency hopping viene sospeso per la durata del multi-slot.</li>
                 </ul>
 
                 <h3 id="bluetooth-packet-overhead" class="subsection-title">4.2. Struttura del Packet Bluetooth e Overhead</h3>
                 Un pacchetto Bluetooth è composto da:
                 <ul>
-                    <li>**Access Code (72 bit):** Usato per la sincronizzazione del ricevitore e l'identificazione del pacchetto, derivato dall'indirizzo del Master.</li>
-                    <li>**Packet Header (54 bit):** Contiene l'indirizzo MAC dello slave di destinazione (3 bit), il tipo di link, flag per ARQ/SEQ, e un checksum (HEC).</li>
-                    <li>**Payload (variabile):** I dati utili. Max 483 bit per slot singolo, fino a 2745 bit per 5 slot.</li>
+                    <li><strong>Access Code (72 bit):</strong> Usato per la sincronizzazione del ricevitore e l'identificazione del pacchetto, derivato dall'indirizzo del Master.</li>
+                    <li><strong>Packet Header (54 bit):</strong> Contiene l'indirizzo MAC dello slave di destinazione (3 bit), il tipo di link, flag per ARQ/SEQ, e un checksum (HEC).</li>
+                    <li><strong>Payload (variabile):</strong> I dati utili. Max 483 bit per slot singolo, fino a 2745 bit per 5 slot.</li>
                 </ul>
                 <div class="note-box">
                     <strong>Overhead del Packet Bluetooth:</strong> L'overhead minimo di un pacchetto Bluetooth è Access Code (72 bit) + Packet Header (54 bit) = 126 bit (o 15.75 byte). Questo è il costo fisso per ogni pacchetto.
@@ -320,10 +320,10 @@
                 <div class="clarification-box">
                     <strong>Vantaggi TDM (Bluetooth) vs CSMA/CA (Wi-Fi):</strong>
                     <ul>
-                        <li>**Banda Minima Garantita:** Il TDM assegna slot di tempo, evitando contese e garantendo un minimo di banda.</li>
-                        <li>**Assenza di Collisioni:** Il meccanismo di alternanza Master-Slave e FHSS minimizza le collisioni all'interno della piconet.</li>
-                        <li>**Minore Consumo Energetico:** Meno traffico di controllo e meno ricetrasmissioni rispetto a CSMA/CA.</li>
-                        <li>**Latenza Massima Garantita:** Il tempo di attesa per trasmettere è prevedibile (multiplo dello slot time).</li>
+                        <li><strong>Banda Minima Garantita:</strong> Il TDM assegna slot di tempo, evitando contese e garantendo un minimo di banda.</li>
+                        <li><strong>Assenza di Collisioni:</strong> Il meccanismo di alternanza Master-Slave e FHSS minimizza le collisioni all'interno della piconet.</li>
+                        <li><strong>Minore Consumo Energetico:</strong> Meno traffico di controllo e meno ricetrasmissioni rispetto a CSMA/CA.</li>
+                        <li><strong>Latenza Massima Garantita:</strong> Il tempo di attesa per trasmettere è prevedibile (multiplo dello slot time).</li>
                     </ul>
                 </div>
             </div>
@@ -332,7 +332,7 @@
         <article id="calcolo-efficienza" class="content-section">
             <h2 class="section-title">5. Calcolo dell'Efficienza di Trasmissione</h2>
             <div class="section-content">
-                <p>L'**efficienza di trasmissione** (o utilizzo del canale) è il rapporto tra il tempo (o i bit) utilizzati per trasmettere i dati utili e il tempo (o i bit) totali impiegati sul canale, inclusi tutti gli overhead e i tempi di attesa. È un parametro fondamentale per valutare quanto efficacemente una tecnologia sfrutta la banda disponibile.</p>
+                <p>L'<strong>efficienza di trasmissione</strong> (o utilizzo del canale) è il rapporto tra il tempo (o i bit) utilizzati per trasmettere i dati utili e il tempo (o i bit) totali impiegati sul canale, inclusi tutti gli overhead e i tempi di attesa. È un parametro fondamentale per valutare quanto efficacemente una tecnologia sfrutta la banda disponibile.</p>
                 <div class="math-block">
                     $$ \text{Efficienza} = \frac{\text{Tempo di Trasmissione Payload}}{\text{Tempo Totale Impiegato sul Canale}} \quad \text{oppure} \quad \frac{\text{Bit Payload}}{\text{Bit Totali Trasmessi}} $$
                 </div>
@@ -341,26 +341,26 @@
                 <h3 class="subsection-title">Componenti da Includere nei Calcoli</h3>
                 Per calcolare il "Tempo Totale Impiegato sul Canale" o i "Bit Totali Trasmessi", devi sommare attentamente:
                 <ul>
-                    <li>**Bit/Byte del Payload:** I dati utili che l'applicazione vuole inviare.</li>
-                    <li>**Bit/Byte dell'Header del Frame:** Le informazioni di controllo del livello Data Link (es. indirizzi MAC, Type, Length/ID, Sequence Control).</li>
-                    <li>**Bit/Byte di Controllo Errori:** CRC/FCS.</li>
-                    <li>**Bit/Byte di Preambolo/Sincronizzazione:** Preamble, SFD, Access Code.</li>
-                    <li>**Tempi di Attesa Inerenti al Protocollo:**
+                    <li><strong>Bit/Byte del Payload:</strong> I dati utili che l'applicazione vuole inviare.</li>
+                    <li><strong>Bit/Byte dell'Header del Frame:</strong> Le informazioni di controllo del livello Data Link (es. indirizzi MAC, Type, Length/ID, Sequence Control).</li>
+                    <li><strong>Bit/Byte di Controllo Errori:</strong> CRC/FCS.</li>
+                    <li><strong>Bit/Byte di Preambolo/Sincronizzazione:</strong> Preamble, SFD, Access Code.</li>
+                    <li><strong>Tempi di Attesa Inerenti al Protocollo:</strong>
                         <ul>
-                            <li>**Ethernet (CSMA/CD):** IPG, Slot Time (per backoff).</li>
-                            <li>**Wi-Fi (CSMA/CA):** Intervalli IFS (SIFS, PIFS, DIFS), tempi di RTS/CTS/ACK.</li>
-                            <li>**Bluetooth (TDM):** Slot Time (625 µs) per ogni trasmissione Master-Slave.</li>
+                            <li><strong>Ethernet (CSMA/CD):</strong> IPG, Slot Time (per backoff).</li>
+                            <li><strong>Wi-Fi (CSMA/CA):</strong> Intervalli IFS (SIFS, PIFS, DIFS), tempi di RTS/CTS/ACK.</li>
+                            <li><strong>Bluetooth (TDM):</strong> Slot Time (625 µs) per ogni trasmissione Master-Slave.</li>
                         </ul>
                     </li>
-                    <li>**RTT (Round Trip Time):** A volte, anche l'RTT (tempo di andata e ritorno) è rilevante, specialmente nei protocolli Stop-and-Wait o quando si parla di "tempo per riempire la pipe".</li>
+                    <li><strong>RTT (Round Trip Time):</strong> A volte, anche l'RTT (tempo di andata e ritorno) è rilevante, specialmente nei protocolli Stop-and-Wait o quando si parla di "tempo per riempire la pipe".</li>
                 </ul>
                 <div class="note-box">
                     <strong>Punti Chiave per i Calcoli:</strong>
                     <ul>
-                        <li>**Bitrate:** Converti sempre i Mbps in bps (moltiplicando per \(10^6\)) per i calcoli.</li>
-                        <li>**Byte vs Bit:** Ricorda che 1 byte = 8 bit. Spesso devi convertire le dimensioni dei frame da byte a bit per lavorare con il bitrate.</li>
-                        <li>**Propagazione:** Negli esercizi di temporizzazione, se non specificato, il tempo di propagazione si può ignorare, ma se è dato (es. 10 µs) va incluso.</li>
-                        <li>**Contese:** Se l'esercizio specifica "senza contese" o "una sola stazione trasmette", i calcoli si semplificano. Altrimenti, devi considerare backoff e intervalli di attesa.</li>
+                        <li><strong>Bitrate:</strong> Converti sempre i Mbps in bps (moltiplicando per \(10^6\)) per i calcoli.</li>
+                        <li><strong>Byte vs Bit:</strong> Ricorda che 1 byte = 8 bit. Spesso devi convertire le dimensioni dei frame da byte a bit per lavorare con il bitrate.</li>
+                        <li><strong>Propagazione:</strong> Negli esercizi di temporizzazione, se non specificato, il tempo di propagazione si può ignorare, ma se è dato (es. 10 µs) va incluso.</li>
+                        <li><strong>Contese:</strong> Se l'esercizio specifica "senza contese" o "una sola stazione trasmette", i calcoli si semplificano. Altrimenti, devi considerare backoff e intervalli di attesa.</li>
                     </ul>
                 </div>
             </div>
