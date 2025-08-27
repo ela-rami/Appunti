@@ -81,21 +81,6 @@
                     <li><code>LastByteSent</code>: L'ultimo byte inviato dal mittente.</li>
                     <li><code>LastByteWritten</code>: L'ultimo byte scritto dall'applicazione nel buffer di invio.</li>
                 </ul>
-                <div class="mermaid-container buffer-diagram">
-                    <pre class="mermaid">
-                        gantt
-                            title Buffer di Invio del Mittente
-                            dateFormat X
-                            axisFormat %s
-
-                            section Dati
-                            Dati Scrivibili :done, b1, 0, 0
-                            Dati Già Scrivibili ma non Inviati: active, b2, 0, 0
-                            Dati Inviati (unACKed): crit, b3, 0, 0
-                            Dati Riscontrati (ACKed): b4, 0, 0
-                    </pre>
-                    <p class="figure-caption">Visualizzazione del buffer di invio del mittente.</p>
-                </div>
 
                 <h3 class="subsection-title">Lato Ricevitore (Receiver)</h3>
                 <p>Il ricevitore gestisce un buffer di ricezione, che contiene:</p>
@@ -116,30 +101,29 @@
         <article id="advertised-window" class="content-section">
             <h2 class="section-title">3. AdvertisedWindow e EffectiveWindow (Cruciale per gli Esercizi)</h2>
             <div class="section-content">
-                <h3 class="subsection-title">AdvertisedWindow (awnd)</h3>
-                <p>Il cuore del controllo di flusso di TCP è la **AdvertisedWindow (Finestra Pubblicizzata)**. È il valore che il **ricevitore** comunica al mittente per indicare la quantità di spazio libero nel suo buffer di ricezione.</p>
+                <h3 class="subsection-title">AdvertisedWindow (rwnd) - Corretto</h3>
+                <p>Il cuore del controllo di flusso di TCP è la **AdvertisedWindow (Finestra Pubblicizzata)**. È il valore che il **ricevitore** comunica al mittente per indicare la quantità di spazio libero nel suo buffer di ricezione, tenendo conto anche dei dati ricevuti fuori ordine.</p>
                 <div class="math-block">
-                    $$ \text{AdvertisedWindow} = \text{MaxRcvBuffer} - (\text{NextByteExpected} - 1 - \text{LastByteRead}) $$
+                    $$ \text{AdvertisedWindow} = \text{MaxRcvBuffer} - (\text{LastByteRcvd} - \text{LastByteRead}) $$
+                </div>
+                <div class="clarification-box">
+                    <strong>Correzione Importante:</strong> La formula corretta utilizza `LastByteRcvd` (l'ultimo byte ricevuto, anche fuori ordine) e non `NextByteExpected`. Questo perché i dati fuori ordine, anche se non possono essere ancora passati all'applicazione, occupano comunque spazio nel buffer. Usare `NextByteExpected` pubblicizzerebbe più spazio di quello realmente disponibile, rischiando un overflow.
                 </div>
                 <p>Questo valore viene inviato al mittente nel campo `Window Size` di ogni segmento TCP. In pratica, il ricevitore sta dicendo: "Puoi inviarmi al massimo `AdvertisedWindow` byte a partire da `NextByteExpected`."</p>
 
-                <h3 class="subsection-title">EffectiveWindow</h3>
-                <p>Il **mittente** deve rispettare questo limite. La quantità di dati che può ancora inviare è determinata dalla sua **EffectiveWindow (Finestra Effettiva)**. Questa non è solo l'awnd, ma tiene conto dei dati già inviati ma non ancora riscontrati.</p>
+                <h3 class="subsection-title">Byte Inviabili e Finestra Effettiva</h3>
+                <p>Il **mittente** deve rispettare questo limite, ma deve anche considerare la congestione della rete (controllata dalla `CongestionWindow`, `cwnd`). La quantità massima di dati che può avere in transito è il minimo tra le due finestre:</p>
                 <div class="math-block">
-                    $$ \text{DatiInTransito} = \text{LastByteSent} - \text{LastByteAcked} $$
-                    $$ \text{EffectiveWindow} = \text{AdvertisedWindow} - \text{DatiInTransito} $$
+                    $$ \text{MaxWindow} = \min(\text{cwnd}, \text{awnd}) $$
+                </div>
+                <p>Di conseguenza, la quantità di **nuovi dati che può effettivamente inviare** in un dato momento è:</p>
+                <div class="math-block">
+                    $$ \text{ByteInviabili} = \text{MaxWindow} - (\text{LastByteSent} - \text{LastByteAcked}) $$
                 </div>
                 <div class="note-box">
-                    <strong>Formula per gli Esercizi:</strong> La formula da usare negli esami è:
+                    <strong>Formula per gli Esercizi:</strong> Se l'esercizio ignora la congestione (o non fornisce `cwnd`), si assume `MaxWindow = AdvertisedWindow`. La formula diventa:
                     $$ \text{ByteInviabili} = \text{AdvertisedWindow} - (\text{LastByteSent} - \text{LastByteAcked}) $$
                 </div>
-
-                <h3 class="subsection-title">Spazio Disponibile per l'Applicazione Mittente</h3>
-                <p>L'applicazione mittente non può scrivere nel buffer di invio all'infinito. Lo spazio disponibile nel buffer di invio è:</p>
-                <div class="math-block">
-                    $$ \text{SpazioDisponibile} = \text{MaxSendBuffer} - (\text{LastByteWritten} - \text{LastByteAcked}) $$
-                </div>
-                <p>Se un'applicazione tenta di scrivere più dati dello spazio disponibile, la chiamata `write()` viene bloccata finché non si libera spazio (cioè finché non arrivano nuovi ACK).</p>
             </div>
         </article>
 
@@ -149,9 +133,21 @@
                 <p>La **Sindrome della Finestra Sciocca (SWS)** è una condizione di inefficienza che si verifica quando vengono inviati molti piccoli segmenti TCP, sprecando banda a causa dell'overhead degli header (40 byte tra TCP e IP).</p>
                 <p>Può essere causata da due problemi:</p>
                 <ol>
-                    <li>**Ricevitore Lento:** Un'applicazione ricevente legge i dati dal buffer un byte alla volta. Dopo aver letto un byte, il ricevitore pubblicizza una finestra di 1 byte. Il mittente, vedendo la finestra aperta, invia immediatamente un segmento con un solo byte di payload, che viene trasportato da un pacchetto IP con 40 byte di header. Questo ciclo è estremamente inefficiente.</li>
-                    <li>**Mittente "Aggressivo":** Un'applicazione mittente scrive dati un byte alla volta. TCP, per garantire bassa latenza, potrebbe decidere di inviare ogni byte in un segmento separato, portando allo stesso problema di overhead.</li>
+                    <li>**Ricevitore Lento:** Un'applicazione ricevente legge i dati dal buffer un byte alla volta. Dopo aver letto un byte, il ricevitore pubblicizza una finestra di 1 byte, causando l'invio di un segmento con un solo byte di payload.</li>
+                    <li>**Mittente "Aggressivo":** Un'applicazione mittente scrive dati un byte alla volta. TCP potrebbe decidere di inviare ogni byte in un segmento separato.</li>
                 </ol>
+                <h3 class="subsection-title">Soluzioni alla SWS</h3>
+                <ul>
+                    <li><strong>Lato Mittente: Algoritmo di Nagle</strong> (vedi sezione successiva).</li>
+                    <li><strong>Lato Ricevitore: Soluzione di Clark</strong>
+                        <div class="clarification-box">
+                            <strong>Soluzione di Clark (Esame ricorrente):</strong> Il ricevitore non deve pubblicizzare piccole finestre. Deve attendere finché non si è liberato uno spazio significativo nel buffer prima di inviare un aggiornamento della finestra. La regola è: non inviare un aggiornamento della finestra finché non si può annunciare uno spazio pari ad almeno **1 MSS** o a **metà della dimensione del buffer**, a seconda di quale sia minore.
+                        </div>
+                    </li>
+                </ul>
+                
+                <h3 class="subsection-title">Zero-Window e Persist Timer</h3>
+                <p>Se il ricevitore pubblicizza una finestra di `rwnd = 0`, il mittente si ferma. Ma se l'ACK del ricevitore che riapre la finestra viene perso, il mittente rimarrebbe bloccato per sempre. Per risolvere questo, quando la finestra è zero, il mittente avvia un **persist timer**. Alla sua scadenza, invia un piccolo pacchetto **"probe"** (sonda, di solito 1 byte) per "stimolare" il ricevitore a inviare un nuovo ACK con la dimensione aggiornata della finestra.</p>
             </div>
         </article>
         
@@ -166,7 +162,7 @@
                 </blockquote>
                 <p>In pratica, l'algoritmo funziona così:</p>
                 <ul>
-                    <li>**Se il mittente ha abbastanza dati per riempire un segmento di dimensione MSS**, li invia immediatamente.</li>
+                    <li><strong>Se il mittente ha abbastanza dati per riempire un segmento di dimensione MSS**, li invia immediatamente.</li>
                     <li>**Se ha meno dati di un MSS**, controlla se ci sono dati non ancora riscontrati:
                         <ul>
                             <li>**Se ci sono dati non ACKed in transito,** il mittente **attende**. Accumula i nuovi dati nel buffer finché non riceve un ACK per i dati precedenti.</li>
@@ -175,26 +171,8 @@
                     </li>
                 </ul>
                 <div class="clarification-box">
-                    <strong>Come Funziona il Self-Clocking:</strong> L'arrivo di un ACK per i dati precedenti "sblocca" la trasmissione dei nuovi dati accumulati. Questo crea un ritmo naturale (self-clocking) in cui i nuovi dati vengono inviati circa una volta per ogni RTT, permettendo di raggruppare i piccoli "chunk" prodotti dall'applicazione.
-                </div>
-                
-                <h3 class="subsection-title">Esempio d'Esame (Calcolo con Nagle)</h3>
-                <p>Una domanda comune è calcolare la dimensione dei segmenti inviati, dato un RTT e un certo ritmo di produzione dati da parte dell'applicazione.</p>
-                <ul>
-                    <li>**Scenario:** RTT = 50ms, l'applicazione scrive 200 byte ogni 20ms nel buffer.</li>
-                    <li>**Analisi:**
-                        <ol>
-                            <li>L'applicazione scrive 200 byte. Non ci sono dati in transito, quindi TCP invia subito un segmento da 200 byte.</li>
-                            <li>Ora ci sono dati in transito. L'applicazione continua a scrivere.</li>
-                            <li>Nei successivi 50ms (l'RTT), l'applicazione scrive dati al tempo t=20ms (altri 200 byte) e al tempo t=40ms (altri 200 byte).</li>
-                            <li>Questi 400 byte vengono accumulati nel buffer, perché Nagle impedisce l'invio finché non arriva l'ACK per il primo segmento.</li>
-                            <li>Al tempo t=50ms, arriva l'ACK. Ora TCP può inviare i 400 byte accumulati in un unico segmento.</li>
-                        </ol>
-                        La sequenza dei segmenti inviati sarà: [200 byte], [400 byte], [600 byte], ... (l'esercizio va analizzato passo-passo).
-                    </li>
-                </ul>
-                <div class="note-box">
-                    <strong>Controindicazioni di Nagle:</strong> In alcune applicazioni (es. giochi online) dove anche la minima latenza è critica, Nagle può essere controproducente e viene spesso disabilitato (tramite l'opzione `TCP_NODELAY` sulla socket).
+                    <strong>Interazione tra Nagle e Delayed ACK:</strong>
+                    <p>Molti ricevitori implementano **Delayed ACK**: invece di inviare un ACK subito per ogni segmento, attendono un breve periodo (es. 200ms) nella speranza di poter "agganciare" (piggyback) l'ACK a un segmento di dati in uscita. L'interazione tra Nagle (mittente) e Delayed ACK (ricevitore) può introdurre latenze fino a un RTT per piccole trasmissioni, motivo per cui in applicazioni time-critical (es. giochi online) Nagle viene spesso disabilitato con l'opzione `TCP_NODELAY`.</p>
                 </div>
             </div>
         </article>
