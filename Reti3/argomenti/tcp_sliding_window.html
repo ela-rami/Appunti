@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP Sliding Window e Algoritmo di Nagle - Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per questa pagina */
+        .math-block {
+            font-size: 1.15em;
+        }
+        .figure-caption {
+            text-align: center;
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+        }
+        .mermaid-container.buffer-diagram {
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>TCP Sliding Window e Algoritmo di Nagle</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="tcp_sliding_window(es).html" class="sidebar-action-button" id="esercizi-btn">Esercizi</a>
+        </div>
+        <h2>Indice Argomento</h2>
+        <ul>
+            <li><a href="#controllo-flusso" class="sidebar-link">1. Controllo di Flusso in TCP</a></li>
+            <li><a href="#variabili-stato" class="sidebar-link">2. Variabili di Stato della Sliding Window</a></li>
+            <li><a href="#advertised-window" class="sidebar-link">3. AdvertisedWindow e EffectiveWindow</a></li>
+            <li><a href="#silly-window" class="sidebar-link">4. Silly Window Syndrome (SWS)</a></li>
+            <li><a href="#algoritmo-nagle" class="sidebar-link">5. L'Algoritmo di Nagle</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="controllo-flusso" class="content-section active-section">
+            <h2 class="section-title">1. Controllo di Flusso in TCP</h2>
+            <div class="section-content">
+                <p>Il **controllo di flusso** è il meccanismo con cui TCP si assicura che un mittente non invii dati a una velocità superiore a quella con cui il ricevitore può processarli e immagazzinarli. Questo previene l'overflow del buffer di ricezione del destinatario.</p>
+                <p>TCP implementa il controllo di flusso utilizzando una **Sliding Window (Finestra Scorrevole)**, un concetto simile a quello visto nel livello Data Link, ma adattato a un servizio a stream di byte (non a frame discreti) e a una rete inaffidabile come Internet.</p>
+            </div>
+        </article>
+
+        <article id="variabili-stato" class="content-section">
+            <h2 class="section-title">2. Variabili di Stato della Sliding Window (Esame ricorrente)</h2>
+            <div class="section-content">
+                <p>Sia il mittente che il ricevitore mantengono un set di variabili di stato per gestire i loro buffer di invio e ricezione.</p>
+
+                <h3 class="subsection-title">Lato Mittente (Sender)</h3>
+                <p>Il mittente gestisce un buffer di invio, suddiviso logicamente in tre regioni:</p>
+                <ul>
+                    <li><strong>Dati Già Inviati e Riscontrati (ACKed):</strong> Questi dati sono stati consegnati con successo e possono essere rimossi dal buffer.</li>
+                    <li><strong>Dati Inviati ma Non Ancora Riscontrati (unACKed):</strong> Questi dati sono "in transito" nella rete. Il mittente deve conservarne una copia nel buffer in caso debba ritrasmetterli.</li>
+                    <li><strong>Dati Scrivibili ma Non Ancora Inviati:</strong> Dati che l'applicazione ha scritto nel buffer ma che TCP non ha ancora inviato.</li>
+                </ul>
+                <p>Le tre variabili chiave che definiscono queste regioni sono:</p>
+                <ul>
+                    <li><code>LastByteAcked</code>: L'ultimo byte di cui è stato ricevuto l'ACK dal ricevitore.</li>
+                    <li><code>LastByteSent</code>: L'ultimo byte inviato dal mittente.</li>
+                    <li><code>LastByteWritten</code>: L'ultimo byte scritto dall'applicazione nel buffer di invio.</li>
+                </ul>
+                <div class="mermaid-container buffer-diagram">
+                    <pre class="mermaid">
+                        gantt
+                            title Buffer di Invio del Mittente
+                            dateFormat X
+                            axisFormat %s
+
+                            section Dati
+                            Dati Scrivibili :done, b1, 0, 0
+                            Dati Già Scrivibili ma non Inviati: active, b2, 0, 0
+                            Dati Inviati (unACKed): crit, b3, 0, 0
+                            Dati Riscontrati (ACKed): b4, 0, 0
+                    </pre>
+                    <p class="figure-caption">Visualizzazione del buffer di invio del mittente.</p>
+                </div>
+
+                <h3 class="subsection-title">Lato Ricevitore (Receiver)</h3>
+                <p>Il ricevitore gestisce un buffer di ricezione, che contiene:</p>
+                <ul>
+                    <li><strong>Dati Già Ricevuti e Letti dall'Applicazione:</strong> Questi dati sono stati consumati e lo spazio nel buffer è stato liberato.</li>
+                    <li><strong>Dati Ricevuti e Riscontrati, ma Non Ancora Letti:</strong> Dati in attesa di essere letti dall'applicazione.</li>
+                    <li><strong>Spazio Libero nel Buffer:</strong> Spazio disponibile per ricevere nuovi dati.</li>
+                </ul>
+                <p>Le tre variabili chiave che definiscono queste regioni sono:</p>
+                <ul>
+                    <li><code>LastByteRead</code>: L'ultimo byte letto dall'applicazione dal buffer.</li>
+                    <li><code>NextByteExpected</code>: Il primo byte di dati che il ricevitore si aspetta di ricevere in ordine (il primo byte di un "buco").</li>
+                    <li><code>LastByteRcvd</code>: L'ultimo byte ricevuto (che può essere fuori ordine).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="advertised-window" class="content-section">
+            <h2 class="section-title">3. AdvertisedWindow e EffectiveWindow (Cruciale per gli Esercizi)</h2>
+            <div class="section-content">
+                <h3 class="subsection-title">AdvertisedWindow (awnd)</h3>
+                <p>Il cuore del controllo di flusso di TCP è la **AdvertisedWindow (Finestra Pubblicizzata)**. È il valore che il **ricevitore** comunica al mittente per indicare la quantità di spazio libero nel suo buffer di ricezione.</p>
+                <div class="math-block">
+                    $$ \text{AdvertisedWindow} = \text{MaxRcvBuffer} - (\text{NextByteExpected} - 1 - \text{LastByteRead}) $$
+                </div>
+                <p>Questo valore viene inviato al mittente nel campo `Window Size` di ogni segmento TCP. In pratica, il ricevitore sta dicendo: "Puoi inviarmi al massimo `AdvertisedWindow` byte a partire da `NextByteExpected`."</p>
+
+                <h3 class="subsection-title">EffectiveWindow</h3>
+                <p>Il **mittente** deve rispettare questo limite. La quantità di dati che può ancora inviare è determinata dalla sua **EffectiveWindow (Finestra Effettiva)**. Questa non è solo l'awnd, ma tiene conto dei dati già inviati ma non ancora riscontrati.</p>
+                <div class="math-block">
+                    $$ \text{DatiInTransito} = \text{LastByteSent} - \text{LastByteAcked} $$
+                    $$ \text{EffectiveWindow} = \text{AdvertisedWindow} - \text{DatiInTransito} $$
+                </div>
+                <div class="note-box">
+                    <strong>Formula per gli Esercizi:</strong> La formula da usare negli esami è:
+                    $$ \text{ByteInviabili} = \text{AdvertisedWindow} - (\text{LastByteSent} - \text{LastByteAcked}) $$
+                </div>
+
+                <h3 class="subsection-title">Spazio Disponibile per l'Applicazione Mittente</h3>
+                <p>L'applicazione mittente non può scrivere nel buffer di invio all'infinito. Lo spazio disponibile nel buffer di invio è:</p>
+                <div class="math-block">
+                    $$ \text{SpazioDisponibile} = \text{MaxSendBuffer} - (\text{LastByteWritten} - \text{LastByteAcked}) $$
+                </div>
+                <p>Se un'applicazione tenta di scrivere più dati dello spazio disponibile, la chiamata `write()` viene bloccata finché non si libera spazio (cioè finché non arrivano nuovi ACK).</p>
+            </div>
+        </article>
+
+        <article id="silly-window" class="content-section">
+            <h2 class="section-title">4. Silly Window Syndrome (SWS)</h2>
+            <div class="section-content">
+                <p>La **Sindrome della Finestra Sciocca (SWS)** è una condizione di inefficienza che si verifica quando vengono inviati molti piccoli segmenti TCP, sprecando banda a causa dell'overhead degli header (40 byte tra TCP e IP).</p>
+                <p>Può essere causata da due problemi:</p>
+                <ol>
+                    <li>**Ricevitore Lento:** Un'applicazione ricevente legge i dati dal buffer un byte alla volta. Dopo aver letto un byte, il ricevitore pubblicizza una finestra di 1 byte. Il mittente, vedendo la finestra aperta, invia immediatamente un segmento con un solo byte di payload, che viene trasportato da un pacchetto IP con 40 byte di header. Questo ciclo è estremamente inefficiente.</li>
+                    <li>**Mittente "Aggressivo":** Un'applicazione mittente scrive dati un byte alla volta. TCP, per garantire bassa latenza, potrebbe decidere di inviare ogni byte in un segmento separato, portando allo stesso problema di overhead.</li>
+                </ol>
+            </div>
+        </article>
+        
+        <article id="algoritmo-nagle" class="content-section">
+            <h2 class="section-title">5. L'Algoritmo di Nagle: la Soluzione alla SWS lato Mittente</h2>
+            <div class="section-content">
+                <p>L'algoritmo di Nagle è una soluzione lato **mittente** per mitigare la Silly Window Syndrome, specialmente per applicazioni interattive (come Telnet) che generano dati a piccoli "chunk".</p>
+                <h3 class="subsection-title">Logica dell'Algoritmo</h3>
+                <p>L'algoritmo introduce una semplice regola per decidere quando inviare un segmento, con l'obiettivo di raggruppare piccoli pezzi di dati in un segmento più grande ed efficiente.</p>
+                <blockquote>
+                Finché ci sono dati inviati ma non ancora riscontrati (unACKed) in transito, il mittente non invierà un nuovo segmento a meno che non sia "pieno" (cioè di dimensione MSS).
+                </blockquote>
+                <p>In pratica, l'algoritmo funziona così:</p>
+                <ul>
+                    <li>**Se il mittente ha abbastanza dati per riempire un segmento di dimensione MSS**, li invia immediatamente.</li>
+                    <li>**Se ha meno dati di un MSS**, controlla se ci sono dati non ancora riscontrati:
+                        <ul>
+                            <li>**Se ci sono dati non ACKed in transito,** il mittente **attende**. Accumula i nuovi dati nel buffer finché non riceve un ACK per i dati precedenti.</li>
+                            <li>**Se non ci sono dati non ACKed in transito,** il mittente invia immediatamente i dati che ha, anche se sono pochi.</li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="clarification-box">
+                    <strong>Come Funziona il Self-Clocking:</strong> L'arrivo di un ACK per i dati precedenti "sblocca" la trasmissione dei nuovi dati accumulati. Questo crea un ritmo naturale (self-clocking) in cui i nuovi dati vengono inviati circa una volta per ogni RTT, permettendo di raggruppare i piccoli "chunk" prodotti dall'applicazione.
+                </div>
+                
+                <h3 class="subsection-title">Esempio d'Esame (Calcolo con Nagle)</h3>
+                <p>Una domanda comune è calcolare la dimensione dei segmenti inviati, dato un RTT e un certo ritmo di produzione dati da parte dell'applicazione.</p>
+                <ul>
+                    <li>**Scenario:** RTT = 50ms, l'applicazione scrive 200 byte ogni 20ms nel buffer.</li>
+                    <li>**Analisi:**
+                        <ol>
+                            <li>L'applicazione scrive 200 byte. Non ci sono dati in transito, quindi TCP invia subito un segmento da 200 byte.</li>
+                            <li>Ora ci sono dati in transito. L'applicazione continua a scrivere.</li>
+                            <li>Nei successivi 50ms (l'RTT), l'applicazione scrive dati al tempo t=20ms (altri 200 byte) e al tempo t=40ms (altri 200 byte).</li>
+                            <li>Questi 400 byte vengono accumulati nel buffer, perché Nagle impedisce l'invio finché non arriva l'ACK per il primo segmento.</li>
+                            <li>Al tempo t=50ms, arriva l'ACK. Ora TCP può inviare i 400 byte accumulati in un unico segmento.</li>
+                        </ol>
+                        La sequenza dei segmenti inviati sarà: [200 byte], [400 byte], [600 byte], ... (l'esercizio va analizzato passo-passo).
+                    </li>
+                </ul>
+                <div class="note-box">
+                    <strong>Controindicazioni di Nagle:</strong> In alcune applicazioni (es. giochi online) dove anche la minima latenza è critica, Nagle può essere controproducente e viene spesso disabilitato (tramite l'opzione `TCP_NODELAY` sulla socket).
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+        }
+    });
+    </script>
+</body>
+</html>
