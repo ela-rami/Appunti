@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocolli Ancillari di IP (ARP, DHCP, ICMP, NAT) - Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Protocolli Ancillari di IP (ARP, DHCP, ICMP, NAT)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="ancillary_protocols(es).html" class="sidebar-action-button" id="esercizi-btn">Esercizi</a>
+        </div>
+        <h2>Indice Argomento</h2>
+        <ul>
+            <li><a href="#arp" class="sidebar-link">1. ARP (Address Resolution Protocol)</a></li>
+            <li><a href="#dhcp" class="sidebar-link">2. DHCP (Dynamic Host Configuration Protocol)</a></li>
+            <li><a href="#icmp" class="sidebar-link">3. ICMP (Internet Control Message Protocol)</a></li>
+            <li><a href="#nat" class="sidebar-link">4. NAT (Network Address Translation)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="arp" class="content-section active-section">
+            <h2 class="section-title">1. ARP (Address Resolution Protocol)</h2>
+            <div class="section-content">
+                <p>ARP è un protocollo fondamentale che risolve un problema chiave: come tradurre un indirizzo logico di livello 3 (indirizzo IP) in un indirizzo fisico di livello 2 (indirizzo MAC) all'interno della stessa rete locale (LAN).</p>
+                
+                <h3 class="subsection-title">Perché è Necessario ARP?</h3>
+                <p>Quando un host A vuole inviare un pacchetto IP a un host B sulla stessa LAN, deve incapsulare il pacchetto IP in un frame di livello 2 (es. Ethernet). L'header del frame Ethernet richiede l'<strong>indirizzo MAC di destinazione</strong>. L'host A conosce l'indirizzo IP di B, ma non necessariamente il suo indirizzo MAC. ARP serve a scoprire questo indirizzo MAC.</p>
+                
+                <h3 class="subsection-title">Funzionamento di ARP</h3>
+                <ol>
+                    <li><strong>Controllo della Cache ARP:</strong> L'host A controlla la sua <strong>tabella ARP</strong> (una cache locale) per vedere se ha già una mappatura per l'indirizzo IP di B.</li>
+                    <li><strong>ARP Request (Broadcast):</strong> Se non trova una mappatura, A invia un <strong>ARP Request</strong> in <strong>broadcast</strong> sulla LAN. Questo messaggio chiede: "Chi ha l'indirizzo IP <code>192.168.1.10</code>? Per favore, dimmi il tuo indirizzo MAC."</li>
+                    <li><strong>ARP Reply (Unicast):</strong> L'host B, riconoscendo il proprio IP nella richiesta, risponde direttamente ad A con un <strong>ARP Reply</strong> in <strong>unicast</strong>. Questo messaggio contiene il suo indirizzo MAC.</li>
+                    <li><strong>Aggiornamento della Cache:</strong> L'host A riceve la risposta, aggiorna la sua tabella ARP con la mappatura IP-MAC e può ora inviare il frame Ethernet all'indirizzo MAC di B.</li>
+                </ol>
+                
+                <h3 class="subsection-title">ARP e Routing</h3>
+                <p>Se l'host di destinazione B si trova su una rete diversa, l'host A non userà ARP per trovare il MAC di B, ma per trovare l'indirizzo MAC del suo <strong>router di default (gateway)</strong>. Il pacchetto IP verrà quindi incapsulato in un frame con l'indirizzo MAC del router come destinazione.</p>
+                
+                <div class="clarification-box">
+                    <strong>Punti Chiave per l'Esame:</strong>
+                    <ul>
+                        <li>ARP opera <strong>solo all'interno di una LAN</strong>.</li>
+                        <li>Una richiesta ARP è inviata in <strong>broadcast</strong>, una risposta ARP è inviata in <strong>unicast</strong>.</li>
+                        <li>Se un host deve inviare un pacchetto a una rete esterna, usa ARP per trovare il MAC del <strong>gateway</strong>, non della destinazione finale.</li>
+                        <li><strong>Proxy ARP:</strong> Un router può rispondere a richieste ARP per conto di altri host, rendendo "trasparente" la presenza di sottoreti.</li>
+                        <li><strong>Vulnerabilità (ARP Poisoning/Spoofing):</strong> Poiché ARP è un protocollo "trusting", un attaccante sulla stessa LAN può inviare risposte ARP false per dirottare il traffico (attacco Man-in-the-Middle).</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="dhcp" class="content-section">
+            <h2 class="section-title">2. DHCP (Dynamic Host Configuration Protocol)</h2>
+            <div class="section-content">
+                <p>DHCP è un protocollo di livello applicativo (che usa UDP) che permette a un host di ottenere automaticamente la sua configurazione di rete (indirizzo IP, subnet mask, gateway di default, server DNS) da un server DHCP.</p>
+                
+                <h3 class="subsection-title">Processo di Assegnazione (DORA)</h3>
+                <p>Il processo di assegnazione di un indirizzo IP tramite DHCP è un dialogo in quattro fasi, noto come DORA:</p>
+                <ol>
+                    <li><strong>Discover (Client &rarr; Server, Broadcast):</strong> L'host appena connesso invia un messaggio <code>DHCPDISCOVER</code> in broadcast per trovare un server DHCP sulla rete.</li>
+                    <li><strong>Offer (Server &rarr; Client, Broadcast/Unicast):</strong> Uno o più server DHCP sulla rete possono rispondere con un messaggio <code>DHCPOFFER</code>, proponendo un indirizzo IP e altri parametri di configurazione.</li>
+                    <li><strong>Request (Client &rarr; Server, Broadcast):</strong> L'host sceglie una delle offerte (di solito la prima che riceve) e invia un messaggio <code>DHCPREQUEST</code> in broadcast per accettare formalmente l'offerta e informare tutti i server della sua scelta.</li>
+                    <li><strong>Acknowledge (Server &rarr; Client, Broadcast/Unicast):</strong> Il server DHCP scelto finalizza l'assegnazione inviando un messaggio <code>DHCPACK</code>, confermando l'indirizzo IP e la durata del "lease" (noleggio).</li>
+                </ol>
+                
+                <div class="note-box">
+                    <strong>DHCP Relay Agent:</strong> Se un server DHCP deve servire più sottoreti, un <strong>DHCP Relay Agent</strong> (spesso un router) su ogni sottoreta può inoltrare le richieste DHCP (in unicast) al server centrale.
+                </div>
+                
+                <h3 class="subsection-title">Cosa Succede se il Server DHCP non Risponde?</h3>
+                <p>Se un client invia un <code>DHCPDISCOVER</code> e non riceve un <code>DHCPOFFER</code> (perché il server è offline, irraggiungibile o ha esaurito gli indirizzi), il client non può ottenere una configurazione di rete. In questo caso, molti sistemi operativi utilizzano <strong>APIPA (Automatic Private IP Addressing)</strong>: l'host si auto-assegna un indirizzo IP nel range <strong>169.254.0.0/16</strong>. Questo permette la comunicazione con altri host sulla stessa LAN che si trovano nella stessa situazione, ma non permette la comunicazione con reti esterne.</p>
+            </div>
+        </article>
+
+        <article id="icmp" class="content-section">
+            <h2 class="section-title">3. ICMP (Internet Control Message Protocol)</h2>
+            <div class="section-content">
+                <p>ICMP è un protocollo di supporto a livello di rete (incapsulato direttamente in IP) utilizzato da host e router per inviare messaggi di <strong>errore</strong> e di <strong>controllo</strong> relativi al processamento dei pacchetti IP.</p>
+                
+                <h3 class="subsection-title">Messaggi di Errore Comuni</h3>
+                <ul>
+                    <li><strong>Destination Unreachable:</strong> Inviato da un router quando non può inoltrare un pacchetto (es. la rete di destinazione è sconosciuta, il protocollo di trasporto non è attivo, o la frammentazione è necessaria ma il flag DF è impostato).</li>
+                    <li><strong>Time Exceeded:</strong> Inviato da un router quando il campo <strong>TTL (Time To Live)</strong> di un pacchetto raggiunge lo zero. Questo previene loop di routing infiniti.</li>
+                    <li><strong>Redirect:</strong> Inviato da un router a un host sulla stessa rete per informarlo di una rotta migliore verso una destinazione.</li>
+                </ul>
+                
+                <h3 class="subsection-title">Messaggi di Controllo (Query)</h3>
+                <ul>
+                    <li><strong>Echo Request / Echo Reply (Ping):</strong> Usato per verificare la raggiungibilità di un host e misurare il <strong>Round Trip Time (RTT)</strong>.</li>
+                </ul>
+                
+                <div class="clarification-box">
+                    <strong>Come funziona Traceroute (Traceroute):</strong><br>
+                    Traceroute è un'utility che usa ICMP per mappare il percorso che un pacchetto segue attraverso la rete.
+                    <ol>
+                        <li>Invia un pacchetto con TTL=1. Il primo router lo scarta e invia un ICMP "Time Exceeded".</li>
+                        <li>Invia un pacchetto con TTL=2. Il secondo router lo scarta e invia un ICMP "Time Exceeded".</li>
+                        <li>Continua ad incrementare il TTL fino a raggiungere la destinazione.</li>
+                        <li>Per rilevare la destinazione finale, invia un pacchetto UDP a una porta non valida, che risponderà con un ICMP "Destination Unreachable (Port Unreachable)".</li>
+                    </ol>
+                </div>
+            </div>
+        </article>
+
+        <article id="nat" class="content-section">
+            <h2 class="section-title">4. NAT (Network Address Translation)</h2>
+            <div class="section-content">
+                <p>NAT è una tecnica utilizzata principalmente per mappare più indirizzi IP privati (usati all'interno di una LAN) in un singolo indirizzo IP pubblico (o un piccolo pool di indirizzi pubblici). È stato introdotto come soluzione temporanea all'esaurimento degli indirizzi IPv4.</p>
+                
+                <h3 class="subsection-title">Funzionamento di NAT (con Port Mapping - PAT)</h3>
+                <p>Un router NAT al confine della rete privata mantiene una <strong>tabella di traduzione</strong>.</p>
+                <ul>
+                    <li><strong>Traffico in Uscita:</strong> Quando un host privato (es. <code>192.168.1.10:1234</code>) invia un pacchetto a un server esterno, il router NAT modifica l'header IP:
+                        <ul>
+                            <li>Sostituisce l'indirizzo IP sorgente privato con il suo indirizzo IP pubblico (es. <code>88.88.88.88</code>).</li>
+                            <li>Sostituisce la porta sorgente originale con una porta pubblica temporanea (es. <code>54321</code>).</li>
+                            <li>Memorizza questa mappatura (<code>192.168.1.10:1234</code> &harr; <code>88.88.88.88:54321</code>) nella sua tabella.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Traffico in Entrata:</strong> Quando il server esterno risponde a <code>88.88.88.88:54321</code>, il router NAT consulta la sua tabella, trova la mappatura e riscrive l'header del pacchetto con l'indirizzo e la porta privati originali, inoltrandolo all'host corretto.</li>
+                </ul>
+                
+                <h3 class="subsection-title">Implicazioni e Problemi del NAT (Esame ricorrente)</h3>
+                <ul>
+                    <li><strong>Rottura della Connettività End-to-End:</strong> Un host esterno non può iniziare una connessione verso un host dietro un NAT, a meno che non sia configurato il <strong>port forwarding</strong>.</li>
+                    <li><strong>Impatto sulle Connessioni TCP:</strong> Se l'indirizzo IP pubblico del router NAT cambia nel mezzo di una connessione TCP (come chiesto in un esame), la connessione si <strong>interrompe</strong>. I pacchetti di risposta dal server verrebbero inviati all'indirizzo IP pubblico vecchio e non raggiungerebbero più il router NAT. L'host mittente andrà in timeout.</li>
+                    <li><strong>Firewall "Naturale":</strong> NAT agisce come un firewall di base, bloccando le connessioni in entrata non richieste.</li>
+                    <li><strong>Necessità di STUN/TURN:</strong> Per le comunicazioni peer-to-peer (VoIP, giochi online), sono necessari protocolli come <strong>STUN</strong> (per scoprire il proprio IP/porta pubblici) e <strong>TURN</strong> (che agisce come un relay) per attraversare i NAT.</li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+        }
+    });
+    </script>
+</body>
+</html>

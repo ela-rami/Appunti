@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frammentazione IP - Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per questa pagina */
+        .math-block {
+            font-size: 1.15em;
+        }
+        .figure-caption {
+            text-align: center;
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+        }
+        .table-data {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-family: var(--font-code);
+            font-size: 0.9em;
+        }
+        .table-data th, .table-data td {
+            border: 1px solid var(--border-soft);
+            padding: 0.8em;
+            text-align: left;
+            color: var(--text-secondary);
+        }
+        .table-data th {
+            background-color: var(--bg-header);
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+        .table-data td { background-color: var(--code-bg); }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Frammentazione IP</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="ip_fragmentation(es).html" class="sidebar-action-button" id="esercizi-btn">Esercizi</a>
+        </div>
+        <h2>Indice Argomento</h2>
+        <ul>
+            <li><a href="#introduzione-mtu" class="sidebar-link">1. Introduzione: il Problema della MTU</a></li>
+            <li><a href="#meccanismo-frammentazione" class="sidebar-link">2. Il Meccanismo di Frammentazione IP</a></li>
+            <li><a href="#header-ipv4" class="sidebar-link">3. Campi dell'Header IPv4 Coinvolti</a></li>
+            <li><a href="#calcolo-frammenti" class="sidebar-link">4. Regole e Calcolo dei Frammenti</a></li>
+            <li><a href="#riassemblaggio" class="sidebar-link">5. Riassemblaggio dei Frammenti</a></li>
+            <li><a href="#frammentazione-ipv6" class="sidebar-link">6. Frammentazione in IPv6</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="introduzione-mtu" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione: il Problema della Maximum Transmission Unit (MTU)</h2>
+            <div class="section-content">
+                <p>Internet è una rete eterogenea, composta da diversi tipi di tecnologie di rete a livello Data Link (Ethernet, Wi-Fi, PPP, etc.). Ogni tecnologia ha una sua <strong>Maximum Transmission Unit (MTU)</strong>, ovvero la dimensione massima del payload che un frame di quella tecnologia può trasportare.</p>
+                <p>Ad esempio:</p>
+                <ul>
+                    <li><strong>Ethernet:</strong> MTU di 1500 byte.</li>
+                    <li><strong>Wi-Fi:</strong> MTU di circa 2304 byte.</li>
+                    <li><strong>PPP:</strong> MTU negoziabile, spesso 1500 byte o meno.</li>
+                </ul>
+                <p>Quando un router deve inoltrare un pacchetto IP da una rete con MTU grande a una rete con MTU più piccola, sorge un problema: il pacchetto potrebbe essere troppo grande per essere incapsulato in un singolo frame della rete di destinazione. La soluzione a questo problema è la <strong>frammentazione IP</strong>.</p>
+            </div>
+        </article>
+
+        <article id="meccanismo-frammentazione" class="content-section">
+            <h2 class="section-title">2. Il Meccanismo di Frammentazione IP</h2>
+            <div class="section-content">
+                <p>La frammentazione è il processo con cui un router, trovandosi nella situazione descritta, suddivide un pacchetto IP troppo grande in più pacchetti IP più piccoli, chiamati <strong>frammenti</strong>. Ogni frammento è un pacchetto IP valido e autonomo che può essere instradato indipendentemente dagli altri.</p>
+                <ul>
+                    <li><strong>Chi frammenta:</strong> I <strong>router</strong> lungo il percorso (in IPv4).</li>
+                    <li><strong>Chi riassembla:</strong> L'<strong>host di destinazione finale</strong>. I router intermedi non riassemblano i frammenti; li instradano come pacchetti normali.</li>
+                    <li><strong>Trasparenza:</strong> Il processo è trasparente per il livello di trasporto (TCP, UDP). Il livello di trasporto dell'host mittente crea un segmento di una certa dimensione, e il livello di trasporto dell'host destinatario riceverà lo stesso segmento, senza "sapere" che è stato frammentato e riassemblato lungo il percorso.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="header-ipv4" class="content-section">
+            <h2 class="section-title">3. Campi dell'Header IPv4 Coinvolti nella Frammentazione</h2>
+            <div class="section-content">
+                <p>Per gestire la frammentazione e il riassemblaggio, l'header IPv4 utilizza tre campi specifici (tutti nella seconda word da 32 bit):</p>
+                <ul>
+                    <li><strong>Identification (16 bit):** Un identificatore univoco assegnato dalla sorgente al pacchetto originale. <strong>Tutti i frammenti dello stesso pacchetto originale condividono lo stesso valore di Identification</strong>. Questo permette all'host di destinazione di sapere quali frammenti appartengono allo stesso pacchetto.</li>
+                    <li><strong>Flags (3 bit):**
+                        <ul>
+                            <li><strong>Bit 0:</strong> Riservato (deve essere 0).</li>
+                            <li><strong>Bit 1 (DF - Don't Fragment):</strong> Se impostato a 1, indica che il pacchetto <strong>non deve essere frammentato</strong>. Se un router incontra un pacchetto con DF=1 che è troppo grande per la MTU del link di uscita, il router scarta il pacchetto e invia un messaggio di errore ICMP "Destination Unreachable (Fragmentation Needed and DF set)" alla sorgente.</li>
+                            <li><strong>Bit 2 (MF - More Fragments):</strong> Se impostato a 1, indica che questo frammento <strong>non è l'ultimo</strong>. Se impostato a 0, indica che questo è l'<strong>ultimo frammento</strong> (o che il pacchetto non è frammentato).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Fragment Offset (13 bit):** Indica la posizione del payload di questo frammento all'interno del payload del pacchetto originale. L'offset è misurato in <strong>unità di 8 byte</strong>. Questo significa che il valore in questo campo deve essere moltiplicato per 8 per ottenere l'offset in byte.
+                        <div class="clarification-box">
+                            <strong>Perché unità di 8 byte?</strong> Per permettere di rappresentare un offset fino a 65528 byte (8191 * 8) con soli 13 bit, e perché la dimensione del payload di ogni frammento (tranne l'ultimo) deve essere un multiplo di 8.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="calcolo-frammenti" class="content-section">
+            <h2 class="section-title">4. Regole e Calcolo dei Frammenti (Esame ricorrente)</h2>
+            <div class="section-content">
+                <p>Quando un router deve frammentare un pacchetto, segue delle regole precise. Negli esercizi, ti verrà dato un pacchetto (con la sua dimensione totale o del payload) e la MTU del link di uscita.</p>
+                <h3 class="subsection-title">Procedimento di Frammentazione</h3>
+                <ol>
+                    <li>
+                        <strong>Calcolare la dimensione massima del payload per frammento:</strong>
+                        <div class="math-block">
+                            $$ \text{Payload}_{\text{max}} = \text{MTU} - \text{Header Size} $$
+                        </div>
+                        (L'header size di IPv4 è tipicamente 20 byte, se non ci sono opzioni).
+                    </li>
+                    <li>
+                        <strong>Arrotondare al multiplo di 8 inferiore:</strong>
+                        La dimensione del payload di ogni frammento (tranne l'ultimo) deve essere un multiplo di 8. Quindi, prendi <code>Payload_max</code> e trova il più grande multiplo di 8 minore o uguale ad esso. Questo sarà il payload dei tuoi primi frammenti.
+                        <div class="clarification-box">
+                            <strong>Esempio:</strong> Se MTU = 512 byte e Header = 20 byte, <code>Payload_max</code> = 492 byte. Il più grande multiplo di 8 <= 492 è 488. Quindi, ogni frammento (tranne l'ultimo) avrà un payload di 488 byte.
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Creare i frammenti:</strong>
+                        <ul>
+                            <li><strong>Primo Frammento:</strong>
+                                <ul>
+                                    <li>Header: Copia dell'header originale, con flag MF=1 e Fragment Offset=0.</li>
+                                    <li>Payload: I primi \(N\) byte (dove N è il payload calcolato al passo 2) del payload originale.</li>
+                                    <li>Total Length: N + Header Size.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Frammenti Intermedi:</strong>
+                                <ul>
+                                    <li>Header: Copia dell'header originale, con flag MF=1.</li>
+                                    <li>Fragment Offset: Offset del frammento precedente + (Payload del frammento precedente / 8).</li>
+                                    <li>Payload: I successivi N byte del payload originale.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Ultimo Frammento:</strong>
+                                <ul>
+                                    <li>Header: Copia dell'header originale, con flag MF=0.</li>
+                                    <li>Fragment Offset: Calcolato come per i frammenti intermedi.</li>
+                                    <li>Payload: Tutti i byte rimanenti del payload originale. La sua dimensione non deve essere necessariamente un multiplo di 8.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </article>
+
+        <article id="riassemblaggio" class="content-section">
+            <h2 class="section-title">5. Riassemblaggio dei Frammenti</h2>
+            <div class="section-content">
+                <p>L'host di destinazione finale utilizza i campi <code>Identification</code>, <code>Fragment Offset</code> e <code>MF</code> per riassemblare il pacchetto originale.</p>
+                <ul>
+                    <li>Quando arriva il primo frammento di un nuovo pacchetto (identificato dal <code>Identification</code>), l'host alloca un buffer.</li>
+                    <li>Man mano che arrivano gli altri frammenti con lo stesso <code>Identification</code>, i loro payload vengono inseriti nel buffer alla posizione indicata dal <code>Fragment Offset</code>.</li>
+                    <li>L'host sa di aver ricevuto l'ultimo frammento quando ne arriva uno con il flag <code>MF=0</code>.</li>
+                    <li>Una volta che tutti i byte tra l'offset 0 e la fine dell'ultimo frammento sono stati ricevuti, il pacchetto viene riassemblato e passato al livello di trasporto.</li>
+                </ul>
+                <h3 class="subsection-title">Gestione delle Perdite</h3>
+                <p>Se anche un solo frammento viene perso, l'host di destinazione non può riassemblare il pacchetto. In questo caso, l'host attende per un certo periodo di tempo (timeout di riassemblaggio, tipicamente 15-60 secondi). Se il frammento mancante non arriva, <strong>tutti i frammenti ricevuti per quel pacchetto vengono scartati</strong>. Non c'è un meccanismo a livello IP per richiedere la ritrasmissione di un singolo frammento. Sarà il livello di trasporto (es. TCP) a rilevare la perdita dell'intero pacchetto e a gestirne la ritrasmissione.</p>
+            </div>
+        </article>
+
+        <article id="frammentazione-ipv6" class="content-section">
+            <h2 class="section-title">6. Frammentazione in IPv6</h2>
+            <div class="section-content">
+                <p>IPv6 gestisce la frammentazione in modo significativamente diverso e più efficiente rispetto a IPv4:</p>
+                <ul>
+                    <li><strong>I router non frammentano:</strong> In IPv6, i router <strong>non possono frammentare</strong> i pacchetti. Se un router riceve un pacchetto IPv6 più grande della MTU del link di uscita, lo <strong>scarta</strong> e invia un messaggio ICMPv6 "Packet Too Big" alla sorgente.</li>
+                    <li><strong>La frammentazione è end-to-end:</strong> È responsabilità dell'<strong>host mittente</strong> frammentare il pacchetto, se necessario. L'host utilizza il messaggio ICMPv6 ricevuto per scoprire la MTU minima lungo il percorso (Path MTU Discovery) e adatta la dimensione dei pacchetti di conseguenza.</li>
+                    <li><strong>Extension Header:</strong> La frammentazione in IPv6 non è gestita nell'header principale, ma in un <strong>Extension Header</strong> opzionale dedicato.</li>
+                </ul>
+                <div class="clarification-box">
+                    <strong>Vantaggi dell'approccio IPv6:</strong> Questo approccio riduce il carico di lavoro sui router, rendendoli più veloci ed efficienti, e sposta la complessità della frammentazione agli endpoint, che hanno più risorse computazionali per gestirla.
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    // Inizializza Mermaid e MathJax
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+        }
+    });
+    </script>
+</body>
+</html>
