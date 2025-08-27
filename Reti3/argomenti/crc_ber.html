@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRC e Probabilità di Errore - Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Mermaid.js per diagrammi -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per questa pagina */
+        .math-block {
+            font-size: 1.15em;
+        }
+        .figure-caption {
+            text-align: center;
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+        }
+        .binary-operation {
+            font-family: var(--font-code);
+            background-color: var(--code-bg);
+            padding: 1em;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+            margin: 1rem 0;
+            white-space: pre;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>CRC e Probabilità di Errore (BER)</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="crc_ber(es).html" class="sidebar-action-button" id="esercizi-btn">Esercizi</a>
+        </div>
+        <h2>Indice Argomento</h2>
+        <ul>
+            <li><a href="#introduzione-errori" class="sidebar-link">1. Rilevamento degli Errori</a></li>
+            <li><a href="#probabilita-errore" class="sidebar-link">2. Probabilità di Errore (BER)</a></li>
+            <li><a href="#crc-introduzione" class="sidebar-link">3. CRC: Introduzione e Aritmetica Polinomiale</a></li>
+            <li><a href="#crc-calcolo" class="sidebar-link">4. Algoritmo di Calcolo del CRC</a></li>
+            <li><a href="#crc-verifica" class="sidebar-link">5. Algoritmo di Verifica del CRC</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="introduzione-errori" class="content-section active-section">
+            <h2 class="section-title">1. Rilevamento degli Errori nel Livello Data Link</h2>
+            <div class="section-content">
+                <p>I canali di comunicazione non sono perfetti. A causa di interferenze elettromagnetiche, rumore termico o altre imperfezioni del mezzo, i bit trasmessi possono essere alterati ("flippati", da 0 a 1 o viceversa). Il livello Data Link ha il compito di **rilevare** questi errori e, in alcuni casi, di correggerli.</p>
+                <p>La tecnica fondamentale per il rilevamento degli errori consiste nell'aggiungere **bit di ridondanza** al messaggio originale. Questi bit extra sono calcolati dal mittente in base ai dati e aggiunti al frame. Il ricevitore esegue lo stesso calcolo sui dati ricevuti e confronta il risultato con i bit di ridondanza ricevuti. Se non corrispondono, è stato rilevato un errore.</p>
+            </div>
+        </article>
+
+        <article id="probabilita-errore" class="content-section">
+            <h2 class="section-title">2. Probabilità di Errore (BER - Bit Error Rate)</h2>
+            <div class="section-content">
+                <p>Il **Bit Error Rate (BER)**, indicato con \(p\), è la probabilità che un singolo bit venga alterato durante la trasmissione. Negli esercizi si assume che gli errori sui bit siano eventi **indipendenti**.</p>
+                
+                <h3 class="subsection-title">Calcolo della Probabilità di un Frame Corretto</h3>
+                <p>Dato un frame di \(N\) bit e una probabilità di errore per bit \(p\):</p>
+                <ul>
+                    <li>La probabilità che un singolo bit sia corretto è \( (1-p) \).</li>
+                    <li>La probabilità che **tutti gli \(N\) bit** di un frame siano corretti (cioè, che il frame arrivi integro) è:
+                        <div class="math-block">
+                            $$ P(\text{frame integro}) = (1 - p)^N $$
+                        </div>
+                    </li>
+                </ul>
+
+                <h3 class="subsection-title">Calcolo della Probabilità di un Frame con Errori</h3>
+                <ul>
+                    <li>La probabilità che un frame abbia **almeno un errore** è l'evento complementare a "nessun errore":
+                        <div class="math-block">
+                            $$ P(\text{almeno 1 errore}) = 1 - P(\text{frame integro}) = 1 - (1 - p)^N $$
+                        </div>
+                    </li>
+                    <li>La probabilità che un frame abbia **esattamente \(k\) errori** si calcola con la distribuzione binomiale:
+                        <div class="math-block">
+                            $$ P(k \text{ errori}) = \binom{N}{k} \cdot p^k \cdot (1 - p)^{N-k} $$
+                        </div>
+                        dove \(\binom{N}{k} = \frac{N!}{k!(N-k)!}\) è il coefficiente binomiale.
+                    </li>
+                </ul>
+
+                <h3 class="subsection-title">Scenario Comune d'Esame: Ritrasmissione di Frame</h3>
+                <p>Spesso gli esercizi chiedono di calcolare la probabilità di successo quando un frame viene inviato più volte.</p>
+                <ul>
+                    <li><strong>Probabilità che almeno una di due copie arrivi integra:</strong><br>
+                    Questo è l'evento complementare a "entrambe le copie arrivano errate".
+                    <div class="math-block">
+                        $$ P(\text{almeno 1 copia integra}) = 1 - P(\text{entrambe errate}) $$
+                    </div>
+                    Se la probabilità che un frame sia errato è \(P(\text{errato}) = 1 - P(\text{integro})\), allora:
+                    <div class="math-block">
+                        $$ P(\text{almeno 1 copia integra}) = 1 - (P(\text{errato}))^2 $$
+                    </div>
+                </ul>
+            </div>
+        </article>
+
+        <article id="crc-introduzione" class="content-section">
+            <h2 class="section-title">3. CRC (Controllo di Ridondanza Ciclica): Introduzione e Aritmetica Polinomiale</h2>
+            <div class="section-content">
+                <p>Il **Cyclic Redundancy Check (CRC)** è una delle tecniche di rilevamento degli errori più potenti ed efficienti, utilizzata in protocolli come Ethernet, Wi-Fi e HDLC.</p>
+                <p>L'idea di base è trattare le sequenze di bit come **polinomi con coefficienti in modulo 2** (cioè 0 o 1). Ad esempio, la sequenza di bit `1101` corrisponde al polinomio \(1 \cdot x^3 + 1 \cdot x^2 + 0 \cdot x^1 + 1 \cdot x^0 = x^3 + x^2 + 1\).</p>
+                <p>In questo sistema, tutte le operazioni aritmetiche (addizione e sottrazione) sono equivalenti all'operazione logica **XOR** (bit a bit), poiché non ci sono riporti.</p>
+
+                <h3 class="subsection-title">Il Generatore Polinomiale G(x)</h3>
+                <p>Mittente e ricevitore si accordano su un **polinomio generatore** \(G(x)\) di grado \(r\). Questo polinomio è la chiave per il calcolo del CRC. \(G(x)\) corrisponde a una sequenza di \(r+1\) bit.</p>
+                <ul>
+                    <li>Esempio: il polinomio \(G(x) = x^3 + x^2 + 1\) corrisponde alla sequenza `1101` (grado \(r=3\)).</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="crc-calcolo" class="content-section">
+            <h2 class="section-title">4. Algoritmo di Calcolo del CRC (Lato Mittente)</h2>
+            <div class="section-content">
+                <p>L'obiettivo del mittente è aggiungere \(r\) bit di ridondanza (il CRC) a un messaggio di \(k\) bit, in modo che il messaggio risultante di \(k+r\) bit sia **divisibile** per il polinomio generatore \(G(x)\).</p>
+                <p>Il procedimento è il seguente:</p>
+                <ol>
+                    <li>Sia \(M(x)\) il polinomio corrispondente al messaggio di \(k\) bit.</li>
+                    <li>Moltiplica \(M(x)\) per \(x^r\). Questo equivale ad aggiungere **\(r\) zeri** alla fine della sequenza di bit del messaggio. Chiamiamo questa nuova sequenza `M_padded`.</li>
+                    <li>Esegui la **divisione polinomiale (modulo 2)** di \(x^r M(x)\) per \(G(x)\). Questa è una divisione binaria che utilizza l'operazione XOR per la sottrazione.</li>
+                    <li>Il **resto** di questa divisione, che avrà al massimo \(r\) bit, è il codice **CRC**.</li>
+                    <li>Sottrai (o somma, è la stessa cosa in modulo 2) il CRC dalla sequenza `M_padded`. Questo equivale a sostituire gli \(r\) zeri finali con i bit del CRC. Il risultato è il frame finale da trasmettere.</li>
+                </ol>
+
+                <h3 class="subsection-title">Esempio Pratico di Calcolo</h3>
+                <p>Dati:</p>
+                <ul>
+                    <li>Messaggio: `11010111` (\(M(x) = x^7 + x^6 + x^4 + x^2 + x + 1\))</li>
+                    <li>Generatore: `10101` (\(G(x) = x^4 + x^2 + 1\), quindi \(r=4\))</li>
+                </ul>
+                <div class="binary-operation">
+                    <p>1. Aggiungiamo 4 zeri al messaggio: `110101110000`</p>
+                    <p>2. Eseguiamo la divisione binaria (XOR):</p>
+<pre>
+  110101110000 | 10101
+  10101        |-------
+  -----        | 11101
+  011111
+   10101
+   -----
+   010101
+    10101
+    -----
+    0000010000
+         10101
+         -----
+         00101  --> Resto (CRC)
+</pre>
+                </div>
+                <p>Il CRC è `0101`. Il frame trasmesso sarà `11010111` + `0101` = `110101110101`.</p>
+            </div>
+        </article>
+
+        <article id="crc-verifica" class="content-section">
+            <h2 class="section-title">5. Algoritmo di Verifica del CRC (Lato Ricevitore)</h2>
+            <div class="section-content">
+                <p>Il ricevitore esegue un'operazione molto semplice per verificare l'integrità del frame ricevuto.</p>
+                <ol>
+                    <li>Prende l'intero frame ricevuto (dati + CRC).</li>
+                    <li>Lo divide per lo stesso polinomio generatore \(G(x)\) utilizzato dal mittente.</li>
+                    <li>**Verifica il resto:**
+                        <ul>
+                            <li>Se il **resto è zero**, il frame è considerato **corretto** e viene accettato.</li>
+                            <li>Se il **resto è diverso da zero**, il frame è considerato **corrotto** e viene scartato.</li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="note-box">
+                    <strong>Frequenza negli esami:</strong> Negli esami, le domande sul CRC sono molto comuni e possono chiedere sia di **calcolare il CRC** da aggiungere a un messaggio, sia di **verificare se un frame ricevuto è corretto**. In entrambi i casi, l'operazione da eseguire è la divisione polinomiale/binaria.
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({
+                startOnLoad: false, 
+                theme: 'dark',
+                darkMode: true,
+                fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-code').trim(),
+                 themeVariables: {
+                    primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    primaryTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    primaryBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    lineColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-secondary').trim(),
+                    secondaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-deep-space').trim(),
+                    tertiaryColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card').trim(),
+                    fontSize: '14px',
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                    mainBkg: getComputedStyle(document.documentElement).getPropertyValue('--code-bg').trim(), 
+                    nodeBorder: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim(),
+                    nodeTextColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                }
+            });
+
+            const mermaidOriginalDefinitions = new Map();
+            document.querySelectorAll('.mermaid').forEach((diag, index) => {
+                const id = diag.id || `mermaid-dynamic-init-${index}`;
+                diag.id = id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = diag.innerHTML; 
+                let decodedContent = (tempDiv.textContent || tempDiv.innerText || "").trim();
+                
+                if (decodedContent.includes('NIL') && !decodedContent.includes('style NIL')) {
+                    decodedContent += `\nstyle NIL fill:#1f2937,stroke:#4b5563,stroke-width:1px,stroke-dasharray: 3 3,color:#4b5563`;
+                }
+
+                mermaidOriginalDefinitions.set(id, decodedContent);
+                diag.innerHTML = ''; 
+                diag.style.visibility = 'hidden'; 
+            });
+
+            async function renderMermaidDiagram(diagElement) {
+                const diagramId = diagElement.id;
+                const diagramDefinition = mermaidOriginalDefinitions.get(diagramId);
+
+                if (!diagramDefinition) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Definizione diagramma non trovata.</p>`;
+                    diagElement.style.visibility = 'visible';
+                    return;
+                }
+                diagElement.innerHTML = ''; 
+                try {
+                    const tempSvgId = 'tempsvg-' + diagramId + '-' + Date.now(); 
+                    const { svg } = await mermaid.render(tempSvgId, diagramDefinition);
+                    diagElement.innerHTML = svg;
+                    diagElement.style.visibility = 'visible';
+                } catch (e) {
+                    diagElement.innerHTML = `<p style="color:var(--accent-primary); font-weight:bold;">Errore rendering Mermaid:</p><pre style="text-align:left; white-space:pre-wrap; word-wrap:break-word; color: var(--text-secondary);">${e.message}\n\n${diagramDefinition.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`;
+                    diagElement.style.visibility = 'visible';
+                }
+            }
+            
+            // Renderizza i diagrammi solo quando la sezione è mostrata
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.addEventListener('sectionshown', function(event) {
+                    this.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+                });
+            });
+            
+            // Trigger per la sezione inizialmente attiva
+            const initiallyActiveSection = document.querySelector('.content-section.active-section');
+            if (initiallyActiveSection) {
+                initiallyActiveSection.querySelectorAll('.mermaid').forEach(renderMermaidDiagram);
+            }
+        }
+    });
+    </script>
+</body>
+</html>
