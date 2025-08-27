@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esercizi: TCP Sliding Window e Nagle - Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <!-- MathJax per rendering formule LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per la pagina degli esercizi */
+        .exercise-item {
+            background-color: var(--bg-card);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: var(--border-radius-main);
+            box-shadow: 0 5px 15px var(--shadow-soft);
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+        .exercise-item .question-title {
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .exercise-item .solution-section {
+            margin-top: 1.5rem;
+            border-top: 1px dashed var(--border-soft);
+            padding-top: 1.5rem;
+        }
+        .exercise-item .solution-section h4 {
+            color: var(--accent-secondary);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        .exercise-item .solution-steps li {
+            margin-bottom: 0.7rem;
+            color: var(--text-secondary);
+        }
+        .exercise-item .solution-steps strong {
+            color: var(--text-primary);
+        }
+        .exercise-item .math-equation {
+            display: block;
+            text-align: center;
+            margin: 1rem 0;
+            font-family: var(--font-code);
+            font-size: 1.05em;
+            color: var(--code-text);
+            background-color: var(--code-bg);
+            padding: 0.75em;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-soft);
+        }
+        .exercise-item .highlight {
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Esercizi: TCP Sliding Window e Nagle</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="tcp_sliding_window.html" class="sidebar-action-button">Torna agli Appunti</a>
+        </div>
+        <h2>Elenco Esercizi</h2>
+        <ul>
+            <li><a href="#esercizio-1" class="sidebar-link">1. Calcolo Byte Inviabili</a></li>
+            <li><a href="#esercizio-2" class="sidebar-link">2. Calcolo Spazio Scrivibile</a></li>
+            <li><a href="#esercizio-3" class="sidebar-link">3. Algoritmo di Nagle (Caso 1)</a></li>
+            <li><a href="#esercizio-4" class="sidebar-link">4. Algoritmo di Nagle (Caso 2)</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="esercizio-1" class="exercise-item active-section">
+            <h3 class="question-title">Esercizio 1: Calcolo dei Byte Inviabili (Effective Window)</h3>
+            <p><strong>Domanda:</strong> Una sorgente TCP ha inviato fino al byte 5399 (<code>LastByteSent = 5399</code>) e ha ricevuto ACK fino al byte 3999 (<code>LastByteAcked = 3999</code>). Il ricevitore ha pubblicizzato una <code>AdvertisedWindow</code> di 7000 byte. Ignorando i problemi di congestione (`cwnd` è molto grande), quanti byte può ancora spedire la sorgente?</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Identificazione delle Variabili:</strong></p>
+                        <ul>
+                            <li><code>AdvertisedWindow (awnd)</code> = 7000 byte</li>
+                            <li><code>LastByteSent</code> = 5399</li>
+                            <li><code>LastByteAcked</code> = 3999</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Calcolo dei Dati in Transito (unACKed):</strong><br>
+                        I dati inviati ma non ancora riscontrati sono la differenza tra l'ultimo byte inviato e l'ultimo byte riscontrato.</p>
+                        <div class="math-equation">
+                            $$ \text{DatiInTransito} = \text{LastByteSent} - \text{LastByteAcked} $$
+                            $$ \text{DatiInTransito} = 5399 - 3999 = 1400 \text{ byte} $$
+                        </div>
+                    </li>
+                    <li>
+                        <p><strong>Calcolo dei Byte Inviabili (Finestra Effettiva):</strong><br>
+                        Il numero di byte che il mittente può ancora inviare è dato dalla finestra pubblicizzata dal ricevitore, ridotta dei dati che sono già in transito.</p>
+                        <div class="math-equation">
+                            $$ \text{ByteInviabili} = \text{AdvertisedWindow} - \text{DatiInTransito} $$
+                            $$ \text{ByteInviabili} = 7000 - 1400 = \highlight{5600 \text{ byte}} $$
+                        </div>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo è l'esercizio più comune sull'argomento. Testa la tua comprensione della formula fondamentale del controllo di flusso TCP. Ricorda che la `AdvertisedWindow` è un limite *totale* di dati non riscontrati che il ricevitore è disposto ad accettare. Devi sempre sottrarre i dati già "in volo" per sapere quanto spazio "utile" ti rimane.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-2" class="exercise-item">
+            <h3 class="question-title">Esercizio 2: Calcolo dello Spazio Scrivibile dall'Applicazione</h3>
+            <p><strong>Domanda:</strong> Una socket TCP ha un buffer di uscita di dimensione <code>MaxSendBuffer = 10000</code> byte. Ad un certo istante, le sue variabili di stato sono: <code>LastByteWritten = 9999</code>, <code>LastByteAcked = 1999</code>, <code>LastByteSent = 6999</code>. (a) Cosa succede se l'applicazione esegue una `write()` di un buffer di 3000 byte su questa socket? (b) Successivamente, viene ricevuto un ACK con `Acknowledgement = 3999`. Cosa succede all'applicazione e quanto diventa <code>LastByteWritten</code>?</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>(a) Analisi della `write()` iniziale:</strong></p>
+                        <ul>
+                            <li><strong>Calcolo dello spazio occupato nel buffer:</strong> Lo spazio occupato è la differenza tra l'ultimo byte scritto dall'applicazione e l'ultimo byte riscontrato dal ricevitore.<br>
+                            <div class="math-equation">$$ \text{SpazioOccupato} = \text{LastByteWritten} - \text{LastByteAcked} = 9999 - 1999 = 8000 \text{ byte} $$</div></li>
+                            <li><strong>Calcolo dello spazio libero nel buffer:</strong><br>
+                            <div class="math-equation">$$ \text{SpazioLibero} = \text{MaxSendBuffer} - \text{SpazioOccupato} = 10000 - 8000 = 2000 \text{ byte} $$</div></li>
+                            <li><strong>Esito della `write()`:</strong> L'applicazione tenta di scrivere 3000 byte, ma ci sono solo 2000 byte liberi. Pertanto, la chiamata `write()` viene **bloccata**. Non può completare l'operazione finché non si libera spazio.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>(b) Analisi dopo la ricezione dell'ACK:</strong></p>
+                        <ul>
+                            <li><strong>Aggiornamento di `LastByteAcked`:</strong> Il nuovo ACK riscontra fino al byte 3999, quindi <code>LastByteAcked</code> diventa 3999.</li>
+                            <li><strong>Ricalcolo dello spazio occupato:</strong><br>
+                            <div class="math-equation">$$ \text{SpazioOccupato} = 9999 - 3999 = 6000 \text{ byte} $$</div></li>
+                            <li><strong>Ricalcolo dello spazio libero:</strong><br>
+                            <div class="math-equation">$$ \text{SpazioLibero} = 10000 - 6000 = 4000 \text{ byte} $$</div></li>
+                            <li><strong>Esito della `write()`:</strong> Ora ci sono 4000 byte liberi nel buffer. La chiamata `write()` che era bloccata può ora completare, scrivendo i suoi 3000 byte. La chiamata si **sblocca**.</li>
+                            <li><strong>Nuovo valore di `LastByteWritten`:</strong> Il valore di `LastByteWritten` avanza di 3000 byte.
+                            <div class="math-equation">$$ \text{LastByteWritten}_{\text{new}} = \text{LastByteWritten}_{\text{old}} + 3000 = 9999 + 3000 = \highlight{12999} $$</div></li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio testa la comprensione dell'interazione tra l'applicazione e il buffer di invio di TCP. È importante distinguere tra i dati che il *TCP* può inviare (legati all'EffectiveWindow) e i dati che l'*applicazione* può scrivere nel buffer (legati a MaxSendBuffer e LastByteAcked).
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-3" class="exercise-item">
+            <h3 class="question-title">Esercizio 3: Algoritmo di Nagle (Caso 1: Dati accumulati)</h3>
+            <p><strong>Domanda:</strong> Un'applicazione scrive su una socket TCP un buffer di 100 byte ogni 10 ms. La connessione ha un RTT di 40 ms e un MSS di 1460 byte. A regime, qual è la dimensione del payload dei segmenti TCP inviati?</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Analisi del Primo Segmento:</strong><br>
+                        Al tempo t=0, l'applicazione scrive 100 byte. Non ci sono dati in transito (`unACKed`), quindi l'algoritmo di Nagle permette l'invio immediato. Viene inviato un segmento con un payload di 100 byte.</p>
+                    </li>
+                    <li>
+                        <p><strong>Fase di Attesa (Dati in Transito):</strong><br>
+                        Ora c'è un segmento da 100 byte in transito. Il suo ACK tornerà dopo 40 ms (l'RTT). Per i prossimi 40 ms, l'algoritmo di Nagle **impedirà l'invio di nuovi segmenti** perché ci sono dati non riscontrati e i dati accumulati non raggiungono l'MSS.</p>
+                    </li>
+                    <li>
+                        <p><strong>Accumulo di Dati nel Buffer:</strong><br>
+                        Durante i 40 ms di attesa, l'applicazione continua a scrivere 100 byte ogni 10 ms. Quindi, scriverà dati ai seguenti istanti:</p>
+                        <ul>
+                            <li>t = 10 ms: +100 byte (buffer = 100)</li>
+                            <li>t = 20 ms: +100 byte (buffer = 200)</li>
+                            <li>t = 30 ms: +100 byte (buffer = 300)</li>
+                            <li>t = 40 ms: +100 byte (buffer = 400)</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Invio del Secondo Segmento:</strong><br>
+                        Al tempo t=40 ms, arriva l'ACK per il primo segmento. Ora non ci sono più dati in transito. L'algoritmo di Nagle permette l'invio di tutti i dati accumulati nel buffer. TCP invierà quindi un segmento con un payload di <highlight>400 byte</highlight>.</p>
+                    </li>
+                    <li>
+                        <p><strong>Regime:</strong><br>
+                        Il ciclo si ripeterà. Ad ogni RTT di 40 ms, verranno accumulati 4 "chunk" da 100 byte. Quindi, a regime, TCP invierà segmenti con un payload di 400 byte ogni 40 ms.</p>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio è un classico per testare la comprensione pratica dell'algoritmo di Nagle. La chiave è capire che Nagle "raggruppa" i dati per un periodo di tempo pari all'RTT, trasformando tanti piccoli invii dell'applicazione in un unico invio più grande ed efficiente.
+                </div>
+            </div>
+        </article>
+
+        <article id="esercizio-4" class="exercise-item">
+            <h3 class="question-title">Esercizio 4: Algoritmo di Nagle (Caso 2: Raggiungimento MSS)</h3>
+            <p><strong>Domanda:</strong> Un'applicazione scrive su una socket TCP un buffer di 500 byte ogni 20 ms. La connessione ha un RTT di 100 ms e un MSS di 1000 byte. A regime, qual è la dimensione del payload dei segmenti TCP inviati?</p>
+            
+            <div class="solution-section">
+                <h4>Svolgimento Dettagliato:</h4>
+                <ol class="solution-steps">
+                    <li>
+                        <p><strong>Analisi del Primo Segmento:</strong><br>
+                        Al tempo t=0, l'applicazione scrive 500 byte. Non ci sono dati in transito, quindi TCP invia subito un segmento da 500 byte.</p>
+                    </li>
+                    <li>
+                        <p><strong>Fase di Attesa e Accumulo:</strong><br>
+                        Ora c'è un segmento da 500 byte in transito. L'algoritmo di Nagle impedisce l'invio di altri dati finché non si verifica una di queste due condizioni: (1) arriva un ACK, o (2) si accumulano abbastanza dati da riempire un MSS.</p>
+                    </li>
+                    <li>
+                        <p><strong>Raggiungimento dell'MSS:</strong><br>
+                        L'applicazione continua a scrivere 500 byte ogni 20 ms.</p>
+                        <ul>
+                            <li>t = 20 ms: l'applicazione scrive altri 500 byte.</li>
+                            <li>Il buffer di invio ora contiene i 500 byte appena scritti. Questi, sommati ai 500 byte già inviati ma non ancora riscontrati, non riempiono un MSS (il buffer contiene dati *nuovi*, non quelli *in transito*). Quindi il buffer contiene 500 byte pronti per essere spediti.</li>
+                            <li>t = 40 ms: l'applicazione scrive altri 500 byte. Il buffer di invio ora contiene 500 + 500 = 1000 byte, che è uguale a 1 MSS.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <p><strong>Invio del Secondo Segmento:</strong><br>
+                        Al tempo t=40 ms, anche se l'ACK per il primo segmento non è ancora arrivato, il buffer di invio contiene dati sufficienti per un segmento di dimensione MSS. L'algoritmo di Nagle **permette l'invio immediato** di un segmento "pieno". Viene quindi inviato un segmento con un payload di <highlight>1000 byte</highlight>.</p>
+                    </li>
+                    <li>
+                        <p><strong>Regime:</strong><br>
+                        Da questo punto in poi, il ciclo si ripete. TCP invierà un segmento da 1000 byte (accumulando due scritture da 500 byte) ogni 40 ms, anche se l'RTT è di 100 ms.</p>
+                    </li>
+                </ol>
+                <div class="clarification-box">
+                    <strong>Spiegazione Chiave:</strong> Questo esercizio testa la comprensione completa della regola di Nagle. Non si tratta solo di aspettare l'ACK, ma anche di inviare subito se si raggiunge un segmento di dimensione MSS.
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    // Inizializza MathJax e Mermaid (se necessario)
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+        }
+    });
+    </script>
+</body>
+</html>

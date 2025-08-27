@@ -58,8 +58,8 @@
         <article id="controllo-flusso" class="content-section active-section">
             <h2 class="section-title">1. Controllo di Flusso in TCP</h2>
             <div class="section-content">
-                <p>Il **controllo di flusso** è il meccanismo con cui TCP si assicura che un mittente non invii dati a una velocità superiore a quella con cui il ricevitore può processarli e immagazzinarli. Questo previene l'overflow del buffer di ricezione del destinatario.</p>
-                <p>TCP implementa il controllo di flusso utilizzando una **Sliding Window (Finestra Scorrevole)**, un concetto simile a quello visto nel livello Data Link, ma adattato a un servizio a stream di byte (non a frame discreti) e a una rete inaffidabile come Internet.</p>
+                <p>Il <strong>controllo di flusso</strong> è il meccanismo con cui TCP si assicura che un mittente non invii dati a una velocità superiore a quella con cui il ricevitore può processarli e immagazzinarli. Questo previene l'overflow del buffer di ricezione del destinatario.</p>
+                <p>TCP implementa il controllo di flusso utilizzando una <strong>Sliding Window (Finestra Scorrevole)</strong>, un concetto simile a quello visto nel livello Data Link, ma adattato a un servizio a stream di byte (non a frame discreti) e a una rete inaffidabile come Internet.</p>
             </div>
         </article>
 
@@ -102,26 +102,26 @@
             <h2 class="section-title">3. AdvertisedWindow e EffectiveWindow (Cruciale per gli Esercizi)</h2>
             <div class="section-content">
                 <h3 class="subsection-title">AdvertisedWindow (rwnd) - Corretto</h3>
-                <p>Il cuore del controllo di flusso di TCP è la **AdvertisedWindow (Finestra Pubblicizzata)**. È il valore che il **ricevitore** comunica al mittente per indicare la quantità di spazio libero nel suo buffer di ricezione, tenendo conto anche dei dati ricevuti fuori ordine.</p>
+                <p>Il cuore del controllo di flusso di TCP è la <strong>AdvertisedWindow (Finestra Pubblicizzata)</strong>. È il valore che il <strong>ricevitore</strong> comunica al mittente per indicare la quantità di spazio libero nel suo buffer di ricezione, tenendo conto anche dei dati ricevuti fuori ordine.</p>
                 <div class="math-block">
                     $$ \text{AdvertisedWindow} = \text{MaxRcvBuffer} - (\text{LastByteRcvd} - \text{LastByteRead}) $$
                 </div>
                 <div class="clarification-box">
-                    <strong>Correzione Importante:</strong> La formula corretta utilizza `LastByteRcvd` (l'ultimo byte ricevuto, anche fuori ordine) e non `NextByteExpected`. Questo perché i dati fuori ordine, anche se non possono essere ancora passati all'applicazione, occupano comunque spazio nel buffer. Usare `NextByteExpected` pubblicizzerebbe più spazio di quello realmente disponibile, rischiando un overflow.
+                    <strong>Correzione Importante:</strong> La formula corretta utilizza <code>LastByteRcvd</code> (l'ultimo byte ricevuto, anche fuori ordine) e non <code>NextByteExpected</code>. Questo perché i dati fuori ordine, anche se non possono essere ancora passati all'applicazione, occupano comunque spazio nel buffer. Usare <code>NextByteExpected</code> pubblicizzerebbe più spazio di quello realmente disponibile, rischiando un overflow.
                 </div>
-                <p>Questo valore viene inviato al mittente nel campo `Window Size` di ogni segmento TCP. In pratica, il ricevitore sta dicendo: "Puoi inviarmi al massimo `AdvertisedWindow` byte a partire da `NextByteExpected`."</p>
+                <p>Questo valore viene inviato al mittente nel campo <code>Window Size</code> di ogni segmento TCP. In pratica, il ricevitore sta dicendo: "Puoi inviarmi al massimo <code>AdvertisedWindow</code> byte a partire da <code>NextByteExpected</code>."</p>
 
                 <h3 class="subsection-title">Byte Inviabili e Finestra Effettiva</h3>
-                <p>Il **mittente** deve rispettare questo limite, ma deve anche considerare la congestione della rete (controllata dalla `CongestionWindow`, `cwnd`). La quantità massima di dati che può avere in transito è il minimo tra le due finestre:</p>
+                <p>Il <strong>mittente</strong> deve rispettare questo limite, ma deve anche considerare la congestione della rete (controllata dalla <code>CongestionWindow</code>, <code>cwnd</code>). La quantità massima di dati che può avere in transito è il minimo tra le due finestre:</p>
                 <div class="math-block">
                     $$ \text{MaxWindow} = \min(\text{cwnd}, \text{awnd}) $$
                 </div>
-                <p>Di conseguenza, la quantità di **nuovi dati che può effettivamente inviare** in un dato momento è:</p>
+                <p>Di conseguenza, la quantità di <strong>nuovi dati che può effettivamente inviare</strong> in un dato momento è:</p>
                 <div class="math-block">
                     $$ \text{ByteInviabili} = \text{MaxWindow} - (\text{LastByteSent} - \text{LastByteAcked}) $$
                 </div>
                 <div class="note-box">
-                    <strong>Formula per gli Esercizi:</strong> Se l'esercizio ignora la congestione (o non fornisce `cwnd`), si assume `MaxWindow = AdvertisedWindow`. La formula diventa:
+                    <strong>Formula per gli Esercizi:</strong> Se l'esercizio ignora la congestione (o non fornisce <code>cwnd</code>), si assume `MaxWindow = AdvertisedWindow`. La formula diventa:
                     $$ \text{ByteInviabili} = \text{AdvertisedWindow} - (\text{LastByteSent} - \text{LastByteAcked}) $$
                 </div>
             </div>
@@ -130,31 +130,31 @@
         <article id="silly-window" class="content-section">
             <h2 class="section-title">4. Silly Window Syndrome (SWS)</h2>
             <div class="section-content">
-                <p>La **Sindrome della Finestra Sciocca (SWS)** è una condizione di inefficienza che si verifica quando vengono inviati molti piccoli segmenti TCP, sprecando banda a causa dell'overhead degli header (40 byte tra TCP e IP).</p>
+                <p>La <strong>Sindrome della Finestra Sciocca (SWS)</strong> è una condizione di inefficienza che si verifica quando vengono inviati molti piccoli segmenti TCP, sprecando banda a causa dell'overhead degli header (40 byte tra TCP e IP).</p>
                 <p>Può essere causata da due problemi:</p>
                 <ol>
-                    <li>**Ricevitore Lento:** Un'applicazione ricevente legge i dati dal buffer un byte alla volta. Dopo aver letto un byte, il ricevitore pubblicizza una finestra di 1 byte, causando l'invio di un segmento con un solo byte di payload.</li>
-                    <li>**Mittente "Aggressivo":** Un'applicazione mittente scrive dati un byte alla volta. TCP potrebbe decidere di inviare ogni byte in un segmento separato.</li>
+                    <li><strong>Ricevitore Lento:</strong> Un'applicazione ricevente legge i dati dal buffer un byte alla volta. Dopo aver letto un byte, il ricevitore pubblicizza una finestra di 1 byte, causando l'invio di un segmento con un solo byte di payload.</li>
+                    <li><strong>Mittente "Aggressivo":</strong> Un'applicazione mittente scrive dati un byte alla volta. TCP potrebbe decidere di inviare ogni byte in un segmento separato.</li>
                 </ol>
                 <h3 class="subsection-title">Soluzioni alla SWS</h3>
                 <ul>
                     <li><strong>Lato Mittente: Algoritmo di Nagle</strong> (vedi sezione successiva).</li>
                     <li><strong>Lato Ricevitore: Soluzione di Clark</strong>
                         <div class="clarification-box">
-                            <strong>Soluzione di Clark (Esame ricorrente):</strong> Il ricevitore non deve pubblicizzare piccole finestre. Deve attendere finché non si è liberato uno spazio significativo nel buffer prima di inviare un aggiornamento della finestra. La regola è: non inviare un aggiornamento della finestra finché non si può annunciare uno spazio pari ad almeno **1 MSS** o a **metà della dimensione del buffer**, a seconda di quale sia minore.
+                            <strong>Soluzione di Clark (Esame ricorrente):</strong> Il ricevitore non deve pubblicizzare piccole finestre. Deve attendere finché non si è liberato uno spazio significativo nel buffer prima di inviare un aggiornamento della finestra. La regola è: non inviare un aggiornamento della finestra finché non si può annunciare uno spazio pari ad almeno <strong>1 MSS</strong> o a <strong>metà della dimensione del buffer</strong>, a seconda di quale sia minore.
                         </div>
                     </li>
                 </ul>
                 
                 <h3 class="subsection-title">Zero-Window e Persist Timer</h3>
-                <p>Se il ricevitore pubblicizza una finestra di `rwnd = 0`, il mittente si ferma. Ma se l'ACK del ricevitore che riapre la finestra viene perso, il mittente rimarrebbe bloccato per sempre. Per risolvere questo, quando la finestra è zero, il mittente avvia un **persist timer**. Alla sua scadenza, invia un piccolo pacchetto **"probe"** (sonda, di solito 1 byte) per "stimolare" il ricevitore a inviare un nuovo ACK con la dimensione aggiornata della finestra.</p>
+                <p>Se il ricevitore pubblicizza una finestra di <code>rwnd = 0</code>, il mittente si ferma. Ma se l'ACK del ricevitore che riapre la finestra viene perso, il mittente rimarrebbe bloccato per sempre. Per risolvere questo, quando la finestra è zero, il mittente avvia un <strong>persist timer</strong>. Alla sua scadenza, invia un piccolo pacchetto <strong>"probe"</strong> (sonda, di solito 1 byte) per "stimolare" il ricevitore a inviare un nuovo ACK con la dimensione aggiornata della finestra.</p>
             </div>
         </article>
         
         <article id="algoritmo-nagle" class="content-section">
             <h2 class="section-title">5. L'Algoritmo di Nagle: la Soluzione alla SWS lato Mittente</h2>
             <div class="section-content">
-                <p>L'algoritmo di Nagle è una soluzione lato **mittente** per mitigare la Silly Window Syndrome, specialmente per applicazioni interattive (come Telnet) che generano dati a piccoli "chunk".</p>
+                <p>L'algoritmo di Nagle è una soluzione lato <strong>mittente</strong> per mitigare la Silly Window Syndrome, specialmente per applicazioni interattive (come Telnet) che generano dati a piccoli "chunk".</p>
                 <h3 class="subsection-title">Logica dell'Algoritmo</h3>
                 <p>L'algoritmo introduce una semplice regola per decidere quando inviare un segmento, con l'obiettivo di raggruppare piccoli pezzi di dati in un segmento più grande ed efficiente.</p>
                 <blockquote>
@@ -162,17 +162,17 @@
                 </blockquote>
                 <p>In pratica, l'algoritmo funziona così:</p>
                 <ul>
-                    <li><strong>Se il mittente ha abbastanza dati per riempire un segmento di dimensione MSS**, li invia immediatamente.</li>
-                    <li>**Se ha meno dati di un MSS**, controlla se ci sono dati non ancora riscontrati:
+                    <li><strong>Se il mittente ha abbastanza dati per riempire un segmento di dimensione MSS</strong>, li invia immediatamente.</li>
+                    <li><strong>Se ha meno dati di un MSS</strong>, controlla se ci sono dati non ancora riscontrati:
                         <ul>
-                            <li>**Se ci sono dati non ACKed in transito,** il mittente **attende**. Accumula i nuovi dati nel buffer finché non riceve un ACK per i dati precedenti.</li>
-                            <li>**Se non ci sono dati non ACKed in transito,** il mittente invia immediatamente i dati che ha, anche se sono pochi.</li>
+                            <li><strong>Se ci sono dati non ACKed in transito,</strong> il mittente <strong>attende</strong>. Accumula i nuovi dati nel buffer finché non riceve un ACK per i dati precedenti.</li>
+                            <li><strong>Se non ci sono dati non ACKed in transito,</strong> il mittente invia immediatamente i dati che ha, anche se sono pochi.</li>
                         </ul>
                     </li>
                 </ul>
                 <div class="clarification-box">
                     <strong>Interazione tra Nagle e Delayed ACK:</strong>
-                    <p>Molti ricevitori implementano **Delayed ACK**: invece di inviare un ACK subito per ogni segmento, attendono un breve periodo (es. 200ms) nella speranza di poter "agganciare" (piggyback) l'ACK a un segmento di dati in uscita. L'interazione tra Nagle (mittente) e Delayed ACK (ricevitore) può introdurre latenze fino a un RTT per piccole trasmissioni, motivo per cui in applicazioni time-critical (es. giochi online) Nagle viene spesso disabilitato con l'opzione `TCP_NODELAY`.</p>
+                    <p>Molti ricevitori implementano <strong>Delayed ACK</strong>: invece di inviare un ACK subito per ogni segmento, attendono un breve periodo (es. 200ms) nella speranza di poter "agganciare" (piggyback) l'ACK a un segmento di dati in uscita. L'interazione tra Nagle (mittente) e Delayed ACK (ricevitore) può introdurre latenze fino a un RTT per piccole trasmissioni, motivo per cui in applicazioni time-critical (es. giochi online) Nagle viene spesso disabilitato con l'opzione <code>TCP_NODELAY</code>.</p>
                 </div>
             </div>
         </article>
