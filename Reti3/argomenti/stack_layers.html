@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livelli Stack ISO/OSI e TCP/IP - Reti di Calcolatori</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/common.css">
+
+    <style>
+        /* Stili specifici per questa pagina */
+        .stack-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.9em;
+        }
+        .stack-table th, .stack-table td {
+            border: 1px solid var(--border-soft);
+            padding: 0.8em 1em;
+            text-align: left;
+            vertical-align: top;
+        }
+        .stack-table th {
+            background-color: var(--bg-header);
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+        .stack-table td {
+            background-color: var(--bg-card);
+            color: var(--text-secondary);
+        }
+        .stack-table td strong {
+            color: var(--text-primary);
+        }
+        .stack-table .level-number {
+            font-family: var(--font-code);
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--accent-secondary);
+            text-align: center;
+        }
+        .stack-table ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+        .stack-table ul li {
+            margin-bottom: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header class="topic-header">
+        <button class="hamburger-menu" id="hamburger-btn">☰</button>
+        <h1>Livelli Stack ISO/OSI e TCP/IP</h1>
+        <div></div>
+    </header>
+
+    <nav id="sidebar">
+        <div class="sidebar-actions">
+            <a href="../reti3_home.html" class="sidebar-action-button">Home Corso</a>
+            <a href="reti3_argomenti_home.html" class="sidebar-action-button">Indice Argomenti</a>
+            <a href="stack_layers(es).html" class="sidebar-action-button" id="esercizi-btn">Esercizi</a>
+        </div>
+        <h2>Indice Argomento</h2>
+        <ul>
+            <li><a href="#introduzione-stack" class="sidebar-link">1. Introduzione all'Architettura a Livelli</a></li>
+            <li><a href="#stack-iso-osi" class="sidebar-link">2. Lo Stack ISO/OSI</a></li>
+            <li><a href="#stack-tcp-ip" class="sidebar-link">3. Lo Stack TCP/IP</a></li>
+            <li><a href="#tabella-riassuntiva" class="sidebar-link">4. Tabella di Riferimento per l'Esame</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <article id="introduzione-stack" class="content-section active-section">
+            <h2 class="section-title">1. Introduzione all'Architettura a Livelli</h2>
+            <div class="section-content">
+                <p>Le reti di calcolatori sono sistemi estremamente complessi. Per gestirne la progettazione e l'implementazione, si utilizza un'<strong>architettura a livelli (o a strati)</strong>. L'idea è di scomporre il problema complesso della comunicazione in una serie di problemi più piccoli e gestibili.</p>
+                <p>Ogni livello fornisce un <strong>servizio</strong> al livello superiore, nascondendo i dettagli di come tale servizio viene implementato. Questa astrazione offre diversi vantaggi:</p>
+                <ul>
+                    <li><strong>Modularità:</strong> Ogni livello può essere sviluppato e modificato in modo indipendente, purché l'interfaccia con i livelli adiacenti rimanga la stessa.</li>
+                    <li><strong>Standardizzazione:</strong> Definisce un modello comune che favorisce l'interoperabilità tra dispositivi di produttori diversi.</li>
+                    <li><strong>Semplicità:</strong> Riduce la complessità, permettendo di concentrarsi su un insieme limitato di funzioni per ogni livello.</li>
+                </ul>
+            </div>
+        </article>
+
+        <article id="stack-iso-osi" class="content-section">
+            <h2 class="section-title">2. Il Modello di Riferimento ISO/OSI</h2>
+            <div class="section-content">
+                <p>Il modello <strong>OSI (Open Systems Interconnection)</strong> è un modello concettuale a <strong>7 livelli</strong> che definisce in modo rigoroso le funzioni di un sistema di telecomunicazione o di elaborazione. Anche se non è stato implementato alla lettera come lo stack TCP/IP, il suo modello è fondamentale per la terminologia e la comprensione delle reti.</p>
+            </div>
+        </article>
+
+        <article id="stack-tcp-ip" class="content-section">
+            <h2 class="section-title">3. Lo Stack TCP/IP (o Internet Stack)</h2>
+            <div class="section-content">
+                <p>Lo stack <strong>TCP/IP</strong> è il modello implementato nella pratica su Internet. È più pragmatico e flessibile del modello OSI, e tipicamente viene descritto con 4 o 5 livelli che raggruppano le funzionalità di OSI.</p>
+                <div class="note-box">
+                    <strong>Corrispondenza tra OSI e TCP/IP:</strong>
+                    <ul>
+                        <li><strong>Livelli 5, 6, 7 OSI (Sessione, Presentazione, Applicazione)</strong> sono raggruppati nel livello <strong>Applicazione</strong> di TCP/IP.</li>
+                        <li><strong>Livello 4 OSI (Trasporto)</strong> corrisponde al livello <strong>Trasporto</strong> di TCP/IP.</li>
+                        <li><strong>Livello 3 OSI (Rete)</strong> corrisponde al livello <strong>Rete (o Internet)</strong> di TCP/IP.</li>
+                        <li><strong>Livelli 1 e 2 OSI (Fisico, Data Link)</strong> sono raggruppati nel livello <strong>Link (o Network Interface)</strong> di TCP/IP.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article id="tabella-riassuntiva" class="content-section">
+            <h2 class="section-title">4. Tabella di Riferimento per l'Esame</h2>
+            <div class="section-content">
+                <p>Questa tabella è lo strumento principale per prepararsi alle domande d'esame. Contiene le funzionalità chiave associate a ogni livello, con esempi di protocolli e note specifiche basate sulle domande passate.</p>
+                <table class="stack-table">
+                    <thead>
+                        <tr>
+                            <th>Livello OSI</th>
+                            <th>Livello TCP/IP</th>
+                            <th>Funzionalità Chiave (Domande d'Esame)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="level-number">7</td>
+                            <td rowspan="3"><strong>Applicazione</strong></td>
+                            <td>
+                                <strong>Funzionalità:</strong>
+                                <ul>
+                                    <li>Interfaccia con l'utente (HTTP, SMTP, FTP).</li>
+                                    <li><strong>Compressione e Cifratura dei Dati (Presentazione):</strong> Gestisce come i dati vengono formattati e resi sicuri (es. TLS/SSL, MIME).</li>
+                                    <li><strong>Gestione della Sessione (Sessione):</strong> Apertura, chiusura e gestione delle sessioni tra applicazioni (es. autenticazione, permessi).</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="level-number">6</td>
+                            <td>
+                                <strong>Funzionalità:</strong>
+                                <ul>
+                                    <li><strong>Conversione dei formati di rappresentazione:</strong> Traduce i dati in un formato standardizzato che le applicazioni possano comprendere (es. ASCII &harr; EBCDIC, crittografia). <strong>(Domanda ricorrente)</strong></li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="level-number">5</td>
+                            <td>
+                                <strong>Funzionalità:</strong>
+                                <ul>
+                                    <li><strong>Dialog control e sincronizzazione.</strong></li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="level-number">4</td>
+                            <td><strong>Trasporto</strong></td>
+                            <td>
+                                <strong>Funzionalità:</strong>
+                                <ul>
+                                    <li>Comunicazione <strong>process-to-process</strong> (gestita tramite porte).</li>
+                                    <li><strong>Multiplexing e Demultiplexing</strong> tra diverse applicazioni/processi sullo stesso host. <strong>(Domanda ricorrente)</strong></li>
+                                    <li><strong>Controllo di Flusso</strong> (evitare di sovraccaricare il ricevitore).</li>
+                                    <li><strong>Controllo di Congestione</strong> (evitare di sovraccaricare la rete). <strong>(Domanda ricorrente)</strong></li>
+                                    <li><strong>Affidabilità e Riordinamento dei Dati</strong> (in TCP).</li>
+                                    <li><strong>Eliminazione Dati Duplicati</strong> (in TCP).</li>
+                                </ul>
+                                <strong>Protocolli:</strong> TCP, UDP.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="level-number">3</td>
+                            <td><strong>Rete / Internet</strong></td>
+                            <td>
+                                <strong>Funzionalità:</strong>
+                                <ul>
+                                    <li>Comunicazione <strong>host-to-host</strong> (globale).</li>
+                                    <li><strong>Instradamento (Routing) e Inoltro (Forwarding)</strong> dei pacchetti tra reti diverse. <strong>(Domanda ricorrente)</strong></li>
+                                    <li><strong>Indirizzamento Logico</strong> (indirizzi IP).</li>
+                                    <li><strong>Frammentazione IP.</strong></li>
+                                    <li><strong>Gestione dei Gruppi Multicast (ICMP/IGMP).</strong></li>
+                                </ul>
+                                <strong>Protocolli:</strong> IP (IPv4, IPv6), ICMP, IGMP.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="level-number">2</td>
+                            <td rowspan="2"><strong>Link / Fisico</strong></td>
+                            <td>
+                                <strong>Funzionalità (Data Link):</strong>
+                                <ul>
+                                    <li>Comunicazione <strong>node-to-node</strong> (su un singolo link).</li>
+                                    <li><strong>Framing:</strong> Riconoscimento dell'inizio e della fine di un frame. <strong>(Domanda ricorrente)</strong></li>
+                                    <li><strong>Rilevamento degli Errori di Trasmissione</strong> (es. CRC). <strong>(Domanda ricorrente)</strong></li>
+                                    <li><strong>Indirizzamento Fisico</strong> (indirizzi MAC).</li>
+                                    <li><strong>Controllo di Accesso al Mezzo</strong> (MAC, es. CSMA/CD, CSMA/CA).</li>
+                                </ul>
+                                <strong>Protocolli:</strong> Ethernet, Wi-Fi (802.11), PPP.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="level-number">1</td>
+                            <td>
+                                <strong>Funzionalità (Fisico):</strong>
+                                <ul>
+                                    <li>Trasmissione di <strong>bit grezzi</strong> sul mezzo fisico.</li>
+                                    <li><strong>Codifica/Decodifica dei simboli in bit:</strong> Come rappresentare 0 e 1 come segnali elettrici, ottici o radio. <strong>(Domanda ricorrente)</strong></li>
+                                    <li>Specifiche hardware (cavi, connettori, voltaggi).</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>© 2025 Appunti Personali - Reti di Calcolatori</p>
+    </footer>
+
+    <script src="../assets/common.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+        }
+    });
+    </script>
+</body>
+</html>
